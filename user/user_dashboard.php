@@ -265,33 +265,44 @@ echo "</select>";
                             <?php
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
- SUM(
-        CASE
-            -- กรณีลาเต็มวัน (08:00 - 16:40)
-            WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '16:40:00'
-            THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
-
-            -- กรณีลาเต็มวันสำหรับวันที่มากกว่าหนึ่งวัน
-            WHEN l_leave_start_date < l_leave_end_date
-            THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
-
-            ELSE 0
-        END
-    ) AS total_leave_days,
-
-    -- คำนวณจำนวนชั่วโมง
-   SUM(
+SUM(
     CASE
+        -- กรณีลาเต็มวัน (08:00 - 16:40)
+        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '16:40:00'
+        THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
+
+        -- กรณีลาเต็มวันสำหรับวันที่มากกว่าหนึ่งวัน
+        WHEN l_leave_start_date < l_leave_end_date
+        THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
+
+        ELSE 0
+    END
+) AS total_leave_days,
+
+-- คำนวณจำนวนชั่วโมง
+SUM(
+    CASE
+        -- กรณีลาเต็ม 08:00 - 11:45 นับเป็น 4 ชั่วโมง
+        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '11:45:00'
+        THEN 4
+        
+        -- กรณีลาเต็ม 12:45 - 16:40 นับเป็น 4 ชั่วโมง
+        WHEN TIME(l_leave_start_time) = '12:45:00' AND TIME(l_leave_end_time) = '16:40:00'
+        THEN 4
+        
+        -- สำหรับกรณีอื่น คำนวณตามเวลาปกติ
         WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00'
-        THEN 4  -- คำนวณเป็น 4 ชั่วโมง
-        WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00'
-        THEN 4  -- คำนวณเป็น 4 ชั่วโมง
-        ELSE ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
+        THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
+
+        WHEN TIME(l_leave_start_time) = '12:45:00' AND TIME(l_leave_end_time) = '16:40:00'
+        THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)  
+
+        ELSE 0 
     END
 ) AS total_leave_hours,
 
-    -- จำนวนวันลารวมจากตาราง employees
-    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
+-- จำนวนวันลารวมจากตาราง employees
+(SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
@@ -352,6 +363,7 @@ if ($result_leave_personal) {
 } else {
     echo '<p>No data found</p>';
 }
+
 
 ?>
                             <p class="card-text">
