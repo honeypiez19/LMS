@@ -265,56 +265,36 @@ echo "</select>";
                             <?php
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
-SUM(
+ SUM(
+        CASE
+            -- กรณีลาเต็มวัน (08:00 - 16:40)
+            WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '16:40:00'
+            THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
+
+            -- กรณีลาเต็มวันสำหรับวันที่มากกว่าหนึ่งวัน
+            WHEN l_leave_start_date < l_leave_end_date
+            THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
+
+            ELSE 0
+        END
+    ) AS total_leave_days,
+
+    -- คำนวณจำนวนชั่วโมง
+   SUM(
     CASE
-        WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
-            -- กรณีลาในวันเดียว
-            CASE
-                WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = 8 * 3600 + 40 * 60 THEN 8
-                WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) > 4 * 3600 THEN
-                    ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600, 1)
-                ELSE
-                    ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
-            END
-        WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 1 THEN
-            -- กรณีลา 1 วัน 1 ชั่วโมง
-            CASE
-                WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 8 * 3600 + 60 * 60 THEN
-                    1 + ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 8 * 3600) / 3600, 1) -- 1 วัน + ชั่วโมง
-                WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 7 * 3600 + 40 * 60 THEN
-                    1 -- นับเป็น 1 วัน
-                ELSE
-                    -- คำนวณครึ่งวันให้ถูกต้อง
-                    CASE
-                        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '12:00:00' THEN 4
-                        WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00' THEN 4
-                        ELSE 0 -- ไม่ใช่ครึ่งวัน
-                    END
-            END
-        ELSE
-            -- กรณีลาในหลายวัน
-            ((DATEDIFF(l_leave_end_date, l_leave_start_date)) -
-             (SELECT COUNT(*) FROM holiday
-              WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
-              AND h_holiday_status = 'วันหยุด'
-              AND h_status = 0)) * 8
-            +
-            -- ตรวจสอบวันสุดท้าย
-            CASE
-                WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '12:00:00' THEN
-                    4 -- นับครึ่งวันช่วงเช้า
-                WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00' THEN
-                    4 -- นับครึ่งวันช่วงบ่าย
-                ELSE
-                    8 -- เต็มวัน
-            END
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00'
+        THEN 4  -- คำนวณเป็น 4 ชั่วโมง
+        WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00'
+        THEN 4  -- คำนวณเป็น 4 ชั่วโมง
+        ELSE ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
     END
-) AS leave_personal_count,
-(SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
+) AS total_leave_hours,
+
+    -- จำนวนวันลารวมจากตาราง employees
+    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
--- AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '12:45:00')
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0";
 
@@ -326,30 +306,42 @@ $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
 if ($result_leave_personal) {
     $total_personal = $result_leave_personal['total_personal'] ?? 0;
-    $leave_personal_count = $result_leave_personal['leave_personal_count'] ?? 0;
+    $leave_personal_days = $result_leave_personal['total_leave_days'] ?? 0;
+    $leave_personal_hours = $result_leave_personal['total_leave_hours'] ?? 0;
 
-    // คำนวณวันและชั่วโมงจากผลรวม
-    $leave_personal_count = round($leave_personal_count * 2) / 2; // ปัดเป็นครึ่งชั่วโมง
-    $leave_personal_days = floor($leave_personal_count / 8);
-    $leave_personal_hours_remain = floor($leave_personal_count % 8);
-    $leave_personal_minutes_remain = ($leave_personal_count - floor($leave_personal_count)) * 60;
+    // แปลงนาทีที่รวมอยู่ใน hours
+    $leave_personal_minutes = ($leave_personal_hours * 60) % 60; // เก็บนาทีที่เหลือ
+    $leave_personal_hours = floor($leave_personal_hours); // ปัดชั่วโมงลง
 
-    $leave_personal_minutes_remain = round($leave_personal_minutes_remain / 30) * 30;
+    // ตรวจสอบเงื่อนไขสำหรับการแปลง 30 นาทีเป็น 0.5 ชั่วโมง
+    $total_30_minute_leaves = floor($leave_personal_minutes / 30); // นับจำนวนการลา 30 นาที
+    $leave_personal_hours += floor($total_30_minute_leaves / 2); // นับ 2 ครั้งเป็น 1 ชั่วโมง
+    $leave_personal_minutes = $total_30_minute_leaves % 2 * 30; // เหลือ 30 นาทีหากมีการลา 30 นาทีอีกครั้ง
 
-    if ($leave_personal_minutes_remain == 30) {
-        $leave_personal_minutes_remain = 5;
-    } else {
-        $leave_personal_minutes_remain = 0;
+    // แปลงนาทีเป็นรูปแบบที่ต้องการ
+    if ($leave_personal_minutes == 30) {
+        $leave_personal_minutes = 5; // ถ้าเป็น 30 นาทีให้แสดงเป็น 5
     }
+
+    // ตรวจสอบการนับ 8 ชั่วโมงเป็น 1 วัน
+    if ($leave_personal_hours >= 8) {
+        $leave_personal_days += floor($leave_personal_hours / 8); // นับวันลาจากจำนวนชั่วโมง
+        $leave_personal_hours = $leave_personal_hours % 8; // เก็บชั่วโมงที่เหลือ
+    }
+
+    echo "วัน: " . $leave_personal_days;
+    echo "ชั่วโมง: " . $leave_personal_hours;
+    echo "นาที: " . $leave_personal_minutes;
 
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
-    echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours_remain . '.' . $leave_personal_minutes_remain . ') / ' . $total_personal . '</h5>';
+    // แสดงผลวัน ชั่วโมง นาที
+    echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ') / ' . $total_personal . '</h5>';
 
-    // เพิ่ม input hidden สำหรับข้อมูลที่ต้องการ
+    // ซ่อน input สำหรับส่งข้อมูลไปยัง backend
     echo '<input type="hidden" name="leave_personal_days" value="' . $leave_personal_days . '">';
-    echo '<input type="hidden" name="leave_personal_hours_remain" value="' . $leave_personal_hours_remain . '">';
-    echo '<input type="hidden" name="leave_personal_minutes_remain" value="' . $leave_personal_minutes_remain . '">';
+    echo '<input type="hidden" name="leave_personal_hours" value="' . $leave_personal_hours . '">';
+    echo '<input type="hidden" name="leave_personal_minutes" value="' . $leave_personal_minutes . '">';
     echo '<input type="hidden" name="total_personal" value="' . $total_personal . '">';
 
     echo '</div>';
