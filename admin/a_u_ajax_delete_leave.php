@@ -16,6 +16,12 @@ $leaveStatus = $_POST['leaveStatus'];
 
 $canDatetime = date('Y-m-d H:i:s');
 
+$workplace = $_POST['workplace'];
+$subDepart = $_POST['subDepart'];
+$subDepart2 = $_POST['subDepart2'];
+$subDepart3 = $_POST['subDepart3'];
+$subDepart4 = $_POST['subDepart4'];
+$subDepart5 = $_POST['subDepart5'];
 // คืนจำนวนวันลา
 $sqlReturn = "UPDATE leave_list SET
                 l_leave_status = 1,
@@ -43,8 +49,58 @@ if ($stmtReturn->execute()) {
     $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
     // แจ้งเตือนไลน์หัวหน้ากับ ผจก ในแผนก
-    $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('chief', 'manager')");
-    $stmt->bindParam(':depart', $depart);
+    // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('chief', 'manager')");
+
+    // $stmt->bindParam(':depart', $depart);
+
+    if ($depart == 'RD') {
+        // แจ้งไลน์โฮซัง
+        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+        // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
+        // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
+        $stmt->bindParam(':workplace', $workplace);
+        // $stmt->bindParam(':depart', $depart);
+
+    } else if ($depart == 'Office') {
+        // บัญชี
+        if ($subDepart == 'AC') {
+            // แจ้งเตือนพี่แวว
+            // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = :subDepart");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'AC'");
+            $stmt->bindParam(':workplace', $workplace);
+            // $stmt->bindParam(':subDepart', $subDepart);
+        }
+        // เซลล์
+        else if ($subDepart == 'Sales') {
+            // แจ้งเตือนพี่เจี๊ยบหรือพี่อ้อม
+            // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = :subDepart");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'Sales'");
+            $stmt->bindParam(':workplace', $workplace);
+            // $stmt->bindParam(':subDepart', $subDepart);
+        }
+        // สโตร์
+        else if ($subDepart == 'Store') {
+            // แจ้งเตือนพี่เก๋
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Store'");
+            $stmt->bindParam(':workplace', $workplace);
+            // $stmt->bindParam(':subDepart', $subDepart);
+        }
+        // HR
+        else if ($subDepart == 'All') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+            $stmt->bindParam(':workplace', $workplace);
+            // $stmt->bindParam(':subDepart', $subDepart);
+        }
+        // พี่เต๋ / พี่น้อย / พี่ไว
+        else if ($subDepart == '') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+            $stmt->bindParam(':workplace', $workplace);
+            // $stmt->bindParam(':subDepart', $subDepart);
+        }
+    } else {
+        echo "ไม่พบเงื่อนไข";
+    }
+
     $stmt->execute();
     $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 

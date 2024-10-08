@@ -34,7 +34,7 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php require 'admin_navbar.php'?>
+    <?php include 'admin_navbar.php'?>
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
         <div class="container-fluid">
@@ -162,7 +162,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         var leaveType = row.find('td:first').text();
 
         $.ajax({
-            url: 'u_ajax_get_detail.php',
+            url: 'a_u_ajax_get_detail.php',
             method: 'POST',
             data: {
                 leaveType: leaveType

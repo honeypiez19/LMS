@@ -36,6 +36,8 @@ if ($result->rowCount() > 0) {
         echo 'manager';
     } elseif ($row['s_level'] == 'manager2') {
         echo 'manager2';
+    } elseif ($row['s_level'] == 'GM') {
+        echo 'GM';
     }
 } else {
     echo 'error';

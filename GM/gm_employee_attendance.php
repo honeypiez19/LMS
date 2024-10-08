@@ -34,7 +34,7 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php include 'manager_navbar.php'?>
+    <?php include 'gm_navbar.php'?>
 
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
@@ -885,7 +885,7 @@ if (count($result) > 0) {
             var userCode = $(this).data('usercode');
             $.ajax({
                 type: 'GET',
-                url: 'c_ajax_get_late_time.php', // ตัวอย่าง URL ที่ต้องการเรียกใช้เพื่อดึงข้อมูลพนักงาน
+                url: 'g_ajax_get_late_time.php', // ตัวอย่าง URL ที่ต้องการเรียกใช้เพื่อดึงข้อมูลพนักงาน
                 data: {
                     userCode: userCode
                 },
@@ -938,7 +938,7 @@ if (count($result) > 0) {
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: 'm_upd_late_time.php',
+                        url: 'g_upd_late_time.php',
                         method: 'POST',
                         data: {
                             userName: userName,
@@ -976,7 +976,7 @@ if (count($result) > 0) {
                     });
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
                     $.ajax({
-                        url: 'm_upd_late_time.php',
+                        url: 'g_upd_late_time.php',
                         method: 'POST',
                         data: {
                             userName: userName,

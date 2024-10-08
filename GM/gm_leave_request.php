@@ -36,7 +36,7 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php include 'manager_navbar.php'?>
+    <?php include 'gm_navbar.php'?>
 
     <!-- <?php echo $subDepart; ?>
     <?php echo $subDepart2; ?>
@@ -384,31 +384,9 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT
-    li.*,
-    em.e_username,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
-FROM
-    leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
+$sql = "SELECT * FROM leave_list
+WHERE l_leave_id NOT IN (6,7)
+AND l_department <> 'RD'
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
@@ -766,7 +744,7 @@ echo '</div>';
 
             // alert(userName)
             $.ajax({
-                url: 'm_ajax_upd_status.php',
+                url: 'g_ajax_upd_status.php',
                 method: 'POST',
                 data: {
                     createDate: createDate,
@@ -810,7 +788,7 @@ echo '</div>';
             var proveName = '<?php echo $name; ?>';
 
             $.ajax({
-                url: 'm_ajax_upd_status.php',
+                url: 'g_ajax_upd_status.php',
                 method: 'POST',
                 data: {
                     createDate: createDate,
@@ -846,7 +824,7 @@ echo '</div>';
         var status = $(this).data("status");
 
         $.ajax({
-            url: 'm_ajax_get_leave_data.php',
+            url: 'g_ajax_get_leave_data.php',
             method: 'GET',
             data: {
                 year: selectedYear,
@@ -1208,9 +1186,9 @@ echo '</div>';
                                 var proveName = '<?php echo $name; ?>';
                                 var subDepart = '<?php echo $subDepart; ?>';
 
-                                alert(subDepart)
+                                // alert(subDepart)
                                 $.ajax({
-                                    url: 'c_ajax_upd_status.php',
+                                    url: 'g_ajax_upd_status.php',
                                     method: 'POST',
                                     data: {
                                         createDate: createDate,
@@ -1255,7 +1233,7 @@ echo '</div>';
                             var proveName = '<?php echo $name; ?>';
 
                             $.ajax({
-                                url: 'm_ajax_upd_status.php',
+                                url: 'g_ajax_upd_status.php',
                                 method: 'POST',
                                 data: {
                                     createDate: createDate,
@@ -1286,7 +1264,7 @@ echo '</div>';
                             'usercode'); // ดึงรหัสพนักงานจาก data attribute
 
                         $.ajax({
-                            url: 'm_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+                            url: 'g_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
                             type: 'POST',
                             data: {
                                 userCode: userCode
@@ -1314,7 +1292,7 @@ echo '</div>';
         var userCode = $(this).data('usercode'); // ดึงรหัสพนักงานจาก data attribute
 
         $.ajax({
-            url: 'm_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+            url: 'g_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
             type: 'POST',
             data: {
                 userCode: userCode

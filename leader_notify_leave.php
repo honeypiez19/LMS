@@ -58,53 +58,10 @@ foreach ($leaveRecords as $row) {
         $message = "ใบลาของ $nameEmp ยังไม่อนุมัติ\nวันที่ลา : $startDate $startTime ถึง $endDate $endTime\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $mURL";
         $sqlLine = "";
 
-        if ($level === 'user') {
-            // echo 'eiei';
-            $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
-            FROM employees
-            WHERE (e_level = 'chief' OR e_level = 'manager')
-            AND (
-                e_department = :depart OR
-                (e_department != :depart AND (
-                    e_sub_department = :depart OR
-                    e_sub_department2 = :depart OR
-                    e_sub_department3 = :depart OR
-                    e_sub_department4 = :depart OR
-                    e_sub_department5 = :depart
-                ))
-            )";
-        } else if ($level === 'leader') {
-            $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
-            FROM employees
-            WHERE (e_level = 'chief' OR e_level = 'manager')
-            AND (
-                e_department = :depart OR
-                (e_department != :depart AND (
-                    e_sub_department = :depart OR
-                    e_sub_department2 = :depart OR
-                    e_sub_department3 = :depart OR
-                    e_sub_department4 = :depart OR
-                    e_sub_department5 = :depart
-                ))
-            )";
-        } else if ($level === 'chief') {
+        if ($level === 'leader') {
             $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
             FROM employees
             WHERE (e_level = 'manager')
-            AND (
-                e_department = :depart OR
-                (e_department != :depart AND (
-                    e_sub_department = :depart OR
-                    e_sub_department2 = :depart OR
-                    e_sub_department3 = :depart OR
-                    e_sub_department4 = :depart OR
-                    e_sub_department5 = :depart
-                ))
-            )";
-        } else if ($level === 'manager') {
-            $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
-            FROM employees
-            WHERE (e_level = 'GM')
             AND (
                 e_department = :depart OR
                 (e_department != :depart AND (

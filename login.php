@@ -232,6 +232,31 @@
                                     "manager/manager_dashboard.php";
                             }
                         });
+                    } else if (response == "GM") {
+
+                        Swal.fire({
+                            title: "Welcome GM",
+                            html: "Redirecting to GM dashboard...",
+                            timer: 500,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getHtmlContainer()
+                                    .querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = Swal
+                                        .getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                window.location.href =
+                                    "GM/gm_dashboard.php";
+                            }
+                        });
                     } else if (response == "already_logged_in") {
                         alert('มีการเข้าสู่ระบบอยู่แล้ว')
                     } else {

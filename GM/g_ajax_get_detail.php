@@ -2,7 +2,6 @@
 include '../connect.php';
 if (isset($_POST['leaveType'])) {
     $leaveType = $_POST['leaveType'];
-    $userCode = $_POST['userCode'];
 
     if ($leaveType == 'ลากิจได้รับค่าจ้าง') {
         $conType = str_replace("ลากิจได้รับค่าจ้าง", "1", $leaveType);
@@ -21,21 +20,31 @@ if (isset($_POST['leaveType'])) {
     } else if ($leaveType == 'อื่น ๆ') {
         $conType = str_replace("อื่น ๆ", "8", $leaveType);
     } else {
-        echo 'ไม่มีประเภทการลา';
+        echo 'ไม่พบประเภทการลา';
+        exit;
     }
 
     // ดึงข้อมูลการลาจากฐานข้อมูล
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id = '$conType' AND l_usercode = '$userCode' ORDER BY l_create_datetime";
+    $sql = "SELECT * FROM leave_list WHERE l_leave_id = '$conType' ORDER BY l_create_datetime";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();
-    $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
+    $rowNumber = $totalRows; // Start with the total number of rows
+
+    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
     if ($totalRows > 0) {
         echo '<h5>' . $leaveType . '</h5>';
         echo '<table class="table table-hover" >';
         echo '<thead>';
         echo '<tr class="text-center align-middle">';
         echo '<th rowspan="2">ลำดับ</th>';
-        echo '<th rowspan="2">วันที่ยื่น</th>';
+
+        // Change the header text based on the leave type
+        if ($leaveType == 'มาสาย') {
+            echo '<th rowspan="2">วันที่มาสาย</th>';
+        } else {
+            echo '<th rowspan="2">วันที่ยื่น</th>';
+        }
+
         echo '<th rowspan="2">ประเภทรายการ</th>';
         echo '<th colspan="2">วันเวลา</th>';
         echo '<th rowspan="2">สถานะรายการ</th>';
@@ -115,6 +124,10 @@ if (isset($_POST['leaveType'])) {
             elseif ($row['l_approve_status'] == 5) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
             }
+            // ช่องว่าง
+            elseif ($row['l_approve_status'] == 6) {
+                echo '';
+            }
             // ไม่มีสถานะ
             else {
                 echo 'ไม่พบสถานะ';
@@ -146,6 +159,10 @@ if (isset($_POST['leaveType'])) {
             elseif ($row['l_approve_status2'] == 5) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
             }
+            // ช่องว่าง
+            elseif ($row['l_approve_status2'] == 6) {
+                echo '';
+            }
             // ไม่มีสถานะ
             else {
                 echo 'ไม่พบสถานะ';
@@ -156,26 +173,22 @@ if (isset($_POST['leaveType'])) {
             if ($row['l_hr_status'] == 0) {
                 echo '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
             } elseif ($row['l_hr_status'] == 1) {
-                echo '<div class="text-success"><b>ผ่าน</b></div>';
+                echo '<div class="text-success"><b>เสร็จสิ้น</b></div>';
             } elseif ($row['l_hr_status'] == 2) {
-                echo '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+                echo '<div class="text-danger"><b>ไม่อนุมัติ</b></div>';
             } else {
                 echo 'ไม่พบสถานะ';
             }
             echo '</td>';
-
             echo '</tr>';
             $rowNumber--;
         }
 
         echo '</tbody>';
         echo '</table>';
-
     } else {
-        // ถ้าไม่มีข้อมูลการลา
-        echo '<div class="leave-details">';
-        echo '<h4>' . $leaveType . '</h4>';
-        echo '<p>ไม่มีข้อมูลการลา</p>';
-        echo '</div>';
+        echo 'ไม่พบข้อมูลการลาสำหรับประเภทการลานี้';
     }
+} else {
+    echo 'ไม่พบข้อมูลประเภทการลา';
 }

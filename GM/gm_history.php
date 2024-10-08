@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการลาและการมาสาย</title>
+    <title>ประวัติการลาและมาสาย</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -34,7 +34,9 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php require 'user_navbar.php'?>
+    <?php include 'gm_navbar.php'?>
+
+    <!-- <?php echo $userCode; ?> -->
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
         <div class="container-fluid">
@@ -97,51 +99,42 @@ echo "</select>";
             </thead>
             <tbody>
                 <?php
-// Prepare the main query for employee
-$sql = "SELECT * FROM employees WHERE e_usercode = :userCode";
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(':userCode', $userCode);
-$stmt->execute();
+// Define the leave types
+$leave_types = [
+    1 => 'ลากิจได้รับค่าจ้าง',
+    2 => 'ลากิจไม่ได้รับค่าจ้าง',
+    3 => 'ลาป่วย',
+    4 => 'ลาป่วยจากงาน',
+    5 => 'ลาพักร้อน',
+    7 => 'มาสาย',
+    6 => 'หยุดงาน',
+    8 => 'อื่น ๆ',
+];
 
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $leave_types = [
-        1 => 'ลากิจได้รับค่าจ้าง',
-        2 => 'ลากิจไม่ได้รับค่าจ้าง',
-        3 => 'ลาป่วย',
-        4 => 'ลาป่วยจากงาน',
-        5 => 'ลาพักร้อน',
-        7 => 'มาสาย',
-        6 => 'หยุดงาน',
-        8 => 'อื่น ๆ'
-        ,
+foreach ($leave_types as $leave_id => $leave_name) {
+    echo '<tr class="text-center align-middle">';
+    echo '<td>' . $leave_name . '</td>';
 
-    ];
-
-    foreach ($leave_types as $leave_id => $leave_name) {
-        echo '<tr class="text-center align-middle">';
-        echo '<td>' . $leave_name . '</td>';
-
-        for ($i = 1; $i <= 12; $i++) {
-            $sql_count = "SELECT COUNT(l_list_id) AS leave_count
+    for ($i = 1; $i <= 12; $i++) {
+        $sql_count = "SELECT COUNT(l_list_id) AS leave_count
                           FROM leave_list
                           WHERE l_leave_id = :leave_id
                           AND YEAR(l_leave_start_date) = :selectedYear
                           AND MONTH(l_leave_start_date) = :month
                           AND l_usercode = :userCode";
-            $stmt_count = $conn->prepare($sql_count);
-            $stmt_count->bindParam(':leave_id', $leave_id);
-            $stmt_count->bindParam(':selectedYear', $selectedYear);
-            $stmt_count->bindParam(':month', $i);
-            $stmt_count->bindParam(':userCode', $userCode); // เพิ่มการ bind userCode
-            $stmt_count->execute();
+        $stmt_count = $conn->prepare($sql_count);
+        $stmt_count->bindParam(':leave_id', $leave_id);
+        $stmt_count->bindParam(':selectedYear', $selectedYear);
+        $stmt_count->bindParam(':month', $i);
+        $stmt_count->bindParam(':userCode', $userCode);
+        $stmt_count->execute();
 
-            $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
-            echo '<td>' . $row_count['leave_count'] . '</td>';
-        }
-
-        echo '<td><button type="button" class="btn btn-primary view-button"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
-        echo '</tr>';
+        $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
+        echo '<td>' . $row_count['leave_count'] . '</td>';
     }
+
+    echo '<td><button type="button" class="btn btn-primary view-button"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
+    echo '</tr>';
 }
 ?>
             </tbody>
@@ -166,15 +159,12 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $('.view-button').click(function() {
         var row = $(this).closest('tr');
         var leaveType = row.find('td:first').text();
-        var userCode = <?php echo $userCode; ?>
 
-        // alert(userCode)
         $.ajax({
-            url: 'u_ajax_get_detail.php',
+            url: 'g_ajax_get_detail.php',
             method: 'POST',
             data: {
-                leaveType: leaveType,
-                userCode: userCode
+                leaveType: leaveType
             },
             success: function(response) {
                 $('#leaveDetailsModal .modal-body').html(response);
