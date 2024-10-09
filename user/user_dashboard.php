@@ -267,15 +267,19 @@ echo "</select>";
 $sql_leave_personal = "SELECT
 SUM(
     CASE
-        -- กรณีลาเต็มวัน (08:00 - 16:40)
-        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '16:40:00'
-        THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
+
+          -- กรณีลาเต็มวัน (08:00 - 16:40)
+        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '16:40:00' AND l_leave_start_date = l_leave_end_date
+        THEN 1
 
         -- กรณีลาเต็มวันสำหรับวันที่มากกว่าหนึ่งวัน
         WHEN l_leave_start_date < l_leave_end_date
-        THEN DATEDIFF(l_leave_end_date, l_leave_start_date) + 1
-
-        ELSE 0
+        THEN (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) -
+                 (SELECT COUNT(*) FROM holiday
+                  WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
+                  AND h_holiday_status = 'วันหยุด'
+                  AND h_status = 0)
+    ELSE 0
     END
 ) AS total_leave_days,
 
@@ -285,23 +289,46 @@ SUM(
         -- กรณีลาเต็ม 08:00 - 11:45 นับเป็น 4 ชั่วโมง
         WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '11:45:00'
         THEN 4
-        
+
         -- กรณีลาเต็ม 12:45 - 16:40 นับเป็น 4 ชั่วโมง
         WHEN TIME(l_leave_start_time) = '12:45:00' AND TIME(l_leave_end_time) = '16:40:00'
         THEN 4
-        
-        -- สำหรับกรณีอื่น คำนวณตามเวลาปกติ
+
+        -- กรณีลาในช่วงเวลาระหว่าง 08:00 ถึง 11:45
         WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00'
         THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
 
-        WHEN TIME(l_leave_start_time) = '12:45:00' AND TIME(l_leave_end_time) = '16:40:00'
-        THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)  
+        -- กรณีลาในช่วงเวลาระหว่าง 12:45 ถึง 16:40
+        WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00'
+        THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
 
-        ELSE 0 
+        -- -- กรณีลาในช่วงเวลา 08:00 ถึง 16:40 ที่ไม่เข้าเงื่อนไขข้างต้น
+        -- WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '16:40:00'
+        -- THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
+         -- กรณีลา 08:00 - 13:00 นับเป็น 5 ชั่วโมง
+         WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '13:00:00'
+        THEN 5
+
+        -- สำหรับกรณีอื่น คำนวณตามเวลาปกติ
+        WHEN l_leave_start_date = l_leave_end_date
+        THEN
+            CASE
+                -- ถ้าลาไม่เกินเวลาเลิกงาน 16:40
+                WHEN TIME(l_leave_end_time) <= '16:40:00'
+                THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
+
+                -- ถ้าลาเกินเวลาเลิกงาน 16:40
+                WHEN TIME(l_leave_start_time) < '16:40:00' AND TIME(l_leave_end_time) > '16:40:00'
+                THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, '16:40:00') / 60, 2)
+
+                -- ถ้าลาเริ่มต้นหลัง 16:40 (อาจไม่เกี่ยวข้องในที่นี้)
+                ELSE 0
+            END
+        ELSE 0
     END
 ) AS total_leave_hours,
 
--- จำนวนวันลารวมจากตาราง employees
+
 (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
 WHERE l_leave_id = 1
@@ -320,11 +347,10 @@ if ($result_leave_personal) {
     $leave_personal_days = $result_leave_personal['total_leave_days'] ?? 0;
     $leave_personal_hours = $result_leave_personal['total_leave_hours'] ?? 0;
 
-    // แปลงนาทีที่รวมอยู่ใน hours
+    // ตรวจสอบเงื่อนไขสำหรับการแปลง 30 นาทีเป็น 0.5 ชั่วโมง
     $leave_personal_minutes = ($leave_personal_hours * 60) % 60; // เก็บนาทีที่เหลือ
     $leave_personal_hours = floor($leave_personal_hours); // ปัดชั่วโมงลง
 
-    // ตรวจสอบเงื่อนไขสำหรับการแปลง 30 นาทีเป็น 0.5 ชั่วโมง
     $total_30_minute_leaves = floor($leave_personal_minutes / 30); // นับจำนวนการลา 30 นาที
     $leave_personal_hours += floor($total_30_minute_leaves / 2); // นับ 2 ครั้งเป็น 1 ชั่วโมง
     $leave_personal_minutes = $total_30_minute_leaves % 2 * 30; // เหลือ 30 นาทีหากมีการลา 30 นาทีอีกครั้ง
@@ -363,7 +389,6 @@ if ($result_leave_personal) {
 } else {
     echo '<p>No data found</p>';
 }
-
 
 ?>
                             <p class="card-text">
