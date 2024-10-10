@@ -267,19 +267,31 @@ echo "</select>";
 $sql_leave_personal = "SELECT
 SUM(
     CASE
-
-          -- กรณีลาเต็มวัน (08:00 - 16:40)
-        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '16:40:00' AND l_leave_start_date = l_leave_end_date
-        THEN 1
+        -- กรณีลาเต็มวัน (08:00 - 16:40) ในวันเดียวกัน
+        WHEN l_leave_start_date = l_leave_end_date
+        THEN
+            CASE
+                -- ถ้าลา 08:00 ถึง 16:40 จะนับเป็น 1 วัน
+                WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '17:00:00'
+                THEN 1
+                -- กรณีอื่นที่ลาในวันเดียว แต่ไม่ตรงเงื่อนไขเวลา
+                ELSE 0
+            END
 
         -- กรณีลาเต็มวันสำหรับวันที่มากกว่าหนึ่งวัน
         WHEN l_leave_start_date < l_leave_end_date
-        THEN (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) -
-                 (SELECT COUNT(*) FROM holiday
-                  WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
-                  AND h_holiday_status = 'วันหยุด'
-                  AND h_status = 0)
-    ELSE 0
+        THEN
+            (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1 )
+            -
+            -- หักวันหยุดจากตาราง holiday
+            (SELECT COUNT(*)
+             FROM holiday
+             WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
+             AND h_holiday_status = 'วันหยุด'
+             AND h_status = 0)
+
+        -- กรณีที่ไม่ตรงเงื่อนไข
+        ELSE 0
     END
 ) AS total_leave_days,
 
@@ -287,47 +299,36 @@ SUM(
 SUM(
     CASE
         -- กรณีลาเต็ม 08:00 - 11:45 นับเป็น 4 ชั่วโมง
-        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '11:45:00'
+        WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '12:00:00'
         THEN 4
 
         -- กรณีลาเต็ม 12:45 - 16:40 นับเป็น 4 ชั่วโมง
-        WHEN TIME(l_leave_start_time) = '12:45:00' AND TIME(l_leave_end_time) = '16:40:00'
+        WHEN TIME(l_leave_start_time) = '13:00:00' AND TIME(l_leave_end_time) = '17:00:00'
         THEN 4
 
         -- กรณีลาในช่วงเวลาระหว่าง 08:00 ถึง 11:45
-        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00'
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '12:00:00'
         THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
 
         -- กรณีลาในช่วงเวลาระหว่าง 12:45 ถึง 16:40
-        WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00'
+        WHEN TIME(l_leave_start_time) >= '13:00:00' AND TIME(l_leave_end_time) <= '17:00:00'
         THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
 
-        -- -- กรณีลาในช่วงเวลา 08:00 ถึง 16:40 ที่ไม่เข้าเงื่อนไขข้างต้น
-        -- WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '16:40:00'
-        -- THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
-         -- กรณีลา 08:00 - 13:00 นับเป็น 5 ชั่วโมง
-         WHEN TIME(l_leave_start_time) = '08:00:00' AND TIME(l_leave_end_time) = '13:00:00'
-        THEN 5
+        -- กรณีลาเริ่มต้นก่อน 12:45 และสิ้นสุดในช่วงเวลา 12:45 ถึง 16:40
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) > '13:00:00' AND TIME(l_leave_end_time) <= '17:00:00'
+        THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
 
-        -- สำหรับกรณีอื่น คำนวณตามเวลาปกติ
-        WHEN l_leave_start_date = l_leave_end_date
-        THEN
-            CASE
-                -- ถ้าลาไม่เกินเวลาเลิกงาน 16:40
-                WHEN TIME(l_leave_end_time) <= '16:40:00'
-                THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
+        -- กรณีลาเริ่มต้นตั้งแต่ 08:00 น. และสิ้นสุดไม่เกิน 16:40 น.
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '17:00:00'
+        THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time) / 60, 2)
 
-                -- ถ้าลาเกินเวลาเลิกงาน 16:40
-                WHEN TIME(l_leave_start_time) < '16:40:00' AND TIME(l_leave_end_time) > '16:40:00'
-                THEN ROUND(TIMESTAMPDIFF(MINUTE, l_leave_start_time, '16:40:00') / 60, 2)
+        -- กรณีที่เวลาลาอยู่ในช่วง 08:00 ถึง 12:45 (หักเวลาพักกลางวัน 1 ชั่วโมง)
+        WHEN TIME(l_leave_start_time) < '13:00:00' AND TIME(l_leave_end_time) > '12:00:00'
+        THEN ROUND((TIMESTAMPDIFF(MINUTE, l_leave_start_time, '12:00:00') + TIMESTAMPDIFF(MINUTE, '13:00:00', l_leave_end_time)) / 60, 2) - 1
 
-                -- ถ้าลาเริ่มต้นหลัง 16:40 (อาจไม่เกี่ยวข้องในที่นี้)
-                ELSE 0
-            END
         ELSE 0
     END
 ) AS total_leave_hours,
-
 
 (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
@@ -1012,8 +1013,8 @@ if ($result_other) {
                                         <option value="10:30">10:30</option>
                                         <option value="11:00">11:00</option>
                                         <option value="11:30">11:30</option>
-                                        <option value="11:45">11:45</option>
-                                        <option value="12:45">12:45</option>
+                                        <option value="12:00">11:45</option>
+                                        <option value="13:00">12:45</option>
                                         <option value="13:00">13:00</option>
                                         <option value="13:30">13:30</option>
                                         <option value="14:00">14:00</option>
@@ -1022,7 +1023,7 @@ if ($result_other) {
                                         <option value="15:30">15:30</option>
                                         <option value="16:00">16:00</option>
                                         <option value="16:30">16:30</option>
-                                        <option value="16:40">16:40</option>
+                                        <option value="17:00">16:40</option>
                                     </select>
                                 </div>
                             </div>
@@ -1046,8 +1047,8 @@ if ($result_other) {
                                         <option value="10:30">10:30</option>
                                         <option value="11:00">11:00</option>
                                         <option value="11:30">11:30</option>
-                                        <option value="11:45">11:45</option>
-                                        <option value="12:45">12:45</option>
+                                        <option value="12:00">11:45</option>
+                                        <option value="13:00">12:45</option>
                                         <option value="13:00">13:00</option>
                                         <option value="13:30">13:30</option>
                                         <option value="14:00">14:00</option>
@@ -1056,7 +1057,7 @@ if ($result_other) {
                                         <option value="15:30">15:30</option>
                                         <option value="16:00">16:00</option>
                                         <option value="16:30">16:30</option>
-                                        <option value="16:40" selected>16:40</option>
+                                        <option value="17:00" selected>16:40</option>
                                     </select>
                                 </div>
                             </div>
@@ -1368,10 +1369,33 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+
+        if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+
+        } else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+        }
+
+        // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
 
         // 10
-        echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+
+        } else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        }
+
+        // echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
 
         // 11
         echo '<td>';
@@ -1773,7 +1797,7 @@ echo '</div>';
             var formattedDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" +
                 seconds;
 
-
+            // alert(endTime)
             // เช็คว่าหากเหตุผลในการลาเป็น "อื่น ๆ" ให้ใช้ค่าจาก input ที่มี id="otherReason"
             /*  if (leaveReason === 'อื่น ๆ') {
                  leaveReason = $('#otherReason').val();

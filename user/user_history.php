@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการลาและการมาสาย</title>
+    <title>ประวัติรายการลาทั้งหมด</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -43,7 +43,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-clock-rotate-left fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>ประวัติการลาและการมาสาย</h3>
+                    <h3>ประวัติรายการลาทั้งหมด</h3>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@ echo "</select>";
             <thead class="table table-secondary">
                 <tr class="text-center align-middle">
                     <th rowspan="2">ประเภทรายการ</th>
-                    <th colspan="12">เดือน</th>
+                    <th colspan="12">เดือน (จำนวนรายการ)</th>
                     <th rowspan="2"></th>
                 </tr>
                 <tr class="text-center align-middle">
@@ -136,7 +136,12 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $stmt_count->execute();
 
             $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
-            echo '<td>' . $row_count['leave_count'] . '</td>';
+
+            if ($row_count['leave_count'] == 0) {
+                echo '<td>' . '-' . '</td>';
+            } else {
+                echo '<td>' . $row_count['leave_count'] . '</td>';
+            }
         }
 
         echo '<td><button type="button" class="btn btn-primary view-button"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
