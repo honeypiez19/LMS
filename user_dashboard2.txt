@@ -1,0 +1,72 @@
+$sql_leave_personal = "SELECT
+-- คำนวณจำนวนวันจากชั่วโมง (ครบ 8 ชั่วโมงนับเป็น 1 วัน)
+FLOOR(SUM(
+    CASE
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '17:00:00'
+        THEN TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time)
+        ELSE 0
+    END
+) / 480) AS total_leave_days,  -- 480 นาที = 8 ชั่วโมง
+
+-- คำนวณจำนวนชั่วโมงที่เหลือ (จากการหารจำนวนวันออกแล้ว)
+FLOOR((SUM(
+    CASE
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '17:00:00'
+        THEN TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time)
+        ELSE 0
+    END
+) % 480) / 60) AS total_leave_hours,  -- นำเศษที่เหลือมาคิดเป็นชั่วโมง (60 นาที = 1 ชั่วโมง)
+
+-- คำนวณจำนวนที่เหลือเป็นนาที
+SUM(
+    CASE
+        WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '17:00:00'
+        THEN TIMESTAMPDIFF(MINUTE, l_leave_start_time, l_leave_end_time)
+        ELSE 0
+    END
+) % 60 AS total_leave_minutes,
+
+
+    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
+    FROM leave_list
+    WHERE l_leave_id = 1
+    AND l_usercode = :userCode
+    AND YEAR(l_create_datetime) = :selectedYear
+    AND l_leave_status = 0
+";
+
+$stmt_leave_personal = $conn->prepare($sql_leave_personal);
+$stmt_leave_personal->bindParam(':userCode', $userCode);
+$stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt_leave_personal->execute();
+$result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
+
+if ($result_leave_personal) {
+    $total_personal = $result_leave_personal['total_personal'] ?? 0;
+    $leave_personal_days = $result_leave_personal['total_leave_days'] ?? 0;
+    $leave_personal_hours = $result_leave_personal['total_leave_hours'] ?? 0;
+    $leave_personal_minutes = $result_leave_personal['total_leave_minutes'] ?? 0;
+
+    echo "วัน: " . $leave_personal_days;
+    echo "ชั่วโมง: " . $leave_personal_hours;
+    echo "นาที: " . $leave_personal_minutes;
+
+    echo '<div class="d-flex justify-content-between">';
+    echo '<div>';
+    // แสดงผลวัน ชั่วโมง นาที
+    echo '<h5>' . $leave_personal_days . ' วัน (' . $leave_personal_hours . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที) / ' . $total_personal . '</h5>';
+
+    // ซ่อน input สำหรับส่งข้อมูลไปยัง backend
+    echo '<input type="hidden" name="leave_personal_days" value="' . $leave_personal_days . '">';
+    echo '<input type="hidden" name="leave_personal_hours" value="' . $leave_personal_hours . '">';
+    echo '<input type="hidden" name="leave_personal_minutes" value="' . $leave_personal_minutes . '">';
+    echo '<input type="hidden" name="total_personal" value="' . $total_personal . '">';
+
+    echo '</div>';
+    echo '<div>';
+    echo '<i class="mx-2 fa-solid fa-sack-dollar fa-2xl"></i>';
+    echo '</div>';
+    echo '</div>';
+} else {
+    echo '<p>No data found</p>';
+}
