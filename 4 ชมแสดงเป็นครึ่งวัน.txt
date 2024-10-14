@@ -1,0 +1,68 @@
+echo '<td>';
+// Query to check holidays in the leave period
+$holiday_query = "SELECT COUNT(*) as holiday_count
+                  FROM holiday
+                  WHERE h_start_date BETWEEN :start_date AND :end_date
+                  AND h_holiday_status = 'วันหยุด'
+                  AND h_status = 0";
+
+// Prepare the query
+$holiday_stmt = $conn->prepare($holiday_query);
+$holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
+$holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
+$holiday_stmt->execute();
+
+// Fetch the holiday count
+$holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+$holiday_count = $holiday_data['holiday_count'];
+
+// คำนวณระยะเวลาการลา
+$l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
+$l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+$interval = $l_leave_start_date->diff($l_leave_end_date);
+
+// คำนวณจำนวนวันลา
+$leave_days = $interval->days - $holiday_count;
+
+// คำนวณจำนวนชั่วโมงและนาทีลา
+$leave_hours = $interval->h;
+$leave_minutes = $interval->i;
+
+// ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
+$start_hour = (int)$l_leave_start_date->format('H');
+$end_hour = (int)$l_leave_end_date->format('H');
+
+if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+      (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
+    // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
+    $leave_hours -= 1;
+}
+
+// ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
+if ($leave_hours >= 8) {
+    $leave_days += floor($leave_hours / 8);
+    $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
+}
+
+// ตรวจสอบการนาที
+if ($leave_minutes >= 30) {
+    $leave_minutes = 5; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
+}
+
+// ถ้าชั่วโมงลาเท่ากับ 4 ชั่วโมงให้แสดงเป็น "ครึ่งวัน"
+if ($leave_hours == 4) {
+    $leave_days = 0.5; // ครึ่งวัน
+    $leave_hours = 0;
+    $leave_minutes = 0;
+}
+
+// แสดงผลลัพธ์
+echo '<span class="text-primary">';
+if ($leave_days == 0.5) {
+    echo 'ครึ่งวัน';
+} else {
+    echo $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที';
+}
+echo '</span>';
+
+echo '</td>';
