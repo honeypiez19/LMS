@@ -45,20 +45,20 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php include 'manager_navbar.php'?>
+    <?php include 'user_navbar.php'?>
 
     <?php
+// echo $depart;
+// echo $subDepart;
 // มาสาย --------------------------------------------------------------------------------------------
 $sql_check_late = "SELECT l_leave_start_date, l_leave_start_time, l_leave_end_time
 FROM leave_list
-WHERE l_department = :depart
-AND l_leave_status = 0
-AND l_approve_status2 = 1
-AND l_level = 'manager'
--- AND l_approve_status2 = 1
+WHERE l_usercode = :userCode
+AND l_level = 'user'
+AND l_late_datetime IS NULL
 AND l_leave_id = 7";
 $stmt_check_late = $conn->prepare($sql_check_late);
-$stmt_check_late->bindParam(':depart', $depart);
+$stmt_check_late->bindParam(':userCode', $userCode);
 $stmt_check_late->execute();
 
 $late_entries = array();
@@ -78,165 +78,7 @@ if (!empty($late_entries_list)) {
 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
-
-// มีใบลาของพนักงาน --------------------------------------------------------------------------------------------
-$sql_check_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
-FROM leave_list
-WHERE l_department = :depart
-AND l_approve_status = 2
-AND l_level IN ('user','chief')
-AND l_approve_status2 = 1
-AND (l_leave_id <> 6 AND l_leave_id <> 7)
-AND l_leave_status = 0
-GROUP BY l_name";
-$stmt_check_leave = $conn->prepare($sql_check_leave);
-$stmt_check_leave->bindParam(':depart', $depart);
-$stmt_check_leave->bindParam(':subDepart', $subDepart);
-$stmt_check_leave->execute();
-
-$employee_names = array();
-while ($row_leave = $stmt_check_leave->fetch(PDO::FETCH_ASSOC)) {
-    $employee_names[] = $row_leave['l_name'];
-}
-
-$employee_list = implode(', ', $employee_names);
-
-if (!empty($employee_list)) {
-    echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
-    <i class="fa-solid fa-circle-exclamation me-2"></i>
-    <span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>';
-}
-
-// พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
-$sql_cancel_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
-FROM leave_list
-WHERE
-l_department = 'Office'
-AND l_approve_status = 2
-AND l_level IN ('user','chief')
-AND l_approve_status2 = 1
-AND (l_leave_id <> 6 AND l_leave_id <> 7)
-AND l_leave_status = 1
-GROUP BY l_name";
-$stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
-$stmt_cancel_leave->bindParam(':depart', $depart);
-$stmt_cancel_leave->execute();
-
-$employee_names = array();
-while ($row_leave = $stmt_cancel_leave->fetch(PDO::FETCH_ASSOC)) {
-    $employee_names[] = $row_leave['l_name'];
-}
-
-$employee_list = implode(', ', $employee_names);
-
-if (!empty($employee_list)) {
-    echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
-<i class="fa-solid fa-circle-exclamation me-2"></i>
-<span>มีการยกเลิกใบลาของ ' . $employee_list . ' กรุณาตรวจสอบ</span>
-<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
-<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>';
-}
-
-// มีพนักงานมาสาย --------------------------------------------------------------------------------------------
-$sql_check_leave_id_7 = "SELECT COUNT(l_list_id) AS leave_count, l_name
-FROM leave_list
-WHERE l_department = 'Office'
-AND l_leave_id = 7
-AND l_approve_status = 2
-OR  l_approve_status = 6
-AND l_approve_status2 = 1
-GROUP BY l_name";
-$stmt_check_leave_id_7 = $conn->prepare($sql_check_leave_id_7);
-$stmt_check_leave_id_7->bindParam(':depart', $depart);
-$stmt_check_leave_id_7->execute();
-
-if ($stmt_check_leave_id_7->rowCount() > 0) {
-    $employee_names_id_7 = array();
-    while ($row_leave_id_7 = $stmt_check_leave_id_7->fetch(PDO::FETCH_ASSOC)) {
-        $employee_names_id_7[] = $row_leave_id_7['l_name'];
-    }
-
-    $employee_list_id_7 = implode(', ', $employee_names_id_7);
-
-    echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
-<i class="fa-solid fa-circle-exclamation me-2"></i>
-<span> ' . $employee_list_id_7 . ' มาสาย' . ' กรุณาตรวจสอบ</span>
-<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_employee_attendance.php\'">ตรวจสอบการมาสาย</button>
-<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>';
-}
-
-// รวมสถิติการลาและมาสายของตัวเอง --------------------------------------------------------------------------------------------
-$sql_leave = "SELECT
-    SUM(
-        CASE
-            WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
-                CASE
-                    WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = 8 * 3600 + 40 * 60 THEN 8
-                    WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) > 4 * 3600 THEN
-                        ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600, 1)
-                    ELSE
-                        ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
-                END
-            ELSE
-                (DATEDIFF(l_leave_end_date, l_leave_start_date) * 8) +
-                CASE
-                    WHEN TIME(l_leave_end_time) <= '11:45:00' THEN 4
-                    ELSE 8
-                END
-        END
-    ) AS leave_days,
-    SUM(CASE WHEN l_leave_id = 1 THEN 1 ELSE 0 END) AS leave_personal,
-    SUM(CASE WHEN l_leave_id = 2 THEN 1 ELSE 0 END) AS leave_personal_no,
-    SUM(CASE WHEN l_leave_id = 3 THEN 1 ELSE 0 END) AS leave_sick,
-    SUM(CASE WHEN l_leave_id = 4 THEN 1 ELSE 0 END) AS leave_sick_work,
-    SUM(CASE WHEN l_leave_id = 5 THEN 1 ELSE 0 END) AS leave_annual,
-    SUM(CASE WHEN l_leave_id = 6 THEN 1 ELSE 0 END) AS stop_work,
-    SUM(CASE WHEN l_leave_id = 8 THEN 1 ELSE 0 END) AS other_leave
-FROM leave_list
-WHERE l_usercode = :userCode
-AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '12:45:00')
-AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
-
-// Prepare and execute statement
-$stmt_leave = $conn->prepare($sql_leave);
-$stmt_leave->bindParam(':userCode', $row['e_usercode']);
-$stmt_leave->bindParam(':selectedYear', $selectedYear);
-$stmt_leave->execute();
-$result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
-
-// Retrieve leave counts
-$leave_personal_days = floor($result_leave['leave_personal'] * 8 / 8);
-$leave_personal_no_days = floor($result_leave['leave_personal_no'] * 8 / 8);
-$leave_sick_days = floor($result_leave['leave_sick'] * 8 / 8);
-$leave_sick_work_days = floor($result_leave['leave_sick_work'] * 8 / 8);
-$leave_annual_days = floor($result_leave['leave_annual'] * 8 / 8);
-$other_days = floor($result_leave['other_leave'] * 8 / 8);
-$stop_work = $result_leave['stop_work'];
-
-// Calculate stop work days
-// $stop_work = floor($late_count / 3);
-
-// Calculate total leave days
-$sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $leave_annual_days + $other_days + $stop_work;
-
-// Display alert with total leave days
-if ($sum_day >= 10) {
-    echo '<div class="alert d-flex align-items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
-    <i class="fa-solid fa-chart-line me-2"></i>
-    <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave.php\'">สถิติการลาและมาสาย</button>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>';
-}
-
 ?>
-
     <div class="mt-3 container-fluid">
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
@@ -300,12 +142,13 @@ echo "</select>";
                     </div>
                 </form>
 
-                <!-- Button trigger modal -->
+
+                <!-- ปุ่มระเบียบการลา -->
                 <button type="button" class="button-shadow btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#leaveRule">
                     <i class="fa-solid fa-file-shield"></i> ระเบียบการลา
                 </button>
-                <!-- Modal -->
+                <!-- Modal ระเบียบการลา -->
                 <div class="modal fade" id="leaveRule" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
                     aria-labelledby="leaveRuleLabel" aria-hidden="true">
                     <div class="modal-dialog modal-xl">
@@ -531,13 +374,13 @@ if ($result_leave_personal) {
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
     echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours_remain . '.' . $leave_personal_minutes_remain . ') / ' . $total_personal . '</h5>';
-
+    
     // เพิ่ม input hidden สำหรับข้อมูลที่ต้องการ
-    echo '<input type="hidden" name="leave_personal_days" value="' . $leave_personal_days . '">';
+    echo '<input type="hidden" name="leave_personal_days" value="' . $leave_personal_days  . '">';
     echo '<input type="hidden" name="leave_personal_hours_remain" value="' . $leave_personal_hours_remain . '">';
     echo '<input type="hidden" name="leave_personal_minutes_remain" value="' . $leave_personal_minutes_remain . '">';
     echo '<input type="hidden" name="total_personal" value="' . $total_personal . '">';
-
+    
     echo '</div>';
     echo '<div>';
     echo '<i class="mx-2 fa-solid fa-sack-dollar fa-2xl"></i>';
@@ -562,27 +405,46 @@ if ($result_leave_personal) {
                         <div class="card-title">
                             <?php
 // ลากิจไม่ได้รับค่าจ้าง ----------------------------------------------------------------
-$sql_leave_personal_no = "SELECT
+// กำหนดค่าตัวแปรก่อน SQL Query
+$work_start = '08:00:00'; // เวลาทำงานเริ่มต้น
+$work_morning_end = '11:45:00'; // เวลาพักเที่ยงเริ่มต้น
+$work_afternoon_start = '12:45:00'; // เวลาพักเที่ยงสิ้นสุด
+$work_end = '16:40:00'; // เวลาทำงานสิ้นสุด
+
+// SQL Query
+$sql_leave_personal_no = "
+SELECT
     SUM(
         CASE
+            -- กรณีลาในวันเดียว
             WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
-                -- กรณีลาในวันเดียว
                 CASE
-                    WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = 8 * 3600 + 40 * 60 THEN 8
+                    WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = TIME_TO_SEC(:work_end) - TIME_TO_SEC(:work_start) THEN 8
                     WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) > 4 * 3600 THEN
-                        ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600, 1)
+                        CEIL((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600)
                     ELSE
-                        ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
+                        CEIL(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600)
                 END
             ELSE
-                -- กรณีลาในหลายวัน และไม่นับวันหยุด
-                ((DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) -
-                 (SELECT COUNT(*) FROM holiday
-                  WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
-                  AND h_holiday_status = 'วันหยุด'
-                  AND h_status = 0)) * 8
+                -- กรณีลาในหลายวัน
+                CASE
+                    -- คำนวณกรณีลา 1 วันครึ่ง
+                    WHEN l_leave_start_date <= l_leave_end_date AND l_leave_start_date = l_leave_start_date THEN
+                        CEIL(
+                            (TIME_TO_SEC(TIMEDIFF(:work_morning_end, l_leave_start_time)) + 
+                             TIME_TO_SEC(TIMEDIFF(:work_end, :work_afternoon_start))) / 3600
+                        )
+                    ELSE 0
+                END
                 +
-                -- ตรวจสอบว่ามีการลาครึ่งวันในวันหยุดหรือไม่
+                CASE
+                    WHEN l_leave_end_date >= l_leave_start_date AND l_leave_end_date = l_leave_end_date THEN
+                        CEIL(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, :work_start)) / 3600)
+                    ELSE 0
+                END
+                +
+                ((DATEDIFF(l_leave_end_date, l_leave_start_date) - 1) * 8) -- ใช้ 8 เพราะคำนวณตามที่ต้องการ
+                +
                 CASE
                     WHEN EXISTS (
                         SELECT 1
@@ -590,7 +452,7 @@ $sql_leave_personal_no = "SELECT
                         WHERE h_start_date = l_leave_end_date
                         AND h_holiday_status = 'วันหยุด'
                         AND h_status = 0
-                    ) AND TIME(l_leave_end_time) <= '12:00:00' THEN 4 -- นับครึ่งวันถ้าวันหยุดและลาแค่ครึ่งวัน
+                    ) AND TIME(l_leave_end_time) <= '12:00:00' THEN 4
                     ELSE 0
                 END
         END
@@ -603,7 +465,12 @@ AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '1
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0";
 
+// เตรียมและประมวลผล SQL
 $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
+$stmt_leave_personal_no->bindParam(':work_start', $work_start);
+$stmt_leave_personal_no->bindParam(':work_morning_end', $work_morning_end);
+$stmt_leave_personal_no->bindParam(':work_afternoon_start', $work_afternoon_start);
+$stmt_leave_personal_no->bindParam(':work_end', $work_end);
 $stmt_leave_personal_no->bindParam(':userCode', $userCode);
 $stmt_leave_personal_no->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $stmt_leave_personal_no->execute();
@@ -613,26 +480,27 @@ if ($result_leave_personal_no) {
     $total_personal_no = $result_leave_personal_no['total_personal_no'] ?? 0;
     $leave_personal_no_count = $result_leave_personal_no['leave_personal_no_count'] ?? 0;
 
-    // Round the total leave count to the nearest half-hour
-    $leave_personal_no_count = round($leave_personal_no_count * 2) / 2;
-
-    // Calculate days, hours, and minutes
+    // คำนวณวันและชั่วโมงคงเหลือ
     $leave_personal_no_days = floor($leave_personal_no_count / 8);
-    $leave_personal_no_hours_remain = floor($leave_personal_no_count % 8);
-    $leave_personal_no_minutes_remain = ($leave_personal_no_count - floor($leave_personal_no_count)) * 60;
+    $leave_personal_no_hours_remain = $leave_personal_no_count % 8;
 
-    // Adjust minutes to nearest 30-minute interval
-    $leave_personal_no_minutes_remain = round($leave_personal_no_minutes_remain / 30) * 30;
-
-    if ($leave_personal_no_minutes_remain == 30) {
-        $leave_personal_no_minutes_remain = 5;
-    } else {
-        $leave_personal_no_minutes_remain = 0;
+    // ปัดค่าตามเงื่อนไข
+    if ($leave_personal_no_hours_remain == 7.67) {
+        $leave_personal_no_hours_remain = 8;
+    } elseif ($leave_personal_no_hours_remain == 3.75 || $leave_personal_no_hours_remain == 3.95) {
+        $leave_personal_no_hours_remain = 4;
     }
 
+    // แสดงผลลัพธ์
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
-    echo '<h5>' . $leave_personal_no_days . '(' . $leave_personal_no_hours_remain . '.' . $leave_personal_no_minutes_remain . ') / ' . $total_personal_no . '</h5>';
+    echo '<h5>' . $leave_personal_no_days . ' (' . number_format($leave_personal_no_hours_remain, 1) .') / ' . $total_personal_no . '</h5>';
+        // Add hidden inputs for the necessary data
+    echo '<input type="hidden" name="leave_personal_no_days" value="' . $leave_personal_no_days . '">';
+    echo '<input type="hidden" name="leave_personal_no_hours_remain" value="' . number_format($leave_personal_no_hours_remain, 1) . '">';
+    echo '<input type="hidden" name="total_personal_no" value="' . $total_personal_no . '">';
+
+
     echo '</div>';
     echo '<div>';
     echo '<i class="mx-2 fa-solid fa-sack-xmark fa-2xl"></i>';
@@ -729,7 +597,7 @@ if ($result_leave_sick) {
     echo '<h5>' . $leave_sick_days . '(' . $leave_sick_hours_remain . '.' . $leave_sick_minutes_remain . ') / ' . $total_sick . '</h5>';
 
     // เพิ่ม input type hidden สำหรับค่า leave_sick_days, leave_sick_hours_remain, leave_sick_minutes_remain และ total_sick
-    echo '<input type="hidden" name="leave_sick_days" value="' . $leave_sick_days . '">';
+    echo '<input type="hidden" name="leave_sick_days" value="' .  $leave_sick_days . '">';
     echo '<input type="hidden" name="leave_sick_hours_remain" value="' . $leave_sick_hours_remain . '">';
     echo '<input type="hidden" name="leave_sick_minutes_remain" value="' . $leave_sick_minutes_remain . '">';
     echo '<input type="hidden" name="total_sick" value="' . $total_sick . '">';
@@ -827,7 +695,7 @@ if ($result_leave_sick_work) {
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
     echo '<h5>' . $leave_sick_work_days . '(' . $leave_sick_work_hours_remain . '.' . $leave_sick_work_minutes_remain . ') / ' . $total_sick_work . '</h5>';
-
+    
     // เพิ่ม input hidden สำหรับข้อมูลที่ต้องการ
     echo '<input type="hidden" name="leave_sick_work_days" value="' . $leave_sick_work_days . '">';
     echo '<input type="hidden" name="leave_sick_work_hours_remain" value="' . $leave_sick_work_hours_remain . '">';
@@ -926,7 +794,7 @@ if ($result_leave_annual) {
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
     echo '<h5>' . $leave_annual_days . '(' . $leave_annual_hours_remain . '.' . $leave_annual_minutes_remain . ') / ' . $total_annual . '</h5>';
-    echo '<input type="hidden" name="leave_annual_days" value="' . $leave_annual_days . '">';
+    echo '<input type="hidden" name="leave_annual_days" value="' .$leave_annual_days . '">';
     echo '<input type="hidden" name="total_annual" value="' . $total_annual . '">';
 
     echo '</div>';
@@ -1221,17 +1089,17 @@ if ($result_other) {
                                 <div class="col-12">
                                     <label for="telPhone" class="form-label">เบอร์โทร</label>
                                     <?php
-$sql2 = "SELECT e_phone FROM employees WHERE e_usercode = '$userCode'";
-$result2 = $conn->query($sql2);
+                                $sql2 = "SELECT e_phone FROM employees WHERE e_usercode = '$userCode'";
+                                $result2 = $conn->query($sql2);
 
-if ($result2->rowCount() > 0) {
-    while ($row2 = $result2->fetch(PDO::FETCH_ASSOC)) {
-        echo '<input type="text" class="form-control" id="telPhone" value="' . $row2['e_phone'] . '">';
-    }
-} else {
-    // กรณีไม่พบข้อมูล
-}
-?>
+                                if ($result2->rowCount() > 0) {
+                                    while ($row2 = $result2->fetch(PDO::FETCH_ASSOC)) {
+                                        echo '<input type="text" class="form-control" id="telPhone" value="' . $row2['e_phone'] . '">';
+                                    }
+                                } else {
+                                    // กรณีไม่พบข้อมูล
+                                }
+                            ?>
                                 </div>
                             </div>
                             <div class="mt-3 row">
@@ -1851,7 +1719,7 @@ echo '</div>';
     $(document).ready(function() {
 
         $.ajax({
-            url: 'm_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
+            url: 'u_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
             type: 'GET',
             dataType: 'json',
             success: function(response) {
@@ -1980,7 +1848,7 @@ echo '</div>';
                     '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
                 );
                 $.ajax({
-                    url: 'm_ajax_add_leave.php',
+                    url: 'u_ajax_add_leave.php',
                     type: 'POST',
                     data: fd,
                     contentType: false,
@@ -1996,6 +1864,74 @@ echo '</div>';
                 });
             }
 
+            /* alert(leaveType) */
+
+            // // ลากิจได้รับค่าจ้าง
+            // else if (leaveType == '1') {
+            //     var leave_personal_days = <?php echo $leave_personal_days; ?>;
+            //     var total_personal = <?php echo $total_personal; ?>;
+
+            //     if (startDate == endDate) {
+            //         Swal.fire({
+            //             title: "ไม่สามารถลาได้",
+            //             text: "ลากิจต้องลาล่วงหน้า 1 วัน",
+            //             icon: "error"
+            //         });
+            //         return false;
+            //     } else if (leave_personal_days >= total_personal) {
+            //         Swal.fire({
+            //             title: "ไม่สามารถลาได้",
+            //             text: "เนื่องจากเกินสิทธิ์",
+            //             icon: "error"
+            //         });
+            //         return false;
+            //     } else {
+            //         // ถ้าเงื่อนไขทั้งหมดผ่าน สามารถดำเนินการลาหยุดได้ที่นี่
+            //         // เขียนโค้ดการลาหยุดเพิ่มเติมได้ตามที่ต้องการ
+            //     }
+            // }
+            // // ลากิจไม่ได้รับค่าจ้าง
+            // else if (leaveType == '2') {
+            //     var leave_personal_no_days = <?php echo $leave_personal_no_days; ?>;
+            //     var total_personal_no = <?php echo $total_personal_no; ?>;
+
+            //     if (leave_personal_no_days >= total_personal_no) {
+            //         Swal.fire({
+            //             title: "ไม่สามารถลาได้",
+            //             text: "เนื่องจากเกินสิทธิ์",
+            //             icon: "error"
+            //         });
+            //         return false;
+            //         location.reload()
+
+            //     }
+            // } else if (leaveType == '3') {
+            //     var leave_sick_days = <?php echo $leave_sick_days; ?>;
+            //     var total_sick = <?php echo $total_sick; ?>;
+
+            //     if (leave_sick_days >= total_sick) {
+            //         Swal.fire({
+            //             title: "ไม่สามารถลาได้",
+            //             text: "เนื่องจากเกินสิทธิ์",
+            //             icon: "error"
+            //         });
+            //         return false;
+            //         location.reload()
+            //     }
+            // } else if (leaveType == '4') {
+            //     var leave_sick_work_days = <?php echo $leave_sick_work_days; ?>;
+            //     var total_sick_work = <?php echo $total_sick_work; ?>;
+
+            //     if (leave_sick_work_days >= total_sick_work) {
+            //         Swal.fire({
+            //             title: "ไม่สามารถลาได้",
+            //             text: "เนื่องจากเกินสิทธิ์",
+            //             icon: "error"
+            //         });
+            //         return false;
+            //         location.reload()
+            //     }
+            // }
 
 
         });
@@ -2063,7 +1999,7 @@ echo '</div>';
                 return false;
             } else {
                 $.ajax({
-                    url: 'm_ajax_add_urgent_leave.php',
+                    url: 'u_ajax_add_urgent_leave.php',
                     type: 'POST',
                     data: fd,
                     contentType: false,
@@ -2123,7 +2059,7 @@ echo '</div>';
                 if (result.isConfirmed) {
                     // ยืนยันก่อนส่ง AJAX request
                     $.ajax({
-                        url: 'm_ajax_delete_leave.php',
+                        url: 'u_ajax_delete_leave.php',
                         method: 'POST',
                         data: {
                             leaveId: leaveId,
@@ -2186,7 +2122,7 @@ echo '</div>';
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: 'm_upd_late_time.php',
+                        url: 'u_upd_late_time.php',
                         method: 'POST',
                         data: {
                             userName: userName,

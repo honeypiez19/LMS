@@ -19,7 +19,7 @@ if ($status == 'all') {
     FROM leave_list li
     INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
     WHERE Month(l_create_datetime) = :month
-    AND l_department = :depart
+    -- AND l_department = :depart
     AND l_level = 'user'
     AND l_leave_id <> 6
     AND l_leave_id <> 7
@@ -37,7 +37,7 @@ if ($status == 'all') {
     FROM leave_list li
     INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
     WHERE Month(l_create_datetime) = :month
-    AND l_department = :depart
+    -- AND l_department = :depart
     AND l_level = 'user'
     AND l_leave_id <> 6
     AND l_leave_id <> 7
@@ -56,7 +56,7 @@ if ($status == 'all') {
             FROM leave_list li
             INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
             WHERE Month(l_create_datetime) = :month
-            AND l_department = :depart
+            -- AND l_department = :depart
             AND l_level = 'user'
             AND l_leave_id <> 6
             AND l_leave_id <> 7
@@ -75,7 +75,7 @@ if ($status == 'all') {
     FROM leave_list li
     INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
     WHERE Month(l_create_datetime) = :month
-    AND l_department = :depart
+    -- AND l_department = :depart
     AND l_level = 'user'
     AND l_leave_id <> 6
     AND l_leave_id <> 7
@@ -88,7 +88,7 @@ if ($status == 'all') {
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
 $stmt->bindParam(':month', $month, PDO::PARAM_INT);
-$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+// $stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
 
 if ($status != 'all') {
     $stmt->bindParam(':status', $status, PDO::PARAM_INT);

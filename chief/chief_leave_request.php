@@ -38,7 +38,7 @@ $userCode = $_SESSION['s_usercode'];
 <body>
     <?php require 'chief_navbar.php';?>
 
-    <!-- <?php echo $depart; ?> -->
+    <!-- <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -122,6 +122,9 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
+// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list
+// WHERE Year(l_create_datetime) = '$selectedYear' AND Month(l_create_datetime) = '$selectedMonth'
+// AND l_department = '$depart' AND l_level = 'user' AND l_leave_id <> 6 AND l_leave_id <> 7";
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
@@ -151,6 +154,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
+// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
+// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
+// AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
@@ -641,7 +647,7 @@ echo '</div>';
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
 
-            alert(userCode)
+            // alert(leaveStatus)
             $.ajax({
                 url: 'c_ajax_upd_status.php',
                 method: 'POST',
@@ -701,6 +707,7 @@ echo '</div>';
                     depart: depart,
                     leaveStatus: leaveStatus,
                     empName: empName
+
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -719,7 +726,7 @@ echo '</div>';
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
 
-        // alert(status)
+        alert(depart)
         $.ajax({
             url: 'c_ajax_get_leave_data.php',
             method: 'GET',
@@ -1078,11 +1085,11 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
+
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
 
-                                // alert(userCode)
                                 $.ajax({
                                     url: 'c_ajax_upd_status.php',
                                     method: 'POST',
@@ -1097,8 +1104,8 @@ echo '</div>';
                                         leaveStartDate: leaveStartDate,
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
-                                        empName: empName,
-                                        leaveStatus: leaveStatus
+                                        leaveStatus: leaveStatus,
+                                        empName: empName
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1143,6 +1150,7 @@ echo '</div>';
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName
+
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide');
@@ -1159,7 +1167,7 @@ echo '</div>';
                             'usercode'); // ดึงรหัสพนักงานจาก data attribute
 
                         $.ajax({
-                            url: 'c_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+                            url: 'l_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
                             type: 'POST',
                             data: {
                                 userCode: userCode

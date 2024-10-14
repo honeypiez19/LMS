@@ -90,19 +90,34 @@ if (!empty($late_entries_list)) {
 // AND l_approve_status2 = 1
 // AND (l_leave_id <> 6 AND l_leave_id <> 7)
 // GROUP BY l_name";
-$sql_check_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND l_department = :depart
-AND l_leave_status = 0
-AND l_approve_status = 0
-AND l_level = 'user'
-AND l_approve_status2 = 1
-AND (l_leave_id <> 6 AND l_leave_id <> 7)
+$sql_check_leave = "SELECT 
+    COUNT(l_list_id) AS leave_count,
+    li.l_username,
+    li.l_username,
+    li.l_name, 
+    li.l_department, 
+    em.e_sub_department, 
+    em.e_sub_department2, 
+    em.e_sub_department3, 
+    em.e_sub_department4, 
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em 
+    ON li.l_usercode = em.e_usercode 
+    AND (CASE 
+            WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
+            ELSE em.e_sub_department = :subDepart
+         END)
+    AND l_leave_status = 0
+    AND l_approve_status = 0
+    AND l_level = 'user'
+    AND l_approve_status2 = 1
+    AND (l_leave_id <> 6 AND l_leave_id <> 7)
 GROUP BY l_name";
 
 $stmt_check_leave = $conn->prepare($sql_check_leave);
 $stmt_check_leave->bindParam(':depart', $depart);
+$stmt_check_leave->bindParam(':subDepart', $subDepart);
 $stmt_check_leave->execute();
 
 $employee_names = array();
