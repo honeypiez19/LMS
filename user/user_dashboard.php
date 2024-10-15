@@ -406,6 +406,11 @@ if ($result_leave_personal_no) {
     $leave_personal_no_days += floor($leave_personal_no_hours / 8);
     $leave_personal_no_hours = $leave_personal_no_hours % 8; // Remaining hours after converting to days
 
+    if ($leave_personal_no_minutes >= 60) {
+        $leave_personal_no_hours += floor($leave_personal_no_minutes / 60);
+        $leave_personal_no_minutes = $leave_personal_no_minutes % 60;
+    }
+
     if ($leave_personal_no_minutes == 30) {
         $leave_personal_no_minutes = 5;
     }
@@ -483,6 +488,11 @@ if ($result_leave_sick) {
     // Convert total hours to days (8 hours = 1 day)
     $leave_sick_days += floor($leave_sick_hours / 8);
     $leave_sick_hours = $leave_sick_hours % 8; // Remaining hours after converting to days
+
+    if ($leave_sick_minutes >= 60) {
+        $leave_sick_hours += floor($leave_sick_minutes / 60);
+        $leave_sick_minutes = $leave_sick_minutes % 60;
+    }
 
     if ($leave_sick_minutes == 30) {
         $leave_sick_minutes = 5;
@@ -566,6 +576,11 @@ if ($result_leave_sick_work) {
     $leave_sick_work_days += floor($leave_sick_work_hours / 8);
     $leave_sick_work_hours = $leave_sick_work_hours % 8; // Remaining hours after converting to days
 
+    if ($leave_sick_work_minutes >= 60) {
+        $leave_sick_work_hours += floor($leave_sick_work_minutes / 60);
+        $leave_sick_work_minutes = $leave_sick_work_minutes % 60;
+    }
+
     if ($leave_sick_work_minutes == 30) {
         $leave_sick_work_minutes = 5;
     }
@@ -645,6 +660,11 @@ if ($result_leave_annual) {
     // Convert total hours to days (8 hours = 1 day)
     $leave_annual_days += floor($leave_annual_hours / 8);
     $leave_annual_hours = $leave_annual_hours % 8; // Remaining hours after converting to days
+
+    if ($leave_annual_minutes >= 60) {
+        $leave_annual_hours += floor($leave_annual_minutes / 60);
+        $leave_annual_minutes = $leave_annual_minutes % 60;
+    }
 
     if ($leave_annual_minutes == 30) {
         $leave_annual_minutes = 5;
@@ -776,6 +796,12 @@ if ($result_other) {
     // Convert total hours to days (8 hours = 1 day)
     $other_days += floor($other_hours / 8);
     $other_hours = $other_hours % 8; // Remaining hours after converting to days
+
+    if ($other_minutes >= 60) {
+        $other_hours += floor($other_minutes / 60);
+        $other_minutes = $other_minutes % 60;
+    }
+
 
     if ($other_minutes == 30) {
         $other_minutes = 5;
