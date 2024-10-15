@@ -80,15 +80,38 @@ if (!empty($late_entries_list)) {
 }
 
 // มีใบลาของพนักงาน --------------------------------------------------------------------------------------------
-$sql_check_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
-FROM leave_list
-WHERE l_department = :depart
-AND l_approve_status = 2
-AND l_level IN ('user','chief')
-AND l_approve_status2 = 1
-AND (l_leave_id <> 6 AND l_leave_id <> 7)
-AND l_leave_status = 0
-GROUP BY l_name";
+// echo 'SUB : ' . $subDepart;
+// echo ' De : ' . $depart;
+
+$sql_check_leave = "SELECT
+    COUNT(li.l_list_id) AS leave_count,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE li.l_leave_status = 0
+    AND li.l_approve_status2 = 1
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    AND (
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        -- หรือ แสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+        OR (em.e_department = 'Management' AND li.l_department IN (
+            em.e_sub_department,
+            em.e_sub_department2,
+            em.e_sub_department3,
+            em.e_sub_department4,
+            em.e_sub_department5))
+    )
+GROUP BY li.l_name";
+
 $stmt_check_leave = $conn->prepare($sql_check_leave);
 $stmt_check_leave->bindParam(':depart', $depart);
 $stmt_check_leave->bindParam(':subDepart', $subDepart);
@@ -103,26 +126,41 @@ $employee_list = implode(', ', $employee_names);
 
 if (!empty($employee_list)) {
     echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
-    <i class="fa-solid fa-circle-exclamation me-2"></i>
-    <span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+<i class="fa-solid fa-circle-exclamation me-2"></i>
+<span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
 
 // พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
-$sql_cancel_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
-FROM leave_list
-WHERE
-l_department = 'Office'
-AND l_approve_status = 2
-AND l_level IN ('user','chief')
-AND l_approve_status2 = 1
-AND (l_leave_id <> 6 AND l_leave_id <> 7)
-AND l_leave_status = 1
+$sql_cancel_leave = "SELECT
+COUNT(l_list_id) AS leave_count,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE l_leave_status = 1
+    AND l_approve_status = 0
+    AND l_level = 'user'
+    AND (l_leave_id <> 6 AND l_leave_id <> 7)
+    AND (
+        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
+        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
+        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+    )
 GROUP BY l_name";
 $stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
 $stmt_cancel_leave->bindParam(':depart', $depart);
+$stmt_cancel_leave->bindParam(':subDepart', $subDepart);
+
 $stmt_cancel_leave->execute();
 
 $employee_names = array();

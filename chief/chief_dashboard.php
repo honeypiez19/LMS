@@ -81,45 +81,50 @@ if (!empty($late_entries_list)) {
 }
 
 // มีใบลาของพนักงาน --------------------------------------------------------------------------------------------
-// แก้ไข SQL Query
-$sql_check_leave = "SELECT COUNT(li.l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2, 
-    em.e_sub_department3, em.e_sub_department4, em.e_sub_department5, li.l_name 
-    FROM leave_list li
-    INNER JOIN employees em ON li.l_usercode = em.e_usercode
-    WHERE em.e_sub_department = :subDepart
-    AND li.l_level = 'user'
-    AND li.l_leave_id <> 6
-    AND li.l_leave_id <> 7
-    GROUP BY li.l_name";
+$sql_check_leave = "SELECT
+    COUNT(l_list_id) AS leave_count,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE l_leave_status = 0
+    AND l_approve_status = 0
+    AND l_level = 'user'
+    AND (l_leave_id <> 6 AND l_leave_id <> 7)
+    AND (
+        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
+        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
+        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+    )
+GROUP BY l_name";
 
-// เตรียมคำสั่ง SQL
 $stmt_check_leave = $conn->prepare($sql_check_leave);
-
-// ผูกค่าตัวแปร $subDepart กับพารามิเตอร์ :subDepart ใน SQL
-$stmt_check_leave->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-
-// รันคำสั่ง SQL
+$stmt_check_leave->bindParam(':depart', $depart);
+$stmt_check_leave->bindParam(':subDepart', $subDepart);
 $stmt_check_leave->execute();
 
-// สร้าง array สำหรับเก็บชื่อพนักงาน
 $employee_names = array();
 while ($row_leave = $stmt_check_leave->fetch(PDO::FETCH_ASSOC)) {
     $employee_names[] = $row_leave['l_name'];
 }
 
-// รวมชื่อพนักงานที่มีใบลาเป็นข้อความเดียว
 $employee_list = implode(', ', $employee_names);
 
-// ถ้ามีพนักงานที่มีใบลา ให้แสดงข้อความเตือน
 if (!empty($employee_list)) {
     echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
-    <i class="fa-solid fa-circle-exclamation me-2"></i>
-    <span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'chief_leave_request.php\'">ตรวจสอบใบลา</button>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>';
+<i class="fa-solid fa-circle-exclamation me-2"></i>
+<span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'chief_leave_request.php\'">ตรวจสอบใบลา</button>
+<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
 }
-
 // พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
 $sql_cancel_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
 FROM leave_list
@@ -436,28 +441,28 @@ echo "</select>";
                         <div class="card-title">
                             <?php
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
-$sql_leave_personal = "SELECT 
+$sql_leave_personal = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-        - 
-        (SELECT COUNT(1) 
-         FROM holiday 
+        -
+        (SELECT COUNT(1)
+         FROM holiday
          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12 
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12 
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
-    
+
     (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
-WHERE l_leave_id = 1 
+WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0";
@@ -475,12 +480,12 @@ if ($result_leave_personal) {
     $leave_personal_hours = $result_leave_personal['total_leave_hours'] ?? 0;
     $leave_personal_minutes = $result_leave_personal['total_leave_minutes'] ?? 0;
 
-      // Convert total hours to days (8 hours = 1 day)
+    // Convert total hours to days (8 hours = 1 day)
     $leave_personal_days += floor($leave_personal_hours / 8);
     $leave_personal_hours = $leave_personal_hours % 8; // Remaining hours after converting to days
 
-    if($leave_personal_minutes == 30){
-        $leave_personal_minutes  = 5;
+    if ($leave_personal_minutes == 30) {
+        $leave_personal_minutes = 5;
     }
     // Output the results
     // echo "วัน: " . $leave_personal_days . " วัน<br>";
@@ -524,22 +529,22 @@ if ($result_leave_personal) {
 $sql_leave_personal_no = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-        - 
-        (SELECT COUNT(1) 
-         FROM holiday 
+        -
+        (SELECT COUNT(1)
+         FROM holiday
          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12 
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12 
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
-    
+
     (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no
 FROM leave_list
 WHERE l_leave_id = 2
@@ -560,12 +565,12 @@ if ($result_leave_personal_no) {
     $leave_personal_no_hours = $result_leave_personal_no['total_leave_hours'] ?? 0;
     $leave_personal_no_minutes = $result_leave_personal_no['total_leave_minutes'] ?? 0;
 
-      // Convert total hours to days (8 hours = 1 day)
+    // Convert total hours to days (8 hours = 1 day)
     $leave_personal_no_days += floor($leave_personal_no_hours / 8);
     $leave_personal_no_hours = $leave_personal_no_hours % 8; // Remaining hours after converting to days
 
-    if($leave_personal_no_minutes == 30){
-        $leave_personal_no_minutes  = 5;
+    if ($leave_personal_no_minutes == 30) {
+        $leave_personal_no_minutes = 5;
     }
 
     echo '<div class="d-flex justify-content-between">';
@@ -602,22 +607,22 @@ if ($result_leave_personal_no) {
 $sql_leave_sick = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-        - 
-        (SELECT COUNT(1) 
-         FROM holiday 
+        -
+        (SELECT COUNT(1)
+         FROM holiday
          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12 
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12 
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
-      
+
     (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick
 FROM leave_list
 WHERE l_leave_id = 3
@@ -637,13 +642,13 @@ if ($result_leave_sick) {
     $leave_sick_days = $result_leave_sick['total_leave_days'] ?? 0;
     $leave_sick_hours = $result_leave_sick['total_leave_hours'] ?? 0;
     $leave_sick_minutes = $result_leave_sick['total_leave_minutes'] ?? 0;
-  
+
     // Convert total hours to days (8 hours = 1 day)
     $leave_sick_days += floor($leave_sick_hours / 8);
     $leave_sick_hours = $leave_sick_hours % 8; // Remaining hours after converting to days
-  
-    if($leave_sick_minutes == 30){
-        $leave_sick_minutes  = 5;
+
+    if ($leave_sick_minutes == 30) {
+        $leave_sick_minutes = 5;
     }
 
     echo '<div class="d-flex justify-content-between">';
@@ -684,22 +689,22 @@ if ($result_leave_sick) {
 $sql_leave_sick_work = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-        - 
-        (SELECT COUNT(1) 
-         FROM holiday 
+        -
+        (SELECT COUNT(1)
+         FROM holiday
          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12 
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12 
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
-    
+
 (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_leave_sick_work
 FROM leave_list
 WHERE l_leave_id = 4
@@ -720,12 +725,12 @@ if ($result_leave_sick_work) {
     $leave_sick_work_hours = $result_leave_sick_work['total_leave_hours'] ?? 0;
     $leave_sick_work_minutes = $result_leave_sick_work['total_leave_minutes'] ?? 0;
 
-      // Convert total hours to days (8 hours = 1 day)
+    // Convert total hours to days (8 hours = 1 day)
     $leave_sick_work_days += floor($leave_sick_work_hours / 8);
     $leave_sick_work_hours = $leave_sick_work_hours % 8; // Remaining hours after converting to days
 
-    if($leave_sick_work_minutes == 30){
-        $leave_sick_work_minutes  = 5;
+    if ($leave_sick_work_minutes == 30) {
+        $leave_sick_work_minutes = 5;
     }
 
     echo '<div class="d-flex justify-content-between">';
@@ -764,22 +769,22 @@ if ($result_leave_sick_work) {
 $sql_leave_annual = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-        - 
-        (SELECT COUNT(1) 
-         FROM holiday 
+        -
+        (SELECT COUNT(1)
+         FROM holiday
          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12 
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12 
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
-  
+
 (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual
 FROM leave_list
 WHERE l_leave_id = 5
@@ -800,12 +805,12 @@ if ($result_leave_annual) {
     $leave_annual_hours = $result_leave_annual['total_leave_hours'] ?? 0;
     $leave_annual_minutes = $result_leave_annual['total_leave_minutes'] ?? 0;
 
-        // Convert total hours to days (8 hours = 1 day)
+    // Convert total hours to days (8 hours = 1 day)
     $leave_annual_days += floor($leave_annual_hours / 8);
     $leave_annual_hours = $leave_annual_hours % 8; // Remaining hours after converting to days
 
-    if($leave_annual_minutes == 30){
-        $leave_annual_minutes  = 5;
+    if ($leave_annual_minutes == 30) {
+        $leave_annual_minutes = 5;
     }
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
@@ -895,22 +900,22 @@ echo '</div>';
 $sql_other = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-        - 
-        (SELECT COUNT(1) 
-         FROM holiday 
+        -
+        (SELECT COUNT(1)
+         FROM holiday
          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12 
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12 
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
-  
+
     (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
 FROM leave_list
 WHERE l_leave_id = 8
@@ -935,14 +940,14 @@ if ($result_other) {
     $other_days += floor($other_hours / 8);
     $other_hours = $other_hours % 8; // Remaining hours after converting to days
 
-    if($other_minutes == 30){
-        $other_minutes  = 5;
+    if ($other_minutes == 30) {
+        $other_minutes = 5;
     }
 
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
     echo '<h5>' . $other_days . '(' . $other_hours . '.' . $other_minutes . ')' . '</h5>';
-    
+
     echo '</div>';
     echo '<div>';
     echo '<i class="mx-2 fa-solid fa-bars fa-2xl"></i>';
@@ -1025,7 +1030,7 @@ if ($result_other) {
                                     <label for="startTime" class="form-label">เวลาที่เริ่มต้น</label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="startTime" name="startTime" required>
-                                    <option value="08:00" selected>08:00</option>
+                                        <option value="08:00" selected>08:00</option>
                                         <option value="08:30">08:30</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
@@ -1057,7 +1062,7 @@ if ($result_other) {
                                     <label for="endTime" class="form-label">เวลาที่สิ้นสุด</label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="endTime" name="endTime" required>
-                                    <option value="08:00">08:00</option>
+                                        <option value="08:00">08:00</option>
                                         <option value="08:30">08:30</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
@@ -1202,7 +1207,7 @@ if ($result2->rowCount() > 0) {
                                     <label for="urgentEndTime" class="form-label">เวลาที่สิ้นสุด</label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="urgentEndTime" name="urgentEndTime" required>
-                                    <option value="08:00">08:00</option>
+                                        <option value="08:00">08:00</option>
                                         <option value="08:30">08:30</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
@@ -1423,60 +1428,58 @@ if ($result->rowCount() > 0) {
         // 11
         echo '<td>';
 // Query to check holidays in the leave period
-$holiday_query = "SELECT COUNT(*) as holiday_count
+        $holiday_query = "SELECT COUNT(*) as holiday_count
                   FROM holiday
                   WHERE h_start_date BETWEEN :start_date AND :end_date
                   AND h_holiday_status = 'วันหยุด'
                   AND h_status = 0";
 
 // Prepare the query
-$holiday_stmt = $conn->prepare($holiday_query);
-$holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
-$holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
-$holiday_stmt->execute();
+        $holiday_stmt = $conn->prepare($holiday_query);
+        $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
+        $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
+        $holiday_stmt->execute();
 
 // Fetch the holiday count
-$holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
-$holiday_count = $holiday_data['holiday_count'];
+        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+        $holiday_count = $holiday_data['holiday_count'];
 // คำนวณระยะเวลาการลา
-$l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-$l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-$interval = $l_leave_start_date->diff($l_leave_end_date);
+        $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
+        $l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+        $interval = $l_leave_start_date->diff($l_leave_end_date);
 
 // คำนวณจำนวนวันลา
-$leave_days = $interval->days - $holiday_count;
+        $leave_days = $interval->days - $holiday_count;
 
 // คำนวณจำนวนชั่วโมงและนาทีลา
-$leave_hours = $interval->h;
-$leave_minutes = $interval->i;
+        $leave_hours = $interval->h;
+        $leave_minutes = $interval->i;
 
 // ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
-$start_hour = (int)$l_leave_start_date->format('H');
-$end_hour = (int)$l_leave_end_date->format('H');
+        $start_hour = (int) $l_leave_start_date->format('H');
+        $end_hour = (int) $l_leave_end_date->format('H');
 
-if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
-      (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
-    // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
-    $leave_hours -= 1;
-}
+        if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+            (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
+            // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
+            $leave_hours -= 1;
+        }
 
 // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
-if ($leave_hours >= 8) {
-    $leave_days += floor($leave_hours / 8);
-    $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
-}
-
+        if ($leave_hours >= 8) {
+            $leave_days += floor($leave_hours / 8);
+            $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
+        }
 
 // ตรวจสอบการนาที
-if ($leave_minutes >= 30) {
-    $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
-}
+        if ($leave_minutes >= 30) {
+            $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
+        }
 
 // แสดงผลลัพธ์
-echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
+        echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
 
-echo '</td>';
-
+        echo '</td>';
 
         // 12
         if (!empty($row['l_file'])) {

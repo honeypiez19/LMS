@@ -22,6 +22,8 @@ try {
         $endDate = date('Y-m-d', strtotime($_POST['endDate']));
         $createDatetime = date('Y-m-d H:i:s');
 
+        $lateDatetime = date('Y-m-d H:i:s');
+
         $leaveType = 7;
         $leaveStatus = 0;
         $proveStatus = 0;
@@ -45,11 +47,11 @@ try {
             l_usercode, l_username, l_name, l_department, l_level, l_phone, l_leave_id,
             l_leave_reason, l_leave_start_date, l_leave_start_time, l_leave_end_date,
             l_leave_end_time, l_leave_status, l_remark,
-            l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime, l_workplace
+            l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime, l_workplace, l_create_datetime
         ) VALUES (
             :userCode, :userName, :name, :department, :level, :telPhone, :leaveType,
             :reason, :startDate, :startTime, :endDate, :endTime, :leaveStatus,
-             :remark, :proveStatus, :proveStatus2, :addName, :addDate, :workplace
+             :remark, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime
         )";
 
         $stmt = $conn->prepare($leaveSql);
@@ -66,13 +68,13 @@ try {
         $stmt->bindParam(':endDate', $endDate, PDO::PARAM_STR);
         $stmt->bindParam(':endTime', $endTime, PDO::PARAM_STR);
         $stmt->bindParam(':leaveStatus', $leaveStatus, PDO::PARAM_INT);
-        // $stmt->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
         $stmt->bindParam(':remark', $remark, PDO::PARAM_STR);
         $stmt->bindParam(':proveStatus', $proveStatus, PDO::PARAM_INT);
         $stmt->bindParam(':proveStatus2', $proveStatus2, PDO::PARAM_INT);
         $stmt->bindParam(':addName', $addName, PDO::PARAM_STR);
         $stmt->bindParam(':addDate', $addDate, PDO::PARAM_STR);
         $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
+        $stmt->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
             // Additional action on 3rd late occurrence
@@ -82,11 +84,11 @@ try {
                     l_usercode, l_username, l_name, l_department, l_level, l_phone,
                     l_leave_id, l_leave_reason, l_leave_start_date, l_leave_start_time,
                     l_leave_end_date, l_leave_end_time, l_leave_status,
-                    l_remark, l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime,  l_workplace
+                    l_remark, l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime,  l_workplace , l_create_datetime
                 ) VALUES (
                     :userCode, :userName, :name, :department, :level, :telPhone, 6,
                     :reason, :startDate, :startTime, :endDate, :endTime, :leaveStatus,
-                     :remarkStopWork, :proveStatus, :proveStatus2, :addName, :addDate, :workplace
+                     :remarkStopWork, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime
                 )";
 
                 $stmtStopWork = $conn->prepare($leaveSqlStopWork);
@@ -102,13 +104,14 @@ try {
                 $stmtStopWork->bindParam(':endDate', $endDate);
                 $stmtStopWork->bindParam(':endTime', $endTime);
                 $stmtStopWork->bindParam(':leaveStatus', $leaveStatus);
-                $stmtStopWork->bindParam(':createDatetime', $createDatetime);
                 $stmtStopWork->bindParam(':remarkStopWork', $remarkStopWork);
                 $stmtStopWork->bindParam(':proveStatus', $proveStatus);
                 $stmtStopWork->bindParam(':proveStatus2', $proveStatus2);
                 $stmtStopWork->bindParam(':addName', $addName);
                 $stmtStopWork->bindParam(':addDate', $addDate);
                 $stmtStopWork->bindParam(':workplace', $workplace);
+                $stmt->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
+
                 $stmtStopWork->execute();
             }
 

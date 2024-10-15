@@ -38,7 +38,7 @@ $userCode = $_SESSION['s_usercode'];
 <body>
     <?php require 'chief_navbar.php';?>
 
-    <!-- <?php echo $subDepart; ?> -->
+    <!-- <?php echo $depart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -122,9 +122,6 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list
-// WHERE Year(l_create_datetime) = '$selectedYear' AND Month(l_create_datetime) = '$selectedMonth'
-// AND l_department = '$depart' AND l_level = 'user' AND l_leave_id <> 6 AND l_leave_id <> 7";
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
@@ -154,9 +151,6 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
-// AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
@@ -555,17 +549,16 @@ echo '</div>';
 
 ?>
             <!-- Modal เช็คการลา -->
-            <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal fade" id="leaveModal" data-bs-backdrop="static" tabindex="-1"
+                aria-labelledby="leaveModalLabel">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title
-                        01f s-5" id="staticBackdropLabel">รายละเอียดการลา</h4>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
+                            <h4 class="modal-title" id="leaveModalLabel">รายละเอียดการลา</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-
+                            <!-- แสดงข้อมูลรายละเอียดการลา -->
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
@@ -574,9 +567,9 @@ echo '</div>';
                     </div>
                 </div>
             </div>
+
             <!-- Modal HTML -->
-            <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel"
-                aria-hidden="true">
+            <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel">
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -633,6 +626,12 @@ echo '</div>';
         );
 
         $('.modal-footer .btn-success').off('click').on('click', function() {
+            var $button = $(this); // เก็บข้อมูลของปุ่ม
+            $button.prop('disabled', true); // เปลี่ยนปุ่มเป็น disabled
+            $button.html(
+                '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> กำลังอนุมัติ...'
+            ); // เปลี่ยนข้อความและแสดง spin
+
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -647,7 +646,7 @@ echo '</div>';
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
 
-            // alert(leaveStatus)
+            //alert(userCode)
             $.ajax({
                 url: 'c_ajax_upd_status.php',
                 method: 'POST',
@@ -666,8 +665,17 @@ echo '</div>';
                     leaveStatus: leaveStatus
                 },
                 success: function(response) {
-                    $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    $('#leaveModal').modal('hide'); // ปิด modal
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: 'อนุมัติคำขอแล้ว',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -675,8 +683,51 @@ echo '</div>';
             });
         });
 
-        // Reject button click
         $('.modal-footer .btn-danger').off('click').on('click', function() {
+            // ซ่อน modal หลัก
+            $('#leaveModal').modal('hide');
+
+            // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
+            setTimeout(function() {
+                showInputDialog(); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
+            }, 300); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
+        });
+
+        function showInputDialog() {
+            Swal.fire({
+                title: 'กรุณากรอกข้อมูล',
+                input: 'text',
+                inputLabel: 'เหตุผล',
+                inputPlaceholder: 'กรอกเหตุผลการไม่อนุมัติ',
+                showCancelButton: true,
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: (inputValue) => {
+                    if (!inputValue) {
+                        Swal.showValidationMessage('กรุณากรอกเหตุผลการไม่อนุมัติ');
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const reasonNoProve = result.value; // รับค่าจาก input
+                    console.log(reasonNoProve); // ตรวจสอบค่าที่กรอก
+                    noApprove(reasonNoProve); // เรียกใช้ฟังก์ชัน noApprove
+                } else {
+                    $('#leaveModal').modal('show');
+                }
+            });
+        }
+
+        function noApprove(reasonNoProve) {
+
+            // แสดง loading ก่อนเริ่มกระบวนการ
+            Swal.fire({
+                title: 'กำลังโหลด...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading(); // แสดง icon โหลด
+                }
+            });
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -690,6 +741,8 @@ echo '</div>';
             var status = '3'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+
+            var reason = reasonNoProve;
 
             $.ajax({
                 url: 'c_ajax_upd_status.php',
@@ -706,18 +759,27 @@ echo '</div>';
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     leaveStatus: leaveStatus,
-                    empName: empName
-
+                    empName: empName,
+                    reasonNoProve: reasonNoProve
                 },
                 success: function(response) {
-                    $('#leaveModal').modal('hide');
-                    location.reload();
+                    $('#leaveModal').modal('hide'); // ปิด modal
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: 'ทำรายการเสร็จสิ้น',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
                 }
             });
-        });
+        }
     });
 
     $(".filter-card").click(function() {
@@ -726,7 +788,7 @@ echo '</div>';
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
 
-        alert(depart)
+        // alert(status)
         $.ajax({
             url: 'c_ajax_get_leave_data.php',
             method: 'GET',
@@ -1085,11 +1147,11 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
 
+                                // alert(userCode)
                                 $.ajax({
                                     url: 'c_ajax_upd_status.php',
                                     method: 'POST',
@@ -1104,8 +1166,8 @@ echo '</div>';
                                         leaveStartDate: leaveStartDate,
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
-                                        leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        leaveStatus: leaveStatus
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1118,6 +1180,57 @@ echo '</div>';
                                 });
                             });
                         $('.modal-footer .btn-danger').off('click').on('click', function() {
+                            // ซ่อน modal หลัก
+                            $('#leaveModal').modal('hide');
+
+                            // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
+                            setTimeout(function() {
+                                    showInputDialog
+                                        (); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
+                                },
+                                300
+                            ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
+                        });
+
+                        function showInputDialog() {
+                            Swal.fire({
+                                title: 'กรุณากรอกข้อมูล',
+                                input: 'text',
+                                inputLabel: 'เหตุผล',
+                                inputPlaceholder: 'กรอกเหตุผลการไม่อนุมัติ',
+                                showCancelButton: true,
+                                confirmButtonText: 'ตกลง',
+                                cancelButtonText: 'ยกเลิก',
+                                preConfirm: (inputValue) => {
+                                    if (!inputValue) {
+                                        Swal.showValidationMessage(
+                                            'กรุณากรอกเหตุผลการไม่อนุมัติ');
+                                    }
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    const reasonNoProve = result
+                                        .value; // รับค่าจาก input
+                                    console.log(reasonNoProve); // ตรวจสอบค่าที่กรอก
+                                    noApprove(
+                                        reasonNoProve
+                                    ); // เรียกใช้ฟังก์ชัน noApprove
+                                } else {
+                                    $('#leaveModal').modal('show');
+                                }
+                            });
+                        }
+
+                        function noApprove(reasonNoProve) {
+
+                            // แสดง loading ก่อนเริ่มกระบวนการ
+                            Swal.fire({
+                                title: 'กำลังโหลด...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading(); // แสดง icon โหลด
+                                }
+                            });
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -1126,13 +1239,14 @@ echo '</div>';
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
-                            var leaveEndDate = $(rowData[10])
-                                .text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
                             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+
+                            var reason = reasonNoProve;
 
                             $.ajax({
                                 url: 'c_ajax_upd_status.php',
@@ -1149,25 +1263,35 @@ echo '</div>';
                                     leaveEndDate: leaveEndDate,
                                     depart: depart,
                                     leaveStatus: leaveStatus,
-                                    empName: empName
-
+                                    empName: empName,
+                                    reasonNoProve: reasonNoProve
                                 },
                                 success: function(response) {
-                                    $('#leaveModal').modal('hide');
-                                    location.reload();
+                                    $('#leaveModal').modal('hide'); // ปิด modal
+                                    Swal.fire({
+                                        title: 'สำเร็จ!',
+                                        text: 'ทำรายการเสร็จสิ้น',
+                                        icon: 'success',
+                                        confirmButtonText: 'ตกลง'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            location
+                                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                                        }
+                                    });
                                 },
                                 error: function(xhr, status, error) {
                                     console.error(error);
                                 }
                             });
-                        });
+                        }
                     });
                     $('.view-history').click(function() {
                         var userCode = $(this).data(
                             'usercode'); // ดึงรหัสพนักงานจาก data attribute
 
                         $.ajax({
-                            url: 'l_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+                            url: 'c_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
                             type: 'POST',
                             data: {
                                 userCode: userCode
