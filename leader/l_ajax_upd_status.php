@@ -20,6 +20,7 @@ $leaveStartDate = $_POST['leaveStartDate'];
 $leaveEndDate = $_POST['leaveEndDate'];
 $depart = $_POST['depart'];
 $leaveStatus = $_POST['leaveStatus'];
+$reasonNoProve = $_POST['reasonNoProve'];
 
 // อนุมัติ
 if ($status == '2') {
@@ -116,7 +117,8 @@ if ($status == '2') {
 }
 // ไม่อนุมัติ
 else if ($status == '3') {
-    $sql = "UPDATE leave_list SET l_approve_status = :status, l_approve_datetime = :appDate, l_approve_name = :userName
+    $sql = "UPDATE leave_list SET l_approve_status = :status, l_approve_datetime = :appDate, l_approve_name = :userName,
+                l_reason = :reasonNoProve  -- เพิ่ม l_reason
             WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':status', $status);
@@ -124,6 +126,7 @@ else if ($status == '3') {
     $stmt->bindParam(':userName', $userName);
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':createDate', $createDate);
+    $stmt->bindParam(':reasonNoProve', $reasonNoProve); // Binding l_reason
 
     if ($stmt->execute()) {
         // แจ้งเตือน พนง

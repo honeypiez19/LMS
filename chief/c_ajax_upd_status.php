@@ -144,13 +144,13 @@ if ($status == '2') {
 }
 // ไม่อนุมัติ
 else if ($status == '3') {
-        // SQL statement สำหรับอัปเดตข้อมูล
-        $sql = "UPDATE leave_list 
-        SET l_approve_status = :status, 
-            l_approve_datetime = :appDate, 
-            l_approve_name = :userName, 
+    // SQL statement สำหรับอัปเดตข้อมูล
+    $sql = "UPDATE leave_list
+        SET l_approve_status = :status,
+            l_approve_datetime = :appDate,
+            l_approve_name = :userName,
             l_reason = :reasonNoProve  -- เพิ่ม l_reason
-        WHERE l_usercode = :userCode 
+        WHERE l_usercode = :userCode
         AND l_create_datetime = :createDate";
 
     $stmt = $conn->prepare($sql);

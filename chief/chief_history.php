@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการลาและมาสาย</title>
+    <title>ประวัติรายการลาทั้งหมด</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -35,8 +35,6 @@ $userCode = $_SESSION['s_usercode'];
 
 <body>
     <?php require 'chief_navbar.php'?>
-
-    <!-- <?php echo $userCode; ?> -->
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
         <div class="container-fluid">
@@ -45,7 +43,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-clock-rotate-left fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>ประวัติการลาและมาสาย</h3>
+                    <h3>ประวัติรายการลาทั้งหมด</h3>
                 </div>
             </div>
         </div>
@@ -59,9 +57,10 @@ $selectedYear = date('Y'); // ปีปัจจุบัน
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
 }
+
 echo "<select class='form-select' name='year' id='selectYear'>";
 for ($i = 0; $i <= 2; $i++) {
-    $year = date('Y') - $i;
+    $year = (date('Y') - $i) + 1;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
 }
 echo "</select>";
@@ -73,14 +72,14 @@ echo "</select>";
                 </button>
             </div>
         </form>
-        <span class="text-danger">**จำนวนครั้งการลางาน ตั้งแต่ 1 ธันวาคม <?php echo $selectedYear-1  ?> - 30 พฤศจิกายน
-        <?php echo $selectedYear  ?></span>
+        <span class="text-danger">**จำนวนครั้งการลางาน ตั้งแต่ 1 ธันวาคม <?php echo $selectedYear - 1 ?> - 30 พฤศจิกายน
+            <?php echo $selectedYear ?></span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead class="table table-secondary">
                 <tr class="text-center align-middle">
                     <th rowspan="2">ประเภทรายการ</th>
-                    <th colspan="12">เดือน</th>
+                    <th colspan="12">จำนวนรายการ</th>
                     <th rowspan="2"></th>
                 </tr>
                 <tr class="text-center align-middle">
@@ -100,6 +99,7 @@ echo "</select>";
             </thead>
             <tbody>
                 <?php
+// Prepare the main query for employee
 $sql = "SELECT * FROM employees WHERE e_usercode = :userCode";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':userCode', $userCode);
@@ -133,7 +133,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $month = $i - 1;
                 $year = $selectedYear;
             }
-        
+
             $sql_count = "SELECT COUNT(l_list_id) AS leave_count
                           FROM leave_list
                           WHERE l_leave_id = :leave_id
@@ -146,16 +146,16 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $stmt_count->bindParam(':month', $month); // bind เดือนที่คำนวณ
             $stmt_count->bindParam(':userCode', $userCode); // bind userCode
             $stmt_count->execute();
-        
+
             $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
-        
+
             if ($row_count['leave_count'] == 0) {
                 echo '<td>' . '-' . '</td>';
             } else {
                 echo '<td>' . $row_count['leave_count'] . '</td>';
             }
         }
-        
+
         echo '<td><button type="button" class="btn btn-primary view-button"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
         echo '</tr>';
     }
