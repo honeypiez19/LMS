@@ -51,14 +51,12 @@ $userCode = $_SESSION['s_usercode'];
 // มาสาย --------------------------------------------------------------------------------------------
 $sql_check_late = "SELECT l_leave_start_date, l_leave_start_time, l_leave_end_time
 FROM leave_list
-WHERE l_department = :depart
-AND l_leave_status = 0
-AND l_approve_status2 = 1
-AND l_level = 'manager'
--- AND l_approve_status2 = 1
-AND l_leave_id = 7";
+WHERE l_usercode = :userCode
+AND l_leave_id = 7
+AND l_approve_status2 = 1";
+
 $stmt_check_late = $conn->prepare($sql_check_late);
-$stmt_check_late->bindParam(':depart', $depart);
+$stmt_check_late->bindParam(':userCode', $userCode);
 $stmt_check_late->execute();
 
 $late_entries = array();
@@ -217,8 +215,8 @@ COUNT(li.l_list_id) AS leave_count,
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE li.l_leave_status = 0
-    AND li.l_approve_status IN (2,3,6)
+WHERE 
+     li.l_approve_status IN (2,3,6)
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id = 7

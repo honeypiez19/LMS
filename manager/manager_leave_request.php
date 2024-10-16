@@ -140,11 +140,13 @@ $sql = "SELECT
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE li.l_leave_status = 0
-    AND li.l_approve_status IN (2,3,6)
-    AND li.l_approve_status2 = 1
+WHERE 
+     li.l_approve_status IN (2,3,6)
+    -- AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    AND Year(li.l_create_datetime) = :selectedYear
+    AND Month(li.l_create_datetime) = :selectedMonth
     AND (
         -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
         (em.e_department = :subDepart AND li.l_department = :subDepart)
@@ -164,6 +166,9 @@ WHERE li.l_leave_status = 0
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+
 $stmt->execute();
 
 // ดึงผลลัพธ์
@@ -189,44 +194,52 @@ $totalLeaveItems = $stmt->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-// em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-// INNER JOIN employees em
-//     ON li.l_usercode = em.e_usercode
-//     AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
-//     AND Year(l_create_datetime) = '$selectedYear'
-//     AND Month(l_create_datetime) = '$selectedMonth'
-//     -- AND l_level = 'user'
-//     AND l_leave_id <> 6
-//     AND l_leave_id <> 7
-//     AND (
-//         (em.e_username IN ('Kiyoka', 'Matsumoto') AND em.e_department = 'RD')
-//         OR em.e_username NOT IN ('Kiyoka', 'Matsumoto')
-//     )
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
 em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
+em.e_sub_department2,
+em.e_sub_department3,
 em.e_sub_department4,
 em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
-AND li.l_approve_status2 = 1";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+ON li.l_usercode = em.e_usercode
+WHERE 
+ li.l_approve_status IN (2,3,6)
+AND li.l_approve_status2 = 1
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -246,44 +259,51 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-// em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-// INNER JOIN employees em
-//     ON li.l_usercode = em.e_usercode
-//     AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
-//     AND Year(l_create_datetime) = '$selectedYear'
-//     AND Month(l_create_datetime) = '$selectedMonth'
-//     -- AND l_level = 'user'
-//     AND l_leave_id <> 6
-//     AND l_leave_id <> 7
-//     AND (
-//         (em.e_username IN ('Kiyoka', 'Matsumoto') AND em.e_department = 'RD')
-//         OR em.e_username NOT IN ('Kiyoka', 'Matsumoto')
-//     )
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
 em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
+em.e_sub_department2,
+em.e_sub_department3,
 em.e_sub_department4,
 em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
-AND li.l_approve_status2 = 4";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+ON li.l_usercode = em.e_usercode
+WHERE 
+ li.l_approve_status IN (2,3,6)
+AND li.l_approve_status2 = 4
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -303,44 +323,51 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-// em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-// INNER JOIN employees em
-//     ON li.l_usercode = em.e_usercode
-//     AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
-//     AND Year(l_create_datetime) = '$selectedYear'
-//     AND Month(l_create_datetime) = '$selectedMonth'
-//     -- AND l_level = 'user'
-//     AND l_leave_id <> 6
-//     AND l_leave_id <> 7
-//     AND (
-//         (em.e_username IN ('Kiyoka', 'Matsumoto') AND em.e_department = 'RD')
-//         OR em.e_username NOT IN ('Kiyoka', 'Matsumoto')
-//     )
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
 em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
+em.e_sub_department2,
+em.e_sub_department3,
 em.e_sub_department4,
 em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
-AND li.l_approve_status2 = 5";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+ON li.l_usercode = em.e_usercode
+WHERE 
+ li.l_approve_status IN (2,3,6)
+AND li.l_approve_status2 = 5
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -404,31 +431,37 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT
-    li.*,
-    em.e_username,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
-FROM
-    leave_list li
+$sql = "SELECT 
+li.*, 
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
+ON li.l_usercode = em.e_usercode
+WHERE 
+ li.l_approve_status IN (2, 3, 6)
+AND li.l_level IN ('user', 'chief', 'leader')
+AND li.l_leave_id NOT IN (6, 7)
+AND Year(li.l_create_datetime) = '$selectedYear'
+AND Month(li.l_create_datetime) = '$selectedMonth'
+AND (
+    -- Check for matching department or sub-department
+    (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+    OR
+    -- Check if chief in Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- Check if Management and matching sub-department
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
@@ -521,11 +554,27 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 9
-        echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-
+         // 9
+         if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+        }
         // 10
-        echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+
+        } else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        }
 
         // 11
         echo '</td>';
@@ -782,53 +831,8 @@ echo '</div>';
             var status = '4'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
-            var subDepart = '<?php echo $subDepart; ?>';
 
-            // alert(userName)
-            $.ajax({
-                url: 'm_ajax_upd_status.php',
-                method: 'POST',
-                data: {
-                    createDate: createDate,
-                    userCode: userCode,
-                    status: status,
-                    userName: userName,
-                    proveName: proveName,
-                    leaveType: leaveType,
-                    leaveReason: leaveReason,
-                    leaveStartDate: leaveStartDate,
-                    leaveEndDate: leaveEndDate,
-                    depart: depart,
-                    empName: empName,
-                    leaveStatus: leaveStatus,
-                    subDepart: subDepart
-                },
-                success: function(response) {
-                    $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                }
-            });
-        });
-
-        // Reject button click
-        $('.modal-footer .btn-danger').off('click').on('click', function() {
-            var userCode = $(rowData[5]).text(); // รหัสพนักงาน
-            var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
-            var leaveType = $(rowData[0]).text(); // ประเภทการลา
-            var depart = $(rowData[2]).text(); // แผนก
-            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
-            var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
-            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
-            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
-            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
-
-            var status = '5'; // ไม่อนุมัติ
-            var userName = '<?php echo $userName; ?>';
-            var proveName = '<?php echo $name; ?>';
-
+            // alert(leaveStatus)
             $.ajax({
                 url: 'm_ajax_upd_status.php',
                 method: 'POST',
@@ -848,31 +852,133 @@ echo '</div>';
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload();
+                    location.reload(); // Reload the page after successful update
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
                 }
             });
         });
+
+        $('.modal-footer .btn-danger').off('click').on('click', function() {
+            // ซ่อน modal หลัก
+            $('#leaveModal').modal('hide');
+
+            // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
+            setTimeout(function() {
+                showInputDialog(); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
+            }, 300); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
+        });
+
+        function showInputDialog() {
+            Swal.fire({
+                title: 'กรุณากรอกข้อมูล',
+                input: 'text',
+                inputLabel: 'เหตุผล',
+                inputPlaceholder: 'กรอกเหตุผลการไม่อนุมัติ',
+                showCancelButton: true,
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: (inputValue) => {
+                    if (!inputValue) {
+                        Swal.showValidationMessage('กรุณากรอกเหตุผลการไม่อนุมัติ');
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const reasonNoProve = result.value; // รับค่าจาก input
+                    console.log(reasonNoProve); // ตรวจสอบค่าที่กรอก
+                    noApprove(reasonNoProve); // เรียกใช้ฟังก์ชัน noApprove
+                } else {
+                    $('#leaveModal').modal('show');
+                }
+            });
+        }
+
+        function noApprove(reasonNoProve) {
+
+            // แสดง loading ก่อนเริ่มกระบวนการ
+            Swal.fire({
+                title: 'กำลังโหลด...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading(); // แสดง icon โหลด
+                }
+            });
+
+
+            var userCode = $(rowData[5]).text(); // รหัสพนักงาน
+            var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
+            var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
+            var depart = $(rowData[2]).text(); // แผนก
+            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
+            var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
+            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+
+            var status = '5'; // ไม่อนุมัติ
+            var userName = '<?php echo $userName; ?>';
+            var proveName = '<?php echo $name; ?>';
+
+            var reason = reasonNoProve;
+
+            $.ajax({
+                url: 'm_ajax_upd_status.php',
+                method: 'POST',
+                data: {
+                    createDate: createDate,
+                    userCode: userCode,
+                    status: status,
+                    userName: userName,
+                    proveName: proveName,
+                    leaveType: leaveType,
+                    leaveReason: leaveReason,
+                    leaveStartDate: leaveStartDate,
+                    leaveEndDate: leaveEndDate,
+                    depart: depart,
+                    leaveStatus: leaveStatus,
+                    empName: empName,
+                    reasonNoProve: reasonNoProve
+                },
+                success: function(response) {
+                    $('#leaveModal').modal('hide'); // ปิด modal
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: 'ทำรายการเสร็จสิ้น',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
+
     });
 
     $(".filter-card").click(function() {
-        // var rowData = $(this).children("td");
-        var selectedYear = $("#selectedYear").val();
-        var selectedMonth = $("#selectedMonth").val();
-        // var depart = $(rowData[2]).text(); // แผนก
-        var depart = <?php echo json_encode($depart); ?>;
         var status = $(this).data("status");
+        var selectedMonth = $("#selectedMonth").val();
+        var selectedYear = $("#selectedYear").val();
+        var depart = <?php echo json_encode($depart); ?>;
+        var subDepart = <?php echo json_encode($subDepart); ?>;
 
+        // alert(selectedYear)
         $.ajax({
             url: 'm_ajax_get_leave_data.php',
             method: 'GET',
             data: {
-                year: selectedYear,
+                status: status,
                 month: selectedMonth,
+                year : selectedYear,
                 depart: depart,
-                status: status
+                subDepart: subDepart
             },
             dataType: 'json',
             success: function(data) {
@@ -881,7 +987,7 @@ echo '</div>';
 
                 if (data.length === 0) {
                     $("tbody").append(
-                        '<tr><td colspan="19" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
+                        '<tr><td colspan="20" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
                     );
                 } else {
                     var totalItems = data.length; // Store total count
@@ -979,6 +1085,30 @@ echo '</div>';
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
                         } else {
                             approveStatus2 = 'ไม่พบสถานะ';
+                        }
+
+                        // เวลาเริ่มต้น
+                        var startTime;
+                        if (row['l_leave_start_time'] == '12:00:00') {
+                            startTime = '11:45:00';
+                        } else if (row['l_leave_start_time'] == '13:00:00') {
+                            startTime = '12:45:00';
+                        } else if (row['l_leave_start_time'] == '17:00:00') {
+                            startTime = '16:40:00';
+                        } else {
+                            startTime = row['l_leave_start_time'];  
+                        }
+                        
+                        // เวลาสิ้นสุด
+                        var endTime;
+                        if (row['l_leave_end_time'] == '12:00:00') {
+                            endTime = '11:45:00';
+                        } else if (row['l_leave_end_time'] == '13:00:00') {
+                            endTime = '12:45:00';
+                        } else if (row['l_leave_end_time'] == '17:00:00') {
+                            endTime = '16:40:00';
+                        } else {
+                            endTime = row['l_leave_end_time'];  
                         }
 
                         var newRow = '<tr class="align-middle">' +
@@ -1086,18 +1216,14 @@ echo '</div>';
                         newRow += '</td>' +
 
                             // 9
-                            '<td>' + (row['l_leave_start_date'] ? row[
-                                'l_leave_start_date'] : '') + '<br>' +
-                            ' ' + (row[
-                                    'l_leave_start_time'] ? row['l_leave_start_time'] :
-                                '') +
+                            '<td>' + (row['l_leave_start_date'] ? row['l_leave_start_date'] : '') + '<br>' +
+                            ' ' + (startTime ? startTime : '') +
                             '</td>' +
 
                             // 10
-                            '<td>' + (row['l_leave_end_date'] ? row[
-                                    'l_leave_end_date'] :
-                                '') + '<br>' + ' ' + (row['l_leave_end_time'] ? row[
-                                'l_leave_end_time'] : '') + '</td>';
+                            '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] : '') + '<br>' +
+                            ' ' + (endTime ? endTime : '') +
+                            '</td>';
                         // 11
                         if (row['l_file']) {
                             newRow +=
@@ -1147,7 +1273,7 @@ echo '</div>';
                             '<td>';
                         if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled>ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
                         } else {
                             newRow +=
                                 '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
@@ -1223,14 +1349,13 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
+
                                 var status = '4'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
-                                var subDepart = '<?php echo $subDepart; ?>';
 
-                                alert(subDepart)
                                 $.ajax({
-                                    url: 'c_ajax_upd_status.php',
+                                    url: 'm_ajax_upd_status.php',
                                     method: 'POST',
                                     data: {
                                         createDate: createDate,
@@ -1245,7 +1370,6 @@ echo '</div>';
                                         depart: depart,
                                         leaveStatus: leaveStatus,
                                         empName: empName
-
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1258,6 +1382,59 @@ echo '</div>';
                                 });
                             });
                         $('.modal-footer .btn-danger').off('click').on('click', function() {
+                            // ซ่อน modal หลัก
+                            $('#leaveModal').modal('hide');
+
+                            // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
+                            setTimeout(function() {
+                                    showInputDialog
+                                        (); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
+                                },
+                                300
+                            ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
+                        });
+
+                        function showInputDialog() {
+                            Swal.fire({
+                                title: 'กรุณากรอกข้อมูล',
+                                input: 'text',
+                                inputLabel: 'เหตุผล',
+                                inputPlaceholder: 'กรอกเหตุผลการไม่อนุมัติ',
+                                showCancelButton: true,
+                                confirmButtonText: 'ตกลง',
+                                cancelButtonText: 'ยกเลิก',
+                                preConfirm: (inputValue) => {
+                                    if (!inputValue) {
+                                        Swal.showValidationMessage(
+                                            'กรุณากรอกเหตุผลการไม่อนุมัติ');
+                                    }
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    const reasonNoProve = result
+                                        .value; // รับค่าจาก input
+                                    console.log(reasonNoProve); // ตรวจสอบค่าที่กรอก
+                                    noApprove(
+                                        reasonNoProve
+                                    ); // เรียกใช้ฟังก์ชัน noApprove
+                                } else {
+                                    $('#leaveModal').modal('show');
+                                }
+                            });
+                        }
+
+                        function noApprove(reasonNoProve) {
+
+                            // แสดง loading ก่อนเริ่มกระบวนการ
+                            Swal.fire({
+                                title: 'กำลังโหลด...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading(); // แสดง icon โหลด
+                                }
+                            });
+
+
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -1266,13 +1443,14 @@ echo '</div>';
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
-                            var leaveEndDate = $(rowData[10])
-                                .text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
                             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                             var status = '5'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+
+                            var reason = reasonNoProve;
 
                             $.ajax({
                                 url: 'm_ajax_upd_status.php',
@@ -1289,17 +1467,28 @@ echo '</div>';
                                     leaveEndDate: leaveEndDate,
                                     depart: depart,
                                     leaveStatus: leaveStatus,
-                                    empName: empName
+                                    empName: empName,
+                                    reasonNoProve: reasonNoProve
                                 },
                                 success: function(response) {
-                                    $('#leaveModal').modal('hide');
-                                    location.reload();
+                                    $('#leaveModal').modal('hide'); // ปิด modal
+                                    Swal.fire({
+                                        title: 'สำเร็จ!',
+                                        text: 'ทำรายการเสร็จสิ้น',
+                                        icon: 'success',
+                                        confirmButtonText: 'ตกลง'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            location
+                                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                                        }
+                                    });
                                 },
                                 error: function(xhr, status, error) {
                                     console.error(error);
                                 }
                             });
-                        });
+                        }
                     });
                     $('.view-history').click(function() {
                         var userCode = $(this).data(
@@ -1350,6 +1539,7 @@ echo '</div>';
             }
         });
     });
+
     $("#nameSearch").on("keyup", function() {
         var value = $(this).val().toLowerCase();
         $("tbody tr").filter(function() {

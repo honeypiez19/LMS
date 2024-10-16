@@ -21,11 +21,13 @@ $leaveEndDate = $_POST['leaveEndDate'];
 $depart = $_POST['depart'];
 $leaveStatus = $_POST['leaveStatus'];
 $subDepart = $_POST['subDepart'];
+$reasonNoProve = $_POST['reasonNoProve'];
 
 if ($status == '4') {
     // เตรียมคำสั่ง SQL
-    $sql = "UPDATE leave_list SET l_approve_status2 = :status, l_approve_datetime2 = :appDate, l_approve_name2 = :userName
-            WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+    $sql = "UPDATE leave_list SET l_approve_status2 = :status, l_approve_datetime2 = :appDate, l_approve_name2 = :userName,
+    l_reason2 = ''  -- เพิ่ม l_reason
+    WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
 
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':status', $status);
@@ -193,14 +195,19 @@ if ($status == '4') {
         }
     }
 } else if ($status == '5') {
-    $sql = "UPDATE leave_list SET l_approve_status2 = :status, l_approve_datetime2 = :appDate, l_approve_name2 = :userName
-            WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+    $sql = "UPDATE leave_list SET l_approve_status2 = :status, 
+    l_approve_datetime2 = :appDate, 
+    l_approve_name2 = :userName,
+    l_reason2 = :reasonNoProve  -- เพิ่ม l_reason
+    WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':status', $status);
     $stmt->bindParam(':appDate', $appDate);
     $stmt->bindParam(':userName', $userName);
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':createDate', $createDate);
+    $stmt->bindParam(':reasonNoProve', $reasonNoProve); // Binding l_reason
 
     if ($stmt->execute()) {
         // ดึง token พนักงาน

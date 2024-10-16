@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $leaveStatus = $_POST['leaveStatus'];
     $action = $_POST['action'];
     $comfirmName = $_POST['comfirmName'];
+    $workplace = $_POST['workplace'];
 
     $proveDate = date('Y-m-d H:i:s');
 
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'deny') {
         $status = 5;
         $message = "$proveName ไม่อนุมัติมาสายของ";
-    } elseif ($action === 'comfirm') {
+    } elseif ($action === 'confirm') {
         $status = 4;
         $message = "$comfirmName ยืนยันมาสาย";
     } else {

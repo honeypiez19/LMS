@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $workplace = $_POST['workplace'];
 
     $proveDate = date('Y-m-d H:i:s');
-    $action = 'comfirm';
+    $action = 'confirm';
 
     $sql = "UPDATE leave_list SET l_late_datetime = :proveDate
     WHERE l_usercode = :userCode
