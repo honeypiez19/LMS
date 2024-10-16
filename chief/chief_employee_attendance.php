@@ -141,10 +141,8 @@ INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department
 AND Year(l_create_datetime) = '$selectedYear'
 AND Month(l_create_datetime) = '$selectedMonth'
 AND l_level = 'user'
--- AND l_leave_id <> 6
 AND l_leave_id = 7
 ORDER BY l_create_datetime DESC";
-
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -420,23 +418,14 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-// $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth'
-// AND Year(l_create_datetime) = '$selectedYear'
-// AND l_leave_id = 7
-// AND l_department = '$subDepart'
-// AND NOT l_level IN ('chief','manager')
-// ORDER BY l_create_datetime DESC";
-
 $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
 AND Year(l_create_datetime) = '$selectedYear'
 AND Month(l_create_datetime) = '$selectedMonth'
 AND l_level = 'user'
--- AND l_leave_id <> 6
 AND l_leave_id = 7
 ORDER BY l_create_datetime DESC";
-
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -647,7 +636,7 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$subDepart'
+$sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$depart'
 AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -904,7 +893,7 @@ if (count($result) > 0) {
             var name = $(rowData[6]).text();
             var leaveStatus = $(rowData[9]).text();
 
-            // alert(name)
+            // alert(workplace)
             // alert(leaveStatus)
             $('.btn-approve').off('click');
 

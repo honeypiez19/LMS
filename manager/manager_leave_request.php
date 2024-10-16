@@ -126,29 +126,49 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
-em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
-em.e_sub_department4,
-em.e_sub_department5
+// เตรียมคำสั่ง SQL
+$sql = "SELECT
+    COUNT(li.l_list_id) AS totalLeaveItems,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-  AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
+WHERE li.l_leave_status = 0
+    AND li.l_approve_status IN (2,3,6)
+    AND li.l_approve_status2 = 1
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    AND (
+        -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR
+        -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+        (li.l_level = 'chief' AND em.e_department = 'Management')
+        OR
+        -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+        (em.e_department = 'Management' AND li.l_department IN (
+            em.e_sub_department,
+            em.e_sub_department2,
+            em.e_sub_department3,
+            em.e_sub_department4,
+            em.e_sub_department5))
     )";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
+
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>

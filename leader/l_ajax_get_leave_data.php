@@ -7,82 +7,91 @@ $month = $_GET['month'];
 $depart = $_GET['depart'];
 $subDepart = $_GET['subDepart'];
 
-// Prepare a SQL query to select leave data based on the status
+// All -----------------------------------------------------------------------
 if ($status == 'all') {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_level = 'user'
-    // AND l_leave_id <> 7
-    // AND l_leave_id <> 6
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2, em.e_sub_department3, em.e_sub_department4, em.e_sub_department5
-    FROM leave_list li
-    INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
-    WHERE Month(l_create_datetime) = :month
-    AND l_department = :depart
-    AND l_level = 'user'
-    AND l_leave_id <> 6
-    AND l_leave_id <> 7
-    ORDER BY l_create_datetime DESC";
-
-} else if ($status == 0) {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_approve_status = '$status'
-    // AND l_level = 'user'
-    // AND l_leave_id <> 7
-    // AND l_leave_id <> 6
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-    FROM leave_list li
-    INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
-    WHERE Month(l_create_datetime) = :month
-    AND l_department = :depart
-    AND l_level = 'user'
-    AND l_leave_id <> 6
-    AND l_leave_id <> 7
-    AND l_approve_status = :status
-    ORDER BY l_create_datetime DESC";
-
-} else if ($status == 2) {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_approve_status = '$status'
-    // AND l_level = 'user'
-    // AND l_leave_id <> 7
-    // AND l_leave_id <> 6
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-            FROM leave_list li
-            INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
-            WHERE Month(l_create_datetime) = :month
-            AND l_department = :depart
-            AND l_level = 'user'
-            AND l_leave_id <> 6
-            AND l_leave_id <> 7
-            AND l_approve_status = :status
-            ORDER BY l_create_datetime DESC";
-
-} else if ($status == 3) {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_approve_status = '$status'
-    // AND l_level = 'user'
-    // AND l_leave_id <> 7
-    // AND l_leave_id <> 6
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-    FROM leave_list li
-    INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = :subDepart
-    WHERE Month(l_create_datetime) = :month
-    AND l_department = :depart
-    AND l_level = 'user'
-    AND l_leave_id <> 6
-    AND l_leave_id <> 7
-    AND l_approve_status = :status
-    ORDER BY l_create_datetime DESC";
+    $sql = "SELECT li.*,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+    AND (CASE
+            WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
+            ELSE em.e_sub_department = :subDepart
+         END)
+    AND Month(li.l_create_datetime) = :month
+    AND li.l_level = 'user'
+    -- AND l_approve_status2 = 1
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    ORDER BY li.l_create_datetime DESC";
+}
+// รออนุมัติ -----------------------------------------------------------------------
+else if ($status == 0) {
+    $sql = "SELECT li.*,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+    AND (CASE
+            WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
+            ELSE em.e_sub_department = :subDepart
+         END)
+    AND Month(li.l_create_datetime) = :month
+    AND li.l_level = 'user'
+    AND li.l_approve_status = :status
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    ORDER BY li.l_create_datetime DESC";
+}
+// อนุมัติ -----------------------------------------------------------------------
+else if ($status == 2) {
+    $sql = "SELECT li.*,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+    AND (CASE
+            WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
+            ELSE em.e_sub_department = :subDepart
+         END)
+    AND Month(li.l_create_datetime) = :month
+    AND li.l_level = 'user'
+    AND li.l_approve_status = :status
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    ORDER BY li.l_create_datetime DESC";
+}
+// ไม่อนุมัติ -----------------------------------------------------------------------
+else if ($status == 3) {
+    $sql = "SELECT li.*,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+    AND (CASE
+            WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
+            ELSE em.e_sub_department = :subDepart
+         END)
+    AND Month(li.l_create_datetime) = :month
+    AND li.l_level = 'user'
+    AND li.l_approve_status = :status
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    ORDER BY li.l_create_datetime DESC";
 } else {
-
+    echo 'ไม่พบสถานะ';
 }
 
 $stmt = $conn->prepare($sql);
