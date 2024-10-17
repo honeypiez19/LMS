@@ -144,15 +144,16 @@ if (!isset($_GET['page'])) {
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 // $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND l_department = 'Office' AND Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
-    AND Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    -- AND l_level = 'user'
-    AND l_leave_id = 7
+$sql = "SELECT
+li.*
+FROM
+leave_list li
+WHERE
+li.l_department <> 'RD'
+-- AND li.l_leave_status = 0
+AND li.l_leave_id = 7
+AND Year(li.l_create_datetime) = '$selectedYear'
+AND Month(li.l_create_datetime) = '$selectedMonth'
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
@@ -437,15 +438,16 @@ if (!isset($_GET['page'])) {
 // AND Year(l_create_datetime) = $selectedYear
 // ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
-    AND Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    -- AND l_level = 'user'
-    AND l_leave_id = 7
+$sql = "SELECT
+li.*
+FROM
+leave_list li
+WHERE
+li.l_department <> 'RD'
+-- AND li.l_leave_status = 0
+AND li.l_leave_id = 7
+AND Year(li.l_create_datetime) = '$selectedYear'
+AND Month(li.l_create_datetime) = '$selectedMonth'
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);

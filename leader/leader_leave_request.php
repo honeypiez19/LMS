@@ -912,6 +912,30 @@ echo '</div>';
                             approveStatus2 = 'ไม่พบสถานะ';
                         }
 
+                        // เวลาเริ่มต้น
+                        var startTime;
+                        if (row['l_leave_start_time'] == '12:00:00') {
+                            startTime = '11:45:00';
+                        } else if (row['l_leave_start_time'] == '13:00:00') {
+                            startTime = '12:45:00';
+                        } else if (row['l_leave_start_time'] == '17:00:00') {
+                            startTime = '16:40:00';
+                        } else {
+                            startTime = row['l_leave_start_time'];
+                        }
+
+                        // เวลาสิ้นสุด
+                        var endTime;
+                        if (row['l_leave_end_time'] == '12:00:00') {
+                            endTime = '11:45:00';
+                        } else if (row['l_leave_end_time'] == '13:00:00') {
+                            endTime = '12:45:00';
+                        } else if (row['l_leave_end_time'] == '17:00:00') {
+                            endTime = '16:40:00';
+                        } else {
+                            endTime = row['l_leave_end_time'];
+                        }
+
                         var newRow = '<tr class="align-middle">' +
                             // 0
                             '<td hidden>' +
@@ -1019,16 +1043,14 @@ echo '</div>';
                             // 9
                             '<td>' + (row['l_leave_start_date'] ? row[
                                 'l_leave_start_date'] : '') + '<br>' +
-                            ' ' + (row[
-                                    'l_leave_start_time'] ? row['l_leave_start_time'] :
-                                '') +
+                            ' ' + (startTime ? startTime : '') +
                             '</td>' +
 
                             // 10
-                            '<td>' + (row['l_leave_end_date'] ? row[
-                                    'l_leave_end_date'] :
-                                '') + '<br>' + ' ' + (row['l_leave_end_time'] ? row[
-                                'l_leave_end_time'] : '') + '</td>';
+                            '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] :
+                                '') + '<br>' +
+                            ' ' + (endTime ? endTime : '') +
+                            '</td>';
                         // 11
                         if (row['l_file']) {
                             newRow +=

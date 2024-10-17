@@ -80,7 +80,7 @@ if (!empty($late_entries_list)) {
 }
 ?>
     <div class="mt-3 container-fluid">
-        <button type="button" class="btn btn-primary rounded-circle position-fixed bottom-0 start-0 m-3 btn-sm"
+        <!-- <button type="button" class="btn btn-primary rounded-circle position-fixed bottom-0 start-0 m-3 btn-sm"
             data-bs-toggle="tooltip" data-bs-placement="top" style="width: 30px;" title="
         <strong>ความหมายของ :</strong> <code>ตัวอย่าง 1(3.5)</code><br>
         <ul>
@@ -89,7 +89,7 @@ if (!empty($late_entries_list)) {
             <li><strong>ตัวอักษรที่สาม (5)</strong> = จำนวนนาที</li>
         </ul>">
             <i class="fa-solid fa-exclamation"></i>
-        </button>
+        </button> -->
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
                 <form class="mt-3 mb-3 row" method="post">
@@ -268,8 +268,7 @@ echo "</select>";
 
     <div class="container">
         <div class="row">
-            <!-- <span>0(0.0) ตัวอักษรแรก = จำนวนวัน / ตัวอักษรที่สอง = จำนวนชั่วโมง / ตัวอักษรที่สาม =
-                จำนวนนาที</span> -->
+            <span class="text-danger">** 0(0.0) = วัน(ชั่วโมง.นาที)</span>
             <div class="col-3 filter-card">
                 <div class="card text-light mb-3" style="background-color: #031B80; ">
                     <div class="card-body">
@@ -1686,28 +1685,28 @@ echo '</div>';
                 flatpickr("#startDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#endDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#urgentStartDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#urgentEndDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
             }
