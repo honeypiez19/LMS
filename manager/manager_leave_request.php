@@ -141,7 +141,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-     li.l_approve_status IN (2,3,6)
+     li.l_approve_status IN (0,2,3,6)
     -- AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -208,7 +208,7 @@ FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (2,3,6)
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 1
 AND li.l_level IN ('user', 'chief', 'leader')
 AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -273,7 +273,7 @@ FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (2,3,6)
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 4
 AND li.l_level IN ('user', 'chief', 'leader')
 AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -337,7 +337,7 @@ FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (2,3,6)
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 5
 AND li.l_level IN ('user', 'chief', 'leader')
 AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -431,38 +431,26 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT
-li.*,
-em.e_sub_department,
-em.e_sub_department2,
-em.e_sub_department3,
-em.e_sub_department4,
-em.e_sub_department5
+$sql = "SELECT 
+  li.*, 
+  em.e_sub_department, 
+  em.e_sub_department2, 
+  em.e_sub_department3, 
+  em.e_sub_department4, 
+  em.e_sub_department5
 FROM leave_list li
-INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (2, 3, 6)
-AND li.l_level IN ('user', 'chief', 'leader')
-AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_create_datetime) = '$selectedYear'
-AND Month(li.l_create_datetime) = '$selectedMonth'
-AND (
-    -- Check for matching department or sub-department
-    (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-    OR
-    -- Check if chief in Management
-    (li.l_level = 'chief' AND em.e_department = 'Management')
-    OR
-    -- Check if Management and matching sub-department
-    (em.e_department = 'Management' AND li.l_department IN (
-        em.e_sub_department,
-        em.e_sub_department2,
-        em.e_sub_department3,
-        em.e_sub_department4,
-        em.e_sub_department5))
-)
-ORDER BY l_create_datetime DESC";
+  li.l_approve_status IN (0, 2, 3, 6)
+  AND li.l_level IN ('user', 'chief', 'leader')
+  AND li.l_leave_id NOT IN (6, 7)
+  AND Year(li.l_create_datetime) = '$selectedYear'
+  AND Month(li.l_create_datetime) = '$selectedMonth'
+   AND (
+        (em.e_department = 'RD' AND li.l_department = 'RD')
+        OR (em.e_department != 'RD' AND em.e_sub_department = 'Office') -- ถ้าไม่ได้อยู่ RD ให้ใช้ e_sub_department
+    )
+ORDER BY li.l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
