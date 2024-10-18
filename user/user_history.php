@@ -60,7 +60,7 @@ if (isset($_POST['year'])) {
 
 echo "<select class='form-select' name='year' id='selectYear'>";
 for ($i = 0; $i <= 2; $i++) {
-    $year = (date('Y') - $i)+1;
+    $year = (date('Y') - $i) + 1;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
 }
 echo "</select>";
@@ -72,8 +72,8 @@ echo "</select>";
                 </button>
             </div>
         </form>
-        <span class="text-danger">**จำนวนครั้งการลางาน ตั้งแต่ 1 ธันวาคม <?php echo $selectedYear-1  ?> - 30 พฤศจิกายน
-            <?php echo $selectedYear  ?></span>
+        <span class="text-danger">**จำนวนครั้งการลางาน ตั้งแต่ 1 ธันวาคม <?php echo $selectedYear - 1 ?> - 30 พฤศจิกายน
+            <?php echo $selectedYear ?></span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead class="table table-secondary">
@@ -133,7 +133,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $month = $i - 1;
                 $year = $selectedYear;
             }
-        
+
             $sql_count = "SELECT COUNT(l_list_id) AS leave_count
                           FROM leave_list
                           WHERE l_leave_id = :leave_id
@@ -146,16 +146,16 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $stmt_count->bindParam(':month', $month); // bind เดือนที่คำนวณ
             $stmt_count->bindParam(':userCode', $userCode); // bind userCode
             $stmt_count->execute();
-        
+
             $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
-        
+
             if ($row_count['leave_count'] == 0) {
                 echo '<td>' . '-' . '</td>';
             } else {
                 echo '<td>' . $row_count['leave_count'] . '</td>';
             }
         }
-        
+
         echo '<td><button type="button" class="btn btn-primary view-button"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
         echo '</tr>';
     }
