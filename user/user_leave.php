@@ -78,7 +78,7 @@ echo "</select>";
                 <tr class="table-dark text-center align-middle">
                     <th style="width: 40%;">ประเภทการลา</th>
                     <th>จำนวนวันลาที่ใช้ไป</th>
-                    <th>จำนวนวันลาที่เหลือ</th>
+                    <th>จำนวนวันลาคงเหลือ</th>
                 </tr>
             </thead>
             <tbody>

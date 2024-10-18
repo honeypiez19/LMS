@@ -876,7 +876,7 @@ $sql_leave_annual = "SELECT
 FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = 2024
+AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0";
 
 $stmt_leave_annual = $conn->prepare($sql_leave_annual);
@@ -1641,6 +1641,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -1673,6 +1675,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {

@@ -36,10 +36,14 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php require 'leader_navbar.php';?>
+    <?php include 'manager_navbar.php'?>
 
-    <!-- <?php echo $subDepart; ?> -->
-    <nav class="navbar bg-body-tertiary">
+    <!-- <?php echo $subDepart; ?>
+    <?php echo $subDepart2; ?>
+    <?php echo $userName; ?> -->
+
+    <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  border: none;">
         <div class="container-fluid">
             <div class="row align-items-center">
                 <div class="col-auto">
@@ -122,17 +126,54 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+// เตรียมคำสั่ง SQL
+$sql = "SELECT
+    COUNT(li.l_list_id) AS totalLeaveItems,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
 INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
-AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+    ON li.l_usercode = em.e_usercode
+WHERE
+     li.l_approve_status IN (0,2,3,6)
+    -- AND li.l_approve_status2 = 1
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    AND Year(li.l_create_datetime) = :selectedYear
+    AND Month(li.l_create_datetime) = :selectedMonth
+    AND (
+        -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR
+        -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+        (li.l_level = 'chief' AND em.e_department = 'Management')
+        OR
+        -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+        (em.e_department = 'Management' AND li.l_department IN (
+            em.e_sub_department,
+            em.e_sub_department2,
+            em.e_sub_department3,
+            em.e_sub_department4,
+            em.e_sub_department5))
+    )";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
+
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -148,24 +189,57 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
             </div>
 
             <!-- รายการลาที่รออนุมัติ -->
-            <div class="col-3 filter-card" data-status="0">
+            <div class="col-3 filter-card" data-status="1">
                 <div class="card text-bg-warning mb-3">
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
-// AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
-AND l_approve_status = 0";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
+WHERE
+ li.l_approve_status IN (0,2,3,6)
+AND li.l_approve_status2 = 1
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -179,22 +253,57 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     </div>
                 </div>
             </div>
-            <div class="col-3 filter-card" data-status="2">
+            <div class="col-3 filter-card" data-status="4">
                 <div class="card text-bg-success mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
-AND l_approve_status = 2";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
+WHERE
+ li.l_approve_status IN (0,2,3,6)
+AND li.l_approve_status2 = 4
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -208,22 +317,57 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     </div>
                 </div>
             </div>
-            <div class="col-3 filter-card" data-status="3">
+            <div class="col-3 filter-card" data-status="5">
                 <div class="card text-bg-danger mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
-AND l_approve_status = 3";
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
+WHERE
+ li.l_approve_status IN (0,2,3,6)
+AND li.l_approve_status2 = 5
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
+
+// เตรียมและรัน query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':selectedYear', $selectedYear);
+$stmt->execute();
+
+// ดึงผลลัพธ์
+$totalLeaveItems = $stmt->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -239,42 +383,41 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
             </div>
         </div>
     </div>
+
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
-        <div class="table-responsive">
+        <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
+            <thead>
+                <tr class="text-center align-middle">
+                    <th rowspan="2">ลำดับ</th>
+                    <th rowspan="2">รหัสพนักงาน</th>
+                    <th rowspan="1">ชื่อ - นามสกุล</th>
+                    <th rowspan="2">วันที่ยื่นใบลา</th>
+                    <th rowspan="1">รายการลา</th>
+                    <th colspan="2" class="text-center">วันเวลาที่ลา</th>
+                    <th rowspan="2">ไฟล์แนบ</th>
+                    <th rowspan="2">สถานะใบลา</th>
+                    <th rowspan="2">สถานะอนุมัติ_1</th>
+                    <th rowspan="2">วันเวลาอนุมัติ_1</th>
+                    <th rowspan="2">เหตุผล_1</th>
+                    <th rowspan="2">หัวหน้า</th>
+                    <th rowspan="2">สถานะอนุมัติ_2</th>
+                    <th rowspan="2">วันเวลาอนุมัติ_2</th>
+                    <th rowspan="2">เหตุผล_2</th>
+                    <th rowspan="2">ผู้จัดการขึ้นไป</th>
+                    <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                    <th rowspan="2"></th>
+                </tr>
+                <tr class="text-center">
+                    <th> <input type="text" class="form-control" id="nameSearch"></th>
+                    <th> <input type="text" class="form-control" id="leaveSearch"></th>
+                    <th style="width: 8%;">จาก</th>
+                    <th style="width: 8%;">ถึง</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                <?php
 
-            <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
-                <thead>
-                    <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">รหัสพนักงาน</th>
-                        <th rowspan="1">ชื่อ - นามสกุล</th>
-                        <th rowspan="2">วันที่ยื่นใบลา</th>
-                        <th rowspan="1">ประเภทการลา</th>
-                        <th colspan="2" class="text-center">วันเวลาที่ลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะใบลา</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_1</th>
-                        <th rowspan="2">เหตุผล_1</th>
-                        <th rowspan="2">หัวหน้า</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_2</th>
-                        <th rowspan="2">เหตุผล_2</th>
-                        <th rowspan="2">ผู้จัดการขึ้นไป</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
-                        <th rowspan="2"></th>
-                        <th rowspan="2"></th>
-                    </tr>
-                    <tr class="text-center">
-                        <th> <input type="text" class="form-control" id="nameSearch"></th>
-                        <th> <input type="text" class="form-control" id="leaveSearch"></th>
-                        <th style="width: 8%;">จาก</th>
-                        <th style="width: 8%;">ถึง</th>
-                    </tr>
-                </thead>
-                <tbody class="text-center">
-                    <?php
 $itemsPerPage = 10;
 
 // คำนวณหน้าปัจจุบัน
@@ -284,14 +427,27 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
+// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
+// AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
+
+$sql = "SELECT
+li.*,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
+WHERE
+ li.l_approve_status IN (0, 2, 3, 6)
+AND li.l_level IN ('user', 'chief', 'leader')
+AND li.l_leave_id NOT IN (6, 7)
+AND Year(li.l_create_datetime) = '$selectedYear'
+AND Month(li.l_create_datetime) = '$selectedMonth'
+
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
@@ -405,6 +561,7 @@ if ($result->rowCount() > 0) {
         } else {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
+
         // 11
         echo '</td>';
         if (!empty($row['l_file'])) {
@@ -431,7 +588,7 @@ if ($result->rowCount() > 0) {
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>รอผู้จัดการอนุมัติ</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
@@ -443,13 +600,11 @@ if ($result->rowCount() > 0) {
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>ผู้จัดการอนุมัติ</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
-        } elseif ($row['l_approve_status'] == 6) {
-            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -491,8 +646,6 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
-        } elseif ($row['l_approve_status2'] == 6) {
-            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -523,8 +676,8 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 22 ปุ่มตรวจสอบ
-        if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >ตรวจสอบ</button></td>";
+        if ($row['l_approve_status'] == 4 || $row['l_approve_status'] == 5) {
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>ตรวจสอบ</button></td>";
         } else {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
         }
@@ -532,17 +685,19 @@ if ($result->rowCount() > 0) {
         // 23
         echo '<td>
         <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
+
         echo '</tr>';
+
         $rowNumber--;
     }
 
 } else {
-    echo '<tr><td colspan="20" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
+    echo '<tr><td colspan="19" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
 }
 ?>
-                </tbody>
-            </table>
-            <?php
+            </tbody>
+        </table>
+        <?php
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
@@ -571,43 +726,42 @@ echo '</ul>';
 echo '</div>';
 
 ?>
-            <!-- Modal เช็คการลา -->
-            <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title
+        <!-- Modal เช็คการลา -->
+        <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title
                         01f s-5" id="staticBackdropLabel">รายละเอียดการลา</h4>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
-                        </div>
-                        <div class="modal-body">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
+                    </div>
+                    <div class="modal-body">
 
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
-                            <button type="button" class="btn btn-success button-shadow">อนุมัติ</button>
-                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
+                        <button type="button" class="btn btn-success button-shadow">อนุมัติ</button>
                     </div>
                 </div>
             </div>
-            <!-- Modal HTML -->
-            <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
-                        </div>
+        </div>
+        <!-- ประวัติลาของพนักงาน -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
     $(".leaveChk").click(function() {
         var rowData = $(this).closest("tr").find("td");
@@ -660,13 +814,13 @@ echo '</div>';
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-            var status = '2'; // อนุมัติ
+            var status = '4'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
 
             // alert(leaveStatus)
             $.ajax({
-                url: 'l_ajax_upd_status.php',
+                url: 'm_ajax_upd_status.php',
                 method: 'POST',
                 data: {
                     createDate: createDate,
@@ -749,14 +903,14 @@ echo '</div>';
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-            var status = '3'; // ไม่อนุมัติ
+            var status = '5'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
 
             var reason = reasonNoProve;
 
             $.ajax({
-                url: 'l_ajax_upd_status.php',
+                url: 'm_ajax_upd_status.php',
                 method: 'POST',
                 data: {
                     createDate: createDate,
@@ -791,21 +945,24 @@ echo '</div>';
                 }
             });
         }
+
     });
 
     $(".filter-card").click(function() {
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
+        var selectedYear = $("#selectedYear").val();
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
 
-        // alert(subDepart)
+        // alert(selectedYear)
         $.ajax({
-            url: 'l_ajax_get_leave_data.php',
+            url: 'm_ajax_get_leave_data.php',
             method: 'GET',
             data: {
                 status: status,
                 month: selectedMonth,
+                year: selectedYear,
                 depart: depart,
                 subDepart: subDepart
             },
@@ -1181,12 +1338,12 @@ echo '</div>';
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
 
-                                var status = '2'; // อนุมัติ
+                                var status = '4'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
 
                                 $.ajax({
-                                    url: 'l_ajax_upd_status.php',
+                                    url: 'm_ajax_upd_status.php',
                                     method: 'POST',
                                     data: {
                                         createDate: createDate,
@@ -1277,14 +1434,14 @@ echo '</div>';
                             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
                             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-                            var status = '3'; // ไม่อนุมัติ
+                            var status = '5'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
 
                             var reason = reasonNoProve;
 
                             $.ajax({
-                                url: 'l_ajax_upd_status.php',
+                                url: 'm_ajax_upd_status.php',
                                 method: 'POST',
                                 data: {
                                     createDate: createDate,
@@ -1326,7 +1483,7 @@ echo '</div>';
                             'usercode'); // ดึงรหัสพนักงานจาก data attribute
 
                         $.ajax({
-                            url: 'l_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+                            url: 'm_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
                             type: 'POST',
                             data: {
                                 userCode: userCode
@@ -1354,7 +1511,7 @@ echo '</div>';
         var userCode = $(this).data('usercode'); // ดึงรหัสพนักงานจาก data attribute
 
         $.ajax({
-            url: 'l_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+            url: 'm_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
             type: 'POST',
             data: {
                 userCode: userCode

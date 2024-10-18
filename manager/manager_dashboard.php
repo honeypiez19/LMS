@@ -82,42 +82,46 @@ if (!empty($late_entries_list)) {
 // echo ' De : ' . $depart;
 
 $sql_check_leave = "SELECT
-COUNT(li.l_list_id) AS leave_count,
-li.l_username,
-li.l_name,
-li.l_department,
-em.e_sub_department,
-em.e_sub_department2,
-em.e_sub_department3,
-em.e_sub_department4,
-em.e_sub_department5
+    COUNT(li.l_list_id) AS leave_count,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
+ON li.l_usercode = em.e_usercode
 WHERE li.l_leave_status = 0
-    AND li.l_approve_status IN (2,3,6)
+    AND li.l_approve_status IN (0, 2, 3, 6)
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-    AND (
+      AND (
         -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
         (em.e_department = :subDepart AND li.l_department = :subDepart)
         OR
-        -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
-        (li.l_level = 'chief' AND em.e_department = 'Management')
-        OR
-        -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+        -- (li.l_level = 'chief' AND em.e_department = 'Management')
+        -- OR
         (em.e_department = 'Management' AND li.l_department IN (
             em.e_sub_department,
             em.e_sub_department2,
             em.e_sub_department3,
             em.e_sub_department4,
-            em.e_sub_department5))
+            em.e_sub_department5
+        ))
     )
+    AND (
+        -- เงื่อนไขเพื่อตรวจสอบว่าผู้จัดการดูแลแผนก RD หรือไม่
+        (em.e_department != 'RD') OR
+        (em.e_department = 'RD' AND li.l_department = 'RD')
+    )
+    AND NOT (li.l_level = 'chief' AND em.e_department = 'RD')
 GROUP BY li.l_name";
 
 $stmt_check_leave = $conn->prepare($sql_check_leave);
-$stmt_check_leave->bindParam(':depart', $depart);
 $stmt_check_leave->bindParam(':subDepart', $subDepart);
 $stmt_check_leave->execute();
 
@@ -152,7 +156,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE li.l_leave_status = 1
-    AND li.l_approve_status IN (2,3,6)
+    AND li.l_approve_status IN (0,2,3,6)
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -215,9 +219,10 @@ COUNT(li.l_list_id) AS leave_count,
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
-     li.l_approve_status IN (2,3,6)
+WHERE
+     li.l_approve_status IN (0,2,3,6)
     AND li.l_approve_status2 = 1
+    AND li.l_leave_status = 2
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id = 7
      AND (
@@ -500,7 +505,8 @@ echo "</select>";
         </div>
     </div>
     <div class="container">
-        <div class="mt-3 row">
+        <div class="mt-1 row">
+            <span class="text-danger">** 0(0.0) = วัน(ชั่วโมง.นาที)</span>
             <div class="col-3 filter-card">
                 <div class="card text-light mb-3" style="background-color: #031B80; ">
                     <div class="card-body">
@@ -1668,7 +1674,10 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
+
         // ไม่มีสถานะ
         else {
             echo 'ไม่มีสถานะ';
@@ -1700,6 +1709,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
