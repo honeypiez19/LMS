@@ -88,7 +88,14 @@ FROM
     leave_list li
 WHERE
     li.l_department <> 'RD'
+<<<<<<< HEAD
     AND li.l_department <> 'CAD1'
+=======
+<<<<<<< HEAD
+    AND li.l_department <> 'CAD1'
+=======
+>>>>>>> 7ae4e4718eaa435e3a5a48ec8b7fe23c21386d8b
+>>>>>>> bee12e4fcc9d6bf28d57a672c60e56358727196f
     AND li.l_leave_status = 0
     AND li.l_approve_status2 = 1
 GROUP BY
