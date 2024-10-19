@@ -320,10 +320,29 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+        if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+        }
+
+        // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
 
         // 10
-        echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+
+        } else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        }
 
         // 11
         echo '</td>';
@@ -351,7 +370,7 @@ if ($result->rowCount() > 0) {
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-success"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
@@ -363,7 +382,7 @@ if ($result->rowCount() > 0) {
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-danger"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
@@ -413,6 +432,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
