@@ -117,7 +117,11 @@ if (isset($_POST['year'])) {
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 AND l_leave_status = 0";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
@@ -176,7 +180,11 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 AND l_leave_status = 0";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
@@ -235,7 +243,11 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 3
 AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 AND l_leave_status = 0";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
@@ -295,7 +307,11 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 4
 AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 AND l_leave_status = 0";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
@@ -356,7 +372,11 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
+<<<<<<< HEAD
 AND YEAR(l_leave_end_date) = :selectedYear
+=======
+AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 AND l_leave_status = 0";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
@@ -427,7 +447,11 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 8
 AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 AND l_leave_status = 0";
 
     $stmt_other = $conn->prepare($sql_other);
@@ -534,6 +558,7 @@ AND l_leave_status = 0";
         $sum_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
         $sum_hours += 1;
     }
+<<<<<<< HEAD
 
     // คำนวณชั่วโมง
     if ($sum_hours >= 8) {
@@ -544,6 +569,8 @@ AND l_leave_status = 0";
         // เหลือจำนวนชั่วโมงหลังจากหักวันที่เพิ่ม
         $sum_hours = $sum_hours % 8;
     }
+=======
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 
     echo '<tr class="text-center align-middle">';
     if ($sum_day < 10) {
@@ -587,9 +614,13 @@ AND l_leave_status = 0";
 // ถ้าไม่เลือกปี
 else {
     $selectedYear = date('Y');
+<<<<<<< HEAD
     // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
+=======
+
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
         SUM(
@@ -614,7 +645,11 @@ else {
  FROM leave_list
  WHERE l_leave_id = 1
  AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+ AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
  AND l_leave_status = 0";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
@@ -673,7 +708,11 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  FROM leave_list
  WHERE l_leave_id = 2
  AND l_usercode = :userCode
+<<<<<<< HEAD
  AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+ AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
  AND l_leave_status = 0";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
@@ -732,7 +771,11 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  FROM leave_list
  WHERE l_leave_id = 3
  AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+ AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
  AND l_leave_status = 0";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
@@ -792,7 +835,11 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  FROM leave_list
  WHERE l_leave_id = 4
  AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+ AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
  AND l_leave_status = 0";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
@@ -853,7 +900,11 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  FROM leave_list
  WHERE l_leave_id = 5
  AND l_usercode = :userCode
+<<<<<<< HEAD
  AND YEAR(l_leave_end_date) = :selectedYear
+=======
+ AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
  AND l_leave_status = 0";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
@@ -924,7 +975,11 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  FROM leave_list
  WHERE l_leave_id = 8
  AND l_usercode = :userCode
+<<<<<<< HEAD
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+=======
+ AND YEAR(l_create_datetime) = :selectedYear
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
  AND l_leave_status = 0";
 
     $stmt_other = $conn->prepare($sql_other);
@@ -1031,6 +1086,7 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
         $sum_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
         $sum_hours += 1;
     }
+<<<<<<< HEAD
 
     // คำนวณชั่วโมง
     if ($sum_hours >= 8) {
@@ -1041,6 +1097,8 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
         // เหลือจำนวนชั่วโมงหลังจากหักวันที่เพิ่ม
         $sum_hours = $sum_hours % 8;
     }
+=======
+>>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
 
     echo '<tr class="text-center align-middle">';
     if ($sum_day < 10) {
