@@ -290,7 +290,7 @@ if ($sum_day >= 10) {
     items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
     <i class="fa-solid fa-chart-line me-2"></i>
     <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'leader_leave.php\'">สถิติการลาและมาสาย</button>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'chief_leave.php\'">สถิติการลาและมาสาย</button>
     <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
@@ -876,7 +876,7 @@ $sql_leave_annual = "SELECT
 FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = 2024
+AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0";
 
 $stmt_leave_annual = $conn->prepare($sql_leave_annual);
@@ -1521,12 +1521,12 @@ if ($result->rowCount() > 0) {
 
         // 10
         if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
 
         } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
         } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
         } else {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
@@ -1641,6 +1641,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -1673,6 +1675,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
