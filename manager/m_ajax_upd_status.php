@@ -195,8 +195,8 @@ if ($status == '4') {
         }
     }
 } else if ($status == '5') {
-    $sql = "UPDATE leave_list SET l_approve_status2 = :status, 
-    l_approve_datetime2 = :appDate, 
+    $sql = "UPDATE leave_list SET l_approve_status2 = :status,
+    l_approve_datetime2 = :appDate,
     l_approve_name2 = :userName,
     l_reason2 = :reasonNoProve  -- เพิ่ม l_reason
     WHERE l_usercode = :userCode AND l_create_datetime = :createDate";

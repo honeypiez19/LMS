@@ -112,7 +112,7 @@ if (isset($_POST['logoutButton'])) {
                             <li><a class="dropdown-item" href="leader_leave_request.php">ใบลาของพนักงาน</a></li>
                             <li><a class="dropdown-item" href="leader_employee_leave.php">การลาของพนักงาน</a></li>
                             <li><a class="dropdown-item"
-                                    href="leader_employee_attendance.php">พนักงานมาสายและหยุดงาน</a>
+                                    href="leader_employee_attendance.php">พนักงานมาสาย</a>
                             </li>
                         </ul>
                     </li>

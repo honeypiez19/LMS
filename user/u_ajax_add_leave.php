@@ -139,7 +139,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
                 $stmt->bindParam(':workplace', $workplace);
                 // $stmt->bindParam(':subDepart', $subDepart);
+
             }
+        } else if ($depart == 'CAD1') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
+            $stmt->bindParam(':workplace', $workplace);
+        } else if ($depart == 'CAD2') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD2'");
+            $stmt->bindParam(':workplace', $workplace);
+
+        } else if ($depart == 'CAM') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAM'");
+            $stmt->bindParam(':workplace', $workplace);
+
         } else {
             echo "ไม่พบเงื่อนไข";
         }

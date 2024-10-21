@@ -140,8 +140,9 @@ $sql = "SELECT
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
-     li.l_approve_status IN (2,3,6)
+WHERE
+     li.l_approve_status IN (0,2,3,6)
+
     -- AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -207,8 +208,8 @@ em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
-WHERE 
- li.l_approve_status IN (2,3,6)
+WHERE
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 1
 AND li.l_level IN ('user', 'chief', 'leader')
 AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -272,8 +273,8 @@ em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
-WHERE 
- li.l_approve_status IN (2,3,6)
+WHERE
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 4
 AND li.l_level IN ('user', 'chief', 'leader')
 AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -336,8 +337,8 @@ em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
-WHERE 
- li.l_approve_status IN (2,3,6)
+WHERE
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 5
 AND li.l_level IN ('user', 'chief', 'leader')
 AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
@@ -431,8 +432,8 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT 
-li.*, 
+$sql = "SELECT
+li.*,
 em.e_sub_department,
 em.e_sub_department2,
 em.e_sub_department3,
@@ -441,8 +442,8 @@ em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
-WHERE 
- li.l_approve_status IN (2, 3, 6)
+WHERE
+ li.l_approve_status IN (0,2, 3, 6)
 AND li.l_level IN ('user', 'chief', 'leader')
 AND li.l_leave_id NOT IN (6, 7)
 AND Year(li.l_create_datetime) = '$selectedYear'
@@ -554,8 +555,8 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-         // 9
-         if ($row['l_leave_start_time'] == '12:00:00') {
+        // 9
+        if ($row['l_leave_start_time'] == '12:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
         } else if ($row['l_leave_start_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
@@ -619,6 +620,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -660,6 +663,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -976,7 +981,7 @@ echo '</div>';
             data: {
                 status: status,
                 month: selectedMonth,
-                year : selectedYear,
+                year: selectedYear,
                 depart: depart,
                 subDepart: subDepart
             },
@@ -1096,9 +1101,9 @@ echo '</div>';
                         } else if (row['l_leave_start_time'] == '17:00:00') {
                             startTime = '16:40:00';
                         } else {
-                            startTime = row['l_leave_start_time'];  
+                            startTime = row['l_leave_start_time'];
                         }
-                        
+
                         // เวลาสิ้นสุด
                         var endTime;
                         if (row['l_leave_end_time'] == '12:00:00') {
@@ -1108,7 +1113,7 @@ echo '</div>';
                         } else if (row['l_leave_end_time'] == '17:00:00') {
                             endTime = '16:40:00';
                         } else {
-                            endTime = row['l_leave_end_time'];  
+                            endTime = row['l_leave_end_time'];
                         }
 
                         var newRow = '<tr class="align-middle">' +
@@ -1216,12 +1221,14 @@ echo '</div>';
                         newRow += '</td>' +
 
                             // 9
-                            '<td>' + (row['l_leave_start_date'] ? row['l_leave_start_date'] : '') + '<br>' +
+                            '<td>' + (row['l_leave_start_date'] ? row[
+                                'l_leave_start_date'] : '') + '<br>' +
                             ' ' + (startTime ? startTime : '') +
                             '</td>' +
 
                             // 10
-                            '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] : '') + '<br>' +
+                            '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] :
+                                '') + '<br>' +
                             ' ' + (endTime ? endTime : '') +
                             '</td>';
                         // 11

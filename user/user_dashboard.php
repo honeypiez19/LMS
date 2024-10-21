@@ -80,7 +80,7 @@ if (!empty($late_entries_list)) {
 }
 ?>
     <div class="mt-3 container-fluid">
-        <button type="button" class="btn btn-primary rounded-circle position-fixed bottom-0 start-0 m-3 btn-sm"
+        <!-- <button type="button" class="btn btn-primary rounded-circle position-fixed bottom-0 start-0 m-3 btn-sm"
             data-bs-toggle="tooltip" data-bs-placement="top" style="width: 30px;" title="
         <strong>ความหมายของ :</strong> <code>ตัวอย่าง 1(3.5)</code><br>
         <ul>
@@ -89,7 +89,7 @@ if (!empty($late_entries_list)) {
             <li><strong>ตัวอักษรที่สาม (5)</strong> = จำนวนนาที</li>
         </ul>">
             <i class="fa-solid fa-exclamation"></i>
-        </button>
+        </button> -->
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
                 <form class="mt-3 mb-3 row" method="post">
@@ -268,8 +268,7 @@ echo "</select>";
 
     <div class="container">
         <div class="row">
-            <!-- <span>0(0.0) ตัวอักษรแรก = จำนวนวัน / ตัวอักษรที่สอง = จำนวนชั่วโมง / ตัวอักษรที่สาม =
-                จำนวนนาที</span> -->
+            <span class="text-danger">** 0(0.0) = วัน(ชั่วโมง.นาที)</span>
             <div class="col-3 filter-card">
                 <div class="card text-light mb-3" style="background-color: #031B80; ">
                     <div class="card-body">
@@ -1629,7 +1628,6 @@ echo '</div>';
         console.log("Leave Days: ", leaveDays);
         console.log("Leave Type: ", typeLeave);
 
-
         if (typeLeave == 1) {
             currentLeaveDays = parseFloat($('input[name="leave_personal_days"]').val()) || 0;
             totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
@@ -1674,7 +1672,6 @@ echo '</div>';
     }
 
     $(document).ready(function() {
-
         $.ajax({
             url: 'u_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
             type: 'GET',
@@ -1686,28 +1683,28 @@ echo '</div>';
                 flatpickr("#startDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#endDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#urgentStartDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#urgentEndDate", {
                     dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                     defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    // minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
             }
@@ -1721,17 +1718,25 @@ echo '</div>';
 
             // เพิ่มข้อมูลจาก PHP variables
             fd.append('userCode', '<?php echo $userCode; ?>');
-            fd.append('userName', '<?php echo $userName; ?>');
+            fd.append('userName',
+                '<?php echo $userName; ?>');
             fd.append('name', '<?php echo $name; ?>');
-            fd.append('telPhone', '<?php echo $telPhone; ?>');
+            fd.append(
+                'telPhone', '<?php echo $telPhone; ?>');
             fd.append('depart', '<?php echo $depart; ?>');
-            fd.append('level', '<?php echo $level; ?>');
-            fd.append('workplace', '<?php echo $workplace; ?>');
+            fd
+                .append('level', '<?php echo $level; ?>');
+            fd.append('workplace',
+                '<?php echo $workplace; ?>');
             fd.append('subDepart', '<?php echo $subDepart; ?>');
-            fd.append('subDepart2', '<?php echo $subDepart2; ?>');
-            fd.append('subDepart3', '<?php echo $subDepart3; ?>');
+            fd
+                .append(
+                    'subDepart2', '<?php echo $subDepart2; ?>');
+            fd.append('subDepart3',
+                '<?php echo $subDepart3; ?>');
             fd.append('subDepart4', '<?php echo $subDepart4; ?>');
-            fd.append('subDepart5', '<?php echo $subDepart5; ?>');
+            fd
+                .append('subDepart5', '<?php echo $subDepart5; ?>');
 
             // ดึงค่าจากฟอร์ม
             var leaveType = $('#leaveType').val();
@@ -1741,6 +1746,46 @@ echo '</div>';
             var endDate = $('#endDate').val();
             var endTime = $('#endTime').val();
             var files = $('#file')[0].files;
+
+            if (startDate && endDate) {
+                // แยกปี, เดือน, วันจากสตริงที่ได้จาก input
+                var startDateParts = startDate.split("-");
+                var endDateParts = endDate.split("-");
+
+                // สร้างวันที่ด้วยการกำหนดปี, เดือน (ลบ 1 เพราะ JavaScript ใช้ 0-based months), และวัน
+                var startDate2 = new Date(startDateParts[0], startDateParts[1] - 1, startDateParts[2]);
+                var endDate2 = new Date(endDateParts[0], endDateParts[1] - 1, endDateParts[2]);
+
+                // ตรวจสอบว่าการแปลงวันที่สำเร็จหรือไม่
+                if (!isNaN(startDate2.getTime()) && !isNaN(endDate2.getTime())) {
+                    // คำนวณระยะเวลาในการลา
+                    var timeDiff = Math.abs(endDate2 - startDate2); // คำนวณความต่างเวลาเป็นมิลลิวินาที
+                    var totalHours = Math.ceil(timeDiff / (1000 * 3600)); // แปลงเป็นจำนวนชั่วโมง
+                    var workDays = Math.ceil(totalHours /
+                        8); // แปลงชั่วโมงเป็นวันทำงาน (8 ชั่วโมงต่อวัน)
+
+                    console.log("จำนวนวันทำงานคือ: " + workDays);
+                    console.log("totalHours: " + totalHours);
+                    console.log("workDays: " + workDays);
+
+                    // เช็คว่าจำนวนวันทำงานมากกว่า 3 วันหรือไม่
+                    if (workDays > 3288) {
+                        // ตรวจสอบว่ามีไฟล์แนบหรือไม่
+                        if (files.length === 0) {
+                            Swal.fire({
+                                title: "ไม่สามารถลาได้",
+                                text: "เนื่องจาก",
+                                icon: "error"
+                            });
+                            return false; // หยุดการส่งฟอร์ม
+                        }
+                    }
+                } else {
+                    console.log("การแปลงวันที่ไม่สำเร็จ");
+                }
+            } else {
+                console.log("ไม่สามารถดึงค่า startDate หรือ endDate ได้");
+            }
 
             var createDate = new Date();
 
@@ -1755,12 +1800,6 @@ echo '</div>';
             var formattedDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" +
                 seconds;
 
-            // alert(endTime)
-            // เช็คว่าหากเหตุผลในการลาเป็น "อื่น ๆ" ให้ใช้ค่าจาก input ที่มี id="otherReason"
-            /*  if (leaveReason === 'อื่น ๆ') {
-                 leaveReason = $('#otherReason').val();
-             } */
-
             // เพิ่มข้อมูลจากฟอร์มลงใน FormData object
             fd.append('leaveType', leaveType);
             fd.append('leaveReason', leaveReason);
@@ -1770,7 +1809,6 @@ echo '</div>';
             fd.append('endTime', endTime);
             fd.append('file', files[0]);
             fd.append('formattedDate', formattedDate);
-
 
             // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
             if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
@@ -1782,7 +1820,6 @@ echo '</div>';
                 console.log("Cannot submit form, alert is visible.");
                 return false; // หยุดการส่งฟอร์ม
             }
-
 
             console.log(leaveReason, startTime, endTime);
             if (leaveType == 'เลือกประเภทการลา') {
@@ -1822,7 +1859,6 @@ echo '</div>';
                 });
             }
         });
-
         // ลาฉุกเฉิน
         $('#urgentLeaveForm').submit(function(e) {
             e.preventDefault();

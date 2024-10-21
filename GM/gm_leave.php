@@ -34,7 +34,7 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php include 'manager_navbar.php'?>
+    <?php include 'gm_navbar.php'?>
 
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">

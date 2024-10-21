@@ -618,11 +618,24 @@ SUM(
 
     // echo "Total Late Count: " . $result_leave['late_count'];
 
+    // คำนวณจำนวนวัน, ชั่วโมง, และนาที
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days;
     $sum_hours = $leave_personal_hours + $leave_personal_no_hours + $leave_sick_hours + $leave_sick_work_hours;
     $sum_minutes = $leave_personal_minutes + $leave_personal_no_minutes + $leave_sick_minutes + $leave_sick_work_minutes;
 
-    echo '<td>' . $sum_day . '(' . $sum_hours . '.' . $sum_minutes . ')' . '</td>';
+// คำนวณชั่วโมงรวม
+    $total_hours = $sum_hours + floor($sum_minutes / 60); // เพิ่มชั่วโมงจากนาที
+    $total_minutes = $sum_minutes % 60; // นาทียังคงอยู่
+
+// ถ้าชั่วโมงรวมมากกว่า 8 ชั่วโมงให้เพิ่มจำนวนวัน
+    if ($total_hours >= 8) {
+        $extra_days = floor($total_hours / 8); // จำนวนวันเพิ่มเติมจากชั่วโมง
+        $sum_day += $extra_days; // เพิ่มจำนวนวัน
+        $total_hours = $total_hours % 8; // คำนวณชั่วโมงที่เหลือ
+    }
+
+// แสดงผล
+    echo '<td>' . $sum_day . '(' . $total_hours . '.' . $total_minutes . ')' . '</td>';
 
     echo '</tr>';
     $rowNumber++;
