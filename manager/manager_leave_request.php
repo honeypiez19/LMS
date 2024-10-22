@@ -452,9 +452,7 @@ AND (
     -- Check for matching department or sub-department
     (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
     OR
-    -- Check if chief in Management
-    (li.l_level = 'chief' AND em.e_department = 'Management')
-    OR
+
     -- Check if Management and matching sub-department
     (em.e_department = 'Management' AND li.l_department IN (
         em.e_sub_department,
