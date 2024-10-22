@@ -334,27 +334,12 @@ if ($result->rowCount() > 0) {
 
         // 10
         if ($row['l_leave_end_time'] == '12:00:00') {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e7775f8e718d5cb4ea794948e1b897ac9cccb3d4
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
 
         } else if ($row['l_leave_end_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
         } else if ($row['l_leave_end_time'] == '17:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
-<<<<<<< HEAD
-=======
-=======
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
-
-        } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
->>>>>>> f3e0c2419777e9256116bd2257fcad081d335d0f
->>>>>>> e7775f8e718d5cb4ea794948e1b897ac9cccb3d4
         } else {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
