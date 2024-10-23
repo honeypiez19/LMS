@@ -224,76 +224,76 @@ if ($stmt_check_leave_id_7->rowCount() > 0) {
 }
 
 // รวมสถิติการลาและมาสายของตัวเอง --------------------------------------------------------------------------------------------
-$sql_leave = "WITH leave_chk AS (
-    SELECT
-        l_leave_id,
-        DATEDIFF(l_leave_end_date, l_leave_start_date) AS diff_days,
-        TIMEDIFF(l_leave_end_time, l_leave_start_time) AS diff_time,
-        CASE
-            WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
-                CASE
-                    WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) = '08:40:00' THEN 8
-                    WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) IN ('07:30:00', '07:00:00', '06:30:00', '06:00:00', '05:30:00', '05:00:00', '03:30:00', '03:00:00', '02:30:00', '02:00:00', '01:30:00', '01:00:00', '00:30:00') THEN ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
-                    WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) IN ('03:45:00', '03:55:00') THEN 4
-                    ELSE 1
-                END
-            WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) = '08:40:00' THEN DATEDIFF(l_leave_end_date, l_leave_start_date) * 8
-            WHEN (TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00') OR (TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00') THEN (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) * 8 + 4
-            ELSE (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) * 8
-        END AS calculate_time
-    FROM leave_list
-    -- WHERE YEAR(l_leave_start_date) = '2024'
-    WHERE YEAR(l_leave_start_date) = YEAR(CURDATE())
-    AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '12:45:00')
-    AND l_leave_status = '0'
-    AND l_usercode = :userCode
-)
+// $sql_leave = "WITH leave_chk AS (
+//     SELECT
+//         l_leave_id,
+//         DATEDIFF(l_leave_end_date, l_leave_start_date) AS diff_days,
+//         TIMEDIFF(l_leave_end_time, l_leave_start_time) AS diff_time,
+//         CASE
+//             WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
+//                 CASE
+//                     WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) = '08:40:00' THEN 8
+//                     WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) IN ('07:30:00', '07:00:00', '06:30:00', '06:00:00', '05:30:00', '05:00:00', '03:30:00', '03:00:00', '02:30:00', '02:00:00', '01:30:00', '01:00:00', '00:30:00') THEN ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
+//                     WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) IN ('03:45:00', '03:55:00') THEN 4
+//                     ELSE 1
+//                 END
+//             WHEN TIMEDIFF(l_leave_end_time, l_leave_start_time) = '08:40:00' THEN DATEDIFF(l_leave_end_date, l_leave_start_date) * 8
+//             WHEN (TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00') OR (TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00') THEN (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) * 8 + 4
+//             ELSE (DATEDIFF(l_leave_end_date, l_leave_start_date) + 1) * 8
+//         END AS calculate_time
+//     FROM leave_list
+//     -- WHERE YEAR(l_leave_start_date) = '2024'
+//     WHERE YEAR(l_leave_start_date) = YEAR(CURDATE())
+//     AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '12:45:00')
+//     AND l_leave_status = '0'
+//     AND l_usercode = :userCode
+// )
 
-SELECT
-    SUM(CASE WHEN l_leave_id = '1' AND diff_days BETWEEN 0 AND 5 THEN calculate_time ELSE 0 END) AS leave_personal_count,
-    SUM(CASE WHEN l_leave_id = '2' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS leave_personal_no_count,
-    SUM(CASE WHEN l_leave_id = '3' AND diff_days BETWEEN 0 AND 30 THEN calculate_time ELSE 0 END) AS leave_sick_count,
-    SUM(CASE WHEN l_leave_id = '4' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS leave_sick_work_count,
-    SUM(CASE WHEN l_leave_id = '5' AND diff_days BETWEEN 0 AND 10 THEN calculate_time ELSE 0 END) AS leave_annual_count,
-    SUM(CASE WHEN l_leave_id = '8' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS other_count,
-    SUM(CASE WHEN l_leave_id = '7' THEN 1 ELSE 0 END) AS late_count
-FROM leave_chk
-WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
+// SELECT
+//     SUM(CASE WHEN l_leave_id = '1' AND diff_days BETWEEN 0 AND 5 THEN calculate_time ELSE 0 END) AS leave_personal_count,
+//     SUM(CASE WHEN l_leave_id = '2' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS leave_personal_no_count,
+//     SUM(CASE WHEN l_leave_id = '3' AND diff_days BETWEEN 0 AND 30 THEN calculate_time ELSE 0 END) AS leave_sick_count,
+//     SUM(CASE WHEN l_leave_id = '4' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS leave_sick_work_count,
+//     SUM(CASE WHEN l_leave_id = '5' AND diff_days BETWEEN 0 AND 10 THEN calculate_time ELSE 0 END) AS leave_annual_count,
+//     SUM(CASE WHEN l_leave_id = '8' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS other_count,
+//     SUM(CASE WHEN l_leave_id = '7' THEN 1 ELSE 0 END) AS late_count
+// FROM leave_chk
+// WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
-$stmt_leave = $conn->prepare($sql_leave);
-$stmt_leave->bindParam(':userCode', $row['e_usercode']);
-// $stmt_leave->bindParam(':selectedYear', $selectedYear);
-$stmt_leave->execute();
-$result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
+// $stmt_leave = $conn->prepare($sql_leave);
+// $stmt_leave->bindParam(':userCode', $row['e_usercode']);
+// // $stmt_leave->bindParam(':selectedYear', $selectedYear);
+// $stmt_leave->execute();
+// $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
 
-// Calculate total leave days
-$leave_personal_days = floor($result_leave['leave_personal_count'] / 8);
-$leave_personal_no_days = floor($result_leave['leave_personal_no_count'] / 8);
-$leave_sick_days = floor($result_leave['leave_sick_count'] / 8);
-$leave_sick_work_days = floor($result_leave['leave_sick_work_count'] / 8);
-$leave_annual_days = floor($result_leave['leave_annual_count'] / 8);
-$other_days = floor($result_leave['other_count'] / 8);
-$late_count = $result_leave['late_count'];
+// // Calculate total leave days
+// $leave_personal_days = floor($result_leave['leave_personal_count'] / 8);
+// $leave_personal_no_days = floor($result_leave['leave_personal_no_count'] / 8);
+// $leave_sick_days = floor($result_leave['leave_sick_count'] / 8);
+// $leave_sick_work_days = floor($result_leave['leave_sick_work_count'] / 8);
+// $leave_annual_days = floor($result_leave['leave_annual_count'] / 8);
+// $other_days = floor($result_leave['other_count'] / 8);
+// $late_count = $result_leave['late_count'];
 
-$stop_work = 0;
-if ($late_count >= 3) {
-    $stop_work = floor($late_count / 3);
-}
+// $stop_work = 0;
+// if ($late_count >= 3) {
+//     $stop_work = floor($late_count / 3);
+// }
 
-$sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $leave_annual_days + $other_days + $stop_work;
+// $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $leave_annual_days + $other_days + $stop_work;
 
-// echo 'Total Leave Days: ' . $sum_day;
+// // echo 'Total Leave Days: ' . $sum_day;
 
-// Display alert with total leave days
-if ($sum_day >= 10) {
-    echo '<div class="alert d-flex align-
-    items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
-    <i class="fa-solid fa-chart-line me-2"></i>
-    <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'chief_leave.php\'">สถิติการลาและมาสาย</button>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>';
-}
+// // Display alert with total leave days
+// if ($sum_day >= 10) {
+//     echo '<div class="alert d-flex align-
+//     items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
+//     <i class="fa-solid fa-chart-line me-2"></i>
+//     <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
+//     <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'chief_leave.php\'">สถิติการลาและมาสาย</button>
+//     <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+// </div>';
+// }
 ?>
 
     <div class="mt-3 container-fluid">

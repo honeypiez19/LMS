@@ -56,9 +56,12 @@ $userCode = $_SESSION['s_usercode'];
 $selectedYear = date('Y'); // ปีปัจจุบัน
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 }
 echo "<select class='form-select' name='year' id='selectYear'>";
-for ($i = 0; $i <= 2; $i++) {
+for ($i = -1; $i <= 2; $i++) {
     $year = date('Y', strtotime("last day of -$i year"));
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
 }
@@ -71,14 +74,17 @@ echo "</select>";
                 </button>
             </div>
         </form>
-
+        <span id="textNotice" class="text-danger"> *สถิติการลา ตั้งแต่เดือนธันวาคม <?php echo $selectedYear - 1 ?> -
+            พฤศจิกายน
+            <?php echo $selectedYear ?> <br>
+            **สถิติการลาพักร้อน ตั้งแต่เดือนมกราคม - ธันวาคม <?php echo $selectedYear ?> </span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead>
                 <tr class="table-dark text-center align-middle">
                     <th style="width: 40%;">ประเภทการลา</th>
                     <th>จำนวนวันลาที่ใช้ไป</th>
-                    <th>จำนวนวันลาที่เหลือ</th>
+                    <th>จำนวนวันลาคงเหลือ</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,12 +117,13 @@ if (isset($_POST['year'])) {
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
-    $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_personal->bindParam(':startDate', $startDate);
+    $stmt_leave_personal->bindParam(':endDate', $endDate);
     $stmt_leave_personal->execute();
     $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -169,12 +176,13 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
-    $stmt_leave_personal_no->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_personal_no->bindParam(':startDate', $startDate);
+    $stmt_leave_personal_no->bindParam(':endDate', $endDate);
     $stmt_leave_personal_no->execute();
     $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -227,12 +235,13 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 3
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
-    $stmt_leave_sick->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_sick->bindParam(':startDate', $startDate);
+    $stmt_leave_sick->bindParam(':endDate', $endDate);
     $stmt_leave_sick->execute();
     $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -286,12 +295,13 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 4
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
-    $stmt_leave_sick_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_sick_work->bindParam(':startDate', $startDate);
+    $stmt_leave_sick_work->bindParam(':endDate', $endDate);
     $stmt_leave_sick_work->execute();
     $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -346,7 +356,7 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = :selectedYear
+AND YEAR(l_leave_end_date) = :selectedYear
 AND l_leave_status = 0";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
@@ -382,13 +392,13 @@ AND l_leave_status = 0";
     }
     // ----------------------------------------------------------------------------------------------
     // มาสาย
-    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' AND Year(l_create_datetime) = '$selectedYear'";
+    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')";
     $result_late = $conn->query($sql_late)->fetch(PDO::FETCH_ASSOC);
     $late_count = $result_late['late_count'];
 
     // ----------------------------------------------------------------------------------------------
     // หยุดงาน
-    $sql_absence_work = "SELECT COUNT(l_list_id) AS stop_work FROM leave_list WHERE l_leave_id = '6' AND YEAR(l_leave_start_date) = '$selectedYear'";
+    $sql_absence_work = "SELECT COUNT(l_list_id) AS stop_work FROM leave_list WHERE l_leave_id = '6' AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')";
     $result_absence_work = $conn->query($sql_absence_work)->fetch(PDO::FETCH_ASSOC);
     $stop_work = $result_absence_work['stop_work'];
 
@@ -417,12 +427,13 @@ AND l_leave_status = 0";
 FROM leave_list
 WHERE l_leave_id = 8
 AND l_usercode = :userCode
-AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
-    $stmt_other->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_other->bindParam(':startDate', $startDate);
+    $stmt_other->bindParam(':endDate', $endDate);
     $stmt_other->execute();
     $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 
@@ -524,6 +535,16 @@ AND l_leave_status = 0";
         $sum_hours += 1;
     }
 
+    // คำนวณชั่วโมง
+    if ($sum_hours >= 8) {
+        // หารจำนวนชั่วโมงด้วย 8 เพื่อนับเป็นวัน
+        $additional_days = floor($sum_hours / 8);
+        $sum_day += $additional_days;
+
+        // เหลือจำนวนชั่วโมงหลังจากหักวันที่เพิ่ม
+        $sum_hours = $sum_hours % 8;
+    }
+
     echo '<tr class="text-center align-middle">';
     if ($sum_day < 10) {
         echo '<td style="font-weight: bold;">' . 'รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน / อื่น ๆ)' . '</td>';
@@ -566,7 +587,9 @@ AND l_leave_status = 0";
 // ถ้าไม่เลือกปี
 else {
     $selectedYear = date('Y');
-
+    // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
         SUM(
@@ -591,12 +614,13 @@ else {
  FROM leave_list
  WHERE l_leave_id = 1
  AND l_usercode = :userCode
- AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  AND l_leave_status = 0";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
-    $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_personal->bindParam(':startDate', $startDate);
+    $stmt_leave_personal->bindParam(':endDate', $endDate);
     $stmt_leave_personal->execute();
     $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -649,12 +673,13 @@ else {
  FROM leave_list
  WHERE l_leave_id = 2
  AND l_usercode = :userCode
- AND YEAR(l_create_datetime) = :selectedYear
+ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  AND l_leave_status = 0";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
-    $stmt_leave_personal_no->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_personal_no->bindParam(':startDate', $startDate);
+    $stmt_leave_personal_no->bindParam(':endDate', $endDate);
     $stmt_leave_personal_no->execute();
     $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -707,12 +732,13 @@ else {
  FROM leave_list
  WHERE l_leave_id = 3
  AND l_usercode = :userCode
- AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  AND l_leave_status = 0";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
-    $stmt_leave_sick->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_sick->bindParam(':startDate', $startDate);
+    $stmt_leave_sick->bindParam(':endDate', $endDate);
     $stmt_leave_sick->execute();
     $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -766,12 +792,13 @@ else {
  FROM leave_list
  WHERE l_leave_id = 4
  AND l_usercode = :userCode
- AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  AND l_leave_status = 0";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
-    $stmt_leave_sick_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_sick_work->bindParam(':startDate', $startDate);
+    $stmt_leave_sick_work->bindParam(':endDate', $endDate);
     $stmt_leave_sick_work->execute();
     $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -826,7 +853,7 @@ else {
  FROM leave_list
  WHERE l_leave_id = 5
  AND l_usercode = :userCode
- AND YEAR(l_create_datetime) = :selectedYear
+ AND YEAR(l_leave_end_date) = :selectedYear
  AND l_leave_status = 0";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
@@ -862,13 +889,13 @@ else {
     }
     // ----------------------------------------------------------------------------------------------
     // มาสาย
-    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' AND Year(l_create_datetime) = '$selectedYear'";
+    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')";
     $result_late = $conn->query($sql_late)->fetch(PDO::FETCH_ASSOC);
     $late_count = $result_late['late_count'];
 
     // ----------------------------------------------------------------------------------------------
     // หยุดงาน
-    $sql_absence_work = "SELECT COUNT(l_list_id) AS stop_work FROM leave_list WHERE l_leave_id = '6' AND YEAR(l_leave_start_date) = '$selectedYear'";
+    $sql_absence_work = "SELECT COUNT(l_list_id) AS stop_work FROM leave_list WHERE l_leave_id = '6' AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')";
     $result_absence_work = $conn->query($sql_absence_work)->fetch(PDO::FETCH_ASSOC);
     $stop_work = $result_absence_work['stop_work'];
 
@@ -897,12 +924,13 @@ else {
  FROM leave_list
  WHERE l_leave_id = 8
  AND l_usercode = :userCode
- AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  AND l_leave_status = 0";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
-    $stmt_other->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_other->bindParam(':startDate', $startDate);
+    $stmt_other->bindParam(':endDate', $endDate);
     $stmt_other->execute();
     $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 
@@ -1002,6 +1030,16 @@ else {
     } elseif ($sum_minutes > 30) {
         $sum_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
         $sum_hours += 1;
+    }
+
+    // คำนวณชั่วโมง
+    if ($sum_hours >= 8) {
+        // หารจำนวนชั่วโมงด้วย 8 เพื่อนับเป็นวัน
+        $additional_days = floor($sum_hours / 8);
+        $sum_day += $additional_days;
+
+        // เหลือจำนวนชั่วโมงหลังจากหักวันที่เพิ่ม
+        $sum_hours = $sum_hours % 8;
     }
 
     echo '<tr class="text-center align-middle">';

@@ -1674,30 +1674,25 @@ echo '</div>';
     $(document).ready(function() {
 
         $.ajax({
-            url: 'u_ajax_get_holiday.php',
+            url: 'u_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
             type: 'GET',
             dataType: 'json',
             success: function(response) {
-                var today = new Date();
-                var leaveType = $('#leaveType')
-                    .val(); // ควรเรียกค่านี้หลังจากที่ฟอร์มถูกโหลด
+                var today = new Date(); // วันที่ปัจจุบัน
 
-                var minDate = new Date(today);
-                minDate.setDate(today.getDate() - 3); // ลบ 3 วันจากวันนี้
-
-                // alert(minDate)
+                // สร้างปฏิทิน Flatpickr พร้อมปิดวันที่เป็นวันหยุด และไม่สามารถเลือกวันที่ก่อนหน้าวันที่ปัจจุบันได้
                 flatpickr("#startDate", {
-                    dateFormat: "d-m-Y",
-                    defaultDate: today,
-                    minDate: minDate,
-                    disable: response.holidays
+                    dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                    defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
+                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#endDate", {
-                    dateFormat: "d-m-Y",
-                    defaultDate: today,
-                    minDate: minDate,
-                    disable: response.holidays
+                    dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                    defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
+                    minDate: today, // ห้ามเลือกวันที่ในอดีต
+                    disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
 
                 flatpickr("#urgentStartDate", {
@@ -1713,122 +1708,164 @@ echo '</div>';
                     minDate: today, // ห้ามเลือกวันที่ในอดีต
                     disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                 });
-                $('#leaveForm').submit(function(e) {
-                    e.preventDefault();
+            }
+        });
 
-                    var fd = new FormData(this);
-                    var leaveType = $('#leaveType')
-                        .val(); // ดึงค่าหลังจาก submit
-                    var leaveReason = $('#leaveReason').val();
-                    var startDate = $('#startDate').val();
-                    var startTime = $('#startTime').val();
-                    var endDate = $('#endDate').val();
-                    var endTime = $('#endTime').val();
-                    var files = $('#file')[0].files;
+        // ยื่นใบลา
+        $('#leaveForm').submit(function(e) {
+            e.preventDefault(); // ป้องกันฟอร์มจากการส่งอย่างปกติ
 
-                    if (leaveType == 3) {
-                        if (startDate && endDate) {
-                            // แยกปี, เดือน, วันจากสตริงที่ได้จาก input
-                            var startDateParts = startDate.split("-");
-                            var endDateParts = endDate.split("-");
+            var fd = new FormData(this);
 
-                            // สร้างวันที่ด้วยการกำหนดปี, เดือน (ลบ 1 เพราะ JavaScript ใช้ 0-based months), และวัน
-                            var startDate2 = new Date(startDateParts[0], startDateParts[1] -
-                                1, startDateParts[2]);
-                            var endDate2 = new Date(endDateParts[0], endDateParts[1] - 1,
-                                endDateParts[2]);
+            // เพิ่มข้อมูลจาก PHP variables
+            fd.append('userCode', '<?php echo $userCode; ?>');
+            fd.append('userName', '<?php echo $userName; ?>');
+            fd.append('name', '<?php echo $name; ?>');
+            fd.append('telPhone', '<?php echo $telPhone; ?>');
+            fd.append('depart', '<?php echo $depart; ?>');
+            fd.append('level', '<?php echo $level; ?>');
+            fd.append('workplace', '<?php echo $workplace; ?>');
+            fd.append('subDepart', '<?php echo $subDepart; ?>');
+            fd.append('subDepart2', '<?php echo $subDepart2; ?>');
+            fd.append('subDepart3', '<?php echo $subDepart3; ?>');
+            fd.append('subDepart4', '<?php echo $subDepart4; ?>');
+            fd.append('subDepart5', '<?php echo $subDepart5; ?>');
 
-                            // ตรวจสอบว่าการแปลงวันที่สำเร็จหรือไม่
-                            if (!isNaN(startDate2.getTime()) && !isNaN(endDate2
-                                    .getTime())) {
-                                // คำนวณระยะเวลาในการลา
-                                var timeDiff = Math.abs(endDate2 -
-                                    startDate2); // คำนวณความต่างเวลาเป็นมิลลิวินาที
-                                var totalHours = Math.ceil(timeDiff / (1000 *
-                                    3600)); // แปลงเป็นจำนวนชั่วโมง
-                                var workDays = Math.ceil(totalHours /
-                                    8); // แปลงชั่วโมงเป็นวันทำงาน (8 ชั่วโมงต่อวัน)
+            // ดึงค่าจากฟอร์ม
+            var leaveType = $('#leaveType').val();
+            var leaveReason = $('#leaveReason').val();
+            var startDate = $('#startDate').val();
+            var startTime = $('#startTime').val();
+            var endDate = $('#endDate').val();
+            var endTime = $('#endTime').val();
+            var files = $('#file')[0].files;
 
-                                console.log("จำนวนวันทำงานคือ: " + workDays);
-                                console.log("totalHours: " + totalHours);
+            if (leaveType == 3) {
+                if (startDate && endDate) {
+                    var startDateParts = startDate.split("-");
+                    var endDateParts = endDate.split("-");
 
-                                // เช็คว่าจำนวนวันทำงานมากกว่า 3 วันหรือไม่
-                                if (workDays > 3287) {
-                                    // ตรวจสอบว่ามีไฟล์แนบหรือไม่
-                                    if (files.length === 0) {
-                                        Swal.fire({
-                                            title: "ไม่สามารถลาได้",
-                                            text: "คุณต้องแนบไฟล์ประกอบการลาเนื่องจากลามากกว่า 3 วัน",
-                                            icon: "error"
-                                        });
-                                        return false; // หยุดการส่งฟอร์ม
-                                    }
-                                }
-                            } else {
-                                console.log("การแปลงวันที่ไม่สำเร็จ");
-                            }
-                        } else {
-                            console.log("ไม่สามารถดึงค่า startDate หรือ endDate ได้");
-                        }
-                    }
+                    var startDate2 = new Date(startDateParts[0], startDateParts[1] - 1, startDateParts[
+                        2]);
+                    var endDate2 = new Date(endDateParts[0], endDateParts[1] - 1, endDateParts[2]);
 
-                    fd.append('leaveType', leaveType);
-                    fd.append('leaveReason', leaveReason);
-                    fd.append('startDate', startDate);
-                    fd.append('startTime', startTime);
-                    fd.append('endDate', endDate);
-                    fd.append('endTime', endTime);
-                    if (files.length > 0) {
-                        fd.append('file', files[0]);
-                    }
+                    var today = new Date();
 
-                    if (leaveType == 'เลือกประเภทการลา') {
-                        Swal.fire({
-                            title: "ไม่สามารถลาได้",
-                            text: "กรุณาเลือกประเภทการลา",
-                            icon: "error"
-                        });
-                        return false;
-                    } else if (leaveReason == '') {
-                        Swal.fire({
-                            title: "ไม่สามารถลาได้",
-                            text: "กรุณาระบุเหตุผลการลา",
-                            icon: "error"
-                        });
-                        return false;
-                    } else {
-                        $('#btnSubmitForm1').prop('disabled', true).html(
-                            '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
-                        );
+                    if (!isNaN(startDate2.getTime()) && !isNaN(endDate2.getTime())) {
+                        var timeDiff = Math.abs(endDate2 - startDate2);
+                        var totalHours = Math.ceil(timeDiff / (1000 * 3600));
+                        var workDays = Math.ceil(totalHours / 8);
 
-                        $.ajax({
-                            url: 'u_ajax_add_leave.php',
-                            type: 'POST',
-                            data: fd,
-                            contentType: false,
-                            processData: false,
-                            success: function(response) {
+                        console.log("จำนวนวันทำงานคือ: " + workDays);
+                        console.log("totalHours: " + totalHours);
+                        console.log("workDays: " + workDays);
+
+                        // เช็คว่าจำนวนวันทำงานมากกว่า 3 วันหรือไม่
+                        if (workDays > 3287) {
+                            // ตรวจสอบว่ามีไฟล์แนบหรือไม่
+                            if (files.length === 0) {
                                 Swal.fire({
-                                    title: "บันทึกสำเร็จ",
-                                    text: "บันทึกคำขอลาสำเร็จ",
-                                    icon: "success"
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            },
-                            error: function() {
-                                Swal.fire({
-                                    title: "เกิดข้อผิดพลาด",
-                                    text: "ไม่สามารถบันทึกคำขอลาได้",
+                                    title: "ไม่สามารถลาได้",
+                                    text: "การลาต้องมีไฟล์แนบเนื่องจากเกิน 3 วัน",
                                     icon: "error"
                                 });
-                            },
-                            complete: function() {
-                                $('#btnSubmitForm1').prop(
-                                        'disabled', false)
-                                    .html('ยื่นใบลา');
+                                return false; // หยุดการส่งฟอร์ม
+                            } else if (endDate2 < today) {
+                                // อนุญาตให้ยื่นคำขอลาย้อนหลังได้เนื่องจากเกิน 3 วัน และเป็นการลาย้อนหลัง
+                                Swal.fire({
+                                    title: "ยื่นคำขอได้ย้อนหลัง",
+                                    text: "คุณสามารถยื่นคำขอลาได้ย้อนหลังเนื่องจากป่วยเกิน 3 วัน",
+                                    icon: "success"
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: "ยื่นคำขอได้",
+                                    text: "คุณสามารถยื่นคำขอลาได้",
+                                    icon: "success"
+                                });
                             }
+                        }
+                    } else {
+                        console.log("การแปลงวันที่ไม่สำเร็จ");
+                    }
+                } else {
+                    console.log("ไม่สามารถดึงค่า startDate หรือ endDate ได้");
+                }
+            }
+
+
+            // เพิ่มข้อมูลจากฟอร์มลงใน FormData object
+            fd.append('leaveType', leaveType);
+            fd.append('leaveReason', leaveReason);
+            fd.append('startDate', startDate);
+            fd.append('startTime', startTime);
+            fd.append('endDate', endDate);
+            fd.append('endTime', endTime);
+            if (files.length > 0) {
+                fd.append('file', files[0]);
+            }
+
+            var createDate = new Date();
+            var formattedDate = createDate.toISOString().slice(0, 19).replace('T', ' ');
+            fd.append('formattedDate', formattedDate);
+
+            // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
+            if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
+                Swal.fire({
+                    title: "ไม่สามารถลาได้",
+                    text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
+                    icon: "error"
+                });
+                return false; // หยุดการส่งฟอร์ม
+            }
+
+            // ตรวจสอบข้อมูลก่อนการส่ง
+            if (leaveType == 'เลือกประเภทการลา') {
+                Swal.fire({
+                    title: "ไม่สามารถลาได้",
+                    text: "กรุณาเลือกประเภทการลา",
+                    icon: "error"
+                });
+                return false;
+            } else if (leaveReason == '') {
+                Swal.fire({
+                    title: "ไม่สามารถลาได้",
+                    text: "กรุณาระบุเหตุผลการลา",
+                    icon: "error"
+                });
+                return false;
+            } else {
+                // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
+                $('#btnSubmitForm1').prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
+                );
+
+                // ส่งข้อมูลแบบ AJAX
+                $.ajax({
+                    url: 'u_ajax_add_leave.php',
+                    type: 'POST',
+                    data: fd,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: "บันทึกสำเร็จ",
+                            text: "บันทึกคำขอลาสำเร็จ",
+                            icon: "success"
+                        }).then(() => {
+                            location.reload();
                         });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: "เกิดข้อผิดพลาด",
+                            text: "ไม่สามารถบันทึกคำขอลาได้",
+                            icon: "error"
+                        });
+                    },
+                    complete: function() {
+                        // เปิดการใช้งานปุ่มอีกครั้ง
+                        $('#btnSubmitForm1').prop('disabled', false).html('ยื่นใบลา');
                     }
                 });
             }
@@ -2067,7 +2104,6 @@ echo '</div>';
             });
         });
     });
-
 
     function checkOther(select) {
         var otherReasonInput = document.getElementById('otherReason');

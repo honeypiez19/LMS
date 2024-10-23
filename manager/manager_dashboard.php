@@ -103,7 +103,7 @@ WHERE li.l_leave_status = 0
         -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
         (em.e_department = :subDepart AND li.l_department = :subDepart)
         OR
-        -- (li.l_level = 'chief' AND em.e_department = 'Management')
+        -- (em.e_department = 'Management' AND li.l_department = 'Management')
         -- OR
         (em.e_department = 'Management' AND li.l_department IN (
             em.e_sub_department,
@@ -113,12 +113,6 @@ WHERE li.l_leave_status = 0
             em.e_sub_department5
         ))
     )
-    AND (
-        -- เงื่อนไขเพื่อตรวจสอบว่าผู้จัดการดูแลแผนก RD หรือไม่
-        (em.e_department != 'RD') OR
-        (em.e_department = 'RD' AND li.l_department = 'RD')
-    )
-    AND NOT (li.l_level = 'chief' AND em.e_department = 'RD')
 GROUP BY li.l_name";
 
 $stmt_check_leave = $conn->prepare($sql_check_leave);
@@ -164,9 +158,6 @@ WHERE li.l_leave_status = 1
         -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
         (em.e_department = :subDepart AND li.l_department = :subDepart)
         OR
-        -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
-        (li.l_level = 'chief' AND em.e_department = 'Management')
-        OR
         -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
         (em.e_department = 'Management' AND li.l_department IN (
             em.e_sub_department,
@@ -177,7 +168,7 @@ WHERE li.l_leave_status = 1
     )
 GROUP BY l_name";
 $stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
-$stmt_cancel_leave->bindParam(':depart', $depart);
+// $stmt_cancel_leave->bindParam(':depart', $depart);
 $stmt_cancel_leave->bindParam(':subDepart', $subDepart);
 $stmt_cancel_leave->execute();
 

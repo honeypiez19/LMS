@@ -734,6 +734,9 @@ echo '</div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus =
+                                '';
                         } else {
                             approveStatus = 'ไม่พบสถานะ';
                         }
@@ -759,6 +762,9 @@ echo '</div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus2 =
+                                '';
                         } else {
                             approveStatus2 = 'ไม่พบสถานะ';
                         }
