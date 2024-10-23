@@ -284,6 +284,7 @@ if ($stmt_check_leave_id_7->rowCount() > 0) {
 
 // // echo 'Total Leave Days: ' . $sum_day;
 
+<<<<<<< Updated upstream
 // // Display alert with total leave days
 // if ($sum_day >= 10) {
 //     echo '<div class="alert d-flex align-
@@ -294,6 +295,18 @@ if ($stmt_check_leave_id_7->rowCount() > 0) {
 //     <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 // </div>';
 // }
+=======
+// Display alert with total leave days
+if ($sum_day >= 10) {
+    echo '<div class="alert d-flex align-
+    items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
+    <i class="fa-solid fa-chart-line me-2"></i>
+    <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'chief_leave.php\'">สถิติการลาและมาสาย</button>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+}
+>>>>>>> Stashed changes
 ?>
 
     <div class="mt-3 container-fluid">
