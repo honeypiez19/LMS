@@ -124,9 +124,7 @@ echo "</select>";
                             <?php
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
-AND em.e_sub_department = '$subDepart'
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
 AND Year(l_create_datetime) = '$selectedYear'
 AND Month(l_create_datetime) = '$selectedMonth'
 AND l_level = 'user'
@@ -275,6 +273,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                 </thead>
                 <tbody class="text-center">
                     <?php
+// echo $subDepart;
 $itemsPerPage = 10;
 
 // คำนวณหน้าปัจจุบัน
@@ -293,6 +292,34 @@ AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
 ORDER BY l_create_datetime DESC";
+
+
+// $sql = "SELECT
+//     li.*,
+//     em.e_department,
+//     em.e_sub_department,
+//     em.e_sub_department2,
+//     em.e_sub_department3,
+//     em.e_sub_department4,
+//     em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+// WHERE
+//     li.l_approve_status IN (0, 1, 2, 3, 6)
+//     AND li.l_level IN ('user')
+//     AND li.l_leave_id NOT IN (6, 7)
+//     AND YEAR(li.l_create_datetime) = '$selectedYear'
+//     AND MONTH(li.l_create_datetime) = '$selectedMonth'
+//     AND (
+//         -- Check for matching department or sub-department
+//         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+//         OR (li.l_department = '$subDepart2')
+//         OR (li.l_department = '$subDepart3')
+//         OR (li.l_department = '$subDepart4')
+//         OR (li.l_department = '$subDepart5')
+//     )
+// ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

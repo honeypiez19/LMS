@@ -132,7 +132,7 @@ $sql = "SELECT
     li.l_username,
     li.l_name,
     li.l_department,
-    em.e_sub_department,
+       em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
     em.e_sub_department4,
@@ -141,30 +141,18 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-<<<<<<< Updated upstream
-    li.l_leave_status = 0
-    AND li.l_approve_status IN (0,2,3,6)
-=======
-     li.l_approve_status IN (0,2,3,6)
-
->>>>>>> Stashed changes
-    -- AND li.l_approve_status2 = 1
+    li.l_approve_status = 2
     AND li.l_level IN ('user', 'chief', 'leader')
-    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-    AND Year(li.l_create_datetime) = :selectedYear
-    AND Month(li.l_create_datetime) = :selectedMonth
+    AND li.l_leave_id NOT IN (6, 7)
+    AND YEAR(li.l_create_datetime) = '$selectedYear'
+    AND MONTH(li.l_create_datetime) = '$selectedMonth'
     AND (
-        -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR
-        -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
-        (em.e_department = 'Management' AND li.l_department IN (
-            em.e_sub_department,
-            em.e_sub_department2,
-            em.e_sub_department3,
-            em.e_sub_department4,
-            em.e_sub_department5,
-            em.e_department))
+        -- Check for matching department or sub-department
+        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
     )";
 
 // เตรียมและรัน query
@@ -203,36 +191,29 @@ COUNT(li.l_list_id) AS totalLeaveItems,
 li.l_username,
 li.l_name,
 li.l_department,
-em.e_sub_department,
-em.e_sub_department2,
-em.e_sub_department3,
-em.e_sub_department4,
-em.e_sub_department5
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
+    ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (0,2,3,6)
-AND li.l_approve_status2 = 1
-AND li.l_level IN ('user', 'chief', 'leader')
-AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth
-AND (
-    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
-    (em.e_department = :subDepart AND li.l_department = :subDepart)
-    OR
-    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
-    (li.l_level = 'chief' AND em.e_department = 'Management')
-    OR
-    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
-    (em.e_department = 'Management' AND li.l_department IN (
-        em.e_sub_department,
-        em.e_sub_department2,
-        em.e_sub_department3,
-        em.e_sub_department4,
-        em.e_sub_department5))
-)";
+    li.l_approve_status = 2
+    AND li.l_approve_status2 = 1
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND YEAR(li.l_create_datetime) = '$selectedYear'
+    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND (
+        -- Check for matching department or sub-department
+        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
+    )";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -268,36 +249,29 @@ COUNT(li.l_list_id) AS totalLeaveItems,
 li.l_username,
 li.l_name,
 li.l_department,
-em.e_sub_department,
-em.e_sub_department2,
-em.e_sub_department3,
-em.e_sub_department4,
-em.e_sub_department5
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
+    ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (0,2,3,6)
-AND li.l_approve_status2 = 4
-AND li.l_level IN ('user', 'chief', 'leader')
-AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth
-AND (
-    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
-    (em.e_department = :subDepart AND li.l_department = :subDepart)
-    OR
-    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
-    (li.l_level = 'chief' AND em.e_department = 'Management')
-    OR
-    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
-    (em.e_department = 'Management' AND li.l_department IN (
-        em.e_sub_department,
-        em.e_sub_department2,
-        em.e_sub_department3,
-        em.e_sub_department4,
-        em.e_sub_department5))
-)";
+    li.l_approve_status = 2
+    AND li.l_approve_status2 = 4
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND YEAR(li.l_create_datetime) = '$selectedYear'
+    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND (
+        -- Check for matching department or sub-department
+        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
+    )";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -332,35 +306,29 @@ COUNT(li.l_list_id) AS totalLeaveItems,
 li.l_username,
 li.l_name,
 li.l_department,
-em.e_sub_department,
-em.e_sub_department2,
-em.e_sub_department3,
-em.e_sub_department4,
-em.e_sub_department5
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
+    ON li.l_usercode = em.e_usercode
 WHERE
- li.l_approve_status IN (0,2,3,6)
-AND li.l_approve_status2 = 5
-AND li.l_level IN ('user', 'chief', 'leader')
-AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth
-AND (
-    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
-    (em.e_department = :subDepart AND li.l_department = :subDepart)
-    OR
-
-    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
-    (em.e_department = 'Management' AND li.l_department IN (
-        em.e_sub_department,
-        em.e_sub_department2,
-        em.e_sub_department3,
-        em.e_sub_department4,
-        em.e_sub_department5,
-        em.e_department))
-)";
+    li.l_approve_status = 2
+    AND li.l_approve_status2 = 5
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND YEAR(li.l_create_datetime) = '$selectedYear'
+    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND (
+        -- Check for matching department or sub-department
+        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
+    )";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -433,11 +401,8 @@ if (!isset($_GET['page'])) {
 // $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-echo $subDepart;
-echo ' แผนก ' . $depart;
 
 $sql = "SELECT
-<<<<<<< Updated upstream
     li.*,
     em.e_department,
     em.e_sub_department,
@@ -457,46 +422,11 @@ WHERE
     AND (
         -- Check for matching department or sub-department
         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR
-    
-        (em.e_department = 'Management' AND li.l_department IN (
-            em.e_sub_department,
-            em.e_sub_department2,
-            em.e_sub_department3,
-            em.e_sub_department4,
-            em.e_sub_department5
-        ))
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
     )
-=======
-li.*,
-em.e_sub_department,
-em.e_sub_department2,
-em.e_sub_department3,
-em.e_sub_department4,
-em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
-WHERE
- li.l_approve_status IN (0,2, 3, 6)
-AND li.l_level IN ('user', 'chief', 'leader')
-AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_create_datetime) = '$selectedYear'
-AND Month(li.l_create_datetime) = '$selectedMonth'
-AND (
-    -- Check for matching department or sub-department
-    (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-    OR
-
-    -- Check if Management and matching sub-department
-    (em.e_department = 'Management' AND li.l_department IN (
-        em.e_sub_department,
-        em.e_sub_department2,
-        em.e_sub_department3,
-        em.e_sub_department4,
-        em.e_sub_department5))
-)
->>>>>>> Stashed changes
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
@@ -1007,6 +937,10 @@ echo '</div>';
         var selectedYear = $("#selectedYear").val();
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
+        var subDepart2 = <?php echo json_encode($subDepart2); ?>;
+        var subDepart3 = <?php echo json_encode($subDepart3); ?>;
+        var subDepart4 = <?php echo json_encode($subDepart4); ?>;
+        var subDepart5 = <?php echo json_encode($subDepart5); ?>;
 
         // alert(selectedYear)
         $.ajax({
@@ -1017,7 +951,12 @@ echo '</div>';
                 month: selectedMonth,
                 year: selectedYear,
                 depart: depart,
-                subDepart: subDepart
+                subDepart: subDepart,
+                subDepart2: subDepart2,
+                subDepart3: subDepart3,
+                subDepart4: subDepart4,
+                subDepart5: subDepart5
+
             },
             dataType: 'json',
             success: function(data) {

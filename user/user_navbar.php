@@ -59,60 +59,140 @@ if (isset($_POST['logoutButton'])) {
     header("Location: ../login.php");
     exit;
 }
+
 ?>
 
-
-<nav class="navbar navbar-expand-lg" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+<body>
+    <nav class="navbar navbar-expand-lg" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
-    <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
-            aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarText">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="user_dashboard.php" style="color: white;">หน้าหลัก</a>
-                </li>
-                <!-- <li class="nav-item">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="user_dashboard.php"
+                            style="color: white;">หน้าหลัก</a>
+                    </li>
+                    <!-- <li class="nav-item">
                     <a class="nav-link" href="user_leave.php" style="color: white;">การลา</a>
                 </li> -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false" style="color: white;">
-                        การลาและการมาสาย
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="user_leave.php">สถิติการลาและการมาสาย</a></li>
-                        <li><a class="dropdown-item" href="user_history.php">ประวัติการลาและการมาสาย</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <form method="post">
-                <ul class="nav justify-content-end">
-                    <?php if (!empty($userName)): ?>
-                    <li class="nav-item">
-                        <label class="mt-2 mx-2" style="color: white;"><?php echo $userName; ?></label>
-                    </li>
-                    <?php endif;?>
-                    <li class="nav-item d-flex align-items-center">
-                        <a href="#"><img src="../logo/th.png" alt="TH Language"
-                                style="width:30px;height:30px; margin: auto 0;"></a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center">
-                        <a href="#" class="ms-2"><img src="../logo/en.png" alt="EN Language"
-                                style="width:30px;height:30px; margin: auto 0;"></a>
-                    </li>
-                    <li class="nav-item">
-                        <button type="submit" name="logoutButton"
-                            class="ms-2 form-control btn btn-dark">ออกจากระบบ</button>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" style="color: white;">
+                            การลาและการมาสาย
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="user_leave.php">สถิติการลาและการมาสาย</a></li>
+                            <li><a class="dropdown-item" href="user_history.php">ประวัติการลาและการมาสาย</a></li>
+                        </ul>
                     </li>
                 </ul>
-            </form>
+                <form method="post">
+                    <ul class="nav justify-content-end">
+                        <?php if (!empty($userName)): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <?php echo $userName; ?>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
+                            </ul>
+                        </li>
+                        <?php endif; ?>
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="#"><img src="../logo/th.png" alt="TH Language"
+                                    style="width:30px;height:30px; margin: auto 0;"></a>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="#" class="ms-2"><img src="../logo/en.png" alt="EN Language"
+                                    style="width:30px;height:30px; margin: auto 0;"></a>
+                        </li>
+                        <li class="nav-item">
+                            <button type="submit" name="logoutButton"
+                                class="ms-2 form-control btn btn-dark">ออกจากระบบ</button>
+                        </li>
+                    </ul>
+                </form>
+            </div>
         </div>
-    </div>
-</nav>
-<!-- <script src="../js/popper.min.js"></script> -->
-<script src="../js/bootstrap.min.js"></script>
-<script src="../js/bootstrap.bundle.js"></script>
-<script src="../js/bootstrap.bundle.min.js"></script>
+    </nav>
+    <!-- Modal สำหรับเปลี่ยนรหัสผ่าน -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">เปลี่ยนรหัสผ่าน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmNewPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="confirmNewPassword"
+                                name="confirmNewPassword" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">เปลี่ยนรหัสผ่าน</button>
+                        </div>
+                    </form>
+                    <div id="changePasswordMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div><!-- <script src="../js/jquery.min.js"></script> -->
+    <script>
+    $(document).ready(function() {
+        $('#changePasswordForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // รับข้อมูลจากฟอร์ม
+            var formData = $(this).serialize();
+
+            $.ajax({
+                type: 'POST',
+                url: 'u_change_password.php',
+                data: formData,
+                success: function(response) {
+                    $('#changePasswordMessage').html(
+                        response);
+                    if (response == 'เปลี่ยนรหัสผ่านใหม่สำเร็จ') {
+                        // $('#changePasswordModal').modal(
+                        //     'hide');
+                        // แสดง SweetAlert
+                        Swal.fire({
+                            title: 'สำเร็จ !',
+                            text: 'เปลี่ยนรหัสผ่านสำเร็จ',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    $('#changePasswordMessage').html(
+                        '<div class="alert alert-danger">เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน</div>'
+                    );
+                }
+            });
+        });
+    });
+    </script>
+
+    <!-- <script src="../js/popper.min.js"></script> -->
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/bootstrap.bundle.js"></script>
+    <script src="../js/bootstrap.bundle.min.js"></script>
+</body>

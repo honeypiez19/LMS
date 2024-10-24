@@ -170,7 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
 
         } else {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'GM'");
         }
 
         // $stmt->bindParam(':depart', $depart);

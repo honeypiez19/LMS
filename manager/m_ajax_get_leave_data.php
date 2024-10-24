@@ -7,16 +7,13 @@ $month = $_GET['month'];
 $year = $_GET['year'];
 $depart = $_GET['depart'];
 $subDepart = $_GET['subDepart'];
+$subDepart2 = $_GET['subDepart2'];
+$subDepart3 = $_GET['subDepart3'];
+$subDepart4 = $_GET['subDepart4'];
+$subDepart5 = $_GET['subDepart5'];
 
 // Prepare a SQL query to select leave data based on the status
-if ($status == 'all') {
-    // $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$year'
-    // AND Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_level IN ('user','chief')
-    // AND l_leave_id NOT IN (6, 7)
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT
+$sql = "SELECT
     li.*,
     em.e_sub_department,
     em.e_sub_department2,
@@ -24,165 +21,37 @@ if ($status == 'all') {
     em.e_sub_department4,
     em.e_sub_department5
 FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-     li.l_approve_status IN (0,2, 3, 6)
-    AND li.l_level IN ('user', 'chief', 'leader')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :year
-    AND Month(li.l_create_datetime) = :month
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR
-        -- Check if chief in Management
-        (li.l_level = 'chief' AND em.e_department = 'Management')
-        OR
-        -- Check if Management and matching sub-department
-        (em.e_department = 'Management' AND li.l_department IN (
-            em.e_sub_department,
-            em.e_sub_department2,
-            em.e_sub_department3,
-            em.e_sub_department4,
-            em.e_sub_department5))
-    )
-    ORDER BY l_create_datetime DESC";
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
+WHERE 
+ li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :year
+AND Month(li.l_create_datetime) = :month
+AND (
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR (li.l_department = :subDepart2)
+    OR (li.l_department = :subDepart3)
+    OR (li.l_department = :subDepart4)
+    OR (li.l_department = :subDepart5)
+)";
 
-// รอ ผจก อนุมัติ
-} else if ($status == 1) {
-    // $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$year'
-    // AND Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_level IN ('user','chief')
-    // AND l_leave_id NOT IN (6, 7)
-    // AND l_approve_status2 = '$status'
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT
-    li.*,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-     li.l_approve_status IN (0,2, 3, 6)
-    AND li.l_level IN ('user', 'chief', 'leader')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :year
-    AND Month(li.l_create_datetime) = :month
-    AND li.l_approve_status2 = :status
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR
-        -- Check if chief in Management
-        (li.l_level = 'chief' AND em.e_department = 'Management')
-        OR
-        -- Check if Management and matching sub-department
-        (em.e_department = 'Management' AND li.l_department IN (
-            em.e_sub_department,
-            em.e_sub_department2,
-            em.e_sub_department3,
-            em.e_sub_department4,
-            em.e_sub_department5))
-    )
-    ORDER BY l_create_datetime DESC";
-} else if ($status == 4) {
-    // $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$year'
-    // AND Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_level IN ('user','chief')
-    // AND l_leave_id NOT IN (6, 7)
-    // AND l_approve_status2 = '$status'
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT
-    li.*,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-     li.l_approve_status IN (0,2, 3, 6)
-    AND li.l_level IN ('user', 'chief', 'leader')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :year
-    AND Month(li.l_create_datetime) = :month
-    AND li.l_approve_status2 = :status
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR
-        -- Check if chief in Management
-        (li.l_level = 'chief' AND em.e_department = 'Management')
-        OR
-        -- Check if Management and matching sub-department
-        (em.e_department = 'Management' AND li.l_department IN (
-            em.e_sub_department,
-            em.e_sub_department2,
-            em.e_sub_department3,
-            em.e_sub_department4,
-            em.e_sub_department5))
-    )
-    ORDER BY l_create_datetime DESC";
-} else if ($status == 5) {
-    // $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$year'
-    // AND Month(l_create_datetime) = '$month'
-    // AND l_department = '$depart'
-    // AND l_level IN ('user','chief')
-    // AND l_leave_id NOT IN (6, 7)
-    // AND l_approve_status2 = '$status'
-    // ORDER BY l_create_datetime DESC";
-    $sql = "SELECT
-    li.*,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-     li.l_approve_status IN (0,2, 3, 6)
-    AND li.l_level IN ('user', 'chief', 'leader')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :year
-    AND Month(li.l_create_datetime) = :month
-    AND li.l_approve_status2 = :status
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR
-        -- Check if chief in Management
-        (li.l_level = 'chief' AND em.e_department = 'Management')
-        OR
-        -- Check if Management and matching sub-department
-        (em.e_department = 'Management' AND li.l_department IN (
-            em.e_sub_department,
-            em.e_sub_department2,
-            em.e_sub_department3,
-            em.e_sub_department4,
-            em.e_sub_department5))
-    )
-    ORDER BY l_create_datetime DESC";
-} else {
-    echo 'ไม่พบสถานะ';
+// Conditionally add filters based on status
+if ($status != 'all') {
+    $sql .= " AND li.l_approve_status = 2 AND li.l_approve_status2 = :status";
 }
+
+
+$sql .= " ORDER BY l_create_datetime DESC";
 
 // Prepare and execute the statement
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
 $stmt->bindParam(':month', $month, PDO::PARAM_INT);
-$stmt->bindParam(':year', $year, PDO::PARAM_INT); // Missing binding for year
-$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+$stmt->bindParam(':year', $year, PDO::PARAM_INT);
 
 // Conditionally bind the status if it's not 'all'
 if ($status != 'all') {

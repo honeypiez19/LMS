@@ -55,22 +55,65 @@
         <h2 class="text-center">เข้าสู่ระบบ</h2>
         <form id="loginForm">
             <div class="mb-3">
-                <label for="usercode" class="form-label">Usercode</label>
+                <label for="usercode" class="form-label">รหัสพนักงาน</label>
                 <input type="text" class="form-control" id="usercode" name="usercode" placeholder="Usercode" required>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">รหัสผ่าน</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password"
                     required>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
         </form>
         <div id="message" class="mt-3"></div>
+        <div class="mt-3 text-center">
+            <a href="#" id="forgotPasswordLink" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">ลืมรหัสผ่าน
+                ?</a>
+        </div>
+    </div>
+    <!-- Modal สำหรับลืมรหัสผ่าน -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">รีเซ็ตรหัสผ่านใหม่</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="text-danger">โปรดติดต่อ HR</h4>
+                    <!-- <form id="forgotPasswordForm">
+                        <div class="mb-3">
+                            <label for="usercode" class="form-label">รหัสพนักงาน</label>
+                            <input type="text" class="form-control" id="userCode" name="userCode"
+                                placeholder="รหัสพนักงาน" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                placeholder="รหัสผ่านใหม่" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmNewPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="confirmNewPassword"
+                                name="confirmNewPassword" placeholder="ยืนยันรหัสผ่านใหม่" required>
+                        </div>
+                    </form> -->
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"></button> -->
+                    <button type="button" class="btn btn-primary">ตกลง</button>
+                    <!-- <button type="button" class="btn btn-primary" id="submitNewPassword">ตกลง</button> -->
+
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
     $(document).ready(function() {
         $("#loginForm").submit(function(e) {
+
             e.preventDefault(); // หยุดการ submit form ปกติ
             var userCode = $("#usercode").val(); // รับค่า usercode จากฟอร์ม
             var passWord = $("#password").val(); // รับค่า password จากฟอร์ม
@@ -207,7 +250,8 @@
                                     "leader/leader_dashboard.php";
                             }
                         });
-                    } else if (response == "manager" || response == "manager2") {
+                    } else if (response == "manager" || response == "manager2" ||
+                        response == "assisManager") {
 
                         Swal.fire({
                             title: "Welcome manager",
@@ -273,6 +317,47 @@
                         title: 'Error',
                         text: 'An error occurred while processing your request. Please try again later.'
                     });
+                }
+            });
+        });
+        // เปิด Modal เมื่อคลิกที่ลิงก์ "ลืมรหัสผ่าน"
+        $('#forgotPasswordLink').on('click', function(e) {
+            e.preventDefault(); // ป้องกันการทำงานของลิงก์
+            $('#forgotPasswordModal').modal('show'); // แสดง Modal
+        });
+
+        // จัดการส่งฟอร์มกรอกรหัสผ่านใหม่
+        $('#submitNewPassword').on('click', function() {
+            var formData = $('#forgotPasswordForm').serialize();
+
+            $.ajax({
+                type: 'POST',
+                url: 'change_password.php', // ใส่ชื่อไฟล์ PHP ที่จัดการการเปลี่ยนรหัสผ่าน
+                data: formData,
+                success: function(response) {
+                    // $('#forgotPasswordModal').modal('hide'); // ปิด Modal
+                    $('#message').html(response); // แสดงข้อความตอบกลับ
+                    if (response == 'เปลี่ยนรหัสผ่านใหม่สำเร็จ') {
+                        // $('#changePasswordModal').modal(
+                        //     'hide');
+
+                        // แสดง SweetAlert
+                        Swal.fire({
+                            title: 'สำเร็จ !',
+                            text: 'เปลี่ยนรหัสผ่านสำเร็จ',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload(); // รีโหลดหน้าหลังจากกด OK
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    $('#message').html(
+                        '<div class="alert alert-danger">เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน</div>'
+                    );
                 }
             });
         });

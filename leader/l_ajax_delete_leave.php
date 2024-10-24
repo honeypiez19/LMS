@@ -66,6 +66,17 @@ if ($stmtReturn->execute()) {
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
             $stmt->bindParam(':workplace', $workplace);
         }
+        else if ($depart == 'CAD1') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
+            $stmt->bindParam(':workplace', $workplace);
+        } else if ($depart == 'CAD2') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department2 = 'CAD2'");
+            $stmt->bindParam(':workplace', $workplace);
+
+        } else if ($depart == 'CAM') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM'");
+            $stmt->bindParam(':workplace', $workplace);
+        } 
     } else if ($level == 'chief') {
         if ($depart == 'Management') {
             // แจ้งเตือนไปที่พี่ตุ๊ก
