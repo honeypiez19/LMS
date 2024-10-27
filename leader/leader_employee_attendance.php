@@ -135,32 +135,68 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT 
+-- li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+-- FROM leave_list li
+-- INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+-- AND Year(l_create_datetime) = '$selectedYear'
+-- AND Month(l_create_datetime) = '$selectedMonth'
+-- AND l_level = 'user'
+-- AND l_leave_id = 7
+    em.*,
+    li.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id = 7
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE 
+    li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id = 7
+    AND (
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+    )
+    AND YEAR(li.l_create_datetime) = :selectedYear
+    AND MONTH(li.l_create_datetime) = :selectedMonth
 ORDER BY l_create_datetime DESC";
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
 
-// คำนวณหน้าทั้งหมด
+// Count total rows for pagination
+$countQuery = $conn->prepare($sql);
+$countQuery->bindParam(':subDepart', $subDepart);
+$countQuery->bindParam(':subDepart2', $subDepart2);
+$countQuery->bindParam(':subDepart3', $subDepart3);
+$countQuery->bindParam(':subDepart4', $subDepart4);
+$countQuery->bindParam(':subDepart5', $subDepart5);
+$countQuery->bindParam(':selectedYear', $selectedYear);
+$countQuery->bindParam(':selectedMonth', $selectedMonth);
+$countQuery->execute();
+$totalRows = $countQuery->rowCount();
+
+// Calculate total pages and offset
 $totalPages = ceil($totalRows / $itemsPerPage);
-
-// คำนวณ offset สำหรับ pagination
 $offset = ($currentPage - 1) * $itemsPerPage;
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
-
-// ประมวลผลคำสั่ง SQL
+// Add LIMIT and OFFSET for pagination
+$sql .= " LIMIT :itemsPerPage OFFSET :offset";
 $stmt = $conn->prepare($sql);
+
+// Bind all parameters
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 
+// Fetch results
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Display results in a table
 if (count($result) > 0) {
     echo '<table class="table">';
     echo '<thead>';
@@ -179,6 +215,7 @@ if (count($result) > 0) {
         </tr>';
     echo '</thead>';
     echo '<tbody>';
+
     foreach ($result as $index => $row) {
         $rowNumber = $totalRows - ($offset + $index);
         echo '<tr class="text-center align-middle">';
@@ -418,49 +455,80 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT 
+    em.*,
+    li.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id = 7
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE 
+    li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id = 7
+    AND (
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+    )
+    AND YEAR(li.l_create_datetime) = :selectedYear
+    AND MONTH(li.l_create_datetime) = :selectedMonth
 ORDER BY l_create_datetime DESC";
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
 
-// คำนวณหน้าทั้งหมด
+// Count total rows for pagination
+$countQuery = $conn->prepare($sql);
+$countQuery->bindParam(':subDepart', $subDepart);
+$countQuery->bindParam(':subDepart2', $subDepart2);
+$countQuery->bindParam(':subDepart3', $subDepart3);
+$countQuery->bindParam(':subDepart4', $subDepart4);
+$countQuery->bindParam(':subDepart5', $subDepart5);
+$countQuery->bindParam(':selectedYear', $selectedYear);
+$countQuery->bindParam(':selectedMonth', $selectedMonth);
+$countQuery->execute();
+$totalRows = $countQuery->rowCount();
+
+// Calculate total pages and offset
 $totalPages = ceil($totalRows / $itemsPerPage);
-
-// คำนวณ offset สำหรับ pagination
 $offset = ($currentPage - 1) * $itemsPerPage;
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
-
-// ประมวลผลคำสั่ง SQL
+// Add LIMIT and OFFSET for pagination
+$sql .= " LIMIT :itemsPerPage OFFSET :offset";
 $stmt = $conn->prepare($sql);
+
+// Bind all parameters
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear);
+$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 
+// Fetch results
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Display results in a table
 if (count($result) > 0) {
     echo '<table class="table">';
     echo '<thead>';
     echo '<tr class="text-center align-middle">
-    <th>ลำดับ</th>
-    <th>รหัสพนักงาน</th>
-    <th>ชื่อพนักงาน</th>
-    <th>ประเภท</th>
-    <th>วันที่มาสาย</th>
-    <th>สถานะรายการ</th>
-    <th>สถานะอนุมัติ_1</th>
-    <th>สถานะอนุมัติ_2</th>
-    <th>สถานะ (เฉพาะ HR)</th>
-    <th>หมายเหตุ</th>
-    </tr>';
+        <th>ลำดับ</th>
+        <th>รหัสพนักงาน</th>
+        <th>ชื่อพนักงาน</th>
+        <th>ประเภท</th>
+        <th>วันที่มาสาย</th>
+        <th>สถานะรายการ</th>
+        <th>สถานะอนุมัติ_1</th>
+        <th>สถานะอนุมัติ_2</th>
+        <th>สถานะ (เฉพาะ HR)</th>
+        <th>หมายเหตุ</th>
+        <th></th>
+        </tr>';
     echo '</thead>';
     echo '<tbody>';
+
     foreach ($result as $index => $row) {
         $rowNumber = $totalRows - ($offset + $index);
         echo '<tr class="text-center align-middle">';

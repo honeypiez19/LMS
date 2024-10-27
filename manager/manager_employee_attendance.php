@@ -148,7 +148,7 @@ $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_depart
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
+    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD'  OR '$subDepart' = 'CAD1' OR '$subDepart2' = 'CAD2' OR '$subDepart3' = 'CAM' )
     AND Year(l_create_datetime) = '$selectedYear'
     AND Month(l_create_datetime) = '$selectedMonth'
     -- AND l_level = 'user'

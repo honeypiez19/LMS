@@ -88,35 +88,58 @@ if (!empty($late_entries_list)) {
 // AND l_approve_status2 = 1
 // AND (l_leave_id <> 6 AND l_leave_id <> 7)
 // GROUP BY l_name";
-$sql_check_leave = "SELECT
-    COUNT(l_list_id) AS leave_count,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+
+// $sql_check_leave = "SELECT
+//     COUNT(l_list_id) AS leave_count,
+//     li.l_username,
+//     li.l_name,
+//     li.l_department,
+//     em.e_sub_department,
+//     em.e_sub_department2,
+//     em.e_sub_department3,
+//     em.e_sub_department4,
+//     em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+// WHERE l_leave_status = 0
+//     AND l_approve_status = 0
+//     AND l_level = 'user'
+//     AND (l_leave_id <> 6 AND l_leave_id <> 7)
+//     AND (
+//         (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
+//         OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
+//         OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+//     )
+// GROUP BY l_name";
+
+$sql_check_leave = "SELECT 
+    COUNT(li.l_list_id) AS leave_count,
+    em.*,
+    li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE l_leave_status = 0
-    AND l_approve_status = 0
-    AND l_level = 'user'
-    AND (l_leave_id <> 6 AND l_leave_id <> 7)
+WHERE li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
-        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
-        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
     )
-GROUP BY l_name";
+GROUP BY li.l_name";
 
+// Prepare and bind parameters
 $stmt_check_leave = $conn->prepare($sql_check_leave);
-$stmt_check_leave->bindParam(':depart', $depart);
 $stmt_check_leave->bindParam(':subDepart', $subDepart);
+$stmt_check_leave->bindParam(':subDepart2', $subDepart2);
+$stmt_check_leave->bindParam(':subDepart3', $subDepart3);
+$stmt_check_leave->bindParam(':subDepart4', $subDepart4);
+$stmt_check_leave->bindParam(':subDepart5', $subDepart5);
 $stmt_check_leave->execute();
 
+// Fetch and build employee list
 $employee_names = array();
 while ($row_leave = $stmt_check_leave->fetch(PDO::FETCH_ASSOC)) {
     $employee_names[] = $row_leave['l_name'];
@@ -124,10 +147,11 @@ while ($row_leave = $stmt_check_leave->fetch(PDO::FETCH_ASSOC)) {
 
 $employee_list = implode(', ', $employee_names);
 
+// Display alert if there are pending leave requests
 if (!empty($employee_list)) {
     echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
 <i class="fa-solid fa-circle-exclamation me-2"></i>
-<span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
+<span>มีใบลาของพนักงาน ' . htmlspecialchars($employee_list) . ' กรุณาตรวจสอบ</span>
 <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'leader_leave_request.php\'">ตรวจสอบใบลา</button>
 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
@@ -135,31 +159,29 @@ if (!empty($employee_list)) {
 
 // พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
 $sql_cancel_leave = "SELECT
-    COUNT(l_list_id) AS leave_count,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+    COUNT(li.l_list_id) AS leave_count,
+    em.*,
+    li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE l_leave_status = 1
-    AND l_approve_status = 0
-    AND l_level = 'user'
-    AND (l_leave_id <> 6 AND l_leave_id <> 7)
+WHERE li.l_leave_status = 1
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
-        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
-        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
     )
-GROUP BY l_name";
+GROUP BY li.l_name";
+
 $stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
-$stmt_cancel_leave->bindParam(':depart', $depart);
 $stmt_cancel_leave->bindParam(':subDepart', $subDepart);
+$stmt_cancel_leave->bindParam(':subDepart2', $subDepart2);
+$stmt_cancel_leave->bindParam(':subDepart3', $subDepart3);
+$stmt_cancel_leave->bindParam(':subDepart4', $subDepart4);
+$stmt_cancel_leave->bindParam(':subDepart5', $subDepart5);
+$stmt_cancel_leave->bindParam(':depart', $depart);
 $stmt_cancel_leave->execute();
 
 $employee_names = array();
@@ -180,31 +202,29 @@ if (!empty($employee_list)) {
 
 // มีพนักงานมาสาย --------------------------------------------------------------------------------------------
 $sql_check_leave_id_7 = "SELECT
-COUNT(l_list_id) AS leave_count,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+    COUNT(li.l_list_id) AS leave_count,
+    em.*,
+    li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE l_leave_id = 7
-    AND l_approve_status = 0
-    AND l_level = 'user'
+WHERE li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id = 7
     AND (
-        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
-        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
-        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
     )
-GROUP BY l_name";
+GROUP BY li.l_name";
 
 $stmt_check_leave_id_7 = $conn->prepare($sql_check_leave_id_7);
-$stmt_check_leave_id_7->bindParam(':depart', $depart);
+// $stmt_check_leave_id_7->bindParam(':depart', $depart);
 $stmt_check_leave_id_7->bindParam(':subDepart', $subDepart);
+$stmt_check_leave_id_7->bindParam(':subDepart2', $subDepart2);
+$stmt_check_leave_id_7->bindParam(':subDepart3', $subDepart3);
+$stmt_check_leave_id_7->bindParam(':subDepart4', $subDepart4);
+$stmt_check_leave_id_7->bindParam(':subDepart5', $subDepart5);
 $stmt_check_leave_id_7->execute();
 
 if ($stmt_check_leave_id_7->rowCount() > 0) {
@@ -968,7 +988,7 @@ echo '</div>';
                     <div class="card-body">
                         <div class="card-title">
                             <?php
-$sql_absence_work = "SELECT
+$sql_stop_work = "SELECT
 SUM(
     DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
     -
@@ -992,11 +1012,11 @@ AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0";
 
-$result_absence_work = $conn->prepare($sql_absence_work);
-$result_absence_work->bindParam(':userCode', $userCode);
-$result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$result_absence_work->execute();
-$stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
+$result_stop_work = $conn->prepare($sql_stop_work);
+$result_stop_work->bindParam(':userCode', $userCode);
+$result_stop_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$result_stop_work->execute();
+$stop_work = $result_stop_work->fetch(PDO::FETCH_ASSOC);
 
 if ($stop_work) {
 // Fetch total personal leave and leave durations

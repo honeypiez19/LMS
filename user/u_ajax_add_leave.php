@@ -35,6 +35,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($_POST['endDate']));
     $leaveTimeEnd = $_POST['endTime'];
 
+    if($leaveTimeStart == '12:00'){
+        $leaveTimeStart = '11:45';
+    } else if($leaveTimeStart == '13:00'){
+        $leaveTimeStart = '12:45';
+    } else if($leaveTimeStart == '17:00'){
+        $leaveTimeStart = '16:40';
+    }
+    
+    if($leaveTimeEnd == '12:00'){
+        $leaveTimeEnd = '11:45';
+    } else if($leaveTimeEnd == '13:00'){
+        $leaveTimeEnd = '12:45';
+    } else if($leaveTimeEnd == '17:00'){
+        $leaveTimeEnd = '16:40';
+    }
+
+    
     // วันที่สร้างใบลา
     $formattedDate = $_POST['formattedDate'];
 
@@ -142,14 +159,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             }
         } else if ($depart == 'CAD1') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAD1'");
             $stmt->bindParam(':workplace', $workplace);
         } else if ($depart == 'CAD2') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD2'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAD2'");
             $stmt->bindParam(':workplace', $workplace);
 
         } else if ($depart == 'CAM') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAM'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAM2'");
             $stmt->bindParam(':workplace', $workplace);
 
         } else {
