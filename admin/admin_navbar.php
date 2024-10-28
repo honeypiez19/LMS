@@ -148,6 +148,75 @@ if (isset($_POST['logoutButton'])) {
             </div>
         </div>
     </nav>
+    <!-- Modal สำหรับเปลี่ยนรหัสผ่าน -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">เปลี่ยนรหัสผ่าน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmNewPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" class="form-control" id="confirmNewPassword"
+                                name="confirmNewPassword" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">เปลี่ยนรหัสผ่าน</button>
+                        </div>
+                    </form>
+                    <div id="changePasswordMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    $(document).ready(function() {
+        $('#changePasswordForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // รับข้อมูลจากฟอร์ม
+            var formData = $(this).serialize();
+
+            $.ajax({
+                type: 'POST',
+                url: 'a_change_password.php',
+                data: formData,
+                success: function(response) {
+                    $('#changePasswordMessage').html(
+                        response);
+                    if (response == 'เปลี่ยนรหัสผ่านใหม่สำเร็จ') {
+                        // $('#changePasswordModal').modal(
+                        //     'hide');
+                        // แสดง SweetAlert
+                        Swal.fire({
+                            title: 'สำเร็จ !',
+                            text: 'เปลี่ยนรหัสผ่านสำเร็จ',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    $('#changePasswordMessage').html(
+                        '<div class="alert alert-danger">เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน</div>'
+                    );
+                }
+            });
+        });
+    });
+    </script>
     <script src="../js/bootstrap.min.js"></script>
     <script src="../js/bootstrap.bundle.js"></script>
     <script src="../js/bootstrap.bundle.min.js"></script>

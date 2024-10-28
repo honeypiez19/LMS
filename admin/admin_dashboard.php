@@ -108,7 +108,9 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -128,7 +130,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 
 ?>
@@ -149,7 +153,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -169,7 +175,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -191,7 +199,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
             <thead>
                 <tr class="text-center align-middle">
                     <th rowspan="2">ลำดับ</th>
-                    <th rowspan="2">รหัสพนักงาน</th>
+                    <th rowspan="1">รหัสพนักงาน</th>
                     <th rowspan="1">ชื่อ - นามสกุล</th>
                     <th rowspan="2">วันที่ยื่นใบลา</th>
                     <th rowspan="1">รายการลา</th>
@@ -212,6 +220,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                 <tr class="text-center">
                     <th><input type="text" class="form-control" id="codeSearch"></th>
                     <th><input type="text" class="form-control" id="nameSearch"></th>
+                    <th><input type="text" class="form-control" id="leaveSearch"></th>
                     <!-- <th><input type="text" class="form-control" id="leaveSearch"></th> -->
                     <th>จาก</th>
                     <th>ถึง</th>
@@ -228,7 +237,12 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC ";
+$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 
+AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
+
+";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
