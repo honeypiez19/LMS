@@ -3,42 +3,15 @@ include '../connect.php';
 
 if (isset($_POST['userCode'])) {
     $userCode = $_POST['userCode'];
-    $currentYear = date("Y");
-    $lastYear = $currentYear - 1;
 
-    $sql = "SELECT * FROM leave_list 
-            WHERE l_usercode = :userCode
-            AND (
-                (l_leave_id IN (1, 2, 3, 4, 8) 
-                AND l_create_datetime BETWEEN :startDateLastYear AND :endDateThisYear) 
-                OR (l_leave_id = 5 
-                AND l_create_datetime BETWEEN :startDateThisYear AND :endDateThisYear)
-            )
-            ORDER BY l_create_datetime DESC";
-
+    // สร้างคำสั่ง SQL เพื่อดึงข้อมูลประวัติการลา
+    $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode
+    AND l_leave_id <> 6
+    AND l_leave_id <> 7
+    ORDER BY l_create_datetime DESC";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-
-    // กำหนดช่วงวันที่ตามเงื่อนไข
-    $startDateLastYear = "$lastYear-12-01";
-    $endDateThisYear = "$currentYear-11-30";
-    $startDateThisYear = "$currentYear-01-01";
-    $endDateThisYear = "$currentYear-12-31";
-
-    $stmt->bindParam(':startDateLastYear', $startDateLastYear);
-    $stmt->bindParam(':endDateThisYear', $endDateThisYear);
-    $stmt->bindParam(':startDateThisYear', $startDateThisYear);
-    $stmt->bindParam(':endDateThisYear', $endDateThisYear);
-
     $stmt->execute();
-    // สร้างคำสั่ง SQL เพื่อดึงข้อมูลประวัติการลา
-    // $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode
-    // AND l_leave_id <> 6
-    // AND l_leave_id <> 7
-    // ORDER BY l_create_datetime DESC";
-    // $stmt = $conn->prepare($sql);
-    // $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-    // $stmt->execute();
 
     $rowCount = $stmt->rowCount();
     if ($rowCount > 0) {

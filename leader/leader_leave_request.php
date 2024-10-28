@@ -122,55 +122,19 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-// em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-// AND Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth'
-// AND l_level = 'user'
-// AND l_leave_id <> 6
-// AND l_leave_id <> 7";
-$sql = "SELECT 
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    -- AND li.l_approve_status = 0
-    li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_create_datetime) = '$selectedYear'
+AND Month(l_create_datetime) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
-                                <?php echo htmlspecialchars($totalLeaveItems); ?>
+                                <?php echo $totalLeaveItems; ?>
+                                <!-- <i class="mt-4 fas fa-file-alt ml-2 fa-2xl"></i> -->
                                 <i class="mt-4 fa-regular fa-folder-open fa-2xl"></i>
                             </div>
                         </h5>
@@ -190,44 +154,16 @@ if ($stmt->execute()) {
 // $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
 // AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
-$sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_approve_status = 0
-    AND li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_create_datetime) = '$selectedYear'
+AND Month(l_create_datetime) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
+AND l_approve_status = 0";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -247,44 +183,16 @@ if ($stmt->execute()) {
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_approve_status = 2
-    AND li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_create_datetime) = '$selectedYear'
+AND Month(l_create_datetime) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
+AND l_approve_status = 2";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -304,44 +212,16 @@ if ($stmt->execute()) {
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_approve_status = 3
-    AND li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_create_datetime) = '$selectedYear'
+AND Month(l_create_datetime) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
+AND l_approve_status = 3";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -1327,10 +1207,10 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var level = '<?php echo $level; ?>';
 
                                 $.ajax({
                                     url: 'l_ajax_upd_status.php',
@@ -1347,7 +1227,8 @@ echo '</div>';
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
                                         leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        level: level
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1427,6 +1308,7 @@ echo '</div>';
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+                            var level = '<?php echo $level; ?>';
 
                             var reason = reasonNoProve;
 
@@ -1446,7 +1328,8 @@ echo '</div>';
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName,
-                                    reasonNoProve: reasonNoProve
+                                    reasonNoProve: reasonNoProve,
+                                    level: level
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide'); // ปิด modal

@@ -414,7 +414,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (1, 2, 3, 6)
+    li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_create_datetime) = '$selectedYear'

@@ -53,7 +53,6 @@ $sql_check_late = "SELECT l_leave_start_date, l_leave_start_time, l_leave_end_ti
 FROM leave_list
 WHERE l_usercode = :userCode
 AND l_leave_id = 7
-AND l_approve_status = 2
 AND l_approve_status2 = 1";
 
 $stmt_check_late = $conn->prepare($sql_check_late);
@@ -82,40 +81,7 @@ if (!empty($late_entries_list)) {
 // echo 'SUB : ' . $subDepart;
 // echo ' De : ' . $depart;
 
-// $sql_check_leave = "SELECT
-//     COUNT(li.l_list_id) AS leave_count,
-//     li.l_username,
-//     li.l_name,
-//     li.l_department,
-//     em.e_sub_department,
-//     em.e_sub_department2,
-//     em.e_sub_department3,
-//     em.e_sub_department4,
-//     em.e_sub_department5
-// FROM leave_list li
-// INNER JOIN employees em
-// ON li.l_usercode = em.e_usercode
-// WHERE li.l_leave_status = 0
-//     AND li.l_approve_status IN (0, 2, 3, 6)
-//     AND li.l_approve_status2 = 1
-//     AND li.l_level IN ('user', 'chief', 'leader')
-//     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-//       AND (
-//         -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
-//         (em.e_department = :subDepart AND li.l_department = :subDepart)
-//         OR
-//         -- (em.e_department = 'Management' AND li.l_department = 'Management')
-//         -- OR
-//         (em.e_department = 'Management' AND li.l_department IN (
-//             em.e_sub_department,
-//             em.e_sub_department2,
-//             em.e_sub_department3,
-//             em.e_sub_department4,
-//             em.e_sub_department5
-//         ))
-//     )
-
-$sql_check_leave = "SELECT 
+$sql_check_leave = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_username,
     li.l_name,
@@ -127,27 +93,30 @@ $sql_check_leave = "SELECT
     em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
+ON li.l_usercode = em.e_usercode
 WHERE li.l_leave_status = 0
-    AND li.l_approve_status IN (1, 2, 3, 6)
+    AND li.l_approve_status IN (0, 2, 3, 6)
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+      AND (
+        -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
         (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        OR
+        -- (em.e_department = 'Management' AND li.l_department = 'Management')
+        -- OR
+        (em.e_department = 'Management' AND li.l_department IN (
+            em.e_sub_department,
+            em.e_sub_department2,
+            em.e_sub_department3,
+            em.e_sub_department4,
+            em.e_sub_department5
+        ))
     )
 GROUP BY li.l_name";
 
 $stmt_check_leave = $conn->prepare($sql_check_leave);
-
-// Binding the parameters
 $stmt_check_leave->bindParam(':subDepart', $subDepart);
-$stmt_check_leave->bindParam(':subDepart2', $subDepart2);
-$stmt_check_leave->bindParam(':subDepart3', $subDepart3);
-$stmt_check_leave->bindParam(':subDepart4', $subDepart4);
-$stmt_check_leave->bindParam(':subDepart5', $subDepart5);
-
 $stmt_check_leave->execute();
 
 $employee_names = array();
@@ -157,14 +126,13 @@ while ($row_leave = $stmt_check_leave->fetch(PDO::FETCH_ASSOC)) {
 
 $employee_list = implode(', ', $employee_names);
 
-// If employee_list is not empty, display the alert
 if (!empty($employee_list)) {
     echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
-    <i class="fa-solid fa-circle-exclamation me-2"></i>
-    <span>มีใบลาของพนักงาน ' . htmlspecialchars($employee_list, ENT_QUOTES, 'UTF-8') . ' กรุณาตรวจสอบ</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>';
+<i class="fa-solid fa-circle-exclamation me-2"></i>
+<span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
 }
 
 // พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
