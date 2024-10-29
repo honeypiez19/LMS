@@ -127,10 +127,17 @@ if (isset($_POST['logoutButton'])) {
                 <form method="post">
                     <ul class="nav justify-content-end">
                         <?php if (!empty($userName)): ?>
-                        <li class="nav-item">
-                            <label class="mt-2 mx-2" style="color: white;"><?php echo $userName; ?></label>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <?php echo $userName; ?>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
+                            </ul>
                         </li>
-                        <?php endif;?>
+                        <?php endif; ?>
                         <li class="nav-item d-flex align-items-center">
                             <a href="#"><img src="../logo/th.png" alt="TH Language"
                                     style="width:30px;height:30px; margin: auto 0;"></a>
@@ -141,7 +148,7 @@ if (isset($_POST['logoutButton'])) {
                         </li>
                         <li class="nav-item">
                             <button type="submit" name="logoutButton"
-                                class="form-control btn btn-dark">ออกจากระบบ</button>
+                                class="ms-2 form-control btn btn-dark">ออกจากระบบ</button>
                         </li>
                     </ul>
                 </form>

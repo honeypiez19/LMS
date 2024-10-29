@@ -1987,69 +1987,6 @@ echo '</div>';
             var endTime = $('#endTime').val();
             var files = $('#file')[0].files;
 
-            if (leaveType == 3) {
-                if (startDate && endDate) {
-                    var startDateParts = startDate.split("-");
-                    var endDateParts = endDate.split("-");
-
-                    var startDate2 = new Date(startDateParts[0], startDateParts[1] - 1, startDateParts[
-                        2]);
-                    var endDate2 = new Date(endDateParts[0], endDateParts[1] - 1, endDateParts[2]);
-
-                    var today = new Date();
-
-                    if (!isNaN(startDate2.getTime()) && !isNaN(endDate2.getTime())) {
-                        var timeDiff = Math.abs(endDate2 - startDate2);
-                        var totalHours = Math.ceil(timeDiff / (1000 * 3600));
-                        var workDays = Math.ceil(totalHours / 8);
-
-                        console.log("จำนวนวันทำงานคือ: " + workDays);
-                        console.log("totalHours: " + totalHours);
-                        console.log("workDays: " + workDays);
-
-                        if (endDate < startDate) {
-                            Swal.fire({
-                                title: "ไม่สามารถลาได้",
-                                text: "กรุณาเลือกวันที่เริ่มต้นลาใหม่",
-                                icon: "error"
-                            });
-                        } else {
-                            // เช็คว่าจำนวนวันทำงานมากกว่า 3 วันหรือไม่
-                            if (workDays > 3287) {
-                                // ตรวจสอบว่ามีไฟล์แนบหรือไม่
-                                if (files.length === 0) {
-                                    Swal.fire({
-                                        title: "ไม่สามารถลาได้",
-                                        text: "การลาต้องมีไฟล์แนบเนื่องจากเกิน 3 วัน",
-                                        icon: "error"
-                                    });
-                                    return false; // หยุดการส่งฟอร์ม
-                                }
-                                // } else if (endDate2 < today) {
-                                //     // อนุญาตให้ยื่นคำขอลาย้อนหลังได้เนื่องจากเกิน 3 วัน และเป็นการลาย้อนหลัง
-                                //     Swal.fire({
-                                //         title: "ยื่นคำขอได้ย้อนหลัง",
-                                //         text: "คุณสามารถยื่นคำขอลาได้ย้อนหลังเนื่องจากป่วยเกิน 3 วัน",
-                                //         icon: "success"
-                                //     });
-                                // } else {
-                                //     Swal.fire({
-                                //         title: "ยื่นคำขอได้",
-                                //         text: "คุณสามารถยื่นคำขอลาได้",
-                                //         icon: "success"
-                                //     });
-                                // }
-                            }
-                        }
-
-                    } else {
-                        console.log("การแปลงวันที่ไม่สำเร็จ");
-                    }
-                } else {
-                    console.log("ไม่สามารถดึงค่า startDate หรือ endDate ได้");
-                }
-            }
-
             var createDate = new Date();
 
             var year = createDate.getFullYear();
@@ -2107,12 +2044,100 @@ echo '</div>';
                 });
                 return false;
             } else {
+                // ลบ - ออกจากวันที่
+                var startDate = $('#startDate').val().replace(/-/g, '');
+                var endDate = $('#endDate').val().replace(/-/g, '');
+                var startTime = $('#startTime').val(); // เช่น "08:00"
+                var endTime = $('#endTime').val(); // เช่น "17:00"
+
+                // ตรวจสอบว่าค่าวันที่มีค่าหรือไม่
+                if (!startDate || !endDate || !startTime || !endTime) {
+                    Swal.fire({
+                        title: "ข้อผิดพลาด",
+                        text: "กรุณาเลือกวันที่เริ่มต้น, วันที่สิ้นสุด, เวลาเริ่มต้น และเวลาเสร็จสิ้น",
+                        icon: "error"
+                    });
+                    return false; // หยุดการทำงาน
+                }
+
+                // แปลงวันที่เป็นรูปแบบ Date พร้อมเวลา
+                var start = new Date(startDate.substring(0, 4), startDate.substring(4, 6) - 1, startDate
+                    .substring(6, 8), startTime.split(':')[0], startTime.split(':')[1]);
+                var end = new Date(endDate.substring(0, 4), endDate.substring(4, 6) - 1, endDate
+                    .substring(6, 8), endTime.split(':')[0], endTime.split(':')[1]);
+
+                // ตรวจสอบว่าการแปลงวันที่สำเร็จหรือไม่
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    Swal.fire({
+                        title: "ข้อผิดพลาด",
+                        text: "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
+                        icon: "error"
+                    });
+                    return false; // หยุดการทำงาน
+                }
+
+                // คำนวณความแตกต่างของวันและเวลา
+                var timeDiff = end - start; // ความแตกต่างเป็นมิลลิวินาที
+                var fullDays = Math.floor(timeDiff / (1000 * 3600 * 8)); // จำนวนวันเต็ม
+                var remainingTimeInMs = timeDiff % (1000 * 3600 * 8); // มิลลิวินาทีที่เหลือจากวันเต็ม
+                var hoursDiff = Math.floor(remainingTimeInMs / (1000 * 3600)); // จำนวนชั่วโมงที่เหลือ
+                var minutesDiff = Math.floor((remainingTimeInMs % (1000 * 3600)) / (1000 *
+                    60)); // คำนวณนาทีที่เหลือ
+
+                // คำนวณวันที่รวมทั้งหมดเป็นทศนิยม (เช่น 2.5 สำหรับ 2 วันกับ 4 ชั่วโมง)
+                var totalDaysWithHoursAndMinutes = fullDays + (hoursDiff / 8) + (minutesDiff /
+                    480); // ใช้ 8 ชั่วโมงและ 480 นาทีต่อวันเป็นฐาน
+
+                // console.log(totalDaysWithHoursAndMinutes); // แสดงผลลัพธ์ใน console
+
+                // เงื่อนไขสำหรับ leaveType = 3
+                if (leaveType == 3) {
+                    if (totalDaysWithHoursAndMinutes > 219145.125) { // หากเวลาลามากกว่า 3 วัน
+                        if (files.length === 0) {
+                            Swal.fire({
+                                title: "ไม่สามารถลาได้",
+                                text: "กรุณาแนบไฟล์เมื่อลาเกิน 3 วัน",
+                                icon: "error"
+                            });
+                            return false;
+                        }
+                    }
+                }
+
+                // ลากิจ, ลาพักร้อนให้ลาล่วงหน้า 1 วัน
+                if (leaveType == 1 || leaveType == 5) {
+                    var startDate = $('#startDate').val();
+                    var parts = startDate.split('-');
+                    var formattedDate = parts[2] + '-' + parts[1] + '-' + parts[
+                        0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+
+                    // สร้าง Date object โดยไม่ต้องตั้งเวลา
+                    var leaveStartDate = new Date(formattedDate + 'T00:00:00'); // ตั้งเวลาเป็น 00:00:00
+
+                    var currentDate = new Date();
+                    currentDate.setHours(0, 0, 0, 0); // ตั้งเวลาเป็น 00:00:00
+
+                    console.log("leaveStartDate :" + leaveStartDate);
+                    console.log("currentDate: " + currentDate);
+
+                    // เช็คว่า startDate เก่ากว่าหรือไม่
+                    if (leaveStartDate <= currentDate) {
+                        Swal.fire({
+                            title: "ไม่สามารถลาได้",
+                            text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                            icon: "error"
+                        });
+                        return false;
+                    }
+                }
+
                 if (endDate < startDate) {
                     Swal.fire({
                         title: "ไม่สามารถลาได้",
                         text: "กรุณาเลือกวันที่เริ่มต้นลาใหม่",
                         icon: "error"
                     });
+                    return false;
                 } else { // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
                     $('#btnSubmitForm1').prop('disabled', true);
                     $('#btnSubmitForm1').html(

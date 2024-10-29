@@ -1889,6 +1889,7 @@ echo '</div>';
                 return false; // หยุดการส่งฟอร์ม
             }
 
+
             console.log(leaveReason, startTime, endTime);
             if (leaveType == 'เลือกประเภทการลา') {
                 Swal.fire({
@@ -1903,7 +1904,6 @@ echo '</div>';
                     text: "กรุณาระบุเหตุผลการลา",
                     icon: "error"
                 });
-                return false;
             } else {
                 // ลบ - ออกจากวันที่
                 var startDate = $('#startDate').val().replace(/-/g, '');
@@ -1988,7 +1988,7 @@ echo '</div>';
                             text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
                             icon: "error"
                         });
-                        return false; // หยุดการส่งแบบฟอร์ม
+                        return false;
                     }
                 }
 
@@ -1999,13 +1999,11 @@ echo '</div>';
                         icon: "error"
                     });
                     return false;
-                } else {
-                    // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
-                    $('#btnSubmitForm1').prop('disabled', true).html(
+                } else { // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
+                    $('#btnSubmitForm1').prop('disabled', true);
+                    $('#btnSubmitForm1').html(
                         '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
                     );
-
-                    // ส่งข้อมูลแบบ AJAX
                     $.ajax({
                         url: 'g_ajax_add_leave.php',
                         type: 'POST',
@@ -2013,30 +2011,18 @@ echo '</div>';
                         contentType: false,
                         processData: false,
                         success: function(response) {
-                            Swal.fire({
-                                title: "บันทึกสำเร็จ",
-                                text: "บันทึกคำขอลาสำเร็จ",
-                                icon: "success"
-                            }).then(() => {
-                                location.reload();
-                            });
+                            console.log(response)
+                            alert('บันทึกคำขอลาสำเร็จ');
+                            location.reload();
                         },
                         error: function() {
-                            Swal.fire({
-                                title: "เกิดข้อผิดพลาด",
-                                text: "ไม่สามารถบันทึกคำขอลาได้",
-                                icon: "error"
-                            });
-                        },
-                        complete: function() {
-                            // เปิดการใช้งานปุ่มอีกครั้ง
-                            $('#btnSubmitForm1').prop('disabled', false).html(
-                                'ยื่นใบลา');
+                            alert('เกิดข้อผิดพลาดในการบันทึกคำขอลา');
                         }
                     });
                 }
             }
         });
+
 
         // ลาฉุกเฉิน
         $('#urgentLeaveForm').submit(function(e) {

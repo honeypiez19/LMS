@@ -169,7 +169,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
             <!-- เนื้อหาของตาราง -->
             <tbody class="text-center my-table">
                 <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '$userCode' AND e_department = '$subDepart'";
+// $sql = "SELECT * FROM employees WHERE e_usercode <> '$userCode' AND e_department = '$subDepart'";
 // $sql = "SELECT li.*, em.*
 // FROM leave_list li
 // INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
@@ -177,6 +177,16 @@ $sql = "SELECT * FROM employees WHERE e_usercode <> '$userCode' AND e_department
 // AND l_leave_id <> 6
 // AND l_leave_id <> 7
 // ORDER BY l_usercode DESC";
+
+$sql = "SELECT * FROM employees WHERE e_usercode <> '$userCode' AND (
+    -- Check for matching department or sub-department
+    (e_department = '$subDepart' AND e_department = '$subDepart')
+    OR (e_department = '$subDepart2')
+    OR (e_department = '$subDepart3')
+    OR (e_department = '$subDepart4')
+    OR (e_department = '$subDepart5')
+)";
+
 $result = $conn->query($sql);
 
 $rowNumber = 1;

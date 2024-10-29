@@ -153,7 +153,7 @@ if ($status == '4') {
                 }
                 curl_close($chOne);
             }
-        } elseif ($userName == 'Pornsuk' || $userName == 'Matsumoto') {
+        } elseif ($userName == 'Pornsuk' || $userName == 'Matsumoto' || $userName == 'Chaikorn') {
             // แจ้งเตือน Anchana
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
             $stmt->execute();

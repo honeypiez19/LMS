@@ -659,10 +659,12 @@ echo '</div>';
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+            var level = '<?php echo $level; ?>';
 
             var status = '2'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
             // alert(leaveStatus)
             $.ajax({
@@ -680,7 +682,8 @@ echo '</div>';
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     empName: empName,
-                    leaveStatus: leaveStatus
+                    leaveStatus: leaveStatus,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -752,6 +755,7 @@ echo '</div>';
             var status = '3'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
             var reason = reasonNoProve;
 
@@ -771,7 +775,8 @@ echo '</div>';
                     depart: depart,
                     leaveStatus: leaveStatus,
                     empName: empName,
-                    reasonNoProve: reasonNoProve
+                    reasonNoProve: reasonNoProve,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal

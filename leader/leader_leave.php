@@ -60,6 +60,7 @@ if (isset($_POST['year'])) {
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 }
+
 echo "<select class='form-select' name='year' id='selectYear'>";
 for ($i = -1; $i <= 2; $i++) {
     $year = date('Y', strtotime("last day of -$i year"));
