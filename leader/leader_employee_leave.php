@@ -205,7 +205,8 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 // เลือกปี
 if (isset($_POST['year'])) {
     // $selectedYear = $_POST['year'];
-    
+    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+
     $sql = "SELECT * FROM employees 
     WHERE e_usercode <> :userCode
     AND e_status <> '1' 
@@ -524,7 +525,8 @@ if (isset($_POST['year'])) {
             )
         AND l_leave_status = 0
         AND l_usercode = :userCode
-    
+        AND l_approve_status = :approveStatus
+        AND l_approve_status2 = 4
         ";
         // echo $startDate;
         // echo $endDate;
@@ -534,6 +536,9 @@ if (isset($_POST['year'])) {
         $stmt_leave->bindParam(':selectedYear', $selectedYear);
         $stmt_leave->bindParam(':startDate', $startDate);
         $stmt_leave->bindParam(':endDate', $endDate);
+        $stmt_leave->bindParam(':approveStatus', $approveStatus);
+
+        $stmt_leave->execute();
         $stmt_leave->execute();
         $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
     
@@ -789,6 +794,8 @@ else {
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
     
+    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+
     $sql = "SELECT * FROM employees 
     WHERE e_usercode <> :userCode
     AND e_status <> '1' 
@@ -1107,7 +1114,8 @@ else {
             )
         AND l_leave_status = 0
         AND l_usercode = :userCode
-    
+        AND l_approve_status = :approveStatus
+        AND l_approve_status2 = 4
         ";
         // echo $startDate;
         // echo $endDate;
@@ -1117,6 +1125,9 @@ else {
         $stmt_leave->bindParam(':selectedYear', $selectedYear);
         $stmt_leave->bindParam(':startDate', $startDate);
         $stmt_leave->bindParam(':endDate', $endDate);
+        $stmt_leave->bindParam(':approveStatus', $approveStatus);
+
+        $stmt_leave->execute();
         $stmt_leave->execute();
         $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
     

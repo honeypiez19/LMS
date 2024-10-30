@@ -475,6 +475,7 @@ echo "</select>";
     <div class="container">
         <div class="mt-3 row">
             <span class="text-danger">** 0(0.0) = วัน(ชั่วโมง.นาที)</span>
+            <span class="text-danger">*** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
             <div class="col-3 filter-card">
                 <div class="card text-light mb-3" style="background-color: #031B80; ">
                     <div class="card-body">
@@ -505,11 +506,14 @@ FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $stmt_leave_personal = $conn->prepare($sql_leave_personal);
 $stmt_leave_personal->bindParam(':userCode', $userCode);
 $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
 $stmt_leave_personal->execute();
 $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -601,7 +605,9 @@ FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
 $stmt_leave_personal_no->bindParam(':userCode', $userCode);
@@ -692,7 +698,9 @@ FROM leave_list
 WHERE l_leave_id = 3
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $stmt_leave_sick = $conn->prepare($sql_leave_sick);
 $stmt_leave_sick->bindParam(':userCode', $userCode);
@@ -786,7 +794,9 @@ FROM leave_list
 WHERE l_leave_id = 4
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
 $stmt_leave_sick_work->bindParam(':userCode', $userCode);
@@ -878,7 +888,9 @@ FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = 2024
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $stmt_leave_annual = $conn->prepare($sql_leave_annual);
 $stmt_leave_annual->bindParam(':userCode', $userCode);
@@ -990,7 +1002,9 @@ FROM leave_list
 WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $result_absence_work = $conn->prepare($sql_absence_work);
 $result_absence_work->bindParam(':userCode', $userCode);
@@ -1079,7 +1093,9 @@ FROM leave_list
 WHERE l_leave_id = 8
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $stmt_other = $conn->prepare($sql_other);
 $stmt_other->bindParam(':userCode', $userCode);

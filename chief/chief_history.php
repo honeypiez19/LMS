@@ -73,7 +73,9 @@ echo "</select>";
             </div>
         </form>
         <span class="text-danger">**จำนวนครั้งการลางาน ตั้งแต่ 1 ธันวาคม <?php echo $selectedYear - 1 ?> - 30 พฤศจิกายน
-            <?php echo $selectedYear ?></span>
+            <?php echo $selectedYear ?><br>
+            <span class="text-danger">*** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
+        </span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead class="table table-secondary">
@@ -139,6 +141,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                           WHERE l_leave_id = :leave_id
                           AND YEAR(l_leave_start_date) = :year
                           AND MONTH(l_leave_start_date) = :month
+                          AND l_approve_status2 = 4
                           AND l_usercode = :userCode";
             $stmt_count = $conn->prepare($sql_count);
             $stmt_count->bindParam(':leave_id', $leave_id);

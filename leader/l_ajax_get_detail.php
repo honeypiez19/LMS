@@ -4,6 +4,7 @@ if (isset($_POST['leaveType'])) {
     $leaveType = $_POST['leaveType'];
     $userCode = $_POST['userCode'];
     $selectedYear = $_POST['selectedYear'];
+    // $depart = $_POST['depart'];
 
     // คำนวณวันที่เริ่มต้นและสิ้นสุดตามปีที่เลือก
     $startDate = date(($selectedYear - 1) . "-12-01"); // วันที่เริ่มต้น 1 ธันวาคมของปีที่เลือก
@@ -40,6 +41,7 @@ if (isset($_POST['leaveType'])) {
             WHERE l_leave_id = $conTypeQuoted
             AND l_usercode = $userCodeQuoted
             AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
+            AND l_approve_status2 = 4
             ORDER BY l_leave_start_date DESC";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();

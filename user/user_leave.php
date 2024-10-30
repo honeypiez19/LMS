@@ -77,7 +77,9 @@ echo "</select>";
         <span id="textNotice" class="text-danger"> *สถิติการลา ตั้งแต่เดือนธันวาคม <?php echo $selectedYear - 1 ?> -
             พฤศจิกายน
             <?php echo $selectedYear ?> <br>
-            **สถิติการลาพักร้อน ตั้งแต่เดือนมกราคม - ธันวาคม <?php echo $selectedYear ?> </span>
+            **สถิติการลาพักร้อน ตั้งแต่เดือนมกราคม - ธันวาคม <?php echo $selectedYear ?><br>
+            *** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว
+        </span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead>
@@ -92,6 +94,8 @@ echo "</select>";
 // ถ้าเลือกปี
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    // $approveStatus = ($depart == 'RD') ? 4 : 2;
+    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
@@ -118,12 +122,15 @@ FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
     $stmt_leave_personal->bindParam(':startDate', $startDate);
     $stmt_leave_personal->bindParam(':endDate', $endDate);
+    $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal->execute();
     $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -177,12 +184,15 @@ FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
     $stmt_leave_personal_no->bindParam(':startDate', $startDate);
     $stmt_leave_personal_no->bindParam(':endDate', $endDate);
+    $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal_no->execute();
     $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -236,12 +246,15 @@ FROM leave_list
 WHERE l_leave_id = 3
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
     $stmt_leave_sick->bindParam(':startDate', $startDate);
     $stmt_leave_sick->bindParam(':endDate', $endDate);
+    $stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick->execute();
     $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -296,12 +309,15 @@ FROM leave_list
 WHERE l_leave_id = 4
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
     $stmt_leave_sick_work->bindParam(':startDate', $startDate);
     $stmt_leave_sick_work->bindParam(':endDate', $endDate);
+    $stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick_work->execute();
     $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -357,11 +373,14 @@ FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
 AND YEAR(l_leave_end_date) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
     $stmt_leave_annual->bindParam(':userCode', $userCode);
     $stmt_leave_annual->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_annual->execute();
     $result_leave_annual = $stmt_leave_annual->fetch(PDO::FETCH_ASSOC);
 
@@ -423,11 +442,14 @@ FROM leave_list
 WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_hr_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
 $result_absence_work = $conn->prepare($sql_absence_work);
 $result_absence_work->bindParam(':userCode', $userCode);
 $result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$result_absence_work->bindParam(':approveStatus', $approveStatus);
 $result_absence_work->execute();
 $stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
 
@@ -483,12 +505,15 @@ FROM leave_list
 WHERE l_leave_id = 8
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
     $stmt_other->bindParam(':startDate', $startDate);
     $stmt_other->bindParam(':endDate', $endDate);
+    $stmt_other->bindParam(':approveStatus', $approveStatus);
     $stmt_other->execute();
     $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 
@@ -644,37 +669,42 @@ else {
     // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
+    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
-        SUM(
-         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-         -
-         (SELECT COUNT(1)
-          FROM holiday
-          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-          AND h_holiday_status = 'วันหยุด'
-          AND h_status = 0)
-     ) AS total_leave_days,
-     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
-     SUM(CASE
-         WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-              AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-         THEN 1
-         ELSE 0
-     END) AS total_leave_hours,
-     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+       SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        -
+        (SELECT COUNT(1)
+         FROM holiday
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+    ) AS total_leave_days,
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END) AS total_leave_hours,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
-     (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
- FROM leave_list
- WHERE l_leave_id = 1
- AND l_usercode = :userCode
+    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
+FROM leave_list
+WHERE l_leave_id = 1
+AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
     $stmt_leave_personal->bindParam(':startDate', $startDate);
     $stmt_leave_personal->bindParam(':endDate', $endDate);
+    $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal->execute();
     $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -703,37 +733,40 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
     } else {
         echo '<p>ไม่พบข้อมูล</p>';
     }
-    // ลากิจไม่ได้รับค่าจ้าง ----------------------------------------------------------------
+// ลากิจไม่ได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal_no = "SELECT
-     SUM(
-         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-         -
-         (SELECT COUNT(1)
-          FROM holiday
-          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-          AND h_holiday_status = 'วันหยุด'
-          AND h_status = 0)
-     ) AS total_leave_days,
-     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
-     SUM(CASE
-         WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-              AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-         THEN 1
-         ELSE 0
-     END) AS total_leave_hours,
-     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+    SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        -
+        (SELECT COUNT(1)
+         FROM holiday
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+    ) AS total_leave_days,
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END) AS total_leave_hours,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
-     (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no
- FROM leave_list
- WHERE l_leave_id = 2
- AND l_usercode = :userCode
- AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+    (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no
+FROM leave_list
+WHERE l_leave_id = 2
+AND l_usercode = :userCode
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
     $stmt_leave_personal_no->bindParam(':startDate', $startDate);
     $stmt_leave_personal_no->bindParam(':endDate', $endDate);
+    $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal_no->execute();
     $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -762,37 +795,40 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
     } else {
         echo '<p>ไม่พบข้อมูล</p>';
     }
-    // ลาป่วย ----------------------------------------------------------------
+// ลาป่วย ----------------------------------------------------------------
     $sql_leave_sick = "SELECT
-     SUM(
-         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-         -
-         (SELECT COUNT(1)
-          FROM holiday
-          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-          AND h_holiday_status = 'วันหยุด'
-          AND h_status = 0)
-     ) AS total_leave_days,
-     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
-     SUM(CASE
-         WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-              AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-         THEN 1
-         ELSE 0
-     END) AS total_leave_hours,
-     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+    SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        -
+        (SELECT COUNT(1)
+         FROM holiday
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+    ) AS total_leave_days,
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END) AS total_leave_hours,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
-     (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick
- FROM leave_list
- WHERE l_leave_id = 3
- AND l_usercode = :userCode
+    (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick
+FROM leave_list
+WHERE l_leave_id = 3
+AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
     $stmt_leave_sick->bindParam(':startDate', $startDate);
     $stmt_leave_sick->bindParam(':endDate', $endDate);
+    $stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick->execute();
     $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -822,37 +858,40 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
         echo '<p>ไม่พบข้อมูล</p>';
     }
 
-    // ลาป่วยจากงาน ----------------------------------------------------------------
+// ลาป่วยจากงาน ----------------------------------------------------------------
     $sql_leave_sick_work = "SELECT
-     SUM(
-         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-         -
-         (SELECT COUNT(1)
-          FROM holiday
-          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-          AND h_holiday_status = 'วันหยุด'
-          AND h_status = 0)
-     ) AS total_leave_days,
-     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
-     SUM(CASE
-         WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-              AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-         THEN 1
-         ELSE 0
-     END) AS total_leave_hours,
-     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+    SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        -
+        (SELECT COUNT(1)
+         FROM holiday
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+    ) AS total_leave_days,
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END) AS total_leave_hours,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
- (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_leave_sick_work
- FROM leave_list
- WHERE l_leave_id = 4
- AND l_usercode = :userCode
+(SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_leave_sick_work
+FROM leave_list
+WHERE l_leave_id = 4
+AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
     $stmt_leave_sick_work->bindParam(':startDate', $startDate);
     $stmt_leave_sick_work->bindParam(':endDate', $endDate);
+    $stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick_work->execute();
     $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -883,36 +922,39 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
         echo '<p>ไม่พบข้อมูล</p>';
     }
 
-    // ลาพักร้อน ----------------------------------------------------------------
+// ลาพักร้อน ----------------------------------------------------------------
     $sql_leave_annual = "SELECT
-     SUM(
-         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-         -
-         (SELECT COUNT(1)
-          FROM holiday
-          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-          AND h_holiday_status = 'วันหยุด'
-          AND h_status = 0)
-     ) AS total_leave_days,
-     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
-     SUM(CASE
-         WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-              AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-         THEN 1
-         ELSE 0
-     END) AS total_leave_hours,
-     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+    SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        -
+        (SELECT COUNT(1)
+         FROM holiday
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+    ) AS total_leave_days,
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END) AS total_leave_hours,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
- (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual
- FROM leave_list
- WHERE l_leave_id = 5
- AND l_usercode = :userCode
- AND YEAR(l_leave_end_date) = :selectedYear
- AND l_leave_status = 0";
+(SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual
+FROM leave_list
+WHERE l_leave_id = 5
+AND l_usercode = :userCode
+AND YEAR(l_leave_end_date) = :selectedYear
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
     $stmt_leave_annual->bindParam(':userCode', $userCode);
     $stmt_leave_annual->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_annual->execute();
     $result_leave_annual = $stmt_leave_annual->fetch(PDO::FETCH_ASSOC);
 
@@ -974,11 +1016,14 @@ FROM leave_list
 WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_hr_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
 $result_absence_work = $conn->prepare($sql_absence_work);
 $result_absence_work->bindParam(':userCode', $userCode);
 $result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$result_absence_work->bindParam(':approveStatus', $approveStatus);
 $result_absence_work->execute();
 $stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
 
@@ -1007,38 +1052,42 @@ if ($stop_work) {
     }
 
 }
+
     // ----------------------------------------------------------------------------------------------
     // อื่น ๆ
     $sql_other = "SELECT
-     SUM(
-         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-         -
-         (SELECT COUNT(1)
-          FROM holiday
-          WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-          AND h_holiday_status = 'วันหยุด'
-          AND h_status = 0)
-     ) AS total_leave_days,
-     SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
-     SUM(CASE
-         WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-              AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-         THEN 1
-         ELSE 0
-     END) AS total_leave_hours,
-     SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+    SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        -
+        (SELECT COUNT(1)
+         FROM holiday
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+    ) AS total_leave_days,
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END) AS total_leave_hours,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
-     (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
- FROM leave_list
- WHERE l_leave_id = 8
- AND l_usercode = :userCode
+    (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
+FROM leave_list
+WHERE l_leave_id = 8
+AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status = :approveStatus
+AND l_approve_status2 = 4";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
     $stmt_other->bindParam(':startDate', $startDate);
     $stmt_other->bindParam(':endDate', $endDate);
+    $stmt_other->bindParam(':approveStatus', $approveStatus);
     $stmt_other->execute();
     $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 
@@ -1132,7 +1181,6 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $stop_work_days;
     $sum_hours = $leave_personal_hours + $leave_personal_no_hours + $leave_sick_hours + $leave_sick_work_hours + $stop_work_hours;
     $sum_minutes = $leave_personal_minutes + $leave_personal_no_minutes + $leave_sick_minutes + $leave_sick_work_minutes + $stop_work_minutes;
-
     if ($sum_minutes > 0 && $sum_minutes <= 30) {
         $sum_minutes = 30; // ปัดขึ้นเป็น 30 นาที
     } elseif ($sum_minutes > 30) {

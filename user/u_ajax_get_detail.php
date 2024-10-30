@@ -4,7 +4,9 @@ if (isset($_POST['leaveType'])) {
     $leaveType = $_POST['leaveType'];
     $userCode = $_POST['userCode'];
     $selectedYear = $_POST['selectedYear'];
-
+    $depart = $_POST['depart'];
+    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    
     // คำนวณวันที่เริ่มต้นและสิ้นสุดตามปีที่เลือก
     $startDate = date(($selectedYear - 1) . "-12-01"); // วันที่เริ่มต้น 1 ธันวาคมของปีที่เลือก
     $endDate = date(($selectedYear) . "-11-30"); // วันที่สิ้นสุด 30 พฤศจิกายนของปีถัดไป
@@ -36,11 +38,13 @@ if (isset($_POST['leaveType'])) {
     $endDateQuoted = $conn->quote($endDate);
 
     // ดึงข้อมูลการลาจากฐานข้อมูล
-    $sql = "SELECT * FROM leave_list
-            WHERE l_leave_id = $conTypeQuoted
-            AND l_usercode = $userCodeQuoted
-            AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
-            ORDER BY l_leave_start_date DESC";
+    $sql = "  SELECT * FROM leave_list
+    WHERE l_leave_id = $conTypeQuoted
+    AND l_usercode = $userCodeQuoted
+    AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
+    AND l_approve_status = $approveStatus
+    AND l_approve_status2 = 4
+    ORDER BY l_leave_start_date DESC";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();
     $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่

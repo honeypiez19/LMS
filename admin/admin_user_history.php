@@ -73,7 +73,9 @@ echo "</select>";
             </div>
         </form>
         <span class="text-danger">**จำนวนครั้งการลางาน ตั้งแต่ 1 ธันวาคม <?php echo $selectedYear - 1 ?> - 30 พฤศจิกายน
-            <?php echo $selectedYear ?></span>
+            <?php echo $selectedYear ?><br>
+            <span class="text-danger">*** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
+        </span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead class="table table-secondary">
@@ -133,18 +135,24 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $month = $i - 1;
                 $year = $selectedYear;
             }
-
+            
+            $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+            
             $sql_count = "SELECT COUNT(l_list_id) AS leave_count
                           FROM leave_list
                           WHERE l_leave_id = :leave_id
                           AND YEAR(l_leave_start_date) = :year
                           AND MONTH(l_leave_start_date) = :month
-                          AND l_usercode = :userCode";
+                          AND l_usercode = :userCode
+                        AND l_approve_status = :approveStatus
+                        AND l_approve_status2 = 4";
+                        
             $stmt_count = $conn->prepare($sql_count);
             $stmt_count->bindParam(':leave_id', $leave_id);
             $stmt_count->bindParam(':year', $year); // bind ปีที่คำนวณ
             $stmt_count->bindParam(':month', $month); // bind เดือนที่คำนวณ
             $stmt_count->bindParam(':userCode', $userCode); // bind userCode
+            $stmt_count->bindParam(':approveStatus', $approveStatus);
             $stmt_count->execute();
 
             $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
@@ -183,12 +191,13 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $('.view-button').click(function() {
         var row = $(this).closest('tr');
         var leaveType = row.find('td:first').text();
-        var userCode = <?php echo $userCode; ?>
+        var userCode = '<?php echo $userCode; ?>';
+        var depart = '<?php echo $depart; ?>';
 
         // ดึงค่าปีที่เลือกจากส่วน PHP
         var selectedYear = <?php echo json_encode($selectedYear); ?>;
 
-        console.log(selectedYear)
+        console.log(selectedYear);
         // alert(userCode)
         $.ajax({
             url: 'a_u_ajax_get_detail.php',
@@ -196,7 +205,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             data: {
                 leaveType: leaveType,
                 userCode: userCode,
-                selectedYear: selectedYear
+                selectedYear: selectedYear,
+                depart: depart
             },
             success: function(response) {
                 $('#leaveDetailsModal .modal-body').html(response);

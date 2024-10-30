@@ -119,7 +119,9 @@ FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
@@ -178,7 +180,9 @@ FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
@@ -237,7 +241,9 @@ FROM leave_list
 WHERE l_leave_id = 3
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
@@ -297,7 +303,9 @@ FROM leave_list
 WHERE l_leave_id = 4
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
@@ -358,7 +366,9 @@ FROM leave_list
 WHERE l_leave_id = 5
 AND l_usercode = :userCode
 AND YEAR(l_leave_end_date) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
     $stmt_leave_annual->bindParam(':userCode', $userCode);
@@ -393,7 +403,9 @@ AND l_leave_status = 0";
     }
     // ----------------------------------------------------------------------------------------------
     // มาสาย
-    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')";
+    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' 
+    AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')
+    AND l_approve_status2 = 4";
     $result_late = $conn->query($sql_late)->fetch(PDO::FETCH_ASSOC);
     $late_count = $result_late['late_count'];
 
@@ -424,7 +436,9 @@ FROM leave_list
 WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_hr_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $result_absence_work = $conn->prepare($sql_absence_work);
 $result_absence_work->bindParam(':userCode', $userCode);
@@ -484,7 +498,9 @@ FROM leave_list
 WHERE l_leave_id = 8
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
@@ -670,7 +686,9 @@ else {
  WHERE l_leave_id = 1
  AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+ AND l_leave_status = 0
+ AND l_approve_status2 = 4
+";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
@@ -729,7 +747,9 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  WHERE l_leave_id = 2
  AND l_usercode = :userCode
  AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+ AND l_leave_status = 0
+ AND l_approve_status2 = 4
+";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
@@ -788,7 +808,9 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  WHERE l_leave_id = 3
  AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+ AND l_leave_status = 0
+ AND l_approve_status2 = 4
+";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
@@ -848,7 +870,9 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  WHERE l_leave_id = 4
  AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+ AND l_leave_status = 0
+ AND l_approve_status2 = 4
+";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
@@ -909,7 +933,9 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
  WHERE l_leave_id = 5
  AND l_usercode = :userCode
  AND YEAR(l_leave_end_date) = :selectedYear
- AND l_leave_status = 0";
+ AND l_leave_status = 0
+ AND l_approve_status2 = 4
+";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
     $stmt_leave_annual->bindParam(':userCode', $userCode);
@@ -944,7 +970,10 @@ AND (l_leave_end_date BETWEEN :startDate AND :endDate)
     }
     // ----------------------------------------------------------------------------------------------
     // มาสาย
-    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')";
+    $sql_late = "SELECT COUNT(l_list_id) AS late_count FROM leave_list WHERE l_leave_id = '7' AND l_usercode = '$userCode' 
+    AND (l_leave_end_date BETWEEN '$startDate' AND '$endDate')
+    AND l_approve_status2 = 4
+";
     $result_late = $conn->query($sql_late)->fetch(PDO::FETCH_ASSOC);
     $late_count = $result_late['late_count'];
 
@@ -975,7 +1004,9 @@ FROM leave_list
 WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_hr_create_datetime) = :selectedYear
-AND l_leave_status = 0";
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
 $result_absence_work = $conn->prepare($sql_absence_work);
 $result_absence_work->bindParam(':userCode', $userCode);
@@ -1034,7 +1065,9 @@ if ($stop_work) {
  WHERE l_leave_id = 8
  AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
- AND l_leave_status = 0";
+ AND l_leave_status = 0
+ AND l_approve_status2 = 4
+";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
