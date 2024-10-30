@@ -159,14 +159,17 @@ if (isset($_POST['logoutButton'])) {
                 </div>
                 <div class="modal-body">
                     <form id="changePasswordForm">
+                        <span class="text-danger">* ความยาวรหัสผ่านไม่เกิน 10 ตัวอักษร</span>
+
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
-                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                maxlength="10" required>
                         </div>
                         <div class="mb-3">
                             <label for="confirmNewPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
                             <input type="password" class="form-control" id="confirmNewPassword"
-                                name="confirmNewPassword" required>
+                                name="confirmNewPassword" maxlength="10" required>
                         </div>
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">เปลี่ยนรหัสผ่าน</button>
