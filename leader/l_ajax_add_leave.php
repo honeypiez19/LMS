@@ -44,6 +44,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($leaveDateEnd)); // แปลงรูปแบบวันที่เป็น YYYY-MM-DD
     $leaveTimeEnd = $_POST['endTime'];
 
+    if($leaveTimeStart == '12:00'){
+        $leaveTimeStartLine = '11:45';
+    } else if($leaveTimeStart == '13:00'){
+        $leaveTimeStartLine = '12:45';
+    } else if($leaveTimeStart == '17:00'){
+        $leaveTimeStartLine = '16:40';
+    } else{
+        $leaveTimeStartLine = $leaveTimeStart;
+    }
+
+    if($leaveTimeEnd == '12:00'){
+        $leaveTimeEndLine = '11:45';
+    } else if($leaveTimeEnd == '13:00'){
+        $leaveTimeEndLine = '12:45';
+    } else if($leaveTimeEnd == '17:00'){
+        $leaveTimeEndLine = '16:40';
+    }else{
+        $leaveTimeEndLine = $leaveTimeEnd;
+    }
+    
     // สถานะใบลา
     $leaveStatus = 0;
     if ($leaveStatus == 0) {
@@ -159,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
-        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStart ถึง $leaveDateEnd $leaveTimeEnd\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
         // $sMessage = $level;
 
         // แจ้งเตือนไลน์ ผจก ในแผนก

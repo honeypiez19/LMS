@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข้อมูลพนักงาน</title>
+    <title>ข้อมูลของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -45,7 +45,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-users fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>ข้อมูลพนักงาน</h3>
+                    <h3>ข้อมูลของพนักงาน</h3>
                 </div>
             </div>
         </div>

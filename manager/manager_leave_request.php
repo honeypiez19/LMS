@@ -388,6 +388,7 @@ $totalLeaveItems = $stmt->fetchColumn();
             </thead>
             <tbody class="text-center">
                 <?php
+$approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 
 $itemsPerPage = 10;
 

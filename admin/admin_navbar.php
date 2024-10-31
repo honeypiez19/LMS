@@ -107,9 +107,10 @@ if (isset($_POST['logoutButton'])) {
                             พนักงาน
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="admin_employee.php">ข้อมูลพนักงาน</a></li>
+                            <li><a class="dropdown-item" href="admin_employee_leave_form.php">ใบลาย้อนหลังของพนักงาน
+                                    (เฉพาะ HR ยื่นใบลาย้อนหลัง)</a>
+                            <li><a class="dropdown-item" href="admin_employee.php">ข้อมูลของพนักงาน</a></li>
                             <li><a class="dropdown-item" href="admin_employee_leave.php">การลาของพนักงาน</a></li>
-                            <!-- <li><a class="dropdown-item" href="admin_employee_attendance.php">ข้อมูลการเข้างาน</a> -->
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

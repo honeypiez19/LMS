@@ -36,19 +36,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveTimeEnd = $_POST['endTime'];
 
     if($leaveTimeStart == '12:00'){
-        $leaveTimeStart = '11:45';
+        $leaveTimeStartLine = '11:45';
     } else if($leaveTimeStart == '13:00'){
-        $leaveTimeStart = '12:45';
+        $leaveTimeStartLine = '12:45';
     } else if($leaveTimeStart == '17:00'){
-        $leaveTimeStart = '16:40';
+        $leaveTimeStartLine = '16:40';
+    } else{
+        $leaveTimeStartLine = $leaveTimeStart;
     }
 
     if($leaveTimeEnd == '12:00'){
-        $leaveTimeEnd = '11:45';
+        $leaveTimeEndLine = '11:45';
     } else if($leaveTimeEnd == '13:00'){
-        $leaveTimeEnd = '12:45';
+        $leaveTimeEndLine = '12:45';
     } else if($leaveTimeEnd == '17:00'){
-        $leaveTimeEnd = '16:40';
+        $leaveTimeEndLine = '16:40';
+    }else{
+        $leaveTimeEndLine = $leaveTimeEnd;
     }
     
     // วันที่สร้างใบลา
@@ -109,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
-        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStart ถึง $leaveDateEnd $leaveTimeEnd\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
         // $sMessage = $depart;
 
         if ($depart == 'RD') {
@@ -158,14 +162,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             }
         } else if ($depart == 'CAD1') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
-            $stmt->bindParam(':workplace', $workplace);
+            if($subDepart == 'Modeling'){
+                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Modeling'");
+                $stmt->bindParam(':workplace', $workplace);
+            }
+            else if($subDepart == 'Design'){
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Design'");
+                $stmt->bindParam(':workplace', $workplace); 
+            }
         } else if ($depart == 'CAD2') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department2 = 'CAD2'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department2 = 'CAD2'");
             $stmt->bindParam(':workplace', $workplace);
 
         } else if ($depart == 'CAM') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM2'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department3 = 'CAM2'");
             $stmt->bindParam(':workplace', $workplace);
 
         } else {
