@@ -95,7 +95,7 @@ echo "</select>";
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
     // $approveStatus = ($depart == 'RD') ? 4 : 2;
-    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
@@ -669,7 +669,7 @@ else {
     // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
-    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT

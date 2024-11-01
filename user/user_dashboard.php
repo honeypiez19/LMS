@@ -276,7 +276,7 @@ echo "</select>";
                         <div class="card-title">
                             <?php
 // $approveStatus = ($depart == 'RD') ? 4 : 2;
-$approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+$approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
     SUM(

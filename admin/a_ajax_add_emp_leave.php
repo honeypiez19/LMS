@@ -12,9 +12,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $depart = $_POST['depart'];
     $level = $_POST['level'];
     $workplace = $_POST['workplace'];
+    $subDepart = $_POST['subDepart'];
+    $addUserName = $_POST['addUserName'];
 
     $leaveType = $_POST['leaveType'];
     $leaveReason = $_POST['leaveReason'];
+    $remark = 'HR ลาย้อนหลัง';
+
+    $createDateByHR = date('Y-m-d H:i:s');
+    $createDate = date('Y-m-d H:i:s');
 
     // ตรวจสอบประเภทการลา
     $leaveTypes = [
@@ -55,24 +61,140 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEndLine = $leaveTimeEnd;
     }
     
-
-    // วันที่สร้างใบลา
-    $formattedDate = $_POST['formattedDate'];
-
+    // เช็คระดับ > เช็คแผก > สถานะอนุมัติ
+    if($level == 'user'){
+        // RD
+        if($depart == 'RD'){
+            $proveStatus = 0;
+            $proveStatus2 = 1;
+            $comfirmStatus = 0;
+        } 
+        // Office
+        else if($depart == 'Office'){
+            if($subDepart == 'Store' || $subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else if($subDepart == ''){
+                $proveStatus = 6;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else {
+                echo 'ไม่พบแผนก';
+            }
+        } 
+        // CAD1 / CAD2 / CAM
+        else if($depart == 'CAD1' || $depart == 'CAD2' || $depart = 'CAM'){
+            if($subDepart == 'Modeling' || $subDepart == 'Design'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else if($subDepart == 'CAD2'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else if($subDepart == 'CAM'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else {
+                echo 'ไม่พบแผนก';
+            }
+        }
+        // 
+    } else if(($level == 'leader' || $level == 'chief' )){
+         // RD
+        if($depart == 'RD'){
+            $proveStatus = 2;
+            $proveStatus2 = 1;
+            $comfirmStatus = 0;
+        } 
+        else if($depart == 'Office'){
+            if($subDepart == 'Store' || $subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else if($subDepart == ''){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else {
+                echo 'ไม่พบแผนก';
+            }
+        }  // CAD1 / CAD2 / CAM
+        else if($depart == 'CAD1' || $depart == 'CAD2' || $depart = 'CAM'){
+            if($subDepart == 'Modeling' || $subDepart == 'Design'){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else if($subDepart == 'CAD2'){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else if($subDepart == 'CAM'){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            } else {
+                echo 'ไม่พบแผนก';
+            }
+        }
+        else if($depart == 'Management'){
+            $proveStatus = 6;
+            $proveStatus2 = 4;
+            $comfirmStatus = 0;
+        }
+    } else if(($level == 'manager' || 'assisManager')){
+           // RD
+        if($depart == 'RD'){
+            $proveStatus = 6;
+            $proveStatus2 = 4;
+            $comfirmStatus = 0;
+        } 
+        else if($depart == 'Office'){
+            if($subDepart == 'Store' || $subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+            } else if($subDepart == ''){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+            } else {
+                echo 'ไม่พบแผนก';
+            }
+        }  // CAD1 / CAD2 / CAM
+        else if($depart == 'CAD1' || $depart == 'CAD2' || $depart = 'CAM'){
+            if($subDepart == 'Modeling' || $subDepart == 'Design'){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+            } else if($subDepart == 'CAD2'){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+            } else if($subDepart == 'CAM'){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+            } else {
+                echo 'ไม่พบแผนก';
+            }
+        } else if($depart == 'Management'){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+        }
+    }
+    
     // สถานะใบลา
     $leaveStatus = 0;
     $leaveStatusName = ($leaveStatus == 0) ? 'ปกติ' : 'ยกเลิก';
 
-    $comfirmStatus = 0;
-    $proveStatus = 0;
-    $proveStatus2 = 1;
-
-    $subDepart = $_POST['subDepart'];
-    $subDepart2 = $_POST['subDepart2'];
-    $subDepart3 = $_POST['subDepart3'];
-    $subDepart4 = $_POST['subDepart4'];
-    $subDepart5 = $_POST['subDepart5'];
-
+    // $comfirmStatus = 0;
+    // $proveStatus = 0;
+    // $proveStatus2 = 1;
+    
     $filename = null;
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $filename = $_FILES['file']['name'];
@@ -83,14 +205,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (in_array($imageFileType, $valid_extensions)) {
             if (move_uploaded_file($_FILES['file']['tmp_name'], $location)) {
                 $response = $location;
+            } else {
+                echo json_encode(["error" => "ไม่สามารถบันทึกไฟล์ได้"]);
             }
+        } else {
+            echo json_encode(["error" => "ประเภทไฟล์ไม่ถูกต้อง"]);
         }
+    } else {
+        echo json_encode(["error" => "ไม่มีไฟล์ที่ถูกต้อง"]);
     }
 
+
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
-    l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace)
+    l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, 
+    l_hr_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, 
+    l_level, l_approve_status2, l_workplace,l_hr_create_name,l_remark,l_create_datetime)
     VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
-    :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace)");
+    :leaveDateEnd, :leaveTimeEnd, :createDateByHR, :filename, :leaveStatus, 
+    :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace, :addUserName, :remark, :createDate)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -103,7 +235,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':leaveTimeStart', $leaveTimeStart);
     $stmt->bindParam(':leaveDateEnd', $leaveDateEnd);
     $stmt->bindParam(':leaveTimeEnd', $leaveTimeEnd);
-    $stmt->bindParam(':formattedDate', $formattedDate);
+    $stmt->bindParam(':createDateByHR', $createDateByHR);
     $stmt->bindParam(':filename', $filename);
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
@@ -111,8 +243,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus2', $proveStatus2);
     $stmt->bindParam(':level', $level);
     $stmt->bindParam(':workplace', $workplace);
+    $stmt->bindParam(':addUserName', $addUserName);
+    $stmt->bindParam(':remark', $remark);
+    $stmt->bindParam(':createDate', $createDate);
 
-    $stmt->execute(); // เพิ่ม ; ตรงนี้
 
+    if($stmt->execute()){
+        echo 'บันทึกข้อมูลสำเร็จ';
+    } else {
+        echo 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
+    }
     $conn = null;
 }
