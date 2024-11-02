@@ -149,6 +149,9 @@ if (isset($_POST['leaveType'])) {
             elseif ($row['l_approve_status'] == 5) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
             }
+            elseif ($row['l_approve_status'] == 6) {
+                echo '';
+            }
             // ไม่มีสถานะ
             else {
                 echo 'ไม่พบสถานะ';
@@ -179,6 +182,9 @@ if (isset($_POST['leaveType'])) {
             //  ผจก ไม่อนุมัติ
             elseif ($row['l_approve_status2'] == 5) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            }
+            elseif ($row['l_approve_status2'] == 6) {
+                echo '';
             }
             // ไม่มีสถานะ
             else {

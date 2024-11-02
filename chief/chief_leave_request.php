@@ -127,8 +127,8 @@ em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_lis
 INNER JOIN employees em
 ON li.l_usercode = em.e_usercode
 AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
 AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7";
@@ -159,8 +159,8 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
 AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
@@ -188,8 +188,8 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
 AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
@@ -217,8 +217,8 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
 em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
 AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
@@ -283,16 +283,15 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-echo $subDepart;
 $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
 AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
-ORDER BY l_create_datetime DESC";
+ORDER BY l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

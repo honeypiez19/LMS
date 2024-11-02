@@ -108,8 +108,8 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_leave_end_date) = '$selectedMonth' 
+AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
@@ -130,8 +130,8 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_leave_end_date) = '$selectedMonth' 
+AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 
@@ -153,8 +153,8 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_leave_end_date) = '$selectedMonth' 
+AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
@@ -175,8 +175,8 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_leave_end_date) = '$selectedMonth' 
+AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
@@ -237,10 +237,10 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
+$sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$selectedMonth' 
+AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id <> 6 
-AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
+AND l_leave_id <> 7 ORDER BY l_leave_end_date DESC
 
 ";
 $result = $conn->query($sql);

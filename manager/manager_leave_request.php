@@ -141,11 +141,11 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 2
+    li.l_approve_status IN (1, 2, 3, 6)
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
     AND (
         -- Check for matching department or sub-department
         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
@@ -204,8 +204,8 @@ WHERE
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
     AND (
         -- Check for matching department or sub-department
         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
@@ -262,8 +262,8 @@ WHERE
     AND li.l_approve_status2 = 4
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
     AND (
         -- Check for matching department or sub-department
         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
@@ -319,8 +319,8 @@ WHERE
     AND li.l_approve_status2 = 5
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
     AND (
         -- Check for matching department or sub-department
         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
@@ -418,8 +418,8 @@ WHERE
     li.l_approve_status IN (1, 2, 3, 6)
     AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
     AND (
         -- Check for matching department or sub-department
         (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
@@ -428,7 +428,7 @@ WHERE
         OR (li.l_department = '$subDepart4')
         OR (li.l_department = '$subDepart5')
     )
-ORDER BY l_create_datetime DESC";
+ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

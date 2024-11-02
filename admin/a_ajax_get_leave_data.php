@@ -8,17 +8,17 @@ $month = $_GET['month'];
 // Prepare a SQL query to select leave data based on the status
 if ($status == 'all') {
     // $sql = "SELECT * FROM leave_list ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month' AND l_leave_id <> 7 ORDER BY l_create_datetime DESC ";
+    $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_leave_id <> 7 ORDER BY l_leave_end_date DESC ";
 } else if ($status == 0) {
     // $sql = "SELECT * FROM leave_list WHERE l_hr_status = 0 ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month' AND l_hr_status = 0 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
+    $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_hr_status = 0 AND l_leave_id <> 7 ORDER BY l_leave_end_date DESC";
 } else if ($status == 1) {
     // $sql = "SELECT * FROM leave_list WHERE l_hr_status = 1 ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month' AND l_hr_status = 1 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
+    $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_hr_status = 1 AND l_leave_id <> 7 ORDER BY l_leave_end_date DESC";
 
 } else if ($status == 2) {
     // $sql = "SELECT * FROM leave_list WHERE l_hr_status = 2 ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$month' AND l_hr_status = 2 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
+    $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_hr_status = 2 AND l_leave_id <> 7 ORDER BY l_leave_end_date DESC";
 } else {
 
 }

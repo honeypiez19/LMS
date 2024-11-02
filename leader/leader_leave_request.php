@@ -150,8 +150,8 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth";
 
 $stmt = $conn->prepare($sql);
 
@@ -216,8 +216,8 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth";
 
 $stmt = $conn->prepare($sql);
 
@@ -279,8 +279,8 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth";
 
 $stmt = $conn->prepare($sql);
 
@@ -342,8 +342,8 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth";
 
 $stmt = $conn->prepare($sql);
 
@@ -447,8 +447,8 @@ WHERE
     li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth
     AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
@@ -456,7 +456,7 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-ORDER BY li.l_create_datetime DESC";
+ORDER BY li.l_leave_end_date DESC";
 
 // Prepare the statement
 $stmt = $conn->prepare($sql);

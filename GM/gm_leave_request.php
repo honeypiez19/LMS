@@ -136,8 +136,8 @@ WHERE
     li.l_department <> 'RD'
     AND li.l_leave_status = 0
     AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :selectedYear
-    AND Month(li.l_create_datetime) = :selectedMonth";
+    AND Year(li.l_leave_end_date) = :selectedYear
+    AND Month(li.l_leave_end_date) = :selectedMonth";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -180,8 +180,8 @@ WHERE
     AND li.l_leave_status = 0
     AND li.l_approve_status2 = 1
     AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :selectedYear
-    AND Month(li.l_create_datetime) = :selectedMonth";
+    AND Year(li.l_leave_end_date) = :selectedYear
+    AND Month(li.l_leave_end_date) = :selectedMonth";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -222,8 +222,8 @@ li.l_department <> 'RD'
 AND li.l_leave_status = 0
 AND li.l_approve_status2 = 4
 AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth";
+AND Year(li.l_leave_end_date) = :selectedYear
+AND Month(li.l_leave_end_date) = :selectedMonth";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -263,8 +263,8 @@ li.l_department <> 'RD'
 AND li.l_leave_status = 0
 AND li.l_approve_status2 = 5
 AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth";
+AND Year(li.l_leave_end_date) = :selectedYear
+AND Month(li.l_leave_end_date) = :selectedMonth";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -346,9 +346,9 @@ WHERE
 li.l_department <> 'RD'
 AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_create_datetime) = '$selectedYear'
-AND Month(li.l_create_datetime) = '$selectedMonth'
-ORDER BY l_create_datetime DESC";
+AND Year(li.l_leave_end_date) = '$selectedYear'
+AND Month(li.l_leave_end_date) = '$selectedMonth'
+ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

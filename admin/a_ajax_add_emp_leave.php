@@ -102,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         // 
-    } else if(($level == 'leader' || $level == 'chief' )){
+    } else if(($level == 'leader')){
          // RD
         if($depart == 'RD'){
             $proveStatus = 2;
@@ -140,11 +140,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         else if($depart == 'Management'){
-            $proveStatus = 6;
-            $proveStatus2 = 4;
-            $comfirmStatus = 0;
+            if($subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            }
         }
-    } else if(($level == 'manager' || 'assisManager')){
+    } 
+    else if(($level == 'chief')){
+        if($depart == 'Management'){
+            if($subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 2;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            }
+        }
+    }
+    else if(($level == 'assisManager')){
+        if($depart == 'Management'){
+            if($subDepart == 'CAD1'){
+                $proveStatus = 6;
+                $proveStatus2 = 4;
+                $comfirmStatus = 0;
+            }
+        }
+    }
+    else if(($level == 'manager')){
            // RD
         if($depart == 'RD'){
             $proveStatus = 6;

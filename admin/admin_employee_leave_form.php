@@ -156,11 +156,11 @@ echo "</select>";
         }
         ?>
                                     </datalist>
-                                    <input type="text" class="form-control" id="userName" name="userName" hidden>
-                                    <input type="text" class="form-control" id="depart" name="depart" hidden>
-                                    <input type="text" class="form-control" id="level" name="level" hidden>
-                                    <input type="text" class="form-control" id="workplace" name="workplace" hidden>
-                                    <input type="text" class="form-control" id="subDepart" name="subDepart" hidden>
+                                    <input type="text" class="form-control" id="userName" name="userName">
+                                    <input type="text" class="form-control" id="depart" name="depart">
+                                    <input type="text" class="form-control" id="level" name="level">
+                                    <input type="text" class="form-control" id="workplace" name="workplace">
+                                    <input type="text" class="form-control" id="subDepart" name="subDepart">
 
                                 </div>
                                 <div class="col-6">
@@ -284,29 +284,38 @@ echo "</select>";
         </div>
         <div class="table-responsive">
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
-                <thead class="table table-secondary">
+                <thead>
                     <tr class="text-center align-middle">
                         <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">วันที่ยื่น</th>
-                        <th rowspan="2">ประเภทรายการ</th>
-                        <th colspan="2">วันเวลา</th>
-                        <th rowspan="2">จำนวนวันลา</th>
+                        <th rowspan="1">รหัสพนักงาน</th>
+                        <th rowspan="1">ชื่อ - นามสกุล</th>
+                        <th rowspan="2">วันที่ยื่นใบลา</th>
+                        <th rowspan="1">รายการลา</th>
+                        <th colspan="2" class="text-center">วันเวลาที่ลา</th>
                         <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะรายการ</th>
-                        <th rowspan="2">สถานะมาสาย</th>
+                        <th rowspan="2">สถานะใบลา</th>
                         <th rowspan="2">สถานะอนุมัติ_1</th>
+                        <th rowspan="2">วันเวลาอนุมัติ_1</th>
+                        <th rowspan="2">เหตุผล_1</th>
+                        <th rowspan="2">หัวหน้า</th>
                         <th rowspan="2">สถานะอนุมัติ_2</th>
+                        <th rowspan="2">วันเวลาอนุมัติ_2</th>
+                        <th rowspan="2">เหตุผล_2</th>
+                        <th rowspan="2">ผู้จัดการขึ้นไป</th>
                         <th rowspan="2">สถานะ (เฉพาะ HR)</th>
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
+                        <th><input type="text" class="form-control" id="codeSearch"></th>
+                        <th><input type="text" class="form-control" id="nameSearch"></th>
+                        <th><input type="text" class="form-control" id="leaveSearch"></th>
+                        <!-- <th><input type="text" class="form-control" id="leaveSearch"></th> -->
                         <th>จาก</th>
                         <th>ถึง</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="text-center">
                     <?php
-// กำหนดจำนวนรายการต่อหน้า
 $itemsPerPage = 10;
 
 // คำนวณหน้าปัจจุบัน
@@ -316,14 +325,12 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-// สร้างคำสั่ง SQL
-$sql = "SELECT * FROM leave_list WHERE Month(l_leave_start_date) = '$selectedMonth'
-AND Year(l_leave_start_date) = '$selectedYear' 
-AND l_leave_id IN (1,2,3,4,5,8)
-AND l_remark = 'HR ลาย้อนหลัง'
-ORDER BY l_create_datetime DESC ";
+$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 
+AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
 
-// หาจำนวนรายการทั้งหมด
+";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -345,7 +352,7 @@ $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนด
 // แสดงข้อมูลในตาราง
 if ($result->rowCount() > 0) {
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        echo '<tr class="text-center align-middle">';
+        echo '<tr class="align-middle">';
 
         // 0
         echo '<td hidden>';
@@ -366,27 +373,27 @@ if ($result->rowCount() > 0) {
         } elseif ($row['l_leave_id'] == 8) {
             echo '<span class="text-primary">' . 'อื่น ๆ' . '</span>';
         } else {
-            echo $row['l_leave_reason'];
+            echo $row['l_leave_id'];
         }
         echo '</td>';
 
         // 1
-        echo '<td hidden>' . $row['l_department'] . '</td>';
+        echo '<td hidden>' . $row['l_name'] . '</td>';
 
         // 2
-        echo '<td hidden>' . $row['l_leave_reason'] . '</td>';
+        echo '<td hidden>' . $row['l_department'] . '</td>';
 
         // 3
-        echo '<td hidden>' . $row['l_leave_start_date'] . '</td>';
+        echo '<td hidden>' . $row['l_leave_reason'] . '</td>';
 
         // 4
-        echo '<td hidden>' . $row['l_leave_start_time'] . '</td>';
+        echo '<td>' . $rowNumber . '</td>';
 
         // 5
-        echo '<td hidden>' . $row['l_leave_end_time'] . '</td>';
+        echo '<td>' . $row['l_usercode'] . '</td>';
 
         // 6
-        echo '<td>' . $rowNumber . '</td>';
+        echo '<td>' . '<span class="text-primary">' . $row['l_name'] . '</span>' . '<br>' . 'แผนก : ' . $row['l_department'] . '</td>'; // คอลัมน์ 2 ชื่อพนักงาน + แผนก
 
         // 7
         echo '<td>' . $row['l_create_datetime'] . '</td>';
@@ -404,13 +411,13 @@ if ($result->rowCount() > 0) {
         } elseif ($row['l_leave_id'] == 5) {
             echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
         } elseif ($row['l_leave_id'] == 6) {
-            echo '<span class="text-primary">' . 'ขาดงาน' . '</span>' . '<br>';
+            echo '<span class="text-primary">' . 'ขาดงาน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
         } elseif ($row['l_leave_id'] == 7) {
-            echo '<span class="text-primary">' . 'มาสาย' . '</span>';
+            echo '<span class="text-primary">' . 'มาสาย' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
         } elseif ($row['l_leave_id'] == 8) {
             echo '<span class="text-primary">' . 'อื่น ๆ' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
         } else {
-            echo $row['l_leave_reason'];
+            echo 'ไม่พบประเภทการลาและเหตุผลการลา';
         }
         echo '</td>';
 
@@ -439,95 +446,25 @@ if ($result->rowCount() > 0) {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
-        // echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
-
         // 11
-        echo '<td>';
-// Query to check holidays in the leave period
-        $holiday_query = "SELECT COUNT(*) as holiday_count
-                  FROM holiday
-                  WHERE h_start_date BETWEEN :start_date AND :end_date
-                  AND h_holiday_status = 'วันหยุด'
-                  AND h_status = 0";
-
-// Prepare the query
-        $holiday_stmt = $conn->prepare($holiday_query);
-        $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
-        $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
-        $holiday_stmt->execute();
-
-// Fetch the holiday count
-        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
-        $holiday_count = $holiday_data['holiday_count'];
-// คำนวณระยะเวลาการลา
-        $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-        $l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-        $interval = $l_leave_start_date->diff($l_leave_end_date);
-
-// คำนวณจำนวนวันลา
-        $leave_days = $interval->days - $holiday_count;
-
-// คำนวณจำนวนชั่วโมงและนาทีลา
-        $leave_hours = $interval->h;
-        $leave_minutes = $interval->i;
-
-// ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
-        $start_hour = (int) $l_leave_start_date->format('H');
-        $end_hour = (int) $l_leave_end_date->format('H');
-
-        if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
-            (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
-            // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
-            $leave_hours -= 1;
-        }
-
-// ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
-        if ($leave_hours >= 8) {
-            $leave_days += floor($leave_hours / 8);
-            $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
-        }
-
-// ตรวจสอบการนาที
-        if ($leave_minutes >= 30) {
-            $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
-        }
-
-// แสดงผลลัพธ์
-        if ($row['l_leave_id'] == 7) {
-            echo '';
-        } else {
-            echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
-
-        }
-
         echo '</td>';
-
-        // 12
         if (!empty($row['l_file'])) {
             echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
         } else {
             echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
         }
+        echo '</td>';
 
-        // 13
+        // 12
         echo '<td>';
         if ($row['l_leave_status'] == 0) {
             echo '<span class="text-success">ปกติ</span>';
         } else {
-            echo '<span class="text-danger">ยกเลิก</span>';
+            echo '<span class="text-danger">ยกเลิกใบลา</span>';
         }
         echo '</td>';
 
-        // 14
-        echo '<td>';
-        if ($row['l_late_datetime'] == '') {
-            echo '';
-        } else {
-            echo '<span class="text-success">ยืนยัน</span>';
-        }
-        echo '</td>';
-
-        // 15
+        // 13
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
@@ -553,13 +490,26 @@ if ($result->rowCount() > 0) {
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
         }
+        // อื่น ๆ
+        elseif ($row['l_approve_status'] == 6) {
+            echo '';
+        }
         // ไม่มีสถานะ
         else {
-            echo 'ไม่มีสถานะ';
+            echo 'ไม่พบสถานะ';
         }
         echo '</td>';
 
+        // 14
+        echo '<td>' . $row['l_approve_datetime'] . '</td>';
+
+        // 15
+        echo '<td>' . $row['l_reason'] . '</td>';
+
         // 16
+        echo '<td>' . $row['l_approve_name'] . '</td>';
+
+        // 17
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
@@ -584,45 +534,50 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
-            echo 'ไม่มีสถานะ';
-        }
-        echo '</td>';
-
-        // 17
-        echo '<td>';
-        if ($row['l_hr_status'] == 0) {
-            echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
-        } elseif ($row['l_hr_status'] == 1) {
-            echo '<span class="text-success"><b>ผ่าน</b></span>';
-        } else {
-            echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
+            echo 'ไม่พบสถานะ';
         }
         echo '</td>';
 
         // 18
-        $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
-        if ($row['l_leave_id'] != 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
-        } else if ($row['l_leave_id'] == 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '>ยืนยันรายการ</button></td>';
-        } else {
-            echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
-        }
+        echo '<td>' . $row['l_approve_datetime2'] . '</td>';
 
+        // 19
+        echo '<td>' . $row['l_reason2'] . '</td>';
+
+        // 20
+        echo '<td>' . $row['l_approve_name2'] . '</td>';
+
+        // 21
+        echo '<td >';
+        if ($row['l_hr_status'] == 0) {
+            echo '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+        } elseif ($row['l_hr_status'] == 1) {
+            echo '<div class="text-success"><b>ผ่าน</b></div>';
+        } elseif ($row['l_hr_status'] == 2) {
+            echo '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+        } else {
+            echo $row['l_hr_status'];
+        }
+        echo '</td>';
+
+        // 22 ปุ่มตรวจสอบ
+        if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
+        } else {
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
+        }
         echo '</tr>';
         $rowNumber--;
-        // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
     }
 } else {
-    echo "<tr><td colspan='12' style='color: red;'>ไม่พบข้อมูล</td></tr>";
+    echo '<tr><td colspan="18" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
 }
-// ปิดการเชื่อมต่อ
-// $conn = null;
 ?>
-
                 </tbody>
             </table>
         </div>
@@ -643,8 +598,9 @@ if ($result->rowCount() > 0) {
             telPhoneField.value = "";
             userNameField.value = "";
             departField.value = "";
-            levelField = "";
-            workPlaceField = "";
+            levelField.value = ""; // ตั้งค่าเป็นค่าว่าง
+            workPlaceField.value = ""; // ตั้งค่าเป็นค่าว่าง
+            subDepartField.value = ""; // ตั้งค่าเป็นค่าว่าง
             return;
         }
 
@@ -725,6 +681,7 @@ if ($result->rowCount() > 0) {
             var endTime = $('#endTime').val();
             var files = $('#file')[0].files;
 
+            alert(depart)
             formData.append('userCode', $('#userCode').val());
             formData.append('userName', $('#userName').val());
             formData.append('name', $('#name').val());
