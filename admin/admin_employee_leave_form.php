@@ -156,11 +156,11 @@ echo "</select>";
         }
         ?>
                                     </datalist>
-                                    <input type="text" class="form-control" id="userName" name="userName">
-                                    <input type="text" class="form-control" id="depart" name="depart">
-                                    <input type="text" class="form-control" id="level" name="level">
-                                    <input type="text" class="form-control" id="workplace" name="workplace">
-                                    <input type="text" class="form-control" id="subDepart" name="subDepart">
+                                    <input type="text" class="form-control" id="userName" name="userName" hidden>
+                                    <input type="text" class="form-control" id="depart" name="depart" hidden>
+                                    <input type="text" class="form-control" id="level" name="level" hidden>
+                                    <input type="text" class="form-control" id="workplace" name="workplace" hidden>
+                                    <input type="text" class="form-control" id="subDepart" name="subDepart" hidden>
 
                                 </div>
                                 <div class="col-6">
@@ -327,9 +327,9 @@ if (!isset($_GET['page'])) {
 
 $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
 AND Year(l_create_datetime) = '$selectedYear' 
-AND l_leave_id <> 6 
-AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
-
+AND l_leave_id NOT IN (6,7)
+-- AND l_leave_status <> 1
+ORDER BY l_create_datetime DESC
 ";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -565,12 +565,12 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 22 ปุ่มตรวจสอบ
-        if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
-        } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
-        }
+        // 22 ปุ่มยกเลิก
+        // 22 Cancel button
+        echo '<td>';
+        echo '<button class="btn btn-danger cancel-btn" data-usercode="' . $row['l_usercode'] . '" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '">ยกเลิก</button>';
+        echo '</td>';
+
         echo '</tr>';
         $rowNumber--;
     }
@@ -844,6 +844,52 @@ if ($result->rowCount() > 0) {
                     });
                 }
             }
+        });
+        $('.cancel-btn').on('click', function() {
+            // Retrieve data attributes from button
+            var usercode = $(this).data('usercode');
+            var leaveId = $(this).data('leaveid');
+            var createDatetime = $(this).data('createdatetime');
+
+            // SweetAlert confirmation dialog
+            Swal.fire({
+                title: 'ต้องการยกเลิกใบลาหรือไม่ ?',
+                // text: "Do you really want to cancel this leave request?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่',
+                cancelButtonText: 'ไม่'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'a_ajax_delete_emp_leave.php', // PHP script to handle cancellation
+                        type: 'POST',
+                        data: {
+                            l_usercode: usercode,
+                            l_leave_id: leaveId,
+                            l_create_datetime: createDatetime
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: 'ยกเลิกใบลาสำเร็จ',
+                                icon: 'success'
+                            }).then(() => {
+                                location
+                                    .reload(); // โหลดหน้าใหม่หลังจากยกเลิกใบลา
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred: ' + error,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
         });
     });
     </script>
