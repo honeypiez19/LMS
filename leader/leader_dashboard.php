@@ -79,42 +79,60 @@ if (!empty($late_entries_list)) {
 }
 
 // มีใบลาของพนักงาน --------------------------------------------------------------------------------------------
-// $sql_check_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
-// FROM leave_list
-// WHERE l_department = :depart
-// AND l_leave_status = 0
-// AND l_approve_status = 0
-// AND l_level = 'user'
-// AND l_approve_status2 = 1
-// AND (l_leave_id <> 6 AND l_leave_id <> 7)
-// GROUP BY l_name";
+
 $sql_check_leave = "SELECT
-    COUNT(l_list_id) AS leave_count,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+--     COUNT(l_list_id) AS leave_count,
+--     li.l_username,
+--     li.l_name,
+--     li.l_department,
+--     em.e_sub_department,
+--     em.e_sub_department2,
+--     em.e_sub_department3,
+--     em.e_sub_department4,
+--     em.e_sub_department5
+-- FROM leave_list li
+-- INNER JOIN employees em
+--     ON li.l_usercode = em.e_usercode
+-- WHERE l_leave_status = 0
+--     AND l_approve_status = 0
+--     AND l_level = 'user'
+--     AND (l_leave_id <> 6 AND l_leave_id <> 7)
+--     AND (
+--         (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
+--         OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
+--         OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+--     )
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE l_leave_status = 0
-    AND l_approve_status = 0
-    AND l_level = 'user'
-    AND (l_leave_id <> 6 AND l_leave_id <> 7)
+WHERE 
+    li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
-        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
-        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+        -- (em.e_department = :subDepart AND li.l_department = :subDepart)
+        -- OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-GROUP BY l_name";
+GROUP BY li.l_name";
 
 $stmt_check_leave = $conn->prepare($sql_check_leave);
 $stmt_check_leave->bindParam(':depart', $depart);
 $stmt_check_leave->bindParam(':subDepart', $subDepart);
+$stmt_check_leave->bindParam(':subDepart2', $subDepart2);
+$stmt_check_leave->bindParam(':subDepart3', $subDepart3);
+$stmt_check_leave->bindParam(':subDepart4', $subDepart4);
+$stmt_check_leave->bindParam(':subDepart5', $subDepart5);
+$stmt_check_leave->bindParam(':selectedYear', $selectedYear);
+$stmt_check_leave->bindParam(':selectedMonth', $selectedMonth);
 $stmt_check_leave->execute();
 
 $employee_names = array();
@@ -135,31 +153,56 @@ if (!empty($employee_list)) {
 
 // พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
 $sql_cancel_leave = "SELECT
-    COUNT(l_list_id) AS leave_count,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+--     COUNT(l_list_id) AS leave_count,
+--     li.l_username,
+--     li.l_name,
+--     li.l_department,
+--     em.e_sub_department,
+--     em.e_sub_department2,
+--     em.e_sub_department3,
+--     em.e_sub_department4,
+--     em.e_sub_department5
+-- FROM leave_list li
+-- INNER JOIN employees em
+--     ON li.l_usercode = em.e_usercode
+-- WHERE l_leave_status = 1
+--     AND l_approve_status = 0
+--     AND l_level = 'user'
+--     AND (l_leave_id <> 6 AND l_leave_id <> 7)
+--     AND (
+--         (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
+--         OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
+--         OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+--     )
+-- GROUP BY l_name
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE l_leave_status = 1
-    AND l_approve_status = 0
-    AND l_level = 'user'
-    AND (l_leave_id <> 6 AND l_leave_id <> 7)
+WHERE 
+    li.l_leave_status = 1
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
-        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
-        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+        -- (em.e_department = :subDepart AND li.l_department = :subDepart)
+        -- OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-GROUP BY l_name";
+GROUP BY li.l_name";
 $stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
 $stmt_cancel_leave->bindParam(':depart', $depart);
 $stmt_cancel_leave->bindParam(':subDepart', $subDepart);
+$stmt_cancel_leave->bindParam(':subDepart2', $subDepart2);
+$stmt_cancel_leave->bindParam(':subDepart3', $subDepart3);
+$stmt_cancel_leave->bindParam(':subDepart4', $subDepart4);
+$stmt_cancel_leave->bindParam(':subDepart5', $subDepart5);
 $stmt_cancel_leave->execute();
 
 $employee_names = array();
@@ -180,31 +223,54 @@ if (!empty($employee_list)) {
 
 // มีพนักงานมาสาย --------------------------------------------------------------------------------------------
 $sql_check_leave_id_7 = "SELECT
-COUNT(l_list_id) AS leave_count,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+-- COUNT(l_list_id) AS leave_count,
+--     li.l_username,
+--     li.l_name,
+--     li.l_department,
+--     em.e_sub_department,
+--     em.e_sub_department2,
+--     em.e_sub_department3,
+--     em.e_sub_department4,
+--     em.e_sub_department5
+-- FROM leave_list li
+-- INNER JOIN employees em
+--     ON li.l_usercode = em.e_usercode
+-- WHERE l_leave_id = 7
+--     AND l_approve_status = 0
+--     AND l_level = 'user'
+--     AND (
+--         (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
+--         OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
+--         OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+--     )
+-- GROUP BY l_name
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE l_leave_id = 7
-    AND l_approve_status = 0
-    AND l_level = 'user'
+WHERE 
+    li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id = 7
     AND (
-        (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
-        OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
-        OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-GROUP BY l_name";
+GROUP BY li.l_name";
 
 $stmt_check_leave_id_7 = $conn->prepare($sql_check_leave_id_7);
 $stmt_check_leave_id_7->bindParam(':depart', $depart);
 $stmt_check_leave_id_7->bindParam(':subDepart', $subDepart);
+$stmt_check_leave_id_7->bindParam(':subDepart2', $subDepart2);
+$stmt_check_leave_id_7->bindParam(':subDepart3', $subDepart3);
+$stmt_check_leave_id_7->bindParam(':subDepart4', $subDepart4);
+$stmt_check_leave_id_7->bindParam(':subDepart5', $subDepart5);
 $stmt_check_leave_id_7->execute();
 
 if ($stmt_check_leave_id_7->rowCount() > 0) {
@@ -2016,7 +2082,7 @@ echo '</div>';
             var formattedDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" +
                 seconds;
 
-
+            // alert(formattedDate)
             // เช็คว่าหากเหตุผลในการลาเป็น "อื่น ๆ" ให้ใช้ค่าจาก input ที่มี id="otherReason"
             /*  if (leaveReason === 'อื่น ๆ') {
                  leaveReason = $('#otherReason').val();

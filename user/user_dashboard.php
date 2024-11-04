@@ -276,7 +276,7 @@ echo "</select>";
                         <div class="card-title">
                             <?php
 // $approveStatus = ($depart == 'RD') ? 4 : 2;
-$approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+$approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
     SUM(
@@ -1512,7 +1512,7 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>' . $row['l_approve_name'] . ' รอหัวหน้าอนุมัติ</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
@@ -1520,7 +1520,7 @@ if ($result->rowCount() > 0) {
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>' . $row['l_approve_name'] . ' อนุมัติ</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
@@ -1845,9 +1845,10 @@ echo '</div>';
             }
 
             var createDate = new Date();
+            createDate.setHours(createDate.getHours() + 7); // Adjust to Thai timezone (UTC+7)
             var formattedDate = createDate.toISOString().slice(0, 19).replace('T', ' ');
-            fd.append(
-                'formattedDate', formattedDate);
+            fd.append('formattedDate', formattedDate);
+            // alert(formattedDate);
 
             // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
             if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {

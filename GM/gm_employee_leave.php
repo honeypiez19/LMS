@@ -134,7 +134,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     <th rowspan="3">แผนก</th>
                     <th rowspan="3">อายุงาน</th>
                     <th rowspan="3">ระดับ</th>
-                    <th colspan="18" style="background-color: #DCDCDC;">ประเภทการลาและจำนวนวัน</th>
+                    <th colspan="19" style="background-color: #DCDCDC;">ประเภทการลาและจำนวนวัน</th>
                     <th rowspan="3">รวมวันลาที่ใช้ (ยกเว้นพักร้อน)</th>
                 </tr>
                 <tr class="text-center align-middle">
@@ -144,6 +144,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     <th colspan="3">ลาป่วยจากงาน</th>
                     <th colspan="3">ลาพักร้อน</th>
                     <th colspan="3">อื่น ๆ (ระบุ)</th>
+                    <th colspan="1" rowspan="3">หยุดงาน</th>
                 </tr>
                 <tr class="text-center align-middle">
                     <th>จำนวนวันที่ได้</th>
@@ -372,6 +373,42 @@ SUM(
     END
 ) AS annual_leave_minutes,
 
+ -- หยุดงาน
+ SUM(
+            CASE
+                WHEN l_leave_id = '6'
+                THEN IFNULL(DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)), 0)
+                - (SELECT COUNT(1)
+                   FROM holiday
+                   WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+                   AND h_holiday_status = 'วันหยุด'
+                   AND h_status = 0)
+                ELSE 0
+            END
+        ) AS stop_work_days,
+    
+        SUM(
+            CASE
+                WHEN l_leave_id = '6'
+                THEN IFNULL(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24, 0)
+                - CASE
+                      WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+                           AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+                      THEN 1
+                      ELSE 0
+                  END
+                ELSE 0
+            END
+        ) AS stop_work_hours,
+    
+        SUM(
+            CASE
+                WHEN l_leave_id = '6'
+                THEN IFNULL(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))), 0)
+                ELSE 0
+            END
+        ) AS stop_work_minutes,
+    
 -- อื่น ๆ
 SUM(
     CASE
@@ -564,7 +601,33 @@ SUM(
     if ($leave_annual_minutes == 30) {
         $leave_annual_minutes = 5;
     }
+ // หยุดงาน ----------------------------------------------------------------
+ $stop_work_days = $result_leave['stop_work_days'] ?? 0;
+ $stop_work_hours = $result_leave['stop_work_hours'] ?? 0;
+ $stop_work_minutes = $result_leave['stop_work_minutes'] ?? 0;
 
+ // Convert total hours to days (8 hours = 1 day)
+ $stop_work_days += floor($stop_work_hours / 8);
+ $stop_work_hours = $stop_work_hours % 8; // Remaining hours after converting to days
+
+ // Convert minutes to hours if applicable
+ if ($stop_work_minutes >= 60) {
+     $stop_work_hours += floor($stop_work_minutes / 60);
+     $stop_work_minutes = $stop_work_minutes % 60;
+ }
+
+ // Round minutes to either 30 or 0
+ if ($stop_work_minutes > 0 && $stop_work_minutes <= 30) {
+     $stop_work_minutes = 30; // ปัดขึ้นเป็น 30 นาที
+ } elseif ($stop_work_minutes > 30) {
+     $stop_work_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
+     $stop_work_hours += 1;
+ }
+
+ // ปรับจำนวน minutes ให้เป็น 5 นาทีในกรณี 30 นาที
+ if ($stop_work_minutes == 30) {
+     $stop_work_minutes = 5;
+ }
     // อื่น ๆ ----------------------------------------------------------------
     // Fetch total personal leave and leave durations
     $total_other = $result_leave['total_other'] ?? 0;
@@ -615,6 +678,8 @@ SUM(
     echo '<td>' . $total_other . '</td>';
     echo '<td>' . $other_days . '(' . $other_hours . '.' . $other_minutes . ')' . '</td>';
     echo '<td>' . ($total_other - $other_days) . '</td>';
+
+    echo '<td>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')' . '</td>';
 
     // echo "Total Late Count: " . $result_leave['late_count'];
 

@@ -96,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($depart == 'RD') {
             // แจ้งไลน์โฮซัง
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department =  'RD'");
             // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
             // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
             $stmt->bindParam(':workplace', $workplace);
@@ -139,14 +139,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // $stmt->bindParam(':subDepart', $subDepart);
             }
         } else if ($depart == 'CAD1') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
-            $stmt->bindParam(':workplace', $workplace);
+            if($subDepart == 'Modeling'){
+                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Modeling'");
+                $stmt->bindParam(':workplace', $workplace);
+            }
+            else if($subDepart == 'Design'){
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Design'");
+                $stmt->bindParam(':workplace', $workplace); 
+            }
         } else if ($depart == 'CAD2') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department2 = 'CAD2'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department2 = 'CAD2'");
             $stmt->bindParam(':workplace', $workplace);
 
         } else if ($depart == 'CAM') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM2'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department3 = 'CAM2'");
             $stmt->bindParam(':workplace', $workplace);
 
         } else {

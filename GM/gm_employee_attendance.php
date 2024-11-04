@@ -152,9 +152,10 @@ WHERE
 li.l_department <> 'RD'
 -- AND li.l_leave_status = 0
 AND li.l_leave_id = 7
-AND Year(li.l_create_datetime) = '$selectedYear'
-AND Month(li.l_create_datetime) = '$selectedMonth'
-ORDER BY l_create_datetime DESC";
+AND li.l_approve_status IN (2,3)
+AND Year(li.l_leave_end_date) = '$selectedYear'
+AND Month(li.l_leave_end_date) = '$selectedMonth'
+ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -446,9 +447,10 @@ WHERE
 li.l_department <> 'RD'
 -- AND li.l_leave_status = 0
 AND li.l_leave_id = 7
-AND Year(li.l_create_datetime) = '$selectedYear'
-AND Month(li.l_create_datetime) = '$selectedMonth'
-ORDER BY l_create_datetime DESC";
+AND li.l_approve_status IN (2,3)
+AND Year(li.l_leave_end_date) = '$selectedYear'
+AND Month(li.l_leave_end_date) = '$selectedMonth'
+ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

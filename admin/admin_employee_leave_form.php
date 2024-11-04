@@ -325,11 +325,12 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
+$sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$selectedMonth' 
+AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id NOT IN (6,7)
--- AND l_leave_status <> 1
-ORDER BY l_create_datetime DESC
+AND l_remark = 'HR ลาย้อนหลัง'
+
+ORDER BY l_leave_end_date DESC
 ";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

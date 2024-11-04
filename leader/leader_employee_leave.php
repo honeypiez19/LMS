@@ -205,7 +205,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 // เลือกปี
 if (isset($_POST['year'])) {
     // $selectedYear = $_POST['year'];
-    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
 
     $sql = "SELECT * FROM employees 
     WHERE e_usercode <> :userCode
@@ -794,7 +794,7 @@ else {
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
     
-    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
 
     $sql = "SELECT * FROM employees 
     WHERE e_usercode <> :userCode

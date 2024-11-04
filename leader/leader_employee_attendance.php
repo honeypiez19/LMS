@@ -135,30 +135,84 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+// AND Year(l_hr_create_datetime) = '$selectedYear'
+// AND Month(l_hr_create_datetime) = '$selectedMonth'
+// AND l_level = 'user'
+// AND l_leave_id = 7
+// ORDER BY l_hr_create_datetime DESC";
+
+$sql = "SELECT
+    li.*,
+    em.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_hr_create_datetime) = '$selectedYear'
-AND Month(l_hr_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id = 7
-ORDER BY l_hr_create_datetime DESC";
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
-
-// คำนวณหน้าทั้งหมด
-$totalPages = ceil($totalRows / $itemsPerPage);
-
-// คำนวณ offset สำหรับ pagination
-$offset = ($currentPage - 1) * $itemsPerPage;
-
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
-
-// ประมวลผลคำสั่ง SQL
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_approve_status IN (0, 1, 2, 3, 6)
+    AND li.l_level IN ('user')
+    AND li.l_leave_id = 7
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth
+    AND (
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
+    )
+ORDER BY li.l_leave_end_date DESC";
+// Prepare the statement
 $stmt = $conn->prepare($sql);
+
+// Bind the parameters
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement to get total rows
 $stmt->execute();
 
+// Get total rows for pagination
+$totalRows = $stmt->rowCount();
+
+// Calculate total pages
+$totalPages = ceil($totalRows / $itemsPerPage);
+
+// Calculate offset for pagination
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Add LIMIT and OFFSET to the SQL query
+$sql .= " LIMIT :limit OFFSET :offset";
+
+// Prepare the statement again with the complete query
+$stmt = $conn->prepare($sql);
+
+// Bind the parameters again for pagination
+$stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+// Bind the previously bound parameters again
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement
+$stmt->execute();
+
+// Fetch the results
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (count($result) > 0) {
@@ -418,30 +472,85 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+// AND Year(l_hr_create_datetime) = '$selectedYear'
+// AND Month(l_hr_create_datetime) = '$selectedMonth'
+// AND l_level = 'user'
+// AND l_leave_id = 7
+// ORDER BY l_hr_create_datetime DESC";
+// $result = $conn->query($sql);
+// $totalRows = $result->rowCount();
+$sql = "SELECT
+    li.*,
+    em.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_hr_create_datetime) = '$selectedYear'
-AND Month(l_hr_create_datetime) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id = 7
-ORDER BY l_hr_create_datetime DESC";
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
-
-// คำนวณหน้าทั้งหมด
-$totalPages = ceil($totalRows / $itemsPerPage);
-
-// คำนวณ offset สำหรับ pagination
-$offset = ($currentPage - 1) * $itemsPerPage;
-
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
-
-// ประมวลผลคำสั่ง SQL
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_approve_status IN (0, 1, 2, 3, 6)
+    AND li.l_level IN ('user')
+    AND li.l_leave_id = 7
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth
+    AND (
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
+    )
+ORDER BY li.l_leave_end_date DESC";
+// Prepare the statement
 $stmt = $conn->prepare($sql);
+
+// Bind the parameters
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement to get total rows
 $stmt->execute();
 
+// Get total rows for pagination
+$totalRows = $stmt->rowCount();
+
+// Calculate total pages
+$totalPages = ceil($totalRows / $itemsPerPage);
+
+// Calculate offset for pagination
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Add LIMIT and OFFSET to the SQL query
+$sql .= " LIMIT :limit OFFSET :offset";
+
+// Prepare the statement again with the complete query
+$stmt = $conn->prepare($sql);
+
+// Bind the parameters again for pagination
+$stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+// Bind the previously bound parameters again
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement
+$stmt->execute();
+
+// Fetch the results
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (count($result) > 0) {

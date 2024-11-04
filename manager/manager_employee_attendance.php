@@ -144,16 +144,43 @@ if (!isset($_GET['page'])) {
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 // $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND l_department = 'Office' AND Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+//     AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD'  OR '$subDepart' = 'CAD1' OR '$subDepart2' = 'CAD2' OR '$subDepart3' = 'CAM' )
+//     AND Year(l_create_datetime) = '$selectedYear'
+//     AND Month(l_create_datetime) = '$selectedMonth'
+//     -- AND l_level = 'user'
+//     AND l_leave_id = 7
+// ORDER BY l_create_datetime DESC";
+
+$sql = "SELECT
+    li.*,
+    em.e_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD'  OR '$subDepart' = 'CAD1' OR '$subDepart2' = 'CAD2' OR '$subDepart3' = 'CAM' )
-    AND Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    -- AND l_level = 'user'
-    AND l_leave_id = 7
-ORDER BY l_create_datetime DESC";
+WHERE
+    li.l_approve_status IN (1, 2, 3, 6)
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_leave_id = 7
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
+    AND (
+        -- Check for matching department or sub-department
+        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
+    )
+ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -431,22 +458,44 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-// คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-// $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND l_department = '$depart'
-// AND Month(l_create_datetime) = '$selectedMonth'
-// AND Year(l_create_datetime) = $selectedYear
+
+// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+//     AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
+//     AND Year(l_create_datetime) = '$selectedYear'
+//     AND Month(l_create_datetime) = '$selectedMonth'
+//     -- AND l_level = 'user'
+//     AND l_leave_id = 7
 // ORDER BY l_create_datetime DESC";
 
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT
+    li.*,
+    em.e_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
-    AND Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    -- AND l_level = 'user'
-    AND l_leave_id = 7
-ORDER BY l_create_datetime DESC";
+WHERE
+    li.l_approve_status IN (1, 2, 3, 6)
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_leave_id = 7
+    AND YEAR(li.l_leave_end_date) = '$selectedYear'
+    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
+    AND (
+        -- Check for matching department or sub-department
+        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
+        OR (li.l_department = '$subDepart2')
+        OR (li.l_department = '$subDepart3')
+        OR (li.l_department = '$subDepart4')
+        OR (li.l_department = '$subDepart5')
+    )
+ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

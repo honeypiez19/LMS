@@ -80,7 +80,7 @@ $userCode = $_SESSION['s_usercode'];
                 <input type="text" class="form-control" id="codeSearch" list="codeList">
                 <datalist id="codeList">
                     <?php
-$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> '1'  AND e_usercode <> '$userCode'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1'";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_usercode'] . '">';
@@ -93,7 +93,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 <input type="text" class="form-control" id="nameSearch" list="nameList">
                 <datalist id="nameList">
                     <?php
-$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> '1' AND e_usercode <> '$userCode'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1'";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_name'] . '">';
@@ -106,7 +106,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 <input type="text" class="form-control" id="depSearch" list="depList">
                 <datalist id="depList">
                     <?php
-$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> '1' AND e_usercode <> '$userCode'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1'";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_sub_department'] . '">';
@@ -134,7 +134,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     <th rowspan="3">แผนก</th>
                     <th rowspan="3">อายุงาน</th>
                     <th rowspan="3">ระดับ</th>
-                    <th colspan="18" style="background-color: #DCDCDC;">ประเภทการลาและจำนวนวัน</th>
+                    <th colspan="19" style="background-color: #DCDCDC;">ประเภทการลาและจำนวนวัน</th>
                     <th rowspan="3">รวมวันลาที่ใช้ (ยกเว้นพักร้อน)</th>
                 </tr>
                 <tr class="text-center align-middle">
@@ -144,6 +144,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     <th colspan="3">ลาป่วยจากงาน</th>
                     <th colspan="3">ลาพักร้อน</th>
                     <th colspan="3">อื่น ๆ (ระบุ)</th>
+                    <th colspan="1" rowspan="3">หยุดงาน</th>
                 </tr>
                 <tr class="text-center align-middle">
                     <th>จำนวนวันที่ได้</th>
@@ -169,7 +170,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
             <!-- เนื้อหาของตาราง -->
             <tbody class="text-center my-table">
                 <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '$userCode'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1'";
 // $sql = "SELECT li.*, em.*
 // FROM leave_list li
 // INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
@@ -372,6 +373,42 @@ SUM(
     END
 ) AS annual_leave_minutes,
 
+ -- หยุดงาน
+ SUM(
+            CASE
+                WHEN l_leave_id = '6'
+                THEN IFNULL(DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)), 0)
+                - (SELECT COUNT(1)
+                   FROM holiday
+                   WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+                   AND h_holiday_status = 'วันหยุด'
+                   AND h_status = 0)
+                ELSE 0
+            END
+        ) AS stop_work_days,
+    
+        SUM(
+            CASE
+                WHEN l_leave_id = '6'
+                THEN IFNULL(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24, 0)
+                - CASE
+                      WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+                           AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+                      THEN 1
+                      ELSE 0
+                  END
+                ELSE 0
+            END
+        ) AS stop_work_hours,
+    
+        SUM(
+            CASE
+                WHEN l_leave_id = '6'
+                THEN IFNULL(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))), 0)
+                ELSE 0
+            END
+        ) AS stop_work_minutes,
+    
 -- อื่น ๆ
 SUM(
     CASE
@@ -564,7 +601,33 @@ SUM(
     if ($leave_annual_minutes == 30) {
         $leave_annual_minutes = 5;
     }
+ // หยุดงาน ----------------------------------------------------------------
+ $stop_work_days = $result_leave['stop_work_days'] ?? 0;
+ $stop_work_hours = $result_leave['stop_work_hours'] ?? 0;
+ $stop_work_minutes = $result_leave['stop_work_minutes'] ?? 0;
 
+ // Convert total hours to days (8 hours = 1 day)
+ $stop_work_days += floor($stop_work_hours / 8);
+ $stop_work_hours = $stop_work_hours % 8; // Remaining hours after converting to days
+
+ // Convert minutes to hours if applicable
+ if ($stop_work_minutes >= 60) {
+     $stop_work_hours += floor($stop_work_minutes / 60);
+     $stop_work_minutes = $stop_work_minutes % 60;
+ }
+
+ // Round minutes to either 30 or 0
+ if ($stop_work_minutes > 0 && $stop_work_minutes <= 30) {
+     $stop_work_minutes = 30; // ปัดขึ้นเป็น 30 นาที
+ } elseif ($stop_work_minutes > 30) {
+     $stop_work_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
+     $stop_work_hours += 1;
+ }
+
+ // ปรับจำนวน minutes ให้เป็น 5 นาทีในกรณี 30 นาที
+ if ($stop_work_minutes == 30) {
+     $stop_work_minutes = 5;
+ }
     // อื่น ๆ ----------------------------------------------------------------
     // Fetch total personal leave and leave durations
     $total_other = $result_leave['total_other'] ?? 0;
@@ -616,13 +679,28 @@ SUM(
     echo '<td>' . $other_days . '(' . $other_hours . '.' . $other_minutes . ')' . '</td>';
     echo '<td>' . ($total_other - $other_days) . '</td>';
 
+    echo '<td>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')' . '</td>';
+
     // echo "Total Late Count: " . $result_leave['late_count'];
 
+    // คำนวณจำนวนวัน, ชั่วโมง, และนาที
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days;
     $sum_hours = $leave_personal_hours + $leave_personal_no_hours + $leave_sick_hours + $leave_sick_work_hours;
     $sum_minutes = $leave_personal_minutes + $leave_personal_no_minutes + $leave_sick_minutes + $leave_sick_work_minutes;
 
-    echo '<td>' . $sum_day . '(' . $sum_hours . '.' . $sum_minutes . ')' . '</td>';
+// คำนวณชั่วโมงรวม
+    $total_hours = $sum_hours + floor($sum_minutes / 60); // เพิ่มชั่วโมงจากนาที
+    $total_minutes = $sum_minutes % 60; // นาทียังคงอยู่
+
+// ถ้าชั่วโมงรวมมากกว่า 8 ชั่วโมงให้เพิ่มจำนวนวัน
+    if ($total_hours >= 8) {
+        $extra_days = floor($total_hours / 8); // จำนวนวันเพิ่มเติมจากชั่วโมง
+        $sum_day += $extra_days; // เพิ่มจำนวนวัน
+        $total_hours = $total_hours % 8; // คำนวณชั่วโมงที่เหลือ
+    }
+
+// แสดงผล
+    echo '<td>' . $sum_day . '(' . $total_hours . '.' . $total_minutes . ')' . '</td>';
 
     echo '</tr>';
     $rowNumber++;
@@ -633,27 +711,81 @@ SUM(
     </div>
 
     <script>
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     const {
+    //         jsPDF
+    //     } = window.jspdf;
+
+    //     document.getElementById("generate-pdf").addEventListener("click", function() {
+    //         html2canvas(document.getElementById("leaveEmpTable")).then(canvas => {
+    //             var imgData = canvas.toDataURL('image/png');
+    //             var pdf = new jsPDF('landscape', 'pt', 'a4');
+    //             var imgWidth = 841.89 -
+    //                 40; // ความกว้างสำหรับ a4 แนวนอน ลบออก 40 pt เพื่อเว้นขอบซ้ายขวา
+    //             var pageHeight = 595.28;
+    //             var imgHeight = canvas.height * imgWidth / canvas.width;
+    //             var heightLeft = imgHeight;
+
+    //             var position = 20; // ระยะห่างจากขอบบน
+    //             var margin = 20; // ระยะห่างจากขอบซ้ายขวา
+
+    //             pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+    //             pdf.save("leaveData.pdf");
+    //         });
+    //     });
+    // });
     document.addEventListener("DOMContentLoaded", function() {
         const {
             jsPDF
         } = window.jspdf;
 
         document.getElementById("generate-pdf").addEventListener("click", function() {
-            html2canvas(document.getElementById("leaveEmpTable")).then(canvas => {
-                var imgData = canvas.toDataURL('image/png');
-                var pdf = new jsPDF('landscape', 'pt', 'a4');
-                var imgWidth = 841.89 -
-                    40; // ความกว้างสำหรับ a4 แนวนอน ลบออก 40 pt เพื่อเว้นขอบซ้ายขวา
-                var pageHeight = 595.28;
-                var imgHeight = canvas.height * imgWidth / canvas.width;
-                var heightLeft = imgHeight;
+            const table = document.getElementById("leaveEmpTable");
+            const rows = table.querySelectorAll("tr"); // Select all rows in the table
+            const rowsPerPage = 20;
+            const pdf = new jsPDF('landscape', 'pt', 'a4');
 
-                var position = 20; // ระยะห่างจากขอบบน
-                var margin = 20; // ระยะห่างจากขอบซ้ายขวา
+            const imgWidth = 841.89 - 40; // A4 width in landscape minus margin
+            const pageHeight = 595.28;
+            const headerHeight = 50; // Adjust header height as needed
+            const margin = 20;
+            let position = margin + headerHeight; // Start position below the header
 
-                pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-                pdf.save("leaveData.pdf");
-            });
+            // Function to add table header on each page
+            function addTableHeader() {
+                pdf.setFontSize(12);
+                pdf.text("Leave Data Table Header", margin, margin + 20); // Example header text
+                pdf.setLineWidth(0.5);
+                pdf.line(margin, margin + 25, imgWidth + margin, margin + 25); // Line below the header
+            }
+
+            // Loop through rows and add them to the PDF, 20 rows per page
+            for (let i = 0; i < rows.length; i += rowsPerPage) {
+                // Add a new page except for the first one
+                if (i > 0) pdf.addPage();
+
+                addTableHeader();
+
+                // Create a temporary table containing only 20 rows for this page
+                const pageRows = Array.from(rows).slice(i, i + rowsPerPage);
+                const tempTable = document.createElement("table");
+
+                pageRows.forEach(row => {
+                    tempTable.appendChild(row.cloneNode(true));
+                });
+
+                // Render the temporary table onto the PDF as an image
+                html2canvas(tempTable).then(canvas => {
+                    const imgData = canvas.toDataURL("image/png");
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+
+                    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+
+                    if (i + rowsPerPage >= rows.length) {
+                        pdf.save("leaveData.pdf");
+                    }
+                });
+            }
         });
     });
 

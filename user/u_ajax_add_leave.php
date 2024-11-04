@@ -57,7 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // วันที่สร้างใบลา
     $formattedDate = $_POST['formattedDate'];
-
+    // $formattedDate = date('Y-m-d', strtotime($_POST['formattedDate']));
+  
     // สถานะใบลา
     $leaveStatus = 0;
     $leaveStatusName = ($leaveStatus == 0) ? 'ปกติ' : 'ยกเลิก';
@@ -118,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($depart == 'RD') {
             // แจ้งไลน์โฮซัง
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department =  'RD'");
             // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
             // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
             $stmt->bindParam(':workplace', $workplace);

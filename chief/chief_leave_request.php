@@ -291,7 +291,7 @@ AND Month(l_leave_end_date) = '$selectedMonth'
 AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
-ORDER BY l_leave_end_date DESC";
+ORDER BY l_leave_end_date DESC"; 
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
