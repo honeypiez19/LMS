@@ -348,7 +348,7 @@ AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
 AND Year(li.l_leave_end_date) = '$selectedYear'
 AND Month(li.l_leave_end_date) = '$selectedMonth'
-ORDER BY li.l_leave_end_date DESC";
+ORDER BY li.l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

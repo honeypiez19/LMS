@@ -95,7 +95,7 @@ echo "</select>";
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
     // $approveStatus = ($depart == 'RD') ? 4 : 2;
-    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
@@ -543,51 +543,95 @@ AND l_approve_status2 = 4";
         echo '<p>No data found</p>';
     }
     // ----------------------------------------------------------------------------------------------
+    // ลากิจได้รับค่าจ้าง ------------------------------------------------------
+    // คำนวณวันและชั่วโมงที่เหลือ
+    $total_personal_minutes_used = ($leave_personal_days * 8 * 60) + ($leave_personal_hours * 60) + $leave_personal_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_personal_minutes = $total_personal * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
-    $total_personal_remaining_days = max($total_personal - $leave_personal_days, 0);
-    $total_personal_remaining_hr = ($leave_personal_hours != 0 ? 8 - $leave_personal_hours : 0);
+    $total_personal_remaining_minutes = $total_personal_minutes - $total_personal_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $personal_remaining_days = floor($total_personal_remaining_minutes / (8 * 60)); // วัน
+    $personal_remaining_hours = floor(($total_personal_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $personal_remaining_minutes = $total_personal_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
     echo '<td>ลากิจได้รับค่าจ้าง</td>';
-    echo '<td>' . $leave_personal_days . ' วัน ' . $leave_personal_hours . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
-    echo '<td><span class="text-primary">' . $total_personal_remaining_days . ' วัน </span>' . $total_personal_remaining_hr . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
+    echo '<td>' . $leave_personal_days . ' วัน ' . $leave_personal_hours  . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
+    echo '<td><span class="text-primary">' . $personal_remaining_days . ' วัน </span>' . $personal_remaining_hours. ' ชั่วโมง ' . $personal_remaining_minutes . ' นาที</td>';
     echo '</tr>';
 
-    $total_personal_no_remaining_days = max($total_personal_no - $leave_personal_no_days, 0);
-    $total_personal_no_remaining_hr = ($leave_personal_no_hours != 0 ? 8 - $leave_personal_no_hours : 0);
+    // ลากิจไม่ได้รับค่าจ้าง ------------------------------------------------------
+    $total_personal_no_minutes_used = ($leave_personal_no_days * 8 * 60) + ($leave_personal_no_hours * 60) + $leave_personal_no_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_personal_no_minutes = $total_personal_no * 8 * 60; // จำนวนวันทั้งหมดในนาที
+
+    $total_personal_no_remaining_minutes = $total_personal_no_minutes - $total_personal_no_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $personal_no_remaining_days = floor($total_personal_no_remaining_minutes / (8 * 60)); // วัน
+    $personal_no_remaining_hours = floor(($total_personal_no_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $personal_no_remaining_minutes = $total_personal_no_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลากิจไม่ได้รับค่าจ้าง' . '</td>';
     echo '<td>' . $leave_personal_no_days . ' วัน ' . $leave_personal_no_hours . ' ชั่วโมง ' . $leave_personal_no_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $total_personal_no_remaining_days .  ' วัน </span>' . $total_personal_no_remaining_hr . ' ชั่วโมง ' . $leave_personal_no_minutes . ' นาที ' . '</td>';
+    echo '<td><span class="text-primary">' . $personal_no_remaining_days .  ' วัน </span>' . $personal_no_remaining_hours . ' ชั่วโมง ' . $personal_no_remaining_minutes . ' นาที ' . '</td>';
     echo '</tr>';
 
-    $total_sick_remaining_days = max($total_sick - $leave_sick_days, 0);
-    $total_sick_remaining_hr = ($leave_sick_hours != 0 ? 8 - $leave_sick_hours : 0);
+    // ลาป่วย ------------------------------------------------------
+    $total_sick_minutes_used = ($leave_sick_days * 8 * 60) + ($leave_sick_hours * 60) + $leave_sick_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_sick_minutes = $total_sick * 8 * 60; // จำนวนวันทั้งหมดในนาที
+
+    $total_sick_remaining_minutes = $total_sick_minutes - $total_sick_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $sick_remaining_days = floor($total_sick_remaining_minutes / (8 * 60)); // วัน
+    $sick_remaining_hours = floor(($total_sick_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $sick_remaining_minutes = $total_sick_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลาป่วย' . '</td>';
     echo '<td>' . $leave_sick_days . ' วัน ' . $leave_sick_hours . ' ชั่วโมง ' . $leave_sick_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $total_sick_remaining_days . ' วัน </span>' . $total_sick_remaining_hr . ' ชั่วโมง ' . $leave_sick_minutes . ' นาที ' . '</td>';
+    echo '<td><span class="text-primary">' . $sick_remaining_days . ' วัน </span>' . $sick_remaining_hours . ' ชั่วโมง ' . $sick_remaining_minutes . ' นาที ' . '</td>';
     echo '</tr>';
 
-    $total_sick_work_remaining_days = max($total_sick_work - $leave_sick_work_days, 0);
-    $total_sick_work_remaining_hr = ($leave_sick_work_hours != 0 ? 8 - $leave_sick_work_hours : 0);
+    // ลาป่วยจากงาน ------------------------------------------------------
+    $total_sick_work_minutes_used = ($leave_sick_work_days * 8 * 60) + ($leave_sick_work_hours * 60) + $leave_sick_work_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_sick_work_minutes = $total_sick_work * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
+    $total_sick_work_remaining_minutes = $total_sick_work_minutes - $total_sick_work_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $sick_work_remaining_days = floor($total_sick_work_remaining_minutes / (8 * 60)); // วัน
+    $sick_work_remaining_hours = floor(($total_sick_work_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $sick_work_remaining_minutes = $total_sick_work_remaining_minutes % 60; // นาที
+    
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลาป่วยจากงาน' . '</td>';
     echo '<td>' . $leave_sick_work_days . ' วัน ' . $leave_sick_work_hours . ' ชั่วโมง ' . $leave_sick_work_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $total_sick_work_remaining_days .  ' วัน </span>' .  $total_sick_work_remaining_hr  . ' ชั่วโมง ' . $leave_sick_work_minutes . ' นาที ' . '</td>';
+    echo '<td><span class="text-primary">' . $sick_work_remaining_days .  ' วัน </span>' .  $sick_work_remaining_hours  . ' ชั่วโมง ' . $sick_work_remaining_minutes . ' นาที ' . '</td>';
     echo '<tr class="text-center align-middle">';
 
-    $total_annual_remaining_days = max($total_annual - $leave_annual_days, 0);
-    $total_annual_remaining_hr = ($leave_annual_hours!= 0 ? 8 - $leave_annual_hours : 0);
+    // ลาพักร้อน ------------------------------------------------------
+    // คำนวณวันและชั่วโมงที่เหลือ
+    $total_annual_minutes_used = ($leave_annual_days * 8 * 60) + ($leave_annual_hours * 60) + $leave_annual_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_annual_minutes = $total_annual * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
+    $total_annual_remaining_minutes = $total_annual_minutes - $total_annual_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $annual_remaining_days = floor($total_annual_remaining_minutes / (8 * 60)); // วัน
+    $annual_remaining_hours = floor(($total_annual_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $annual_remaining_minutes = $total_annual_remaining_minutes % 60; // นาที
+
+    // แสดงผลลัพธ์
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลาพักร้อน' . '</td>';
     echo '<td>' . $leave_annual_days . ' วัน ' . $leave_annual_hours . ' ชั่วโมง ' . $leave_annual_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $total_annual_remaining_days . ' วัน </span>' .  $leave_annual_hours . ' ชั่วโมง ' . $leave_annual_minutes . ' นาที' . '</td>';
+    echo '<td><span class="text-primary">' . $annual_remaining_days . ' วัน </span>' . $annual_remaining_hours . ' ชั่วโมง ' . $annual_remaining_minutes . ' นาที' . '</td>';
     echo '</tr>';
+
+    // ------------------------------------------------------
 
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'มาสาย' . '</td>';
@@ -601,13 +645,22 @@ AND l_approve_status2 = 4";
     echo '<td>' . '-' . '</td>';
     echo '</tr>';
 
-    $total_other_remaining_days = max($total_other - $other_days, 0);
-    $total_other_remaining_hr = ( $other_hours  != 0 ? 8 -  $other_hours  : 0);
+    // อื่น ๆ ------------------------------------------------------
+    // คำนวณวันและชั่วโมงที่เหลือ
+    $total_other_minutes_used = ($other_days * 8 * 60) + ($other_hours * 60) + $other_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_other_minutes = $total_other * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
+    $total_other_remaining_minutes = $total_other_minutes - $total_other_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $other_remaining_days = floor($total_other_remaining_minutes / (8 * 60)); // วัน
+    $other_remaining_hours = floor(($total_other_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $other_remaining_minutes = $total_other_remaining_minutes % 60; // นาที
+    
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'อื่น ๆ' . '</td>';
     echo '<td>' . $other_days . ' วัน ' . $other_hours . ' ชั่วโมง ' . $other_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $total_other_remaining_days . ' วัน </span>' . $total_other_remaining_hr . ' ชั่วโมง ' . $other_minutes . ' นาที' . '</td>';
+    echo '<td><span class="text-primary">' . $other_remaining_days . ' วัน </span>' . $other_remaining_hours . ' ชั่วโมง ' . $other_remaining_minutes . ' นาที' . '</td>';
     echo '</tr>';
 
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $stop_work_days;
@@ -675,7 +728,7 @@ else {
     // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
-    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT
@@ -1123,62 +1176,94 @@ AND l_approve_status2 = 4";
         echo '<p>No data found</p>';
     }
     // ----------------------------------------------------------------------------------------------
+    // ลากิจได้รับค่าจ้าง ------------------------------------------------------
+    // คำนวณวันและชั่วโมงที่เหลือ
+    $total_personal_minutes_used = ($leave_personal_days * 8 * 60) + ($leave_personal_hours * 60) + $leave_personal_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_personal_minutes = $total_personal * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
-    $total_personal_remaining_days = max($total_personal - $leave_personal_days, 0);
-    $total_personal_remaining_hr = ($leave_personal_hours != 0 ? 8 - $leave_personal_hours : 0);
+    $total_personal_remaining_minutes = $total_personal_minutes - $total_personal_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $personal_remaining_days = floor($total_personal_remaining_minutes / (8 * 60)); // วัน
+    $personal_remaining_hours = floor(($total_personal_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $personal_remaining_minutes = $total_personal_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
     echo '<td>ลากิจได้รับค่าจ้าง</td>';
     echo '<td>' . $leave_personal_days . ' วัน ' . $leave_personal_hours  . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
-    echo '<td><span class="text-primary">' . $total_personal_remaining_days . ' วัน </span>' . $total_personal_remaining_hr. ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
+    echo '<td><span class="text-primary">' . $personal_remaining_days . ' วัน </span>' . $personal_remaining_hours. ' ชั่วโมง ' . $personal_remaining_minutes . ' นาที</td>';
     echo '</tr>';
 
-    $total_personal_no_remaining_days = max($total_personal_no - $leave_personal_no_days, 0);
-    $total_personal_no_remaining_hr = ($leave_personal_no_hours != 0 ? 8 - $leave_personal_no_hours : 0);
+    // ลากิจไม่ได้รับค่าจ้าง ------------------------------------------------------
+    $total_personal_no_minutes_used = ($leave_personal_no_days * 8 * 60) + ($leave_personal_no_hours * 60) + $leave_personal_no_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_personal_no_minutes = $total_personal_no * 8 * 60; // จำนวนวันทั้งหมดในนาที
+
+    $total_personal_no_remaining_minutes = $total_personal_no_minutes - $total_personal_no_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $personal_no_remaining_days = floor($total_personal_no_remaining_minutes / (8 * 60)); // วัน
+    $personal_no_remaining_hours = floor(($total_personal_no_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $personal_no_remaining_minutes = $total_personal_no_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลากิจไม่ได้รับค่าจ้าง' . '</td>';
     echo '<td>' . $leave_personal_no_days . ' วัน ' . $leave_personal_no_hours . ' ชั่วโมง ' . $leave_personal_no_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $total_personal_no_remaining_days .  ' วัน </span>' . $total_personal_no_remaining_hr . ' ชั่วโมง ' . $leave_personal_no_minutes . ' นาที ' . '</td>';
+    echo '<td><span class="text-primary">' . $personal_no_remaining_days .  ' วัน </span>' . $personal_no_remaining_hours . ' ชั่วโมง ' . $personal_no_remaining_minutes . ' นาที ' . '</td>';
     echo '</tr>';
 
-    $total_sick_remaining_days = max($total_sick - $leave_sick_days, 0);
-    $total_sick_remaining_hr = ($leave_sick_hours != 0 ? 8 - $leave_sick_hours : 0);
+    // ลาป่วย ------------------------------------------------------
+    $total_sick_minutes_used = ($leave_sick_days * 8 * 60) + ($leave_sick_hours * 60) + $leave_sick_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_sick_minutes = $total_sick * 8 * 60; // จำนวนวันทั้งหมดในนาที
+
+    $total_sick_remaining_minutes = $total_sick_minutes - $total_sick_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $sick_remaining_days = floor($total_sick_remaining_minutes / (8 * 60)); // วัน
+    $sick_remaining_hours = floor(($total_sick_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $sick_remaining_minutes = $total_sick_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลาป่วย' . '</td>';
     echo '<td>' . $leave_sick_days . ' วัน ' . $leave_sick_hours . ' ชั่วโมง ' . $leave_sick_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $total_sick_remaining_days . ' วัน </span>' . $total_sick_remaining_hr . ' ชั่วโมง ' . $leave_sick_minutes . ' นาที ' . '</td>';
+    echo '<td><span class="text-primary">' . $sick_remaining_days . ' วัน </span>' . $sick_remaining_hours . ' ชั่วโมง ' . $sick_remaining_minutes . ' นาที ' . '</td>';
     echo '</tr>';
 
-    $total_sick_work_remaining_days = max($total_sick_work - $leave_sick_work_days, 0);
-    $total_sick_work_remaining_hr = ($leave_sick_work_hours != 0 ? 8 - $leave_sick_work_hours : 0);
+    // ลาป่วยจากงาน ------------------------------------------------------
+    $total_sick_work_minutes_used = ($leave_sick_work_days * 8 * 60) + ($leave_sick_work_hours * 60) + $leave_sick_work_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_sick_work_minutes = $total_sick_work * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
+    $total_sick_work_remaining_minutes = $total_sick_work_minutes - $total_sick_work_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $sick_work_remaining_days = floor($total_sick_work_remaining_minutes / (8 * 60)); // วัน
+    $sick_work_remaining_hours = floor(($total_sick_work_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $sick_work_remaining_minutes = $total_sick_work_remaining_minutes % 60; // นาที
+    
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลาป่วยจากงาน' . '</td>';
     echo '<td>' . $leave_sick_work_days . ' วัน ' . $leave_sick_work_hours . ' ชั่วโมง ' . $leave_sick_work_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $total_sick_work_remaining_days .  ' วัน </span>' .  $total_sick_work_remaining_hr  . ' ชั่วโมง ' . $leave_sick_work_minutes . ' นาที ' . '</td>';
+    echo '<td><span class="text-primary">' . $sick_work_remaining_days .  ' วัน </span>' .  $sick_work_remaining_hours  . ' ชั่วโมง ' . $sick_work_remaining_minutes . ' นาที ' . '</td>';
     echo '<tr class="text-center align-middle">';
 
-    // ------------------------------------------------------
-// คำนวณวันและชั่วโมงที่เหลือ
-$total_minutes_used = ($leave_annual_days * 8 * 60) + ($leave_annual_hours * 60) + $leave_annual_minutes; // แปลงทั้งหมดเป็นนาที
-$total_annual_minutes = $total_annual * 8 * 60; // จำนวนวันทั้งหมดในนาที
+    // ลาพักร้อน ------------------------------------------------------
+    // คำนวณวันและชั่วโมงที่เหลือ
+    $total_annual_minutes_used = ($leave_annual_days * 8 * 60) + ($leave_annual_hours * 60) + $leave_annual_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_annual_minutes = $total_annual * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
-$total_remaining_minutes = $total_annual_minutes - $total_minutes_used; // คำนวณนาทีที่เหลือ
+    $total_annual_remaining_minutes = $total_annual_minutes - $total_annual_minutes_used; // คำนวณนาทีที่เหลือ
 
-// แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
-$remaining_days = floor($total_remaining_minutes / (8 * 60)); // วัน
-$remaining_hours = floor(($total_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
-$remaining_minutes = $total_remaining_minutes % 60; // นาที
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $annual_remaining_days = floor($total_annual_remaining_minutes / (8 * 60)); // วัน
+    $annual_remaining_hours = floor(($total_annual_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $annual_remaining_minutes = $total_annual_remaining_minutes % 60; // นาที
 
-// แสดงผลลัพธ์
-echo '<tr class="text-center align-middle">';
-echo '<td>' . 'ลาพักร้อน' . '</td>';
-echo '<td>' . $leave_annual_days . ' วัน ' . $leave_annual_hours . ' ชั่วโมง ' . $leave_annual_minutes . ' นาที' . '</td>';
-echo '<td><span class="text-primary">' . $remaining_days . ' วัน </span>' . $remaining_hours . ' ชั่วโมง ' . $remaining_minutes . ' นาที' . '</td>';
-echo '</tr>';
-    
+    // แสดงผลลัพธ์
+    echo '<tr class="text-center align-middle">';
+    echo '<td>' . 'ลาพักร้อน' . '</td>';
+    echo '<td>' . $leave_annual_days . ' วัน ' . $leave_annual_hours . ' ชั่วโมง ' . $leave_annual_minutes . ' นาที' . '</td>';
+    echo '<td><span class="text-primary">' . $annual_remaining_days . ' วัน </span>' . $annual_remaining_hours . ' ชั่วโมง ' . $annual_remaining_minutes . ' นาที' . '</td>';
+    echo '</tr>';
+
     // ------------------------------------------------------
 
     echo '<tr class="text-center align-middle">';
@@ -1193,13 +1278,22 @@ echo '</tr>';
     echo '<td>' . '-' . '</td>';
     echo '</tr>';
 
-    $total_other_remaining_days = max($total_other - $other_days, 0);
-    $total_other_remaining_hr = ( $other_hours  != 0 ? 8 -  $other_hours  : 0);
+    // อื่น ๆ ------------------------------------------------------
+    // คำนวณวันและชั่วโมงที่เหลือ
+    $total_other_minutes_used = ($other_days * 8 * 60) + ($other_hours * 60) + $other_minutes; // แปลงทั้งหมดเป็นนาที
+    $total_other_minutes = $total_other * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
+    $total_other_remaining_minutes = $total_other_minutes - $total_other_minutes_used; // คำนวณนาทีที่เหลือ
+
+    // แปลงนาทีที่เหลือเป็นวัน ชั่วโมง และนาที
+    $other_remaining_days = floor($total_other_remaining_minutes / (8 * 60)); // วัน
+    $other_remaining_hours = floor(($total_other_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+    $other_remaining_minutes = $total_other_remaining_minutes % 60; // นาที
+    
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'อื่น ๆ' . '</td>';
     echo '<td>' . $other_days . ' วัน ' . $other_hours . ' ชั่วโมง ' . $other_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $total_other_remaining_days . ' วัน </span>' . $total_other_remaining_hr . ' ชั่วโมง ' . $other_minutes . ' นาที' . '</td>';
+    echo '<td><span class="text-primary">' . $other_remaining_days . ' วัน </span>' . $other_remaining_hours . ' ชั่วโมง ' . $other_remaining_minutes . ' นาที' . '</td>';
     echo '</tr>';
 
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $stop_work_days;

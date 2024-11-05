@@ -3,13 +3,25 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
 }
 
 $userCode = $_SESSION['s_usercode'];
-// echo $userCode;
+
+if (!isset($_SESSION["lang"])) {
+    $_SESSION["lang"] = "TH";
+}
+
+// if ($_SESSION["lang"] == "EN") {
+//     include("../en.php");
+// } else {
+//     include("../th.php");
+// }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +30,7 @@ $userCode = $_SESSION['s_usercode'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <meta http-equiv="refresh" content="1"> -->
-    <title>หน้าหลัก</title>
+    <title><?php echo $strDash;?></title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">

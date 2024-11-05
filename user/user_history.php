@@ -136,7 +136,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $year = $selectedYear;
             }
             
-            $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+            $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
             
             $sql_count = "SELECT COUNT(l_list_id) AS leave_count
                           FROM leave_list

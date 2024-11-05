@@ -3,6 +3,7 @@
 date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
 
 include '../connect.php';
+include '../session_lang.php';
 
 if (isset($_SESSION['s_usercode'])) {
     $userCode = $_SESSION['s_usercode'];
@@ -91,28 +92,32 @@ if (isset($_POST['logoutButton'])) {
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="manager_dashboard.php"
-                            style="color: white;">หน้าหลัก</a>
+                            style="color: white;"><?php echo $strDash;?></a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false" style="color: white;">
-                            การลาและมาสาย
+                            <?php echo $strLeaveAndLate;?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="manager_leave.php">สถิติการลาและมาสาย</a></li>
-                            <li><a class="dropdown-item" href="manager_history.php">ประวัติการลาและมาสาย</a></li>
+                            <li><a class="dropdown-item" href="manager_leave.php"><?php echo $strStatistics;?></a></li>
+                            <li><a class="dropdown-item" href="manager_history.php"><?php echo $strHistory;?>
+                                </a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false" style="color: white;">
-                            พนักงาน
+                            <?php echo $strEmp;?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="manager_leave_request.php">ใบลาของพนักงาน</a></li>
-                            <li><a class="dropdown-item" href="manager_employee_leave.php">การลาของพนักงาน</a>
+                            <li><a class="dropdown-item"
+                                    href="manager_leave_request.php"><?php echo $strEmpLeaveForm;?></a>
                             </li>
-                            <li><a class="dropdown-item" href="manager_employee_attendance.php">พนักงานมาสาย</a>
+                            <li><a class="dropdown-item"
+                                    href="manager_employee_leave.php"><?php echo $strEmpLeaveSta;?></a></li>
+                            <li><a class="dropdown-item"
+                                    href="manager_employee_attendance.php"><?php echo $strEmpLeaveLate;?></a>
                             </li>
                         </ul>
                     </li>
@@ -132,12 +137,16 @@ if (isset($_POST['logoutButton'])) {
                         </li>
                         <?php endif; ?>
                         <li class="nav-item d-flex align-items-center">
-                            <a href="#"><img src="../logo/th.png" alt="TH Language"
-                                    style="width:30px;height:30px; margin: auto 0;"></a>
+                            <a href="../change_language.php?lang=TH&level=<?php echo $level; ?>">
+                                <img src="../logo/th.png" alt="TH Language"
+                                    style="width:30px;height:30px; margin: auto 0;">
+                            </a>
                         </li>
                         <li class="nav-item d-flex align-items-center">
-                            <a href="#" class="ms-2"><img src="../logo/en.png" alt="EN Language"
-                                    style="width:30px;height:30px; margin: auto 0;"></a>
+                            <a href="../change_language.php?lang=EN&level=<?php echo $level; ?>" class="ms-2">
+                                <img src="../logo/en.png" alt="EN Language"
+                                    style="width:30px;height:30px; margin: auto 0;">
+                            </a>
                         </li>
                         <li class="nav-item">
                             <button type="submit" name="logoutButton"

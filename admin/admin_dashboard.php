@@ -240,7 +240,7 @@ if (!isset($_GET['page'])) {
 $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$selectedMonth' 
 AND Year(l_leave_end_date) = '$selectedYear' 
 AND l_leave_id <> 6 
-AND l_leave_id <> 7 ORDER BY l_leave_end_date DESC
+AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
 
 ";
 $result = $conn->query($sql);

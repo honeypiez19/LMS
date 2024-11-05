@@ -5,7 +5,7 @@ if (isset($_POST['leaveType'])) {
     $userCode = $_POST['userCode'];
     $selectedYear = $_POST['selectedYear'];
     $depart = $_POST['depart'];
-    $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+    $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
     
     // คำนวณวันที่เริ่มต้นและสิ้นสุดตามปีที่เลือก
     $startDate = date(($selectedYear - 1) . "-12-01"); // วันที่เริ่มต้น 1 ธันวาคมของปีที่เลือก

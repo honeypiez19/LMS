@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -456,7 +458,7 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-ORDER BY li.l_leave_end_date DESC";
+ORDER BY li.l_create_datetime DESC";
 
 // Prepare the statement
 $stmt = $conn->prepare($sql);
@@ -719,9 +721,9 @@ if ($stmt->rowCount() > 0) {
 
         // 22 ปุ่มตรวจสอบ
         if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
         } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         }
 
         // 23
@@ -780,8 +782,9 @@ echo '</div>';
 
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
-                            <button type="button" class="btn btn-success button-shadow">อนุมัติ</button>
+                            <button type="button"
+                                class="btn btn-danger button-shadow"><?php echo $btnNotProve;?></button>
+                            <button type="button" class="btn btn-success button-shadow"><?php echo $btnProve;?></button>
                         </div>
                     </div>
                 </div>
@@ -1375,7 +1378,6 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
@@ -1459,7 +1461,6 @@ echo '</div>';
                                     Swal.showLoading(); // แสดง icon โหลด
                                 }
                             });
-
 
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา

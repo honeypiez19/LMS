@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -428,7 +430,7 @@ WHERE
         OR (li.l_department = '$subDepart4')
         OR (li.l_department = '$subDepart5')
     )
-ORDER BY li.l_leave_end_date DESC";
+ORDER BY li.l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -661,9 +663,9 @@ if ($result->rowCount() > 0) {
 
         // 22 ปุ่มตรวจสอบ
         if ($row['l_approve_status'] == 4 || $row['l_approve_status'] == 5) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         }
 
         // 23
@@ -724,8 +726,8 @@ echo '</div>';
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
-                        <button type="button" class="btn btn-success button-shadow">อนุมัติ</button>
+                        <button type="button" class="btn btn-danger button-shadow"><?php echo $btnNotProve;?></button>
+                        <button type="button" class="btn btn-success button-shadow"><?php echo $btnProve;?></button>
                     </div>
                 </div>
             </div>

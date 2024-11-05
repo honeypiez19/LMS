@@ -77,13 +77,7 @@ if ($status == '2') {
     }
 
     // แจ้งเตือนผู้จัดการตามแผนก
-    if ($depart == 'RD') {
-        // แจ้งไลน์โฮซัง
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  :depart");
-        $stmt->bindParam(':workplace', $workplace);
-        $stmt->bindParam(':depart', $depart);
-
-    } else if ($level == 'leader') {
+    if ($level == 'leader') {
         if ($depart == 'Office') {
             // แจ้งเตือนไปที่พี่ตุ๊ก
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
@@ -99,7 +93,10 @@ if ($status == '2') {
         } else if ($depart == 'CAM') {
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM'");
             $stmt->bindParam(':workplace', $workplace);
-        } 
+        } else if ($depart == 'RD') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'RD'");
+            $stmt->bindParam(':workplace', $workplace);
+        }
     } else if ($level == 'chief') {
         if ($depart == 'Management') {
             // แจ้งเตือนไปที่พี่ตุ๊ก
