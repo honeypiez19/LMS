@@ -48,7 +48,7 @@
     $strTo = "ถึง";
     $strDayCount = "จำนวนวันลา";
     $strListStatus = "สถานะรายการ";
-    $strLatetatus = "สถานะมาสาย";
+    $strLateStatus = "สถานะมาสาย";
     $strStatus1 = "สถานะอนุมัติ_1";
     $strStatus2 = "สถานะอนุมัติ_2";
     $strStatusHR = "สถานะเฉพาะ HR";
