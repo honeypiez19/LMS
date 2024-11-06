@@ -55,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEndLine = $leaveTimeEnd;
     }
     
-
     // วันที่สร้างใบลา
     $formattedDate = $_POST['formattedDate'];
 
@@ -64,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveStatusName = ($leaveStatus == 0) ? 'ปกติ' : 'ยกเลิก';
 
     $comfirmStatus = 0;
-    $proveStatus = 0;
+    $proveStatus = 6;
     $proveStatus2 = 1;
 
     $subDepart = $_POST['subDepart'];

@@ -144,7 +144,7 @@ INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
     li.l_approve_status IN (1, 2, 3, 6)
-    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = '$selectedYear'
     AND MONTH(li.l_leave_end_date) = '$selectedMonth'
@@ -204,7 +204,7 @@ INNER JOIN employees em
 WHERE
     li.l_approve_status = 2
     AND li.l_approve_status2 = 1
-    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = '$selectedYear'
     AND MONTH(li.l_leave_end_date) = '$selectedMonth'
@@ -262,7 +262,7 @@ INNER JOIN employees em
 WHERE
     li.l_approve_status = 2
     AND li.l_approve_status2 = 4
-    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = '$selectedYear'
     AND MONTH(li.l_leave_end_date) = '$selectedMonth'
@@ -319,7 +319,7 @@ INNER JOIN employees em
 WHERE
     li.l_approve_status = 2
     AND li.l_approve_status2 = 5
-    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = '$selectedYear'
     AND MONTH(li.l_leave_end_date) = '$selectedMonth'
@@ -359,37 +359,39 @@ $totalLeaveItems = $stmt->fetchColumn();
 
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
-        <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
-            <thead>
-                <tr class="text-center align-middle">
-                    <th rowspan="2">ลำดับ</th>
-                    <th rowspan="2">รหัสพนักงาน</th>
-                    <th rowspan="1">ชื่อ - นามสกุล</th>
-                    <th rowspan="2">วันที่ยื่นใบลา</th>
-                    <th rowspan="1">รายการลา</th>
-                    <th colspan="2" class="text-center">วันเวลาที่ลา</th>
-                    <th rowspan="2">ไฟล์แนบ</th>
-                    <th rowspan="2">สถานะใบลา</th>
-                    <th rowspan="2">สถานะอนุมัติ_1</th>
-                    <th rowspan="2">วันเวลาอนุมัติ_1</th>
-                    <th rowspan="2">เหตุผล_1</th>
-                    <th rowspan="2">หัวหน้า</th>
-                    <th rowspan="2">สถานะอนุมัติ_2</th>
-                    <th rowspan="2">วันเวลาอนุมัติ_2</th>
-                    <th rowspan="2">เหตุผล_2</th>
-                    <th rowspan="2">ผู้จัดการขึ้นไป</th>
-                    <th rowspan="2">สถานะ (เฉพาะ HR)</th>
-                    <th rowspan="2"></th>
-                </tr>
-                <tr class="text-center">
-                    <th> <input type="text" class="form-control" id="nameSearch"></th>
-                    <th> <input type="text" class="form-control" id="leaveSearch"></th>
-                    <th style="width: 8%;">จาก</th>
-                    <th style="width: 8%;">ถึง</th>
-                </tr>
-            </thead>
-            <tbody class="text-center">
-                <?php
+        <div class="table-responsive">
+
+            <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
+                <thead>
+                    <tr class="text-center align-middle">
+                        <th rowspan="2">ลำดับ</th>
+                        <th rowspan="2">รหัสพนักงาน</th>
+                        <th rowspan="1">ชื่อ - นามสกุล</th>
+                        <th rowspan="2">วันที่ยื่นใบลา</th>
+                        <th rowspan="1">รายการลา</th>
+                        <th colspan="2" class="text-center">วันเวลาที่ลา</th>
+                        <th rowspan="2">ไฟล์แนบ</th>
+                        <th rowspan="2">สถานะใบลา</th>
+                        <th rowspan="2">สถานะอนุมัติ_1</th>
+                        <th rowspan="2">วันเวลาอนุมัติ_1</th>
+                        <th rowspan="2">เหตุผล_1</th>
+                        <th rowspan="2">หัวหน้า</th>
+                        <th rowspan="2">สถานะอนุมัติ_2</th>
+                        <th rowspan="2">วันเวลาอนุมัติ_2</th>
+                        <th rowspan="2">เหตุผล_2</th>
+                        <th rowspan="2">ผู้จัดการขึ้นไป</th>
+                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                        <th rowspan="2"></th>
+                    </tr>
+                    <tr class="text-center">
+                        <th> <input type="text" class="form-control" id="nameSearch"></th>
+                        <th> <input type="text" class="form-control" id="leaveSearch"></th>
+                        <th style="width: 8%;">จาก</th>
+                        <th style="width: 8%;">ถึง</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    <?php
 $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 
 $itemsPerPage = 10;
@@ -418,7 +420,7 @@ INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
     li.l_approve_status IN (1, 2, 3, 6)
-    AND li.l_level IN ('user', 'chief', 'leader')
+    AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = '$selectedYear'
     AND MONTH(li.l_leave_end_date) = '$selectedMonth'
@@ -681,8 +683,9 @@ if ($result->rowCount() > 0) {
     echo '<tr><td colspan="19" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
 }
 ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
         <?php
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
@@ -732,6 +735,7 @@ echo '</div>';
                 </div>
             </div>
         </div>
+
         <!-- ประวัติลาของพนักงาน -->
         <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -824,7 +828,15 @@ echo '</div>';
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'อนุมัติใบลาสำเร็จ !',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -916,8 +928,8 @@ echo '</div>';
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
                     Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ทำรายการเสร็จสิ้น',
+                        title: 'ไม่อนุมัติใบลาสำเร็จ !',
+                        // text: 'ทำรายการเสร็จสิ้น',
                         icon: 'success',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
@@ -1209,7 +1221,8 @@ echo '</div>';
                             '</td>' +
 
                             // 10
-                            '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] :
+                            '<td>' + (row['l_leave_end_date'] ? row[
+                                    'l_leave_end_date'] :
                                 '') + '<br>' +
                             ' ' + (endTime ? endTime : '') +
                             '</td>';
@@ -1235,10 +1248,12 @@ echo '</div>';
                                 'l_approve_datetime'] : '') + '</td>' +
 
                             // 15
-                            '<td>' + (row['l_reason'] ? row['l_reason'] : '') + '</td>' +
+                            '<td>' + (row['l_reason'] ? row['l_reason'] : '') +
+                            '</td>' +
 
                             // 16
-                            '<td>' + (row['l_approve_name'] ? row['l_approve_name'] : '') +
+                            '<td>' + (row['l_approve_name'] ? row['l_approve_name'] :
+                                '') +
                             '</td>' +
 
                             // 17
@@ -1249,7 +1264,8 @@ echo '</div>';
                                 'l_approve_datetime2'] : '') + '</td>' +
 
                             // 19
-                            '<td>' + (row['l_reason2'] ? row['l_reason2'] : '') + '</td>' +
+                            '<td>' + (row['l_reason2'] ? row['l_reason2'] : '') +
+                            '</td>' +
 
                             // 20
                             '<td>' + (row['l_approve_name2'] ? row['l_approve_name2'] :
@@ -1260,7 +1276,8 @@ echo '</div>';
 
                             // 22
                             '<td>';
-                        if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
+                        if (row['l_approve_status'] == 2 || row['l_approve_status'] ==
+                            3) {
                             newRow +=
                                 '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
                         } else {
@@ -1336,7 +1353,8 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาเริ่มต้น
                                 var leaveEndDate = $(rowData[10])
                                     .text(); // วันเวลาที่ลาสิ้นสุด
-                                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+                                var leaveStatus = $(rowData[12])
+                                    .text(); // สถานะใบลา
 
 
                                 var status = '4'; // อนุมัติ
@@ -1362,26 +1380,36 @@ echo '</div>';
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
-                                        location
-                                            .reload(); // Reload the page after successful update
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'อนุมัติใบลาสำเร็จ !',
+                                            confirmButtonText: 'ตกลง'
+                                        }).then((result) => {
+                                            if (result
+                                                .isConfirmed) {
+                                                location
+                                                    .reload();
+                                            }
+                                        });
                                     },
                                     error: function(xhr, status, error) {
                                         console.error(error);
                                     }
                                 });
                             });
-                        $('.modal-footer .btn-danger').off('click').on('click', function() {
-                            // ซ่อน modal หลัก
-                            $('#leaveModal').modal('hide');
+                        $('.modal-footer .btn-danger').off('click').on('click',
+                            function() {
+                                // ซ่อน modal หลัก
+                                $('#leaveModal').modal('hide');
 
-                            // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
-                            setTimeout(function() {
-                                    showInputDialog
-                                        (); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
-                                },
-                                300
-                            ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
-                        });
+                                // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
+                                setTimeout(function() {
+                                        showInputDialog
+                                            (); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
+                                    },
+                                    300
+                                ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
+                            });
 
                         function showInputDialog() {
                             Swal.fire({
@@ -1395,14 +1423,16 @@ echo '</div>';
                                 preConfirm: (inputValue) => {
                                     if (!inputValue) {
                                         Swal.showValidationMessage(
-                                            'กรุณากรอกเหตุผลการไม่อนุมัติ');
+                                            'กรุณากรอกเหตุผลการไม่อนุมัติ'
+                                        );
                                     }
                                 }
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     const reasonNoProve = result
                                         .value; // รับค่าจาก input
-                                    console.log(reasonNoProve); // ตรวจสอบค่าที่กรอก
+                                    console.log(
+                                        reasonNoProve); // ตรวจสอบค่าที่กรอก
                                     noApprove(
                                         reasonNoProve
                                     ); // เรียกใช้ฟังก์ชัน noApprove
@@ -1432,7 +1462,8 @@ echo '</div>';
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
-                            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveEndDate = $(rowData[10])
+                                .text(); // วันเวลาที่ลาสิ้นสุด
                             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                             var status = '5'; // ไม่อนุมัติ
@@ -1460,10 +1491,11 @@ echo '</div>';
                                     reasonNoProve: reasonNoProve
                                 },
                                 success: function(response) {
-                                    $('#leaveModal').modal('hide'); // ปิด modal
+                                    $('#leaveModal').modal(
+                                        'hide'); // ปิด modal
                                     Swal.fire({
-                                        title: 'สำเร็จ!',
-                                        text: 'ทำรายการเสร็จสิ้น',
+                                        title: 'ไม่อนุมัติสำเร็จ !',
+                                        // text: 'ทำรายการเสร็จสิ้น',
                                         icon: 'success',
                                         confirmButtonText: 'ตกลง'
                                     }).then((result) => {
@@ -1492,7 +1524,8 @@ echo '</div>';
                             success: function(response) {
                                 // แสดงข้อมูลประวัติการลาหรือทำสิ่งที่ต้องการหลังจากได้รับข้อมูล
                                 // เช่น แสดงใน modal หรือ alert
-                                $('#historyModal .modal-body').html(response);
+                                $('#historyModal .modal-body').html(
+                                    response);
                                 $('#historyModal').modal('show');
                             },
                             error: function() {

@@ -10,6 +10,7 @@ $year = $_GET['year'];
 if ($status == 'all') {
     $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = :year
             AND Month(l_create_datetime) = :month
+            
             AND l_leave_id NOT IN (6, 7)
             AND l_department <> 'RD'
             ORDER BY l_create_datetime DESC";

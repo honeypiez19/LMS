@@ -80,6 +80,7 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
+    'All' => 'ทั้งหมด',
     '01' => 'มกราคม',
     '02' => 'กุมภาพันธ์',
     '03' => 'มีนาคม',
@@ -94,7 +95,8 @@ $months = [
     '12' => 'ธันวาคม',
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+// $selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -152,9 +154,17 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear
-    AND MONTH(li.l_leave_end_date) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }
+    $sql .= " AND (
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
+    )";
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
@@ -165,8 +175,9 @@ $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -218,9 +229,10 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear
-    AND MONTH(li.l_leave_end_date) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth";
+}
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
@@ -231,8 +243,10 @@ $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
 
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -281,9 +295,10 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear
-    AND MONTH(li.l_leave_end_date) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if($selectedMonth != "All"){
+    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+}
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
@@ -294,8 +309,9 @@ $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -344,9 +360,10 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear
-    AND MONTH(li.l_leave_end_date) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if($selectedMonth != "All"){
+    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+}
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
@@ -357,7 +374,9 @@ $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+if($selectedMonth != "All"){
+    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+}
 
 // Execute and check for errors
 if ($stmt->execute()) {
@@ -386,7 +405,6 @@ if ($stmt->execute()) {
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
         <div class="table-responsive">
-
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
@@ -449,9 +467,13 @@ WHERE
     li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = :selectedYear
-    AND MONTH(li.l_leave_end_date) = :selectedMonth
-    AND (
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }
+    
+    $sql .= " AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
         OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
@@ -471,8 +493,10 @@ $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
 
+if($selectedMonth != "All"){
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 // Execute the query to get the total number of rows
 $stmt->execute();
 $totalRows = $stmt->rowCount();
@@ -501,8 +525,9 @@ $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 // Execute the paginated query
 $stmt->execute();
 
@@ -739,7 +764,8 @@ if ($stmt->rowCount() > 0) {
 ?>
                 </tbody>
             </table>
-            <?php
+        </div>
+        <?php
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
@@ -768,43 +794,41 @@ echo '</ul>';
 echo '</div>';
 
 ?>
-            <!-- Modal เช็คการลา -->
-            <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title
+        <!-- Modal เช็คการลา -->
+        <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title
                         01f s-5" id="staticBackdropLabel">รายละเอียดการลา</h4>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
-                        </div>
-                        <div class="modal-body">
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button"
-                                class="btn btn-danger button-shadow"><?php echo $btnNotProve;?></button>
-                            <button type="button" class="btn btn-success button-shadow"><?php echo $btnProve;?></button>
-                        </div>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
                     </div>
-                </div>
-            </div>
-            <!-- Modal HTML -->
-            <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
-                        </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger button-shadow"><?php echo $btnNotProve;?></button>
+                        <button type="button" class="btn btn-success button-shadow"><?php echo $btnProve;?></button>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Modal HTML -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     <script>
     $(".leaveChk").click(function() {
@@ -861,8 +885,9 @@ echo '</div>';
             var status = '2'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
-            // alert(leaveStatus)
+            // alert(level)
             $.ajax({
                 url: 'l_ajax_upd_status.php',
                 method: 'POST',
@@ -878,11 +903,21 @@ echo '</div>';
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     empName: empName,
-                    leaveStatus: leaveStatus
+                    leaveStatus: leaveStatus,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'อนุมัติใบลาสำเร็จ !',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result
+                            .isConfirmed) {
+                            location.reload();
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -936,7 +971,6 @@ echo '</div>';
                 }
             });
 
-
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -950,6 +984,7 @@ echo '</div>';
             var status = '3'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
             var reason = reasonNoProve;
 
@@ -969,18 +1004,20 @@ echo '</div>';
                     depart: depart,
                     leaveStatus: leaveStatus,
                     empName: empName,
-                    reasonNoProve: reasonNoProve
+                    reasonNoProve: reasonNoProve,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
                     Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ทำรายการเสร็จสิ้น',
+                        title: 'ไม่อนุมัติสำเร็จ !',
+                        // text: 'ทำรายการเสร็จสิ้น',
                         icon: 'success',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                            location
+                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
                         }
                     });
                 },
@@ -994,18 +1031,27 @@ echo '</div>';
     $(".filter-card").click(function() {
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
+        var selectedYear = $("#selectedYear").val();
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
+        var subDepart2 = "<?php echo $subDepart2 ?>";
+        var subDepart3 = "<?php echo $subDepart3 ?>";
+        var subDepart4 = "<?php echo $subDepart4 ?>";
+        var subDepart5 = "<?php echo $subDepart5 ?>";
 
-        // alert(subDepart)
         $.ajax({
             url: 'l_ajax_get_leave_data.php',
             method: 'GET',
             data: {
                 status: status,
                 month: selectedMonth,
+                year: selectedYear,
                 depart: depart,
-                subDepart: subDepart
+                subDepart: subDepart,
+                subDepart2: subDepart2,
+                subDepart3: subDepart3,
+                subDepart4: subDepart4,
+                subDepart5: subDepart5
             },
             dataType: 'json',
             success: function(data) {
@@ -1381,6 +1427,7 @@ echo '</div>';
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var level = '<?php echo $level; ?>';
 
                                 $.ajax({
                                     url: 'l_ajax_upd_status.php',
@@ -1397,12 +1444,21 @@ echo '</div>';
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
                                         leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        level: level
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
-                                        location
-                                            .reload(); // Reload the page after successful update
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'อนุมัติใบลาสำเร็จ !',
+                                            confirmButtonText: 'ตกลง'
+                                        }).then((result) => {
+                                            if (result
+                                                .isConfirmed) {
+                                                location.reload();
+                                            }
+                                        });
                                     },
                                     error: function(xhr, status, error) {
                                         console.error(error);
@@ -1476,6 +1532,7 @@ echo '</div>';
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+                            var level = '<?php echo $level; ?>';
 
                             var reason = reasonNoProve;
 
@@ -1495,13 +1552,14 @@ echo '</div>';
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName,
-                                    reasonNoProve: reasonNoProve
+                                    reasonNoProve: reasonNoProve,
+                                    level: level
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide'); // ปิด modal
                                     Swal.fire({
-                                        title: 'สำเร็จ!',
-                                        text: 'ทำรายการเสร็จสิ้น',
+                                        title: 'ไม่อนุมัติสำเร็จ !',
+                                        // text: 'ทำรายการเสร็จสิ้น',
                                         icon: 'success',
                                         confirmButtonText: 'ตกลง'
                                     }).then((result) => {

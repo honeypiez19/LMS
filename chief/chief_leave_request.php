@@ -658,7 +658,6 @@ echo '</div>';
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
             var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
-            var level = '<?php echo $level; ?>';
 
             var status = '2'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
@@ -686,7 +685,16 @@ echo '</div>';
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'อนุมัติใบลาสำเร็จ !',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result
+                            .isConfirmed) {
+                            location.reload();
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -780,13 +788,14 @@ echo '</div>';
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
                     Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ทำรายการเสร็จสิ้น',
+                        title: 'ไม่อนุมัติสำเร็จ !',
+                        // text: 'ทำรายการเสร็จสิ้น',
                         icon: 'success',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                            location
+                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
                         }
                     });
                 },
@@ -1186,10 +1195,10 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var level = '<?php echo $level; ?>';
 
                                 $.ajax({
                                     url: 'c_ajax_upd_status.php',
@@ -1206,12 +1215,21 @@ echo '</div>';
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
                                         leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        level: level
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
-                                        location
-                                            .reload(); // Reload the page after successful update
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'อนุมัติใบลาสำเร็จ !',
+                                            confirmButtonText: 'ตกลง'
+                                        }).then((result) => {
+                                            if (result
+                                                .isConfirmed) {
+                                                location.reload();
+                                            }
+                                        });
                                     },
                                     error: function(xhr, status, error) {
                                         console.error(error);
@@ -1286,6 +1304,7 @@ echo '</div>';
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+                            var level = '<?php echo $level; ?>';
 
                             var reason = reasonNoProve;
 
@@ -1305,13 +1324,14 @@ echo '</div>';
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName,
-                                    reasonNoProve: reasonNoProve
+                                    reasonNoProve: reasonNoProve,
+                                    level: level
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide'); // ปิด modal
                                     Swal.fire({
-                                        title: 'สำเร็จ!',
-                                        text: 'ทำรายการเสร็จสิ้น',
+                                        title: 'ไม่อนุมัติสำเร็จ !',
+                                        // text: 'ทำรายการเสร็จสิ้น',
                                         icon: 'success',
                                         confirmButtonText: 'ตกลง'
                                     }).then((result) => {

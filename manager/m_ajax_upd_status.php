@@ -153,9 +153,9 @@ if ($status == '4') {
                 }
                 curl_close($chOne);
             }
-        } elseif ($userName == 'Pornsuk' || $userName == 'Matsumoto' || $userName == 'Chaikorn') {
+        } elseif ($userName == 'Chaikorn') {
             // แจ้งเตือน Anchana
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'GM'");
             $stmt->execute();
             $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 

@@ -646,7 +646,7 @@ if ($result_leave_personal) {
 
 ?>
                             <p class="card-text">
-                                ลากิจได้รับค่าจ้าง
+                                <?php echo $strPersonal;?>
                             </p>
                         </div>
                     </div>
@@ -739,7 +739,7 @@ if ($result_leave_personal_no) {
 
 ?>
                             <p class="card-text">
-                                ลากิจไม่ได้รับค่าจ้าง
+                                <?php echo $strPersonalNo;?>
                             </p>
                         </div>
                     </div>
@@ -835,7 +835,7 @@ if ($result_leave_sick) {
 
 ?>
                             <p class="card-text">
-                                ลาป่วย
+                                <?php echo $strSick;?>
                             </p>
                         </div>
                     </div>
@@ -928,7 +928,7 @@ if ($result_leave_sick_work) {
 }
 ?>
                             <p class="card-text">
-                                ลาป่วยจากงาน
+                                <?php echo $strSickWork;?>
                             </p>
                         </div>
                     </div>
@@ -1019,7 +1019,7 @@ if ($result_leave_annual) {
 
 ?>
                             <p class="card-text">
-                                ลาพักร้อน
+                                <?php echo $strAnnual;?>
                             </p>
                         </div>
                     </div>
@@ -1047,7 +1047,7 @@ echo '</div>';
 
 ?>
                             <p class="card-text">
-                                มาสาย (ครั้ง)
+                                <?php echo $strLate;?>
                             </p>
                         </div>
                     </div>
@@ -1134,7 +1134,7 @@ echo '<p>No data found</p>';
 }
 ?>
                             <p class="card-text">
-                                หยุดงาน
+                                <?php echo $strStopWork;?>
                             </p>
                         </div>
                     </div>
@@ -1222,7 +1222,7 @@ if ($result_other) {
 }
 ?>
                             <p class="card-text">
-                                อื่น ๆ
+                                <?php echo $strOther;?>
                             </p>
                         </div>
                     </div>
@@ -1237,12 +1237,12 @@ if ($result_other) {
                 <!-- ปุ่มยื่นใบลา -->
                 <button type="button" class="button-shadow btn btn-primary mt-3" data-bs-toggle="modal"
                     data-bs-target="#leaveModal" style="width: 100px;">
-                    ยื่นใบลา
+                    <?php echo $btnAddLeave;?>
                 </button>
                 <!-- ลาฉุกเฉิน -->
                 <button type="button" class="button-shadow btn btn-danger mt-3 ms-2" data-bs-toggle="modal"
                     data-bs-target="#urgentLeaveModal" style="width: 100px;">
-                    ลาฉุกเฉิน
+                    <?php echo $btnAddLeaveEmer;?>
                 </button>
             </div>
         </div>
@@ -1251,7 +1251,7 @@ if ($result_other) {
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="leaveModalLabel">รายละเอียดการลา</h5>
+                        <h5 class="modal-title" id="leaveModalLabel"><?php echo $strLeaveDes;?></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -1261,24 +1261,24 @@ if ($result_other) {
                                     ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ครบกำหนดแล้ว
                                 </div>
                                 <div class="col-12">
-                                    <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                    <label for="leaveType" class="form-label"><?php echo $strLeaveType;?></label>
                                     <span class="badge rounded-pill text-bg-info" id="totalDays">เหลือ - วัน</span>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="leaveType" required
                                         onchange="checkDays(this.value)">
-                                        <option selected>เลือกประเภทการลา</option>
-                                        <option value="1">ลากิจได้รับค่าจ้าง</option>
-                                        <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
-                                        <option value="3">ลาป่วย</option>
-                                        <option value="4">ลาป่วยจากงาน</option>
-                                        <option value="5">ลาพักร้อน</option>
-                                        <option value="8">อื่น ๆ</option>
+                                        <option selected><?php echo $strLeaveSelect;?></option>
+                                        <option value="1"><?php echo $strPersonal;?></option>
+                                        <option value="2"><?php echo $strPersonalNo;?></option>
+                                        <option value="3"><?php echo $strSick;?></option>
+                                        <option value="4"><?php echo $strSickWork;?></option>
+                                        <option value="5"><?php echo $strAnnual;?></option>
+                                        <option value="8"><?php echo $strOther;?></option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mt-3 row">
                                 <div class="col-12">
-                                    <label for="leaveReason" class="form-label">เหตุผลการลา</label>
+                                    <label for="leaveReason" class="form-label"><?php echo $strReason;?></label>
                                     <span style="color: red;">*</span>
                                     <textarea class="form-control mt-2" id="leaveReason" rows="3"
                                         placeholder="กรุณาระบุเหตุผล"></textarea>
@@ -1286,13 +1286,13 @@ if ($result_other) {
                             </div>
                             <div class="mt-3 row">
                                 <div class="col-6">
-                                    <label for="startDate" class="form-label">วันที่เริ่มต้น</label>
+                                    <label for="startDate" class="form-label"><?php echo $strStartDate;?></label>
                                     <span style="color: red;">*</span>
                                     <input type="text" class="form-control" id="startDate" required
                                         onchange="checkDays(document.getElementById('leaveType').value)">
                                 </div>
                                 <div class="col-6">
-                                    <label for="startTime" class="form-label">เวลาที่เริ่มต้น</label>
+                                    <label for="startTime" class="form-label"><?php echo $strStartTime;?></label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="startTime" name="startTime" required
                                         onchange="checkDays(document.getElementById('leaveType').value)">
@@ -1320,13 +1320,13 @@ if ($result_other) {
                             </div>
                             <div class="mt-3 row">
                                 <div class="col-6">
-                                    <label for="endDate" class="form-label">วันที่สิ้นสุด</label>
+                                    <label for="endDate" class="form-label"><?php echo $strEndtDate;?></label>
                                     <span style="color: red;">*</span>
                                     <input type="text" class="form-control" id="endDate" required
                                         onchange="checkDays(document.getElementById('leaveType').value)">
                                 </div>
                                 <div class="col-6">
-                                    <label for="endTime" class="form-label">เวลาที่สิ้นสุด</label>
+                                    <label for="endTime" class="form-label"><?php echo $strEndTime;?></label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="endTime" name="endTime" required
                                         onchange="checkDays(document.getElementById('leaveType').value)">
@@ -1354,7 +1354,7 @@ if ($result_other) {
                             </div>
                             <div class="mt-3 row">
                                 <div class="col-12">
-                                    <label for="telPhone" class="form-label">เบอร์โทร</label>
+                                    <label for="telPhone" class="form-label"><?php echo $strPhone;?></label>
                                     <?php
 $sql2 = "SELECT e_phone FROM employees WHERE e_usercode = '$userCode'";
 $result2 = $conn->query($sql2);
@@ -1371,14 +1371,15 @@ if ($result2->rowCount() > 0) {
                             </div>
                             <div class="mt-3 row">
                                 <div class="col-12">
-                                    <label for="file" class="form-label">ไฟล์แนบ (PNG , JPG, JPEG)</label>
+                                    <label for="file" class="form-label"><?php echo $strFile;?> (PNG , JPG,
+                                        JPEG)</label>
                                     <input class="form-control" type="file" id="file" name="file" />
                                 </div>
                             </div>
 
                             <div class="mt-3 d-flex justify-content-end">
                                 <button type="submit" class="btn btn-success" id="btnSubmitForm1" name="submit"
-                                    style="white-space: nowrap;">บันทึก</button>
+                                    style="white-space: nowrap;"><?php echo $btnSave;?></button>
                             </div>
                         </form>
                     </div>
@@ -1534,22 +1535,22 @@ if ($result2->rowCount() > 0) {
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead class="table table-secondary">
                     <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">วันที่ยื่น</th>
-                        <th rowspan="2">ประเภทรายการ</th>
-                        <th colspan="2">วันเวลา</th>
-                        <th rowspan="2">จำนวนวันลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะรายการ</th>
-                        <th rowspan="2">สถานะมาสาย</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                        <th rowspan="2"><?php echo $strNo;?></th>
+                        <th rowspan="2"><?php echo $strSubDate;?></th>
+                        <th rowspan="2"><?php echo $strList;?></th>
+                        <th colspan="2"><?php echo $strDateTime;?></th>
+                        <th rowspan="2"><?php echo $strDayCount;?></th>
+                        <th rowspan="2"><?php echo $strFile;?></th>
+                        <th rowspan="2"><?php echo $strListStatus;?></th>
+                        <th rowspan="2"><?php echo $strLateStatus;?></th>
+                        <th rowspan="2"><?php echo $strStatus1;?></th>
+                        <th rowspan="2"><?php echo $strStatus2;?></th>
+                        <th rowspan="2"><?php echo $strStatusHR;?></th>
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
-                        <th>จาก</th>
-                        <th>ถึง</th>
+                        <th><?php echo $strFrom;?></th>
+                        <th><?php echo $strTo;?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1754,9 +1755,9 @@ if ($result->rowCount() > 0) {
         // 13
         echo '<td>';
         if ($row['l_leave_status'] == 0) {
-            echo '<span class="text-success">ปกติ</span>';
+            echo '<span class="text-success">'. $strStatusNormal .'</span>';
         } else {
-            echo '<span class="text-danger">ยกเลิก</span>';
+            echo '<span class="text-danger">'. $strStatusCancel .'</span>';
         }
         echo '</td>';
 
@@ -1773,27 +1774,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
@@ -1807,27 +1808,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status2'] == 6) {
             echo '';
         }
@@ -1840,11 +1841,11 @@ if ($result->rowCount() > 0) {
         // 17
         echo '<td>';
         if ($row['l_hr_status'] == 0) {
-            echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
+            echo '<span class="text-warning"><b>'.$strStatusHR0.'</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
-            echo '<span class="text-success"><b>ผ่าน</b></span>';
+            echo '<span class="text-success"><b>'.$strStatusHR1.'</b></span>';
         } else {
-            echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
+            echo '<span class="text-danger"><b>'.$strStatusHR2.'</b></span>';
         }
         echo '</td>';
 

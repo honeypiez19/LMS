@@ -1825,6 +1825,7 @@ echo '</div>';
             // ดึงค่าจากฟอร์ม
             var leaveType = $('#leaveType').val();
             var leaveReason = $('#leaveReason').val();
+            s
             var startDate = $('#startDate').val();
             var startTime = $('#startTime').val();
             var endDate = $('#endDate').val();
@@ -1845,9 +1846,9 @@ echo '</div>';
             }
 
             var createDate = new Date();
+            createDate.setHours(createDate.getHours() + 7); // Adjust to Thai timezone (UTC+7)
             var formattedDate = createDate.toISOString().slice(0, 19).replace('T', ' ');
-            fd.append(
-                'formattedDate', formattedDate);
+            fd.append('formattedDate', formattedDate);
 
             // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
             if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
