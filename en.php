@@ -14,10 +14,14 @@
     $btnProve = "Approve";
     $btnNotProve = "Not approve";
 
+    $strEmpCode = "Usercode";
+    $strEmpName = "Name";
+
     // หน้าหลัก
     $btnAddLeave = "Leave request";
     $btnAddLeaveEmer = "Emergency leave";
     $btnSave = "Save";
+    $btnCancel = "Cancel";
 
     $strLeaveDes = "Leave detail";
     $strLeaveType = "Leave type";
@@ -65,4 +69,16 @@
     $strStatusHR0 = "Pending";
     $strStatusHR1 = "Passed";
     $strStatusHR2 = "Failed";
+
+    $strDay = "Day";
+    $strHour = "Hour";
+    $strMinute = "Minute";
+    $strTime = "Time";
+
+    
+    // สถิติการลา
+    $strLeaveTotal = "Total leave (Except for annual leave / other)";
+
+
+    
 ?>

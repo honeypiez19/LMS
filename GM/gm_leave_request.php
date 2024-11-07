@@ -134,7 +134,7 @@ FROM
     leave_list li
 WHERE
     li.l_department <> 'RD'
-    AND li.l_leave_status = 0
+    -- AND li.l_leave_status = 0
     AND li.l_leave_id NOT IN (6, 7)
     AND Year(li.l_leave_end_date) = :selectedYear
     AND Month(li.l_leave_end_date) = :selectedMonth";
@@ -177,7 +177,7 @@ FROM
     leave_list li
 WHERE
     li.l_department <> 'RD'
-    AND li.l_leave_status = 0
+    -- AND li.l_leave_status = 0
     AND li.l_approve_status2 = 1
     AND li.l_leave_id NOT IN (6, 7)
     AND Year(li.l_leave_end_date) = :selectedYear
@@ -219,7 +219,7 @@ FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
-AND li.l_leave_status = 0
+-- AND li.l_leave_status = 0
 AND li.l_approve_status2 = 4
 AND li.l_leave_id NOT IN (6, 7)
 AND Year(li.l_leave_end_date) = :selectedYear
@@ -260,7 +260,7 @@ FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
-AND li.l_leave_status = 0
+-- AND li.l_leave_status = 0
 AND li.l_approve_status2 = 5
 AND li.l_leave_id NOT IN (6, 7)
 AND Year(li.l_leave_end_date) = :selectedYear
@@ -942,6 +942,9 @@ echo '</div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus =
+                                '';
                         } else {
                             approveStatus = 'ไม่พบสถานะ';
                         }
@@ -968,6 +971,9 @@ echo '</div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                        } else if (row['l_approve_status2'] == 6) {
+                            approveStatus =
+                                '';
                         } else {
                             approveStatus2 = 'ไม่พบสถานะ';
                         }

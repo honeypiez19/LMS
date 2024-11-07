@@ -352,8 +352,6 @@ WHERE
     AND li.l_level = 'user'
     AND li.l_leave_id NOT IN (6, 7)
     AND (
-        -- (em.e_department = :subDepart AND li.l_department = :subDepart)
-        -- OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
         OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
@@ -375,9 +373,8 @@ $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
 if($selectedMonth != "All"){
-    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
 }
-
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -408,7 +405,7 @@ if ($stmt->execute()) {
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
+                        <th rowspan="2"><?php echo $strNo;?></th>
                         <th rowspan="2">รหัสพนักงาน</th>
                         <th rowspan="1">ชื่อ - นามสกุล</th>
                         <th rowspan="2">วันที่ยื่นใบลา</th>

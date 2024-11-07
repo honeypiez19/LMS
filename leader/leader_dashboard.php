@@ -1740,7 +1740,8 @@ if ($result->rowCount() > 0) {
         if ($row['l_leave_id'] == 7) {
             echo '';
         } else {
-            echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
+            echo '<span class="text-primary">' . $leave_days . ' ' . $strDay .' ' . $leave_hours . ' ' . $strHour .' '
+            . $leave_minutes . ' ' . $strMinute . '</span>';
 
         }
         echo '</td>';
@@ -1852,23 +1853,29 @@ if ($result->rowCount() > 0) {
         // 18
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
         if ($row['l_leave_id'] != 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
-        } else if ($row['l_leave_id'] == 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '>ยืนยันรายการ</button></td>';
-        } else {
-            echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
-        }
+            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . 
+            $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> '.$btnCancel.'</button>
+                    </td>';
+                    } else if ($row['l_leave_id'] == 7) {
+                    echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn"
+                            data-createdatetime="' . $row['l_create_datetime'] . '"
+                            data-usercode="' . $userCode . '" ' . $disabled . '>ยืนยันรายการ</button></td>';
+                    } else {
+                    echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
+                    }
 
-        echo '</tr>';
-        $rowNumber--;
-        // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
-    }
-} else {
-    echo "<tr><td colspan='12' style='color: red;'>ไม่พบข้อมูล</td></tr>";
-}
-// ปิดการเชื่อมต่อ
-// $conn = null;
-?>
+                    echo '</tr>';
+                    $rowNumber--;
+                    // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
+                    }
+                    } else {
+                    echo "<tr>
+                        <td colspan='12' style='color: red;'>ไม่พบข้อมูล</td>
+                    </tr>";
+                    }
+                    // ปิดการเชื่อมต่อ
+                    // $conn = null;
+                    ?>
 
                 </tbody>
             </table>

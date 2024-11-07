@@ -8,29 +8,29 @@ $year = $_GET['year'];
 
 // Prepare a SQL query to select leave data based on the status
 if ($status == 'all') {
-    $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = :year
-            AND Month(l_create_datetime) = :month
+    $sql = "SELECT * FROM leave_list WHERE Year(l_leave_end_date) = :year
+            AND Month(l_leave_end_date) = :month
             
             AND l_leave_id NOT IN (6, 7)
             AND l_department <> 'RD'
             ORDER BY l_create_datetime DESC";
 } else if ($status == 1) {
-    $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = :year
-            AND Month(l_create_datetime) = :month
+    $sql = "SELECT * FROM leave_list WHERE Year(l_leave_end_date) = :year
+            AND Month(l_leave_end_date) = :month
             AND l_leave_id NOT IN (6, 7)
             AND l_department <> 'RD'
             AND l_approve_status2 = :status
             ORDER BY l_create_datetime DESC";
 } else if ($status == 4) {
-    $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = :year
-            AND Month(l_create_datetime) = :month
+    $sql = "SELECT * FROM leave_list WHERE Year(l_leave_end_date) = :year
+            AND Month(l_leave_end_date) = :month
             AND l_leave_id NOT IN (6, 7)
             AND l_department <> 'RD'
             AND l_approve_status2 = :status
             ORDER BY l_create_datetime DESC";
 } else if ($status == 5) {
-    $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = :year
-            AND Month(l_create_datetime) = :month
+    $sql = "SELECT * FROM leave_list WHERE Year(l_leave_end_date) = :year
+            AND Month(l_leave_end_date) = :month
             AND l_leave_id NOT IN (6, 7)
             AND l_department <> 'RD'
             AND l_approve_status2 = :status

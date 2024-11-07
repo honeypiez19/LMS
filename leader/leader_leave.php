@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -17,7 +19,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สถิติการลา</title>
+    <title><?php echo $strStatistics;?></title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -43,7 +45,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-chart-line fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>สถิติการลา</h3>
+                    <h3><?php echo $strStatistics;?></h3>
                 </div>
             </div>
         </div>
@@ -543,7 +545,7 @@ AND l_approve_status2 = 4";
         echo '<p>No data found</p>';
     }
     // ----------------------------------------------------------------------------------------------
-// ลากิจได้รับค่าจ้าง ------------------------------------------------------
+    // ลากิจได้รับค่าจ้าง ------------------------------------------------------
     // คำนวณวันและชั่วโมงที่เหลือ
     $total_personal_minutes_used = ($leave_personal_days * 8 * 60) + ($leave_personal_hours * 60) + $leave_personal_minutes; // แปลงทั้งหมดเป็นนาที
     $total_personal_minutes = $total_personal * 8 * 60; // จำนวนวันทั้งหมดในนาที
@@ -556,9 +558,9 @@ AND l_approve_status2 = 4";
     $personal_remaining_minutes = $total_personal_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>ลากิจได้รับค่าจ้าง</td>';
-    echo '<td>' . $leave_personal_days . ' วัน ' . $leave_personal_hours  . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
-    echo '<td><span class="text-primary">' . $personal_remaining_days . ' วัน </span>' . $personal_remaining_hours. ' ชั่วโมง ' . $personal_remaining_minutes . ' นาที</td>';
+    echo '<td>'. $strPersonal.'</td>';
+    echo '<td>' . $leave_personal_days . ' '. $strDay . ' ' . $leave_personal_hours  . ' ' .  $strHour . ' ' . $leave_personal_minutes . ' ' . $strMinute . '</td>';
+    echo '<td><span class="text-primary">' . $personal_remaining_days . ' ' . $strDay . ' ' .'</span>' . $personal_remaining_hours. ' ' . $strHour . ' ' . $personal_remaining_minutes . ' ' . $strMinute . '</td>';
     echo '</tr>';
 
     // ลากิจไม่ได้รับค่าจ้าง ------------------------------------------------------
@@ -573,9 +575,9 @@ AND l_approve_status2 = 4";
     $personal_no_remaining_minutes = $total_personal_no_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลากิจไม่ได้รับค่าจ้าง' . '</td>';
-    echo '<td>' . $leave_personal_no_days . ' วัน ' . $leave_personal_no_hours . ' ชั่วโมง ' . $leave_personal_no_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $personal_no_remaining_days .  ' วัน </span>' . $personal_no_remaining_hours . ' ชั่วโมง ' . $personal_no_remaining_minutes . ' นาที ' . '</td>';
+    echo '<td>'. $strPersonalNo.'</td>';
+    echo '<td>' . $leave_personal_no_days . ' '. $strDay . ' ' . $leave_personal_no_hours . ' ' .  $strHour . ' ' . $leave_personal_no_minutes . ' ' . $strMinute .'</td>';
+    echo '<td><span class="text-primary">' . $personal_no_remaining_days . ' ' . $strDay . ' ' . '</span>' . $personal_no_remaining_hours . ' ' . $strHour . ' ' .  $personal_no_remaining_minutes . ' ' . $strMinute . '</td>';
     echo '</tr>';
 
     // ลาป่วย ------------------------------------------------------
@@ -590,9 +592,9 @@ AND l_approve_status2 = 4";
     $sick_remaining_minutes = $total_sick_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลาป่วย' . '</td>';
-    echo '<td>' . $leave_sick_days . ' วัน ' . $leave_sick_hours . ' ชั่วโมง ' . $leave_sick_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $sick_remaining_days . ' วัน </span>' . $sick_remaining_hours . ' ชั่วโมง ' . $sick_remaining_minutes . ' นาที ' . '</td>';
+    echo '<td>'. $strSick.'</td>';
+    echo '<td>' . $leave_sick_days . ' '. $strDay . ' ' . $leave_sick_hours . ' ' .  $strHour . ' ' . $leave_sick_minutes . ' ' . $strMinute .'</td>';
+    echo '<td><span class="text-primary">' . $sick_remaining_days. ' ' . $strDay . ' ' . '</span>' . $sick_remaining_hours . ' ' . $strHour . ' ' . $sick_remaining_minutes . ' ' . $strMinute . '</td>';
     echo '</tr>';
 
     // ลาป่วยจากงาน ------------------------------------------------------
@@ -607,9 +609,9 @@ AND l_approve_status2 = 4";
     $sick_work_remaining_minutes = $total_sick_work_remaining_minutes % 60; // นาที
     
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลาป่วยจากงาน' . '</td>';
-    echo '<td>' . $leave_sick_work_days . ' วัน ' . $leave_sick_work_hours . ' ชั่วโมง ' . $leave_sick_work_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $sick_work_remaining_days .  ' วัน </span>' .  $sick_work_remaining_hours  . ' ชั่วโมง ' . $sick_work_remaining_minutes . ' นาที ' . '</td>';
+    echo '<td>'. $strSickWork.'</td>';
+    echo '<td>' . $leave_sick_work_days  . ' '. $strDay . ' ' . $leave_sick_work_hours . ' ' .  $strHour . ' ' . $leave_sick_work_minutes . ' ' . $strMinute . '</td>';
+    echo '<td><span class="text-primary">' . $sick_work_remaining_days . ' ' . $strDay . ' ' . '</span>' .  $sick_work_remaining_hours . ' ' . $strHour . ' ' . $sick_work_remaining_minutes . ' ' . $strMinute .  '</td>';
     echo '<tr class="text-center align-middle">';
 
     // ลาพักร้อน ------------------------------------------------------
@@ -626,22 +628,22 @@ AND l_approve_status2 = 4";
 
     // แสดงผลลัพธ์
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลาพักร้อน' . '</td>';
-    echo '<td>' . $leave_annual_days . ' วัน ' . $leave_annual_hours . ' ชั่วโมง ' . $leave_annual_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $annual_remaining_days . ' วัน </span>' . $annual_remaining_hours . ' ชั่วโมง ' . $annual_remaining_minutes . ' นาที' . '</td>';
+    echo '<td>'. $strAnnual.'</td>';
+    echo '<td>' . $leave_annual_days  . ' '. $strDay . ' ' . $leave_annual_hours . ' ' .  $strHour . ' ' . $leave_annual_minutes . ' ' . $strMinute . '</td>';
+    echo '<td><span class="text-primary">' . $annual_remaining_days . ' ' . $strDay . ' ' . '</span>' . $annual_remaining_hours . ' ' . $strHour . ' ' .  $annual_remaining_minutes . ' ' . $strMinute .   '</td>';
     echo '</tr>';
 
     // ------------------------------------------------------
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'มาสาย' . '</td>';
-    echo '<td>' . $late_count . ' ครั้ง</td>';
+    echo '<td>'. $strLate.'</td>';
+    echo '<td>' . $late_count . ' ' . $strTime .'</td>';
     echo '<td>' . '-' . '</td>';
     echo '</tr>';
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'หยุดงาน' . '</td>';
-    echo '<td>' . $stop_work_days . ' วัน ' . $stop_work_hours . ' ชั่วโมง ' . $stop_work_minutes . ' นาที' . '</td>';
+    echo '<td>'. $strStopWork.'</td>';
+    echo '<td>' . $stop_work_days  . ' '. $strDay . ' ' . $stop_work_hours . ' ' .  $strHour . ' ' . $stop_work_minutes . ' ' . $strMinute . '</td>';
     echo '<td>' . '-' . '</td>';
     echo '</tr>';
 
@@ -658,9 +660,9 @@ AND l_approve_status2 = 4";
     $other_remaining_minutes = $total_other_remaining_minutes % 60; // นาที
     
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'อื่น ๆ' . '</td>';
-    echo '<td>' . $other_days . ' วัน ' . $other_hours . ' ชั่วโมง ' . $other_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $other_remaining_days . ' วัน </span>' . $other_remaining_hours . ' ชั่วโมง ' . $other_remaining_minutes . ' นาที' . '</td>';
+    echo '<td>'. $strOther.'</td>';
+    echo '<td>' . $other_days . ' '. $strDay . ' ' . $other_hours. ' ' .  $strHour . ' ' . $other_minutes . ' ' . $strMinute .  '</td>';
+    echo '<td><span class="text-primary">' . $other_remaining_days . ' '. $strDay . ' ' .'</span>' . $other_remaining_hours . ' ' .  $strHour . ' ' . $other_remaining_minutes . ' ' . $strMinute .  '</td>';
     echo '</tr>';
 
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $stop_work_days;
@@ -685,8 +687,8 @@ AND l_approve_status2 = 4";
 
     echo '<tr class="text-center align-middle">';
     if ($sum_day < 10) {
-        echo '<td style="font-weight: bold;">' . 'รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน / อื่น ๆ)' . '</td>';
-        echo '<td colspan="2" style="font-weight: bold;">' . $sum_day . ' วัน ' . $sum_hours . ' ชั่วโมง ' . $sum_minutes . ' นาที' . '</td>';
+        echo '<td style="font-weight: bold;">' . $strLeaveTotal  . '</td>';
+        echo '<td colspan="2" style="font-weight: bold;">' . $sum_day  . ' '. $strDay . ' ' . $sum_hours. ' ' .  $strHour . ' ' . $sum_minutes . ' ' . $strMinute .  '</td>';
     } else if ($sum_day == 10) {
         echo '<div class="alert alert-primary" role="alert">';
         echo '<i class="fa-solid fa-circle-exclamation"></i>' . ' รวมจำนวนวันลาทั้งหมด ' . $sum_day . ' วัน (ยกเว้นลาพักร้อน / อื่น ๆ)';
@@ -1189,9 +1191,9 @@ AND l_approve_status2 = 4";
     $personal_remaining_minutes = $total_personal_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>ลากิจได้รับค่าจ้าง</td>';
-    echo '<td>' . $leave_personal_days . ' วัน ' . $leave_personal_hours  . ' ชั่วโมง ' . $leave_personal_minutes . ' นาที</td>';
-    echo '<td><span class="text-primary">' . $personal_remaining_days . ' วัน </span>' . $personal_remaining_hours. ' ชั่วโมง ' . $personal_remaining_minutes . ' นาที</td>';
+    echo '<td>'. $strPersonal.'</td>';
+    echo '<td>' . $leave_personal_days . ' '. $strDay . ' ' . $leave_personal_hours  . ' ' .  $strHour . ' ' . $leave_personal_minutes . ' ' . $strMinute . '</td>';
+    echo '<td><span class="text-primary">' . $personal_remaining_days . ' ' . $strDay . ' ' .'</span>' . $personal_remaining_hours. ' ' . $strHour . ' ' . $personal_remaining_minutes . ' ' . $strMinute . '</td>';
     echo '</tr>';
 
     // ลากิจไม่ได้รับค่าจ้าง ------------------------------------------------------
@@ -1206,9 +1208,9 @@ AND l_approve_status2 = 4";
     $personal_no_remaining_minutes = $total_personal_no_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลากิจไม่ได้รับค่าจ้าง' . '</td>';
-    echo '<td>' . $leave_personal_no_days . ' วัน ' . $leave_personal_no_hours . ' ชั่วโมง ' . $leave_personal_no_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $personal_no_remaining_days .  ' วัน </span>' . $personal_no_remaining_hours . ' ชั่วโมง ' . $personal_no_remaining_minutes . ' นาที ' . '</td>';
+    echo '<td>'. $strPersonalNo.'</td>';
+    echo '<td>' . $leave_personal_no_days . ' '. $strDay . ' ' . $leave_personal_no_hours . ' ' .  $strHour . ' ' . $leave_personal_no_minutes . ' ' . $strMinute .'</td>';
+    echo '<td><span class="text-primary">' . $personal_no_remaining_days . ' ' . $strDay . ' ' . '</span>' . $personal_no_remaining_hours . ' ' . $strHour . ' ' .  $personal_no_remaining_minutes . ' ' . $strMinute . '</td>';
     echo '</tr>';
 
     // ลาป่วย ------------------------------------------------------
@@ -1223,9 +1225,9 @@ AND l_approve_status2 = 4";
     $sick_remaining_minutes = $total_sick_remaining_minutes % 60; // นาที
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลาป่วย' . '</td>';
-    echo '<td>' . $leave_sick_days . ' วัน ' . $leave_sick_hours . ' ชั่วโมง ' . $leave_sick_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $sick_remaining_days . ' วัน </span>' . $sick_remaining_hours . ' ชั่วโมง ' . $sick_remaining_minutes . ' นาที ' . '</td>';
+    echo '<td>'. $strSick.'</td>';
+    echo '<td>' . $leave_sick_days . ' '. $strDay . ' ' . $leave_sick_hours . ' ' .  $strHour . ' ' . $leave_sick_minutes . ' ' . $strMinute .'</td>';
+    echo '<td><span class="text-primary">' . $sick_remaining_days. ' ' . $strDay . ' ' . '</span>' . $sick_remaining_hours . ' ' . $strHour . ' ' . $sick_remaining_minutes . ' ' . $strMinute . '</td>';
     echo '</tr>';
 
     // ลาป่วยจากงาน ------------------------------------------------------
@@ -1240,9 +1242,9 @@ AND l_approve_status2 = 4";
     $sick_work_remaining_minutes = $total_sick_work_remaining_minutes % 60; // นาที
     
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลาป่วยจากงาน' . '</td>';
-    echo '<td>' . $leave_sick_work_days . ' วัน ' . $leave_sick_work_hours . ' ชั่วโมง ' . $leave_sick_work_minutes . ' นาที ' . '</td>';
-    echo '<td><span class="text-primary">' . $sick_work_remaining_days .  ' วัน </span>' .  $sick_work_remaining_hours  . ' ชั่วโมง ' . $sick_work_remaining_minutes . ' นาที ' . '</td>';
+    echo '<td>'. $strSickWork.'</td>';
+    echo '<td>' . $leave_sick_work_days  . ' '. $strDay . ' ' . $leave_sick_work_hours . ' ' .  $strHour . ' ' . $leave_sick_work_minutes . ' ' . $strMinute . '</td>';
+    echo '<td><span class="text-primary">' . $sick_work_remaining_days . ' ' . $strDay . ' ' . '</span>' .  $sick_work_remaining_hours . ' ' . $strHour . ' ' . $sick_work_remaining_minutes . ' ' . $strMinute .  '</td>';
     echo '<tr class="text-center align-middle">';
 
     // ลาพักร้อน ------------------------------------------------------
@@ -1259,22 +1261,22 @@ AND l_approve_status2 = 4";
 
     // แสดงผลลัพธ์
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'ลาพักร้อน' . '</td>';
-    echo '<td>' . $leave_annual_days . ' วัน ' . $leave_annual_hours . ' ชั่วโมง ' . $leave_annual_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $annual_remaining_days . ' วัน </span>' . $annual_remaining_hours . ' ชั่วโมง ' . $annual_remaining_minutes . ' นาที' . '</td>';
+    echo '<td>'. $strAnnual.'</td>';
+    echo '<td>' . $leave_annual_days  . ' '. $strDay . ' ' . $leave_annual_hours . ' ' .  $strHour . ' ' . $leave_annual_minutes . ' ' . $strMinute . '</td>';
+    echo '<td><span class="text-primary">' . $annual_remaining_days . ' ' . $strDay . ' ' . '</span>' . $annual_remaining_hours . ' ' . $strHour . ' ' .  $annual_remaining_minutes . ' ' . $strMinute .   '</td>';
     echo '</tr>';
 
     // ------------------------------------------------------
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'มาสาย' . '</td>';
-    echo '<td>' . $late_count . ' ครั้ง</td>';
+    echo '<td>'. $strLate.'</td>';
+    echo '<td>' . $late_count . ' ' . $strTime .'</td>';
     echo '<td>' . '-' . '</td>';
     echo '</tr>';
 
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'หยุดงาน' . '</td>';
-    echo '<td>' . $stop_work_days . ' วัน ' . $stop_work_hours . ' ชั่วโมง ' . $stop_work_minutes . ' นาที' . '</td>';
+    echo '<td>'. $strStopWork.'</td>';
+    echo '<td>' . $stop_work_days  . ' '. $strDay . ' ' . $stop_work_hours . ' ' .  $strHour . ' ' . $stop_work_minutes . ' ' . $strMinute . '</td>';
     echo '<td>' . '-' . '</td>';
     echo '</tr>';
 
@@ -1291,9 +1293,9 @@ AND l_approve_status2 = 4";
     $other_remaining_minutes = $total_other_remaining_minutes % 60; // นาที
     
     echo '<tr class="text-center align-middle">';
-    echo '<td>' . 'อื่น ๆ' . '</td>';
-    echo '<td>' . $other_days . ' วัน ' . $other_hours . ' ชั่วโมง ' . $other_minutes . ' นาที' . '</td>';
-    echo '<td><span class="text-primary">' . $other_remaining_days . ' วัน </span>' . $other_remaining_hours . ' ชั่วโมง ' . $other_remaining_minutes . ' นาที' . '</td>';
+    echo '<td>'. $strOther.'</td>';
+    echo '<td>' . $other_days . ' '. $strDay . ' ' . $other_hours. ' ' .  $strHour . ' ' . $other_minutes . ' ' . $strMinute .  '</td>';
+    echo '<td><span class="text-primary">' . $other_remaining_days . ' '. $strDay . ' ' .'</span>' . $other_remaining_hours . ' ' .  $strHour . ' ' . $other_remaining_minutes . ' ' . $strMinute .  '</td>';
     echo '</tr>';
 
     $sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $stop_work_days;
@@ -1318,8 +1320,8 @@ AND l_approve_status2 = 4";
 
     echo '<tr class="text-center align-middle">';
     if ($sum_day < 10) {
-        echo '<td style="font-weight: bold;">' . 'รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน / อื่น ๆ)' . '</td>';
-        echo '<td colspan="2" style="font-weight: bold;">' . $sum_day . ' วัน ' . $sum_hours . ' ชั่วโมง ' . $sum_minutes . ' นาที' . '</td>';
+        echo '<td style="font-weight: bold;">' . $strLeaveTotal  . '</td>';
+        echo '<td colspan="2" style="font-weight: bold;">' . $sum_day  . ' '. $strDay . ' ' . $sum_hours. ' ' .  $strHour . ' ' . $sum_minutes . ' ' . $strMinute .  '</td>';
     } else if ($sum_day == 10) {
         echo '<div class="alert alert-primary" role="alert">';
         echo '<i class="fa-solid fa-circle-exclamation"></i>' . ' รวมจำนวนวันลาทั้งหมด ' . $sum_day . ' วัน (ยกเว้นลาพักร้อน / อื่น ๆ)';

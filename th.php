@@ -14,10 +14,14 @@
     $btnProve = "อนุมัติ";
     $btnNotProve = "ไม่อนุมัติ";
 
+    $strEmpCode = "รหัสพนักงาน";
+    $strEmpName = "ชื่อ - นามสกุล";
+
     // หน้าหลัก
     $btnAddLeave = "ยื่นใบลา";
     $btnAddLeaveEmer = "ลาฉุกเฉิน";
     $btnSave = "บันทึก";
+    $btnCancel = "ยกเลิก";
 
     $strLeaveDes = "รายละเอียดการลา";
     $strLeaveType = "ประเภทการลา";
@@ -35,7 +39,6 @@
     $strStartDate  = "วันที่เริ่มต้น";
     $strEndtDate  = "วันที่สิ้นสุด";
     $strStartTime = "เวลาที่เริ่มต้น";
-    $strEndTime = "เวลาที่สิ้นสุด";
     $strEndTime = "เวลาที่สิ้นสุด";
     $strPhone = "เบอร์โทรศัพท์";
     $strFile = "ไฟล์แนบ";
@@ -66,5 +69,14 @@
     $strStatusHR0 = "รอตรวจสอบ";
     $strStatusHR1 = "ผ่าน";
     $strStatusHR2 = "ไม่ผ่าน";
+
+    $strDay = "วัน";
+    $strHour = "ชั่วโมง";
+    $strMinute = "นาที";
+    $strTime = "ครั้ง";
+
+    // สถิติการลา
+    $strLeaveTotal = "รวมจำนวนวันลาทั้งหมด  (ยกเว้นลาพักร้อน / อื่น ๆ)";
+    
 
 ?>
