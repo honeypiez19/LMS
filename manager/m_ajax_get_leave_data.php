@@ -23,35 +23,44 @@ $sql = "SELECT
 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode
 WHERE 
- li.l_level IN ('user', 'chief', 'leader')
-AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-AND Year(li.l_create_datetime) = :year
-AND Month(li.l_create_datetime) = :month
-AND (
-    (em.e_department = :subDepart AND li.l_department = :subDepart)
-    OR (li.l_department = :subDepart2)
-    OR (li.l_department = :subDepart3)
-    OR (li.l_department = :subDepart4)
-    OR (li.l_department = :subDepart5)
-)";
+    li.l_level IN ('user', 'chief', 'leader', 'admin')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND YEAR(li.l_leave_end_date) = :year";
+
+// Conditionally add month filter if selected
+if ($month != "All") {
+    $sql .= " AND MONTH(li.l_leave_end_date) = :month";
+}
+
+// Add department conditions
+$sql .= " AND (
+       (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR (li.l_department = :subDepart2)
+        OR (li.l_department = :subDepart3)
+        OR (li.l_department = :subDepart4)
+        OR (li.l_department = :subDepart5)
+    )";
 
 // Conditionally add filters based on status
 if ($status != 'all') {
     $sql .= " AND li.l_approve_status = 2 AND li.l_approve_status2 = :status";
 }
 
-
-$sql .= " ORDER BY l_create_datetime DESC";
+// Finalize order
+$sql .= " ORDER BY li.l_create_datetime DESC";
 
 // Prepare and execute the statement
 $stmt = $conn->prepare($sql);
+$stmt->bindParam(':year', $year, PDO::PARAM_INT);
 $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
 $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
 $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
 $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
 $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
-$stmt->bindParam(':month', $month, PDO::PARAM_INT);
-$stmt->bindParam(':year', $year, PDO::PARAM_INT);
+
+if ($month != "All") {
+    $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+}
 
 // Conditionally bind the status if it's not 'all'
 if ($status != 'all') {

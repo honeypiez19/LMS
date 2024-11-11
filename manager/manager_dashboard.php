@@ -1552,22 +1552,22 @@ if ($result2->rowCount() > 0) {
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead class="table table-secondary">
                     <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">วันที่ยื่น</th>
-                        <th rowspan="2">ประเภทรายการ</th>
-                        <th colspan="2">วันเวลา</th>
-                        <th rowspan="2">จำนวนวันลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะรายการ</th>
-                        <th rowspan="2">สถานะมาสาย</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                        <th rowspan="2"><?php echo $strNo;?></th>
+                        <th rowspan="2"><?php echo $strSubDate;?></th>
+                        <th rowspan="2"><?php echo $strList;?></th>
+                        <th colspan="2"><?php echo $strDateTime;?></th>
+                        <th rowspan="2"><?php echo $strDayCount;?></th>
+                        <th rowspan="2"><?php echo $strFile;?></th>
+                        <th rowspan="2"><?php echo $strListStatus;?></th>
+                        <th rowspan="2"><?php echo $strLateStatus;?></th>
+                        <th rowspan="2"><?php echo $strStatus1;?></th>
+                        <th rowspan="2"><?php echo $strStatus2;?></th>
+                        <th rowspan="2"><?php echo $strStatusHR;?></th>
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
-                        <th>จาก</th>
-                        <th>ถึง</th>
+                        <th><?php echo $strFrom;?></th>
+                        <th><?php echo $strTo;?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1791,27 +1791,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
@@ -1826,27 +1826,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status2'] == 6) {
             echo '';
         }
@@ -1859,11 +1859,11 @@ if ($result->rowCount() > 0) {
         // 17
         echo '<td>';
         if ($row['l_hr_status'] == 0) {
-            echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
+            echo '<span class="text-warning"><b>'.$strStatusHR0.'</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
-            echo '<span class="text-success"><b>ผ่าน</b></span>';
+            echo '<span class="text-success"><b>'.$strStatusHR1.'</b></span>';
         } else {
-            echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
+            echo '<span class="text-danger"><b>'.$strStatusHR2.'</b></span>';
         }
         echo '</td>';
 
@@ -1897,8 +1897,8 @@ echo '<ul class="pagination">';
 
 // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
 }
 
 // สร้างลิงก์สำหรับแต่ละหน้า
@@ -1906,14 +1906,14 @@ for ($i = 1; $i <= $totalPages; $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
     }
 }
 
 // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
 if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
 }
 
 echo '</ul>';

@@ -868,19 +868,80 @@ echo '</div>';
                         <div class="card-title">
                             <?php
 // หยุดงาน
-$sql_absence_work = "SELECT COUNT(l_list_id) AS stop_work FROM leave_list WHERE l_leave_id = '6' AND YEAR(l_leave_start_date) = '$selectedYear'";
-$result_absence_work = $conn->query($sql_absence_work)->fetch(PDO::FETCH_ASSOC);
-$stop_work = $result_absence_work['stop_work'];
+$sql_absence_work = "SELECT
+SUM(
+    DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+    -
+    (SELECT COUNT(1)
+     FROM holiday
+     WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+     AND h_holiday_status = 'วันหยุด'
+     AND h_status = 0)
+) AS total_leave_days,
+SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+SUM(CASE
+    WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+         AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+    THEN 1
+    ELSE 0
+END) AS total_leave_hours,
+SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes
+FROM leave_list
+WHERE l_leave_id = 6
+AND l_usercode = :userCode
+AND YEAR(l_create_datetime) = :selectedYear
+AND l_leave_status = 0
+AND l_approve_status2 = 4
+";
 
-// แสดงผล
+$result_absence_work = $conn->prepare($sql_absence_work);
+$result_absence_work->bindParam(':userCode', $userCode);
+$result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$result_absence_work->execute();
+$stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
+
+if ($stop_work) {
+// Fetch total personal leave and leave durations
+$stop_work_days = $stop_work['total_leave_days'] ?? 0;
+$stop_work_hours = $stop_work['total_leave_hours'] ?? 0;
+$stop_work_minutes = $stop_work['total_leave_minutes'] ?? 0;
+
+// Convert total hours to days (8 hours = 1 day)
+$stop_work_days += floor($stop_work_hours / 8);
+$stop_work_hours = $stop_work_hours % 8; // Remaining hours after converting to days
+
+// Convert minutes to hours if applicable
+if ($stop_work_minutes >= 60) {
+    $stop_work_hours += floor($stop_work_minutes / 60);
+    $stop_work_minutes = $stop_work_minutes % 60;
+}
+
+// Round minutes to either 30 or 0
+if ($stop_work_minutes > 0 && $stop_work_minutes <= 30) {
+    $stop_work_minutes = 30; // ปัดขึ้นเป็น 30 นาที
+} elseif ($stop_work_minutes > 30) {
+    $stop_work_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
+    $stop_work_hours += 1;
+}
+
+// ปรับจำนวน minutes ให้เป็น 5 นาทีในกรณี 30 นาที
+if ($stop_work_minutes == 30) {
+    $stop_work_minutes = 5;
+}
+
 echo '<div class="d-flex justify-content-between">';
 echo '<div>';
-echo '<h5>' . $stop_work . '</h5>'; // แสดงจำนวนวันขาดงานทั้งหมด
+echo '<h5>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')'.'</h5>';
+echo '<input type="hidden" name="leave_annual_days" value="' . $stop_work_days . '">';
+echo '<input type="hidden" name="total_annual" value="' . $total_annual . '">'; // Ensure $total_annual is fetched or calculated properly
 echo '</div>';
 echo '<div>';
-echo '<i class="fa-solid fa-circle-minus fa-2xl"></i>'; // แสดงไอคอนสัญลักษณ์
+echo '<i class="mx-2 fa-solid fa-business-time fa-2xl"></i>';
 echo '</div>';
 echo '</div>';
+} else {
+echo '<p>No data found</p>';
+}
 ?>
                             <p class="card-text">
                                 หยุดงาน

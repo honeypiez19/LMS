@@ -84,21 +84,23 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+// $selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -146,27 +148,41 @@ WHERE
     li.l_approve_status IN (1, 2, 3, 6)
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = '$selectedYear'
-    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }
+     $sql .= " AND (
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR (li.l_department = :subDepart2)
+        OR (li.l_department = :subDepart3)
+        OR (li.l_department = :subDepart4)
+        OR (li.l_department = :subDepart5)
     )";
 
-// เตรียมและรัน query
 $stmt = $conn->prepare($sql);
+
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
 
-$stmt->execute();
-
-// ดึงผลลัพธ์
-$totalLeaveItems = $stmt->fetchColumn();
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute and check for errors
+if ($stmt->execute()) {
+    $totalLeaveItems = $stmt->fetchColumn();
+} else {
+    // Output error information
+    $errorInfo = $stmt->errorInfo();
+    echo "SQL Error: " . $errorInfo[2];
+    $totalLeaveItems = 0;
+}
 
 ?>
                             <div class="d-flex justify-content-between">
@@ -176,7 +192,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาทั้งหมด
+                            <?php echo $strAll;?>
                         </p>
                     </div>
                 </div>
@@ -206,27 +222,41 @@ WHERE
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = '$selectedYear'
-    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }   
+    $sql .= " AND (
+       (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR (li.l_department = :subDepart2)
+        OR (li.l_department = :subDepart3)
+        OR (li.l_department = :subDepart4)
+        OR (li.l_department = :subDepart5)
     )";
 
-// เตรียมและรัน query
 $stmt = $conn->prepare($sql);
+
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
 
-$stmt->execute();
-
-// ดึงผลลัพธ์
-$totalLeaveItems = $stmt->fetchColumn();
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute and check for errors
+if ($stmt->execute()) {
+    $totalLeaveItems = $stmt->fetchColumn();
+} else {
+    // Output error information
+    $errorInfo = $stmt->errorInfo();
+    echo "SQL Error: " . $errorInfo[2];
+    $totalLeaveItems = 0;
+}
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -235,7 +265,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่รออนุมัติ
+                            <?php echo $strPendProve;?>
                         </p>
                     </div>
                 </div>
@@ -264,22 +294,32 @@ WHERE
     AND li.l_approve_status2 = 4
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = '$selectedYear'
-    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
+      AND YEAR(li.l_leave_end_date) = :selectedYear";
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }   
+    $sql .= " AND (
+       (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR (li.l_department = :subDepart2)
+        OR (li.l_department = :subDepart3)
+        OR (li.l_department = :subDepart4)
+        OR (li.l_department = :subDepart5)
     )";
 
-// เตรียมและรัน query
 $stmt = $conn->prepare($sql);
+
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
+
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 $stmt->execute();
 
 // ดึงผลลัพธ์
@@ -292,7 +332,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่อนุมัติ
+                            <?php echo $strProve;?>
                         </p>
                     </div>
                 </div>
@@ -321,22 +361,32 @@ WHERE
     AND li.l_approve_status2 = 5
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = '$selectedYear'
-    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }   
+    $sql .= " AND (
+       (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR (li.l_department = :subDepart2)
+        OR (li.l_department = :subDepart3)
+        OR (li.l_department = :subDepart4)
+        OR (li.l_department = :subDepart5)
     )";
 
-// เตรียมและรัน query
 $stmt = $conn->prepare($sql);
+
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
+
+if($selectedMonth != "All"){
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 $stmt->execute();
 
 // ดึงผลลัพธ์
@@ -349,7 +399,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่ไม่อนุมัติ
+                            <?php echo $strNotProve;?>
                         </p>
                     </div>
                 </div>
@@ -364,35 +414,35 @@ $totalLeaveItems = $stmt->fetchColumn();
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">รหัสพนักงาน</th>
-                        <th rowspan="1">ชื่อ - นามสกุล</th>
-                        <th rowspan="2">วันที่ยื่นใบลา</th>
-                        <th rowspan="1">รายการลา</th>
-                        <th colspan="2" class="text-center">วันเวลาที่ลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะใบลา</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_1</th>
-                        <th rowspan="2">เหตุผล_1</th>
-                        <th rowspan="2">หัวหน้า</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_2</th>
-                        <th rowspan="2">เหตุผล_2</th>
-                        <th rowspan="2">ผู้จัดการขึ้นไป</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                        <th rowspan="2"><?php echo $strNo;?></th>
+                        <th rowspan="2"><?php echo $strEmpCode;?></th>
+                        <th rowspan="1"><?php echo $strEmpName;?></th>
+                        <th rowspan="2"><?php echo $strSubDate;?></th>
+                        <th rowspan="1"><?php echo $strLeaveType;?></th>
+                        <th colspan="2" class="text-center"><?php echo $strDateTime;?></th>
+                        <th rowspan="2"><?php echo $strFile;?></th>
+                        <th rowspan="2"><?php echo $strListStatus;?></th>
+                        <th rowspan="2"><?php echo $strStatus1;?></th>
+                        <th rowspan="2"><?php echo $strProveDate1;?></th>
+                        <th rowspan="2"><?php echo $strReason1;?></th>
+                        <th rowspan="2"><?php echo $strProveName1;?></th>
+                        <th rowspan="2"><?php echo $strStatus2;?></th>
+                        <th rowspan="2"><?php echo $strProveDate2;?></th>
+                        <th rowspan="2"><?php echo $strReason2;?></th>
+                        <th rowspan="2"><?php echo $strProveName2;?></th>
+                        <th rowspan="2"><?php echo $strStatusHR;?></th>
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
                         <th> <input type="text" class="form-control" id="leaveSearch"></th>
-                        <th style="width: 8%;">จาก</th>
-                        <th style="width: 8%;">ถึง</th>
+                        <th style="width: 8%;"><?php echo $strFrom;?></th>
+                        <th style="width: 8%;"><?php echo $strTo;?></th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
                     <?php
-$approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+// $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
 
 $itemsPerPage = 10;
 
@@ -422,39 +472,62 @@ WHERE
     li.l_approve_status IN (1, 2, 3, 6)
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = '$selectedYear'
-    AND MONTH(li.l_leave_end_date) = '$selectedMonth'
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    if($selectedMonth != "All"){
+        $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    }   
+    $sql .= " AND (
+       (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR (li.l_department = :subDepart2)
+        OR (li.l_department = :subDepart3)
+        OR (li.l_department = :subDepart4)
+        OR (li.l_department = :subDepart5)
     )
 ORDER BY li.l_create_datetime DESC";
+// Calculate total rows for pagination
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':selectedYear', $selectedYear);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->execute();
+$totalRows = $stmt->rowCount();
 
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
-
-// คำนวณหน้าทั้งหมด
+// Calculate total pages
 $totalPages = ceil($totalRows / $itemsPerPage);
 
-// คำนวณ offset สำหรับ pagination
+// Calculate offset for pagination
 $offset = ($currentPage - 1) * $itemsPerPage;
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
+// Add LIMIT and OFFSET for pagination
+$sql .= " LIMIT :itemsPerPage OFFSET :offset";
 
-// ประมวลผลคำสั่ง SQL
-$result = $conn->query($sql);
+// Prepare and execute the final paginated query
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':selectedYear', $selectedYear);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 
-// แสดงผลลำดับของแถว
-$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+// Row numbering
+$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
-// แสดงข้อมูลในตาราง
-if ($result->rowCount() > 0) {
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+// Display data in table
+if ($stmt->rowCount() > 0) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         echo '<tr class="align-middle">';
 
         // 0
@@ -558,9 +631,9 @@ if ($result->rowCount() > 0) {
         // 12
         echo '<td>';
         if ($row['l_leave_status'] == 0) {
-            echo '<span class="text-success">ปกติ</span>';
+            echo '<span class="text-success">'. $strStatusNormal .'</span>';
         } else {
-            echo '<span class="text-danger">ยกเลิกใบลา</span>';
+            echo '<span class="text-danger">'. $strStatusCancel .'</span>';
         }
         echo '</td>';
 
@@ -568,27 +641,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-success"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-danger"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
@@ -611,27 +684,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status2'] == 6) {
             echo '';
         }
@@ -653,11 +726,11 @@ if ($result->rowCount() > 0) {
         // 21
         echo '<td >';
         if ($row['l_hr_status'] == 0) {
-            echo '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+            echo '<span class="text-warning"><b>'.$strStatusHR0.'</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
-            echo '<div class="text-success"><b>ผ่าน</b></div>';
+            echo '<span class="text-success"><b>'.$strStatusHR1.'</b></span>';
         } elseif ($row['l_hr_status'] == 2) {
-            echo '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+            echo '<span class="text-danger"><b>'.$strStatusHR2.'</b></span>';
         } else {
             echo $row['l_hr_status'];
         }
@@ -692,8 +765,8 @@ echo '<ul class="pagination">';
 
 // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
 }
 
 // สร้างลิงก์สำหรับแต่ละหน้า
@@ -701,14 +774,14 @@ for ($i = 1; $i <= $totalPages; $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
     }
 }
 
 // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
 if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
 }
 
 echo '</ul>';
@@ -1010,9 +1083,11 @@ echo '</div>';
                         // สถานะใบลา
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
-                            leaveStatus = '<div class="text-success">ปกติ</div>';
+                            leaveStatus =
+                                '<div class="text-success"><?= $strStatusNormal ?></div>';
                         } else if (row['l_leave_status'] == 1) {
-                            leaveStatus = '<div class="text-danger">ยกเลิกใบลา</div>';
+                            leaveStatus =
+                                '<div class="text-danger"><?= $strStatusCancel ?></div>';
                         } else {
                             leaveStatus = 'ไม่พบสถานะใบลา';
                         }
@@ -1020,13 +1095,13 @@ echo '</div>';
                         var confirmStatus = '';
                         if (row['l_hr_status'] == 0) {
                             confirmStatus =
-                                '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusHR0 ?></b></div>';
                         } else if (row['l_hr_status'] == 1) {
                             confirmStatus =
-                                '<div class="text-success"><b>ผ่าน</b></div>';
+                                '<div class="text-success"><b><?= $strStatusHR1 ?></b></div>';
                         } else if (row['l_hr_status'] == 2) {
                             confirmStatus =
-                                '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusHR2 ?></b></div>';
                         } else {
                             confirmStatus = row['l_hr_status'];
                         }
@@ -1034,22 +1109,22 @@ echo '</div>';
                         var approveStatus;
                         if (row['l_approve_status'] == 0) {
                             approveStatus =
-                                '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status'] == 1) {
                             approveStatus =
-                                '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status'] == 2) {
                             approveStatus =
-                                '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status'] == 3) {
                             approveStatus =
-                                '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status'] == 4) {
                             approveStatus =
-                                '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
-                                '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status'] == 6) {
                             approveStatus =
                                 '';
@@ -1063,22 +1138,22 @@ echo '</div>';
                         var approveStatus2;
                         if (row['l_approve_status2'] == 0) {
                             approveStatus2 =
-                                '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status2'] == 1) {
                             approveStatus2 =
-                                '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status2'] == 2) {
                             approveStatus2 =
-                                '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status2'] == 3) {
                             approveStatus2 =
-                                '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status2'] == 4) {
                             approveStatus2 =
-                                '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
-                                '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status'] == 6) {
                             approveStatus2 =
                                 '';
@@ -1279,10 +1354,10 @@ echo '</div>';
                         if (row['l_approve_status'] == 2 || row['l_approve_status'] ==
                             3) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?= $btnCheck ?></button>';
                         } else {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?= $btnCheck ?></button>';
                         }
                         newRow += '</td>' +
 

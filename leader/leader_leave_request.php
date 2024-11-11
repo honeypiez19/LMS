@@ -80,19 +80,19 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    'All' => 'ทั้งหมด',
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
 // $selectedMonth = date('m'); // เดือนปัจจุบัน
@@ -194,7 +194,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาทั้งหมด
+                            <?php echo $strAll;?>
                         </p>
                     </div>
                 </div>
@@ -264,7 +264,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่รออนุมัติ
+                            <?php echo $strPendProve;?>
                         </p>
                     </div>
                 </div>
@@ -329,7 +329,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่อนุมัติ
+                            <?php echo $strProve;?>
                         </p>
                     </div>
                 </div>
@@ -392,7 +392,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่ไม่อนุมัติ
+                            <?php echo $strNotProve;?>
                         </p>
                     </div>
                 </div>
@@ -406,30 +406,29 @@ if ($stmt->execute()) {
                 <thead>
                     <tr class="text-center align-middle">
                         <th rowspan="2"><?php echo $strNo;?></th>
-                        <th rowspan="2">รหัสพนักงาน</th>
-                        <th rowspan="1">ชื่อ - นามสกุล</th>
-                        <th rowspan="2">วันที่ยื่นใบลา</th>
-                        <th rowspan="1">ประเภทการลา</th>
-                        <th colspan="2" class="text-center">วันเวลาที่ลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะใบลา</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_1</th>
-                        <th rowspan="2">เหตุผล_1</th>
-                        <th rowspan="2">หัวหน้า</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_2</th>
-                        <th rowspan="2">เหตุผล_2</th>
-                        <th rowspan="2">ผู้จัดการขึ้นไป</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
-                        <th rowspan="2"></th>
+                        <th rowspan="2"><?php echo $strEmpCode;?></th>
+                        <th rowspan="1"><?php echo $strEmpName;?></th>
+                        <th rowspan="2"><?php echo $strSubDate;?></th>
+                        <th rowspan="1"><?php echo $strLeaveType;?></th>
+                        <th colspan="2" class="text-center"><?php echo $strDateTime;?></th>
+                        <th rowspan="2"><?php echo $strFile;?></th>
+                        <th rowspan="2"><?php echo $strListStatus;?></th>
+                        <th rowspan="2"><?php echo $strStatus1;?></th>
+                        <th rowspan="2"><?php echo $strProveDate1;?></th>
+                        <th rowspan="2"><?php echo $strReason1;?></th>
+                        <th rowspan="2"><?php echo $strProveName1;?></th>
+                        <th rowspan="2"><?php echo $strStatus2;?></th>
+                        <th rowspan="2"><?php echo $strProveDate2;?></th>
+                        <th rowspan="2"><?php echo $strReason2;?></th>
+                        <th rowspan="2"><?php echo $strProveName2;?></th>
+                        <th rowspan="2"><?php echo $strStatusHR;?></th>
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
                         <th> <input type="text" class="form-control" id="leaveSearch"></th>
-                        <th style="width: 8%;">จาก</th>
-                        <th style="width: 8%;">ถึง</th>
+                        <th style="width: 8%;"><?php echo $strFrom;?></th>
+                        <th style="width: 8%;"><?php echo $strTo;?></th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
@@ -636,9 +635,9 @@ if ($stmt->rowCount() > 0) {
         // 12
         echo '<td>';
         if ($row['l_leave_status'] == 0) {
-            echo '<span class="text-success">ปกติ</span>';
+            echo '<span class="text-success">'. $strStatusNormal .'</span>';
         } else {
-            echo '<span class="text-danger">ยกเลิกใบลา</span>';
+            echo '<span class="text-danger">'. $strStatusCancel .'</span>';
         }
         echo '</td>';
 
@@ -646,27 +645,27 @@ if ($stmt->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
@@ -689,27 +688,27 @@ if ($stmt->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'. $strStatusProve0 .'</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>'.$strStatusProve1.'</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve2.'</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve3.'</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>'.$strStatusProve4.'</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>'.$strStatusProve5.'</b></div>';
         } elseif ($row['l_approve_status2'] == 6) {
             echo '';
         }
@@ -731,11 +730,11 @@ if ($stmt->rowCount() > 0) {
         // 21
         echo '<td >';
         if ($row['l_hr_status'] == 0) {
-            echo '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+            echo '<span class="text-warning"><b>'.$strStatusHR0.'</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
-            echo '<div class="text-success"><b>ผ่าน</b></div>';
+            echo '<span class="text-success"><b>'.$strStatusHR1.'</b></span>';
         } elseif ($row['l_hr_status'] == 2) {
-            echo '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+            echo '<span class="text-danger"><b>'.$strStatusHR2.'</b></span>';
         } else {
             echo $row['l_hr_status'];
         }
@@ -743,7 +742,7 @@ if ($stmt->rowCount() > 0) {
 
         // 22 ปุ่มตรวจสอบ
         if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         }
@@ -1087,9 +1086,11 @@ echo '</div>';
                         // สถานะใบลา
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
-                            leaveStatus = '<div class="text-success">ปกติ</div>';
+                            leaveStatus =
+                                '<div class="text-success"><?= $strStatusNormal ?></div>';
                         } else if (row['l_leave_status'] == 1) {
-                            leaveStatus = '<div class="text-danger">ยกเลิกใบลา</div>';
+                            leaveStatus =
+                                '<div class="text-danger"><?= $strStatusCancel ?></div>';
                         } else {
                             leaveStatus = 'ไม่พบสถานะใบลา';
                         }
@@ -1097,13 +1098,13 @@ echo '</div>';
                         var confirmStatus = '';
                         if (row['l_hr_status'] == 0) {
                             confirmStatus =
-                                '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusHR0 ?></b></div>';
                         } else if (row['l_hr_status'] == 1) {
                             confirmStatus =
-                                '<div class="text-success"><b>ผ่าน</b></div>';
+                                '<div class="text-success"><b><?= $strStatusHR1 ?></b></div>';
                         } else if (row['l_hr_status'] == 2) {
                             confirmStatus =
-                                '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusHR2 ?></b></div>';
                         } else {
                             confirmStatus = row['l_hr_status'];
                         }
@@ -1111,22 +1112,25 @@ echo '</div>';
                         var approveStatus;
                         if (row['l_approve_status'] == 0) {
                             approveStatus =
-                                '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status'] == 1) {
                             approveStatus =
-                                '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status'] == 2) {
                             approveStatus =
-                                '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status'] == 3) {
                             approveStatus =
-                                '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status'] == 4) {
                             approveStatus =
-                                '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
-                                '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve5 ?></b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus =
+                                '';
                         } else {
                             approveStatus = 'ไม่พบสถานะ';
                         }
@@ -1137,22 +1141,25 @@ echo '</div>';
                         var approveStatus2;
                         if (row['l_approve_status2'] == 0) {
                             approveStatus2 =
-                                '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status2'] == 1) {
                             approveStatus2 =
-                                '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?= $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status2'] == 2) {
                             approveStatus2 =
-                                '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status2'] == 3) {
                             approveStatus2 =
-                                '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status2'] == 4) {
                             approveStatus2 =
-                                '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?= $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
-                                '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?= $strStatusProve5 ?></b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus2 =
+                                '';
                         } else {
                             approveStatus2 = 'ไม่พบสถานะ';
                         }
@@ -1345,10 +1352,10 @@ echo '</div>';
                             '<td>';
                         if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?= $btnCheck ?></button>';
                         } else {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?= $btnCheck ?></button>';
                         }
                         newRow += '</td>' +
 

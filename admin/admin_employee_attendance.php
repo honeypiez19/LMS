@@ -54,6 +54,9 @@ $userCode = $_SESSION['s_usercode'];
                 <a class="nav-link active" data-bs-toggle="tab" href="#tab1">บันทึกเวลามาสาย</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab5">บันทึกหยุดงาน</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#tab4">รายการมาสาย</a>
             </li>
             <li class="nav-item">
@@ -155,6 +158,94 @@ for ($i = 2; $i <= 30; $i++) {
                 </form>
             </div>
             <!-- //////////////////////////////////////////////////////////////////////////////// -->
+            <!-- บันทึกหยุดงาน -->
+            <div class="tab-pane fade show" id="tab5">
+                <form id="stopWorkForm">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mt-3">
+                                <label for="employeeCode" class="form-label">รหัสพนักงาน</label>
+                                <input type="text" class="form-control" id="codeSearchS" name="userCodeS"
+                                    list="codeListS" required>
+                                <datalist id="codeListS">
+                                    <?php
+$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> 1";
+$result = $conn->query($sql);
+while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    echo '<option value="' . $row['e_usercode'] . '" data-name="' . $row['e_name'] . '" data-username="' . $row['e_username'] . '" data-depart="' .
+        $row['e_department'] . '" data-level="' . $row['e_level'] . '" data-telPhone="' . $row['e_phone'] . '" data-sub-department="' . $row['e_sub_department'] . '"
+    data-sub-department2="' . $row['e_sub_department2'] . '" data-sub-department3="' . $row['e_sub_department3'] . '" data-sub-department4="' .
+        $row['e_sub_department4'] . '" data-sub-department5="' . $row['e_sub_department5'] . '" data-workplace="' . $row['e_workplace'] . '" >';
+
+}
+?>
+                                </datalist>
+                                <input type="text" class="form-control" id="userName" name="userName" hidden>
+                                <input type="text" class="form-control" id="department" name="department" hidden>
+                                <input type="text" class="form-control" id="level" name="level" hidden>
+                                <input type="text" class="form-control" id="telPhone" name="telPhone" hidden>
+                                <input type="text" class="form-control" id="reason" name="reason" value="มาสาย" hidden>
+                                <input type="text" class="form-control" id="workplace" name="workplace" hidden>
+                                <input type="text" class="form-control" id="subDepart" name="subDepart" hidden>
+                                <!-- Correct subDepart -->
+                                <input type="text" class="form-control" id="subDepart2" name="subDepart2" hidden>
+                                <!-- Correct subDepart2 -->
+                                <input type="text" class="form-control" id="subDepart3" name="subDepart3" hidden>
+                                <!-- Correct subDepart3 -->
+                                <input type="text" class="form-control" id="subDepart4" name="subDepart4" hidden>
+                                <!-- Correct subDepart4 -->
+                                <input type="text" class="form-control" id="subDepart5" name="subDepart5" hidden>
+                                <!-- Correct subDepart5 -->
+
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mt-3">
+                                <label for="employeeName" class="form-label">ชื่อพนักงาน</label>
+                                <input type="text" class="form-control" id="nameS" name="nameS" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 row">
+                        <div class="col-6">
+                            <label for="startDate" class="form-label">วันที่เริ่มต้น</label>
+                            <input type="text" class="form-control" id="startDate" placeholder="YYYY-MM-DD">
+                        </div>
+                        <div class="col-6">
+                            <label for="endDate" class="form-label">วันที่สิ้นสุด</label>
+                            <input type="text" class="form-control" id="endDate" placeholder="YYYY-MM-DD">
+                        </div>
+                    </div>
+                    <div class="mt-3 row">
+                        <div class="col-6">
+                            <label for="" class="form-label">เวลาเริ่มต้น</label>
+                            <input type="text" id="leaveType" class="form-control" hidden value="7">
+                            <select class="form-select" id="startTime" name="startTime" required>
+                                <option value="08:01" selected>08:01</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="" class="form-label">เวลาสิ้นสุด</label>
+                            <input type="text" id="leaveType" class="form-control" hidden value="7">
+                            <select class="form-select" id="endTime" name="endTime" required>
+                                <?php
+for ($i = 2; $i <= 30; $i++) {
+    $time = sprintf('08:%02d', $i);
+    echo '<option value="' . $time . '">' . $time . '</option>';
+}
+?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="mt-3 btn btn-success button-shadow">บันทึก</button>
+                        </div>
+                    </div>
+                    <!-- <button type="submit" class="mt-3 btn btn-primary">บันทึก</button> -->
+                </form>
+            </div>
+            <!-- /////////////////////////////////////////////////////////////////////////////////// -->
             <!-- รายการมาสาย -->
             <div class="tab-pane fade" id="tab4">
                 <form class="row" method="post">
@@ -510,7 +601,7 @@ echo "</select>";
                 <div class="mt-3 row">
                     <div class="col-4">
                         <label for="userCodeLabel" class="form-label">รหัสพนักงาน</label>
-                        <input type="text" class="form-control" id="codeSearch2">
+                        <input type="text" class="form-control" id="codeSearch3">
                     </div>
                 </div>
                 <?php
@@ -1254,66 +1345,84 @@ if (count($currentResults) > 0) {
                 $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
             });
         });
+        $("#codeSearch3").on("keyup", function() {
+            var value3 = $(this).val().toLowerCase();
+            $("tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
+            });
+        });
     });
 
-    document.getElementById('codeSearch').addEventListener('input', function() {
-        var selectedCode = this.value;
-        var dataList = document.getElementById('codeList').getElementsByTagName('option');
-        for (var i = 0; i < dataList.length; i++) {
-            if (dataList[i].value === selectedCode) {
-                document.getElementById('name').value = dataList[i].getAttribute('data-name');
-                document.getElementById('userName').value = dataList[i].getAttribute('data-username');
-                document.getElementById('department').value = dataList[i].getAttribute('data-depart');
-                document.getElementById('level').value = dataList[i].getAttribute('data-level');
-                document.getElementById('telPhone').value = dataList[i].getAttribute('data-telPhone');
-                document.getElementById('workplace').value = dataList[i].getAttribute('data-workplace');
-                document.getElementById('subDepart').value = dataList[i].getAttribute(
-                    'data-sub-department'); // Correct subDepart
-                document.getElementById('subDepart2').value = dataList[i].getAttribute(
-                    'data-sub-department2'); // Correct subDepart2
-                document.getElementById('subDepart3').value = dataList[i].getAttribute(
-                    'data-sub-department3'); // Correct subDepart3
-                document.getElementById('subDepart4').value = dataList[i].getAttribute(
-                    'data-sub-department4'); // Correct subDepart4
-                document.getElementById('subDepart5').value = dataList[i].getAttribute(
-                    'data-sub-department5'); // Correct subDepart5
-                break;
+    const codeSearchElements = document.querySelectorAll('#codeSearch, #codeSearchS');
+
+    // Add 'input' event listener to both elements
+    codeSearchElements.forEach(function(element) {
+        element.addEventListener('input', function() {
+            var selectedCode = this.value;
+            var dataList = document.getElementById('codeList').getElementsByTagName('option');
+            for (var i = 0; i < dataList.length; i++) {
+                if (dataList[i].value === selectedCode) {
+                    document.getElementById('name').value = dataList[i].getAttribute('data-name');
+                    document.getElementById('nameS').value = dataList[i].getAttribute('data-name');
+                    document.getElementById('userName').value = dataList[i].getAttribute(
+                        'data-username');
+                    document.getElementById('department').value = dataList[i].getAttribute(
+                        'data-depart');
+                    document.getElementById('level').value = dataList[i].getAttribute('data-level');
+                    document.getElementById('telPhone').value = dataList[i].getAttribute(
+                        'data-telPhone');
+                    document.getElementById('workplace').value = dataList[i].getAttribute(
+                        'data-workplace');
+                    document.getElementById('subDepart').value = dataList[i].getAttribute(
+                        'data-sub-department');
+                    document.getElementById('subDepart2').value = dataList[i].getAttribute(
+                        'data-sub-department2');
+                    document.getElementById('subDepart3').value = dataList[i].getAttribute(
+                        'data-sub-department3');
+                    document.getElementById('subDepart4').value = dataList[i].getAttribute(
+                        'data-sub-department4');
+                    document.getElementById('subDepart5').value = dataList[i].getAttribute(
+                        'data-sub-department5');
+                    break;
+                }
             }
-        }
+        });
+
+        // Add 'change' event listener to both elements
+        element.addEventListener('change', function() {
+            if (this.value === '') {
+                document.getElementById('name').value = '';
+                document.getElementById('userName').value = '';
+                document.getElementById('department').value = '';
+                document.getElementById('level').value = '';
+                document.getElementById('telPhone').value = '';
+                document.getElementById('workplace').value = '';
+                document.getElementById('subDepart').value = '';
+                document.getElementById('subDepart2').value = '';
+                document.getElementById('subDepart3').value = '';
+                document.getElementById('subDepart4').value = '';
+                document.getElementById('subDepart5').value = '';
+            }
+        });
+
+        // Add 'keyup' event listener to both elements
+        element.addEventListener('keyup', function(e) {
+            if (e.keyCode === 8 || e.keyCode === 46) {
+                document.getElementById('name').value = '';
+                document.getElementById('userName').value = '';
+                document.getElementById('department').value = '';
+                document.getElementById('level').value = '';
+                document.getElementById('telPhone').value = '';
+                document.getElementById('workplace').value = '';
+                document.getElementById('subDepart').value = '';
+                document.getElementById('subDepart2').value = '';
+                document.getElementById('subDepart3').value = '';
+                document.getElementById('subDepart4').value = '';
+                document.getElementById('subDepart5').value = '';
+            }
+        });
     });
 
-
-    document.getElementById('codeSearch').addEventListener('change', function() {
-        if (this.value === '') {
-            document.getElementById('name').value = '';
-            document.getElementById('userName').value = '';
-            document.getElementById('department').value = '';
-            document.getElementById('level').value = '';
-            document.getElementById('telPhone').value = '';
-            document.getElementById('workplace').value = '';
-            document.getElementById('subDeart').value = '';
-            document.getElementById('subDeart2').value = '';
-            document.getElementById('subDeart3').value = '';
-            document.getElementById('subDeart4').value = '';
-            document.getElementById('subDeart5').value = '';
-        }
-    });
-
-    document.getElementById('codeSearch').addEventListener('keyup', function(e) {
-        if (e.keyCode === 8 || e.keyCode === 46) {
-            document.getElementById('name').value = '';
-            document.getElementById('userName').value = '';
-            document.getElementById('department').value = '';
-            document.getElementById('level').value = '';
-            document.getElementById('telPhone').value = '';
-            document.getElementById('workplace').value = '';
-            document.getElementById('subDeart').value = '';
-            document.getElementById('subDeart2').value = '';
-            document.getElementById('subDeart3').value = '';
-            document.getElementById('subDeart4').value = '';
-            document.getElementById('subDeart5').value = '';
-        }
-    });
     $(function() {
         $.datepicker.regional['th'] = {
             closeText: 'ปิด',
