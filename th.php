@@ -1,4 +1,19 @@
 <?php
+    // เดือน
+    $strAllMonth = "ทั้งหมด";
+    $strJan = "มกราคม";
+    $strFeb = "กุมภาพันธ์";
+    $strMar = "มีนาคม";
+    $strApr = "เมษายน";
+    $strMay = "พฤษภาคม";
+    $strJun = "มิถุนายน";
+    $strJul = "กรกฎาคม";
+    $strAug = "สิงหาคม";
+    $strSep = "กันยายน";
+    $strOct = "ตุลาคม";
+    $strNov = "พฤศจิกายน";
+    $strDec = "ธันวาคม";
+
     // Navbar
     $strDash = "หน้าหลัก";
     $strLeaveAndLate = "การลาและมาสาย";
@@ -16,6 +31,16 @@
 
     $strEmpCode = "รหัสพนักงาน";
     $strEmpName = "ชื่อ - นามสกุล";
+    $strProveDate1 = "วันเวลาอนุมัติ_1";
+    $strProveDate2 = "วันเวลาอนุมัติ_2";
+    $strReason1 = "เหตุผล_1";
+    $strReason2 = "เหตุผล_2";
+    $strProveName1 = "ชื่ออนุมัติ_1";
+    $strProveName2 = "ชื่ออนุมัติ_2";
+    $strAll = "รายการทั้งหมด";
+    $strPendProve = "รายการรออนุมัติ";
+    $strProve = "รายการอนุมัติ";
+    $strNotProve = "รายการไม่อนุมัติ";
 
     // หน้าหลัก
     $btnAddLeave = "ยื่นใบลา";
@@ -31,13 +56,13 @@
     $strPersonalNo = "ลากิจไม่ได้รับค่าจ้าง";
     $strSick = "ลาป่วย";
     $strSickWork = "ลาป่วยจากงาน";
-    $strAnnual  = "ลาพักร้อน";
-    $strOther  = "ลาอื่น ๆ";
+    $strAnnual = "ลาพักร้อน";
+    $strOther = "ลาอื่น ๆ";
     $strLate = "มาสาย";
     $strStopWork = "หยุดงาน";
-    $strReason  = "เหตุผลการลา";
-    $strStartDate  = "วันที่เริ่มต้น";
-    $strEndtDate  = "วันที่สิ้นสุด";
+    $strReason = "เหตุผลการลา";
+    $strStartDate = "วันที่เริ่มต้น";
+    $strEndtDate = "วันที่สิ้นสุด";
     $strStartTime = "เวลาที่เริ่มต้น";
     $strEndTime = "เวลาที่สิ้นสุด";
     $strPhone = "เบอร์โทรศัพท์";
@@ -76,7 +101,7 @@
     $strTime = "ครั้ง";
 
     // สถิติการลา
-    $strLeaveTotal = "รวมจำนวนวันลาทั้งหมด  (ยกเว้นลาพักร้อน / อื่น ๆ)";
-    
+    $strLeaveTotal = "รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน / อื่น ๆ)";
+
 
 ?>

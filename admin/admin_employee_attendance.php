@@ -165,8 +165,8 @@ for ($i = 2; $i <= 30; $i++) {
                         <div class="col-6">
                             <div class="mt-3">
                                 <label for="employeeCode" class="form-label">รหัสพนักงาน</label>
-                                <input type="text" class="form-control" id="codeSearchS" name="userCodeS"
-                                    list="codeListS" required>
+                                <input type="text" class="form-control" id="userCodeS" name="userCodeS" list="codeListS"
+                                    required>
                                 <datalist id="codeListS">
                                     <?php
 $sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> 1";
@@ -180,23 +180,23 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 }
 ?>
                                 </datalist>
-                                <input type="text" class="form-control" id="userName" name="userName" hidden>
-                                <input type="text" class="form-control" id="department" name="department" hidden>
-                                <input type="text" class="form-control" id="level" name="level" hidden>
-                                <input type="text" class="form-control" id="telPhone" name="telPhone" hidden>
-                                <input type="text" class="form-control" id="reason" name="reason" value="มาสาย" hidden>
-                                <input type="text" class="form-control" id="workplace" name="workplace" hidden>
-                                <input type="text" class="form-control" id="subDepart" name="subDepart" hidden>
+                                <input type="text" class="form-control" id="userNameS" name="userNameS" hidden>
+                                <input type="text" class="form-control" id="departmentS" name="departmentS" hidden>
+                                <input type="text" class="form-control" id="levelS" name="levelS" hidden>
+                                <input type="text" class="form-control" id="telPhoneS" name="telPhoneS" hidden>
+                                <input type="text" class="form-control" id="reasonS" name="reasonS" value="ขาดงาน"
+                                    hidden>
+                                <input type="text" class="form-control" id="workplaceS" name="workplaceS" hidden>
+                                <input type="text" class="form-control" id="subDepartS" name="subDepartS" hidden>
                                 <!-- Correct subDepart -->
-                                <input type="text" class="form-control" id="subDepart2" name="subDepart2" hidden>
+                                <input type="text" class="form-control" id="subDepartS2" name="subDepartS2" hidden>
                                 <!-- Correct subDepart2 -->
-                                <input type="text" class="form-control" id="subDepart3" name="subDepart3" hidden>
+                                <input type="text" class="form-control" id="subDepartS3" name="subDepartS3" hidden>
                                 <!-- Correct subDepart3 -->
-                                <input type="text" class="form-control" id="subDepart4" name="subDepart4" hidden>
+                                <input type="text" class="form-control" id="subDepartS4" name="subDepartS4" hidden>
                                 <!-- Correct subDepart4 -->
-                                <input type="text" class="form-control" id="subDepart5" name="subDepart5" hidden>
+                                <input type="text" class="form-control" id="subDepartS5" name="subDepartS5" hidden>
                                 <!-- Correct subDepart5 -->
-
                             </div>
                         </div>
                         <div class="col-6">
@@ -209,31 +209,62 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     <div class="mt-3 row">
                         <div class="col-6">
                             <label for="startDate" class="form-label">วันที่เริ่มต้น</label>
-                            <input type="text" class="form-control" id="startDate" placeholder="YYYY-MM-DD">
+                            <input type="text" class="form-control" id="startDateS" placeholder="YYYY-MM-DD">
                         </div>
                         <div class="col-6">
                             <label for="endDate" class="form-label">วันที่สิ้นสุด</label>
-                            <input type="text" class="form-control" id="endDate" placeholder="YYYY-MM-DD">
+                            <input type="text" class="form-control" id="endDateS" placeholder="YYYY-MM-DD">
                         </div>
                     </div>
                     <div class="mt-3 row">
                         <div class="col-6">
                             <label for="" class="form-label">เวลาเริ่มต้น</label>
                             <input type="text" id="leaveType" class="form-control" hidden value="7">
-                            <select class="form-select" id="startTime" name="startTime" required>
-                                <option value="08:01" selected>08:01</option>
+                            <select class="form-select" id="startTimeS" name="startTimeS" required>
+                                <option value="08:00" selected>08:00</option>
+                                <option value="08:30">08:30</option>
+                                <option value="09:00">09:00</option>
+                                <option value="09:30">09:30</option>
+                                <option value="10:00">10:00</option>
+                                <option value="10:30">10:30</option>
+                                <option value="11:00">11:00</option>
+                                <!-- <option value="11:30">11:30</option> -->
+                                <option value="12:00">11:45</option>
+                                <option value="13:00">12:45</option>
+                                <!-- <option value="13:00">13:00</option> -->
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="15:00">15:00</option>
+                                <option value="15:30">15:30</option>
+                                <option value="16:00">16:00</option>
+                                <!-- <option value="16:30">16:30</option> -->
+                                <option value="17:00">16:40</option>
                             </select>
                         </div>
                         <div class="col-6">
                             <label for="" class="form-label">เวลาสิ้นสุด</label>
                             <input type="text" id="leaveType" class="form-control" hidden value="7">
-                            <select class="form-select" id="endTime" name="endTime" required>
-                                <?php
-for ($i = 2; $i <= 30; $i++) {
-    $time = sprintf('08:%02d', $i);
-    echo '<option value="' . $time . '">' . $time . '</option>';
-}
-?>
+                            <select class="form-select" id="endTimeS" name="endTimeS" required>
+                                <option value="08:00">08:00</option>
+                                <option value="08:30">08:30</option>
+                                <option value="09:00">09:00</option>
+                                <option value="09:30">09:30</option>
+                                <option value="10:00">10:00</option>
+                                <option value="10:30">10:30</option>
+                                <option value="11:00">11:00</option>
+                                <!-- <option value="11:30">11:30</option> -->
+                                <option value="12:00">11:45</option>
+                                <option value="13:00">12:45</option>
+                                <!-- <option value="13:00">13:00</option> -->
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="15:00">15:00</option>
+                                <option value="15:30">15:30</option>
+                                <option value="16:00">16:00</option>
+                                <!-- <option value="16:30">16:30</option> -->
+                                <option value="17:00" selected>16:40</option>
                             </select>
                         </div>
                     </div>
@@ -1145,6 +1176,78 @@ if (count($currentResults) > 0) {
                 }
             });
         });
+
+        // Form หยุดงาน
+        $('#stopWorkForm').on('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const name = $('#nameS').val();
+            const userCode = $('#userCodeS').val();
+            const userName = $('#userNameS').val();
+            const department = $('#departmentS').val();
+            const level = $('#levelS').val();
+            const startTime = $('#startTimeS').val();
+            const endTime = $('#endTimeS').val();
+            const telPhone = $('#telPhoneS').val();
+            const reason = $('#reasonS').val();
+            const startDate = $('#startDateS').val();
+            const endDate = $('#endDateS').val();
+            const workplace = $('#workplaceS').val();
+            const subDepart = $('#subDepartS').val();
+            // const subDeart2 = $('#subDeart2').val();
+            // const subDeart3 = $('#subDeart3').val();
+            // const subDeart4 = $('#subDeart4').val();
+            // const subDeart5 = $('#subDeart5').val();
+
+            var addName = '<?php echo $userName; ?>';
+
+            alert(department)
+            formData.append('userCodeS', userCode);
+            formData.append('userNameS', userName);
+            formData.append('nameS', name);
+            formData.append('departmentS', department);
+            formData.append('levelS', level);
+            formData.append('startTimeS', startTime);
+            formData.append('endTimeS', endTime);
+            formData.append('telPhoneS', telPhone);
+            formData.append('addNameS', addName);
+            formData.append('reasonS', reason);
+            formData.append('startDateS', startDate);
+            formData.append('endDateS', endDate);
+            formData.append('workplaceS', workplace);
+            formData.append('subDepartS', subDepart);
+            // formData.append('subDepart2', subDepart2);
+            // formData.append('subDepart3', subDepart3);
+            // formData.append('subDepart4', subDepart4);
+            // formData.append('subDepart5', subDepart5);
+
+
+            $.ajax({
+                url: 'a_ajax_add_stop_work.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // alert(response);
+                    Swal.fire({
+                        title: "บันทึกข้อมูลหยุดงานสำเร็จ",
+                        text: "บันทึกข้อมูลหยุดงานของ " + name + " สำเร็จ",
+                        icon: "success",
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('เกิดข้อผิดพลาด: ', error);
+                }
+            });
+        });
+
         $('.btn-open-modal').click(function() {
             var userCode = $(this).data('usercode');
             $.ajax({
@@ -1353,7 +1456,7 @@ if (count($currentResults) > 0) {
         });
     });
 
-    const codeSearchElements = document.querySelectorAll('#codeSearch, #codeSearchS');
+    const codeSearchElements = document.querySelectorAll('#codeSearch, #userCodeS');
 
     // Add 'input' event listener to both elements
     codeSearchElements.forEach(function(element) {
@@ -1366,23 +1469,42 @@ if (count($currentResults) > 0) {
                     document.getElementById('nameS').value = dataList[i].getAttribute('data-name');
                     document.getElementById('userName').value = dataList[i].getAttribute(
                         'data-username');
+                    document.getElementById('userNameS').value = dataList[i].getAttribute(
+                        'data-username');
                     document.getElementById('department').value = dataList[i].getAttribute(
                         'data-depart');
+                    document.getElementById('departmentS').value = dataList[i].getAttribute(
+                        'data-depart');
                     document.getElementById('level').value = dataList[i].getAttribute('data-level');
+                    document.getElementById('levelS').value = dataList[i].getAttribute('data-level');
                     document.getElementById('telPhone').value = dataList[i].getAttribute(
+                        'data-telPhone');
+                    document.getElementById('telPhoneS').value = dataList[i].getAttribute(
                         'data-telPhone');
                     document.getElementById('workplace').value = dataList[i].getAttribute(
                         'data-workplace');
+                    document.getElementById('workplaceS').value = dataList[i].getAttribute(
+                        'data-workplace')
                     document.getElementById('subDepart').value = dataList[i].getAttribute(
+                        'data-sub-department');
+                    document.getElementById('subDepartS').value = dataList[i].getAttribute(
                         'data-sub-department');
                     document.getElementById('subDepart2').value = dataList[i].getAttribute(
                         'data-sub-department2');
+                    document.getElementById('subDepartS2').value = dataList[i].getAttribute(
+                        'data-sub-department2');
                     document.getElementById('subDepart3').value = dataList[i].getAttribute(
+                        'data-sub-department3');
+                    document.getElementById('subDepartS3').value = dataList[i].getAttribute(
                         'data-sub-department3');
                     document.getElementById('subDepart4').value = dataList[i].getAttribute(
                         'data-sub-department4');
+                    document.getElementById('subDepartS4').value = dataList[i].getAttribute(
+                        'data-sub-department4');
                     document.getElementById('subDepart5').value = dataList[i].getAttribute(
                         'data-sub-department5');
+                    document.getElementById('subDepartS5').value = dataList[i].getAttribute(
+                        'data-sub-department5')
                     break;
                 }
             }
@@ -1392,16 +1514,27 @@ if (count($currentResults) > 0) {
         element.addEventListener('change', function() {
             if (this.value === '') {
                 document.getElementById('name').value = '';
+                document.getElementById('nameS').value = '';
                 document.getElementById('userName').value = '';
+                document.getElementById('userNameS').value = '';
                 document.getElementById('department').value = '';
+                document.getElementById('departmentS').value = '';
                 document.getElementById('level').value = '';
+                document.getElementById('levelS').value = '';
                 document.getElementById('telPhone').value = '';
+                document.getElementById('telPhoneS').value = '';
                 document.getElementById('workplace').value = '';
+                document.getElementById('workplaceS').value = '';
                 document.getElementById('subDepart').value = '';
+                document.getElementById('subDepartS').value = '';
                 document.getElementById('subDepart2').value = '';
+                document.getElementById('subDepartS2').value = '';
                 document.getElementById('subDepart3').value = '';
+                document.getElementById('subDepartS3').value = '';
                 document.getElementById('subDepart4').value = '';
+                document.getElementById('subDepartS4').value = '';
                 document.getElementById('subDepart5').value = '';
+                document.getElementById('subDepartS5').value = '';
             }
         });
 
@@ -1409,16 +1542,27 @@ if (count($currentResults) > 0) {
         element.addEventListener('keyup', function(e) {
             if (e.keyCode === 8 || e.keyCode === 46) {
                 document.getElementById('name').value = '';
+                document.getElementById('nameS').value = '';
                 document.getElementById('userName').value = '';
+                document.getElementById('userNameS').value = '';
                 document.getElementById('department').value = '';
+                document.getElementById('departmentS').value = '';
                 document.getElementById('level').value = '';
+                document.getElementById('levelS').value = '';
                 document.getElementById('telPhone').value = '';
+                document.getElementById('telPhoneS').value = '';
                 document.getElementById('workplace').value = '';
+                document.getElementById('workplaceS').value = '';
                 document.getElementById('subDepart').value = '';
+                document.getElementById('subDepartS').value = '';
                 document.getElementById('subDepart2').value = '';
+                document.getElementById('subDepartS2').value = '';
                 document.getElementById('subDepart3').value = '';
+                document.getElementById('subDepartS3').value = '';
                 document.getElementById('subDepart4').value = '';
+                document.getElementById('subDepartS4').value = '';
                 document.getElementById('subDepart5').value = '';
+                document.getElementById('subDepartS5').value = '';
             }
         });
     });
@@ -1454,6 +1598,18 @@ if (count($currentResults) > 0) {
         }).datepicker("setDate", new Date()); // ให้แสดงวันที่ปัจจุบัน
 
         $('#endDate').datepicker({
+            showButtonPanel: true, // แสดงปุ่มกดตรง datepicker
+            changeMonth: true, // ให้แสดงเลือกเดือน
+            defaultDate: new Date() // กำหนดให้วันที่เริ่มต้นเป็นวันปัจจุบัน
+        }).datepicker("setDate", new Date()); // ให้แสดงวันที่ปัจจุบัน
+
+        $('#startDateS').datepicker({
+            showButtonPanel: true, // แสดงปุ่มกดตรง datepicker
+            changeMonth: true, // ให้แสดงเลือกเดือน
+            defaultDate: new Date() // กำหนดให้วันที่เริ่มต้นเป็นวันปัจจุบัน
+        }).datepicker("setDate", new Date()); // ให้แสดงวันที่ปัจจุบัน
+
+        $('#endDateS').datepicker({
             showButtonPanel: true, // แสดงปุ่มกดตรง datepicker
             changeMonth: true, // ให้แสดงเลือกเดือน
             defaultDate: new Date() // กำหนดให้วันที่เริ่มต้นเป็นวันปัจจุบัน

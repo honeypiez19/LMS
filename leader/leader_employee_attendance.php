@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>การมาสายของพนักงาน</title>
+    <title>การมาสายและหยุดงานของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -42,7 +42,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-user-clock fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>ข้อมูลการมาสายของพนักงาน</h3>
+                    <h3>ข้อมูลมาสายและหยุดงานของพนักงาน</h3>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@ $userCode = $_SESSION['s_usercode'];
     <div class="mt-5 container-fluid">
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#tab1">การมาสาย</a>
+                <a class="nav-link active" data-bs-toggle="tab" href="#tab1">มาสายและหยุดงาน</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#tab2">ประวัติพนักงานมาสาย</a>
@@ -134,15 +134,6 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-// คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-// FROM leave_list li
-// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-// AND Year(l_hr_create_datetime) = '$selectedYear'
-// AND Month(l_hr_create_datetime) = '$selectedMonth'
-// AND l_level = 'user'
-// AND l_leave_id = 7
-// ORDER BY l_hr_create_datetime DESC";
 
 $sql = "SELECT
     li.*,
@@ -153,7 +144,7 @@ INNER JOIN employees em
 WHERE
     li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user')
-    AND li.l_leave_id = 7
+    AND li.l_leave_id IN (6,7)
     AND YEAR(li.l_leave_end_date) = :selectedYear
     AND MONTH(li.l_leave_end_date) = :selectedMonth
     AND (
@@ -259,8 +250,15 @@ if (count($result) > 0) {
         echo '<td>' . $row['l_name'] . '</td>';
 
         // 7
-        echo '<td>' . ($row['l_leave_id'] == 7 ? 'มาสาย' : $row['l_leave_id']) . '</td>';
-
+        echo '<td>';
+        if ($row['l_leave_id'] == 7) {
+            echo 'มาสาย';
+        } elseif ($row['l_leave_id'] == 6) {
+            echo 'หยุดงาน';
+        } else {
+            echo $row['l_leave_id'];
+        }
+        echo '</td>';
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 
@@ -1000,10 +998,11 @@ if (count($result) > 0) {
             var lateEnd = $(rowData[3]).text(); // เวลาสิ้นสุดที่มาสาย
             var userCode = $(rowData[5]).text();
             var name = $(rowData[6]).text();
+            var leaveType = $(rowData[7]).text();
             var leaveStatus = $(rowData[9]).text();
 
             // alert(workplace)
-            // alert(leaveStatus)
+            // alert(leaveType)
             $('.btn-approve').off('click');
 
             Swal.fire({
@@ -1045,6 +1044,7 @@ if (count($result) > 0) {
                             leaveStatus: leaveStatus,
                             level: level,
                             workplace: workplace,
+                            leaveType: leaveType,
                             action: 'approve'
                         },
                         success: function(response) {

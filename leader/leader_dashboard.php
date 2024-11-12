@@ -91,29 +91,7 @@ if (!empty($late_entries_list)) {
 }
 
 // มีใบลาของพนักงาน --------------------------------------------------------------------------------------------
-
 $sql_check_leave = "SELECT
---     COUNT(l_list_id) AS leave_count,
---     li.l_username,
---     li.l_name,
---     li.l_department,
---     em.e_sub_department,
---     em.e_sub_department2,
---     em.e_sub_department3,
---     em.e_sub_department4,
---     em.e_sub_department5
--- FROM leave_list li
--- INNER JOIN employees em
---     ON li.l_usercode = em.e_usercode
--- WHERE l_leave_status = 0
---     AND l_approve_status = 0
---     AND l_level = 'user'
---     AND (l_leave_id <> 6 AND l_leave_id <> 7)
---     AND (
---         (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
---         OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
---         OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
---     )
 COUNT(li.l_list_id) AS totalLeaveItems,
 em.*,
 li.*
@@ -235,27 +213,6 @@ if (!empty($employee_list)) {
 
 // มีพนักงานมาสาย --------------------------------------------------------------------------------------------
 $sql_check_leave_id_7 = "SELECT
--- COUNT(l_list_id) AS leave_count,
---     li.l_username,
---     li.l_name,
---     li.l_department,
---     em.e_sub_department,
---     em.e_sub_department2,
---     em.e_sub_department3,
---     em.e_sub_department4,
---     em.e_sub_department5
--- FROM leave_list li
--- INNER JOIN employees em
---     ON li.l_usercode = em.e_usercode
--- WHERE l_leave_id = 7
---     AND l_approve_status = 0
---     AND l_level = 'user'
---     AND (
---         (em.e_department = 'Management' AND (em.e_sub_department IS NULL OR em.e_sub_department = ''))
---         OR (em.e_sub_department IS NOT NULL AND em.e_sub_department <> '' AND em.e_sub_department = :subDepart)
---         OR (em.e_sub_department IS NULL OR em.e_sub_department = '') AND li.l_department = :depart
---     )
--- GROUP BY l_name
 COUNT(li.l_list_id) AS totalLeaveItems,
 em.*,
 li.*
@@ -297,6 +254,52 @@ if ($stmt_check_leave_id_7->rowCount() > 0) {
 <i class="fa-solid fa-circle-exclamation me-2"></i>
 <span> ' . $employee_list_id_7 . ' มาสาย' . ' กรุณาตรวจสอบ</span>
 <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'leader_employee_attendance.php\'">ตรวจสอบการมาสาย</button>
+<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+}
+// หยุดงาน --------------------------------------------------------------------------------------------
+$sql_stop_work = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE 
+    li.l_leave_status = 0
+    AND li.l_approve_status = 0
+    AND li.l_level = 'user'
+    AND li.l_leave_id = 6
+    AND (
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
+    )
+GROUP BY li.l_name";
+
+$stmt_stop_work = $conn->prepare($sql_stop_work);
+$stmt_stop_work->bindParam(':depart', $depart);
+$stmt_stop_work->bindParam(':subDepart', $subDepart);
+$stmt_stop_work->bindParam(':subDepart2', $subDepart2);
+$stmt_stop_work->bindParam(':subDepart3', $subDepart3);
+$stmt_stop_work->bindParam(':subDepart4', $subDepart4);
+$stmt_stop_work->bindParam(':subDepart5', $subDepart5);
+$stmt_stop_work->execute();
+
+if ($stmt_stop_work->rowCount() > 0) {
+    $emp_stop_work = array();
+    while ($row_stop_work = $stmt_stop_work->fetch(PDO::FETCH_ASSOC)) {
+        $emp_stop_work[] = $row_stop_work['l_name'];
+    }
+
+    $emp_stop_work_list = implode(', ', $emp_stop_work);
+
+    echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
+<i class="fa-solid fa-circle-exclamation me-2"></i>
+<span> ' . $emp_stop_work_list . ' หยุดงาน' . ' กรุณาตรวจสอบ</span>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'leader_employee_attendance.php\'">ตรวจสอบ</button>
 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }

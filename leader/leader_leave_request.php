@@ -462,7 +462,7 @@ INNER JOIN employees em
 WHERE
     li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user')
-    AND li.l_leave_id NOT IN (6, 7)
+    AND li.l_leave_id NOT IN (7)
     AND YEAR(li.l_leave_end_date) = :selectedYear";
 
     if($selectedMonth != "All"){
@@ -614,12 +614,12 @@ if ($stmt->rowCount() > 0) {
         }
         // 10
         if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
 
         } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
         } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
         } else {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }

@@ -452,12 +452,12 @@ if ($result->rowCount() > 0) {
         }
         // 10
         if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
 
         } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
         } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
         } else {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }

@@ -1316,7 +1316,7 @@ if($selectedMonth != "ALL"){
 $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
 }
 
-$sql .= " AND Year(l_leave_start_date) = '$selectedYear' AND l_leave_id <> 6 ORDER BY l_create_datetime DESC ";
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
 
 // หาจำนวนรายการทั้งหมด
 $result = $conn->query($sql);
@@ -1609,13 +1609,14 @@ if ($result->rowCount() > 0) {
         
         $disabledConfirmCheck = ($row['l_late_datetime'] != NULL) ? 'disabled' : '';
         
-
-        if ($row['l_leave_id'] != 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck. '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+        if ($row['l_leave_id'] == 6) {
+            echo '<td></td>';
         } else if ($row['l_leave_id'] == 7) {
-                echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
-        }else {
-            echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
+            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+        } else if ($row['l_leave_id'] != 7) {
+            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+        } else {
+            echo '<td></td>'; 
         }
         
         echo '</tr>';

@@ -1,4 +1,19 @@
 <?php
+    // เดือน
+    $strAllMonth = "All";
+    $strJan = "January";
+    $strFeb = "February";
+    $strMar = "March";
+    $strApr = "April";
+    $strMay = "May";
+    $strJun = "June";
+    $strJul = "July";
+    $strAug = "August";
+    $strSep = "September";
+    $strOct = "October";
+    $strNov = "November";
+    $strDec = "December";
+    
     // Navbar
     $strDash = "Dashboard";
     $strLeaveAndLate = "Leave and late";
@@ -16,7 +31,17 @@
 
     $strEmpCode = "Usercode";
     $strEmpName = "Name";
-
+    $strProveDate1 = "Approve Date_1";
+    $strProveDate2 = "Approve Date_2";
+    $strReason1 = "Reason_1";
+    $strReason2 = "Reason_2";
+    $strProveName1 = "Approve Name_1";
+    $strProveName2 = "Approve Name_2";
+    $strAll = "All";
+    $strPendProve = "Pending approve";
+    $strProve = "Approve";
+    $strNotProve = "Not approve";
+    
     // หน้าหลัก
     $btnAddLeave = "Leave request";
     $btnAddLeaveEmer = "Emergency leave";
