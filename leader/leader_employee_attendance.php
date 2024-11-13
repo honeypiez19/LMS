@@ -1006,7 +1006,8 @@ if (count($result) > 0) {
             $('.btn-approve').off('click');
 
             Swal.fire({
-                title: "ต้องการอนุมัติการมาสายหรือไม่ ?",
+                title: "ต้องการอนุมัติ" +
+                    leaveType + "หรือไม่ ?",
                 text: "กรุณายืนยันการอนุมัติ",
                 icon: "question",
                 showCancelButton: true,
@@ -1050,7 +1051,9 @@ if (count($result) > 0) {
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                text: 'อนุมัติการมาสายของ ' + name +
+                                text: 'อนุมัติ' +
+                                    leaveType +
+                                    'ของ ' + name +
                                     ' ของวันที่ ' +
                                     lateDate,
                                 icon: 'success',
@@ -1085,12 +1088,14 @@ if (count($result) > 0) {
                             leaveStatus: leaveStatus,
                             level: level,
                             workplace: workplace,
+                            leaveType: leaveType,
                             action: 'deny'
                         },
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                html: 'ไม่อนุมัติการมาสายของ ' + name +
+                                html: 'ไม่อนุมัติ' + leaveType +
+                                    'ของ ' + name +
                                     '<br>ของวันที่ ' + lateDate,
                                 icon: 'success',
                                 confirmButtonText: 'OK'
