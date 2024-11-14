@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>การมาสายของพนักงาน</title>
+    <title>การมาสายและหยุดงานของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -42,7 +42,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-user-clock fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>ข้อมูลการมาสายของพนักงาน</h3>
+                    <h3>การมาสายและหยุดงานของพนักงาน</h3>
                 </div>
             </div>
         </div>
@@ -51,10 +51,10 @@ $userCode = $_SESSION['s_usercode'];
     <div class="mt-5 container-fluid">
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#tab1">การมาสาย</a>
+                <a class="nav-link active" data-bs-toggle="tab" href="#tab1">มาสายและหยุดงาน</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab2">ประวัติพนักงานมาสาย</a>
+                <a class="nav-link" data-bs-toggle="tab" href="#tab2">ประวัติมาสายและหยุดงาน</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#tab3" hidden>ประวัติพนักงานที่ขาดงาน</a>
@@ -64,7 +64,7 @@ $userCode = $_SESSION['s_usercode'];
 
     <div class="container">
         <div class="tab-content">
-            <!-- การมาสาย -->
+            <!-- มาสายและหยุดงาน -->
             <div class="tab-pane fade show active" id="tab1">
                 <form class="mt-3 mb-3 row" method="post">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
@@ -141,7 +141,7 @@ INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department
 AND Year(l_create_datetime) = '$selectedYear'
 AND Month(l_create_datetime) = '$selectedMonth'
 AND l_level = 'user'
-AND l_leave_id = 7
+AND l_leave_id IN (6,7)
 ORDER BY l_create_datetime DESC";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -169,7 +169,7 @@ if (count($result) > 0) {
         <th>รหัสพนักงาน</th>
         <th>ชื่อพนักงาน</th>
         <th>ประเภท</th>
-        <th>วันที่มาสาย</th>
+        <th>วันที่เวลา</th>
         <th>สถานะรายการ</th>
         <th>สถานะอนุมัติ_1</th>
         <th>สถานะอนุมัติ_2</th>
@@ -205,8 +205,16 @@ if (count($result) > 0) {
         echo '<td>' . $row['l_name'] . '</td>';
 
         // 7
-        echo '<td>' . ($row['l_leave_id'] == 7 ? 'มาสาย' : $row['l_leave_id']) . '</td>';
-
+        echo '<td>';
+        if ($row['l_leave_id'] == 7) {
+            echo 'มาสาย';
+        } elseif ($row['l_leave_id'] == 6) {
+            echo 'หยุดงาน';
+        } else {
+            echo $row['l_leave_id'];
+        }
+        echo '</td>';
+        
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 
@@ -305,6 +313,7 @@ if (count($result) > 0) {
         // 13
         echo '<td>' . $row['l_remark'] . '</td>';
 
+        // 14
         echo '<td>';
         echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '">ตรวจสอบ</button>';
         echo '</td>';
@@ -788,6 +797,7 @@ if (count($result) > 0) {
         // 13
         echo '<td>' . $row['l_remark'] . '</td>';
 
+        // 14
         echo '<td><button type="button" class="btn btn-primary btn-open-modal" data-toggle="modal" data-target="#employeeModal" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
 
         echo '</tr>';
@@ -841,7 +851,6 @@ if (count($result) > 0) {
 
                     </div>
                     <div class="modal-body" id="employeeModalBody">
-                        <!-- ใส่โค้ด HTML ที่ต้องการแสดงข้อมูลพนักงานที่นี่ -->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
@@ -865,14 +874,14 @@ if (count($result) > 0) {
             var userCode = $(this).data('usercode');
             $.ajax({
                 type: 'GET',
-                url: 'c_ajax_get_late_time.php', // ตัวอย่าง URL ที่ต้องการเรียกใช้เพื่อดึงข้อมูลพนักงาน
+                url: 'c_ajax_get_late_time.php',
                 data: {
                     userCode: userCode
                 },
                 success: function(data) {
                     $('#employeeModalBody').html(data);
                     $('#employeeModal').modal(
-                        'show'); // แสดง Modal เมื่อโหลดข้อมูลเสร็จสิ้น
+                        'show');
                 }
             });
         });
@@ -881,6 +890,11 @@ if (count($result) > 0) {
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
             var level = '<?php echo $level; ?>';
+            var subDepart = '<?php echo $subDepart; ?>';
+            var subDepart2 = '<?php echo $subDepart2; ?>';
+            var subDepart3 = '<?php echo $subDepart3; ?>';
+            var subDepart4 = '<?php echo $subDepart4; ?>';
+            var subDepart5 = '<?php echo $subDepart5; ?>';
             var workplace = '<?php echo $workplace; ?>';
 
             var createDateTime = $(this).data(
@@ -891,14 +905,15 @@ if (count($result) > 0) {
             var lateEnd = $(rowData[3]).text(); // เวลาสิ้นสุดที่มาสาย
             var userCode = $(rowData[5]).text();
             var name = $(rowData[6]).text();
+            var leaveType = $(rowData[7]).text();
             var leaveStatus = $(rowData[9]).text();
 
             // alert(workplace)
             // alert(leaveStatus)
             $('.btn-approve').off('click');
-
             Swal.fire({
-                title: "ต้องการอนุมัติการมาสายหรือไม่ ?",
+                title: "ต้องการอนุมัติ" +
+                    leaveType + "หรือไม่ ?",
                 text: "กรุณายืนยันการอนุมัติ",
                 icon: "question",
                 showCancelButton: true,
@@ -936,12 +951,20 @@ if (count($result) > 0) {
                             leaveStatus: leaveStatus,
                             level: level,
                             workplace: workplace,
+                            leaveType: leaveType,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
                             action: 'approve'
                         },
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                text: 'อนุมัติการมาสายของ ' + name +
+                                text: 'อนุมัติ' +
+                                    leaveType +
+                                    'ของ ' + name +
                                     ' ของวันที่ ' +
                                     lateDate,
                                 icon: 'success',
@@ -976,12 +999,19 @@ if (count($result) > 0) {
                             leaveStatus: leaveStatus,
                             level: level,
                             workplace: workplace,
+                            leaveType: leaveType,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
                             action: 'deny'
                         },
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                html: 'ไม่อนุมัติการมาสายของ ' + name +
+                                html: 'ไม่อนุมัติ' + leaveType +
+                                    'ของ ' + name +
                                     '<br>ของวันที่ ' + lateDate,
                                 icon: 'success',
                                 confirmButtonText: 'OK'

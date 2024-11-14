@@ -988,6 +988,11 @@ if (count($result) > 0) {
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
             var level = '<?php echo $level; ?>';
+            var subDepart = '<?php echo $subDepart; ?>';
+            var subDepart2 = '<?php echo $subDepart2; ?>';
+            var subDepart3 = '<?php echo $subDepart3; ?>';
+            var subDepart4 = '<?php echo $subDepart4; ?>';
+            var subDepart5 = '<?php echo $subDepart5; ?>';
             var workplace = '<?php echo $workplace; ?>';
 
             var createDateTime = $(this).data(
@@ -1004,7 +1009,6 @@ if (count($result) > 0) {
             // alert(workplace)
             // alert(leaveType)
             $('.btn-approve').off('click');
-
             Swal.fire({
                 title: "ต้องการอนุมัติ" +
                     leaveType + "หรือไม่ ?",
@@ -1046,6 +1050,11 @@ if (count($result) > 0) {
                             level: level,
                             workplace: workplace,
                             leaveType: leaveType,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
                             action: 'approve'
                         },
                         success: function(response) {
@@ -1089,6 +1098,11 @@ if (count($result) > 0) {
                             level: level,
                             workplace: workplace,
                             leaveType: leaveType,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
                             action: 'deny'
                         },
                         success: function(response) {

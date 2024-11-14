@@ -88,7 +88,6 @@ FROM
     leave_list li
 WHERE
     li.l_department <> 'RD'
-    AND li.l_department <> 'CAD1'
     AND li.l_leave_status = 0
     AND li.l_approve_status2 = 1
 GROUP BY
