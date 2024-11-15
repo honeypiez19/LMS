@@ -57,10 +57,10 @@ $userCode = $_SESSION['s_usercode'];
                 <a class="nav-link" data-bs-toggle="tab" href="#tab5">บันทึกหยุดงาน</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab4">รายการมาสาย</a>
+                <a class="nav-link" data-bs-toggle="tab" href="#tab4">รายการมาสายและขาดงานของพนักงาน</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#tab2">ประวัติพนักงานมาสาย</a>
+                <a class="nav-link" data-bs-toggle="tab" href="#tab2">ประวัติมาสายและขาดงานของพนักงาน</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#tab3" hidden>ประวัติพนักงานที่ขาดงาน</a>
@@ -81,7 +81,7 @@ $userCode = $_SESSION['s_usercode'];
                                     required>
                                 <datalist id="codeList">
                                     <?php
-$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> 1";
+$sql = "SELECT * FROM employees WHERE e_status <> 1";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_usercode'] . '" data-name="' . $row['e_name'] . '" data-username="' . $row['e_username'] . '" data-depart="' .
@@ -169,7 +169,7 @@ for ($i = 2; $i <= 30; $i++) {
                                     required>
                                 <datalist id="codeListS">
                                     <?php
-$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> 1";
+$sql = "SELECT * FROM employees WHERE  e_status <> 1";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_usercode'] . '" data-name="' . $row['e_name'] . '" data-username="' . $row['e_username'] . '" data-depart="' .
@@ -355,7 +355,7 @@ if (!isset($_GET['page'])) {
 
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 // $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 ORDER BY l_create_datetime DESC";
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7
+$sql = "SELECT * FROM leave_list WHERE l_leave_id IN (6,7)
 AND Month(l_leave_end_date) = '$selectedMonth'
 AND Year(l_leave_end_date) = $selectedYear
 ORDER BY l_leave_end_date DESC";
@@ -419,8 +419,15 @@ if (count($result) > 0) {
         echo '<td>' . $row['l_name'] . '</td>';
 
         // 7
-        echo '<td>' . ($row['l_leave_id'] == 7 ? 'มาสาย' : $row['l_leave_id']) . '</td>';
-
+        echo '<td>';
+        if ($row['l_leave_id'] == 7) {
+            echo 'มาสาย';
+        } elseif ($row['l_leave_id'] == 6) {
+            echo 'ขาดงาน';
+        } else {
+            echo $row['l_leave_id'];
+        }
+        echo '</td>';
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 
@@ -563,7 +570,7 @@ if (count($result) > 0) {
     echo '</ul>';
     echo '</div>';
 } else {
-    echo '<span style="text-align: left; color:red;">ไม่พบข้อมูลการมาสาย</span>';
+    echo '<span style="text-align: left; color:red;">ไม่พบข้อมูลการมาสายและขาดงาน</span>';
 }
 ?>
             </div>
@@ -650,7 +657,7 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' 
 // AND Year(l_create_datetime) = $selectedYear 
 // ORDER BY l_create_datetime DESC";
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7
+$sql = "SELECT * FROM leave_list WHERE l_leave_id IN (6,7)
 AND Month(l_leave_end_date) = '$selectedMonth'
 AND Year(l_leave_end_date) = $selectedYear
 ORDER BY l_leave_end_date DESC";
@@ -713,8 +720,15 @@ if (count($result) > 0) {
         echo '<td>' . $row['l_name'] . '</td>';
 
         // 7
-        echo '<td>' . ($row['l_leave_id'] == 7 ? 'มาสาย' : $row['l_leave_id']) . '</td>';
-
+        echo '<td>';
+        if ($row['l_leave_id'] == 7) {
+            echo 'มาสาย';
+        } elseif ($row['l_leave_id'] == 6) {
+            echo 'ขาดงาน';
+        } else {
+            echo $row['l_leave_id'];
+        }
+        echo '</td>';
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 
@@ -841,7 +855,7 @@ if (count($result) > 0) {
     echo '</ul>';
     echo '</div>';
 } else {
-    echo '<span style="text-align: left; color:red;">ไม่พบข้อมูลการมาสาย</span>';
+    echo '<span style="text-align: left; color:red;">ไม่พบข้อมูลการมาสายและขาดงาน</span>';
 }
 
 ?>

@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -100,11 +102,20 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
 
 echo "<select class='form-select' name='year' id='selectedYear'>";
+
+// เพิ่มตัวเลือกของปีหน้า
+$nextYear = $currentYear + 1;
+echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+
+
 for ($i = 0; $i <= 4; $i++) {
     $year = $currentYear - $i;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
@@ -117,21 +128,22 @@ echo "</select>";
                     <div class="col-auto">
                         <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -151,7 +163,6 @@ echo "</select>";
                         </button>
                     </div>
                 </form>
-
 
                 <!-- ปุ่มระเบียบการลา -->
                 <button type="button" class="button-shadow btn btn-primary" data-bs-toggle="modal"
@@ -276,7 +287,7 @@ echo "</select>";
                         <div class="card-title">
                             <?php
 // $approveStatus = ($depart == 'RD') ? 4 : 2;
-$approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+$approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? NULL : 2));
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
     SUM(
@@ -302,6 +313,7 @@ FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
 AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
@@ -311,6 +323,8 @@ $stmt_leave_personal = $conn->prepare($sql_leave_personal);
 $stmt_leave_personal->bindParam(':userCode', $userCode);
 $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
+$stmt_leave_personal->bindParam(':startDate', $startDate);
+$stmt_leave_personal->bindParam(':endDate', $endDate);
 $stmt_leave_personal->execute();
 $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -404,6 +418,7 @@ FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
 AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
@@ -413,6 +428,8 @@ $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
 $stmt_leave_personal_no->bindParam(':userCode', $userCode);
 $stmt_leave_personal_no->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
+$stmt_leave_personal_no->bindParam(':startDate', $startDate);
+$stmt_leave_personal_no->bindParam(':endDate', $endDate);
 $stmt_leave_personal_no->execute();
 $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -1301,8 +1318,13 @@ if (!isset($_GET['page'])) {
 }
 
 // สร้างคำสั่ง SQL
-$sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' AND Month(l_leave_start_date) = '$selectedMonth'
-AND Year(l_leave_start_date) = '$selectedYear' AND l_leave_id <> 6 ORDER BY l_create_datetime DESC ";
+$sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
+
+if($selectedMonth != "All"){
+$sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
 
 // หาจำนวนรายการทั้งหมด
 $result = $conn->query($sql);
@@ -1520,7 +1542,7 @@ if ($result->rowCount() > 0) {
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>อนุมัติ</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
@@ -1533,6 +1555,9 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        }
+        elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -1566,6 +1591,9 @@ if ($result->rowCount() > 0) {
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
         }
+        elseif ($row['l_approve_status2'] == 6) {
+            echo '';
+        }
         // ไม่มีสถานะ
         else {
             echo 'ไม่มีสถานะ';
@@ -1585,14 +1613,26 @@ if ($result->rowCount() > 0) {
 
         // 18
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
-        if ($row['l_leave_id'] != 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+        
+        $dateNow = date('Y-m-d');
+        $disabledCancalCheck = (
+            $row['l_approve_status'] != 0 
+            && $row['l_approve_status2'] != 1 
+            && $row['l_leave_start_date'] <= $dateNow
+        ) ? 'disabled' : '';
+        
+        $disabledConfirmCheck = ($row['l_late_datetime'] != NULL) ? 'disabled' : '';
+        
+        if ($row['l_leave_id'] == 6) {
+            echo '<td></td>';
         } else if ($row['l_leave_id'] == 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '>ยืนยันรายการ</button></td>';
+            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+        } else if ($row['l_leave_id'] != 7) {
+            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
         } else {
-            echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
+            echo '<td></td>'; 
         }
-
+        
         echo '</tr>';
         $rowNumber--;
         // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
@@ -1613,8 +1653,8 @@ echo '<ul class="pagination">';
 
 // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
 }
 
 // สร้างลิงก์สำหรับแต่ละหน้า
@@ -1622,16 +1662,15 @@ for ($i = 1; $i <= $totalPages; $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
     }
 }
 
 // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
 if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
 }
-
 echo '</ul>';
 echo '</div>';
 
@@ -1825,7 +1864,6 @@ echo '</div>';
             // ดึงค่าจากฟอร์ม
             var leaveType = $('#leaveType').val();
             var leaveReason = $('#leaveReason').val();
-            s
             var startDate = $('#startDate').val();
             var startTime = $('#startTime').val();
             var endDate = $('#endDate').val();
@@ -1849,6 +1887,7 @@ echo '</div>';
             createDate.setHours(createDate.getHours() + 7); // Adjust to Thai timezone (UTC+7)
             var formattedDate = createDate.toISOString().slice(0, 19).replace('T', ' ');
             fd.append('formattedDate', formattedDate);
+            // alert(formattedDate);
 
             // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
             if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {

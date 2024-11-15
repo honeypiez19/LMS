@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -100,6 +102,9 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
@@ -123,29 +128,26 @@ echo "</select>";
                     <div class="col-auto">
                         <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
 }
-elseif (isset($_GET['month'])) {
-    $selectedMonth = $_GET['month'];
-}
-
 
 echo "<select class='form-select' name='month' id='selectedMonth'>";
 foreach ($months as $key => $monthName) {
@@ -320,6 +322,8 @@ $stmt_leave_personal = $conn->prepare($sql_leave_personal);
 $stmt_leave_personal->bindParam(':userCode', $userCode);
 $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
+// $stmt_leave_personal->bindParam(':startDate', $startDate);
+// $stmt_leave_personal->bindParam(':endDate', $endDate);
 $stmt_leave_personal->execute();
 $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -422,6 +426,8 @@ $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
 $stmt_leave_personal_no->bindParam(':userCode', $userCode);
 $stmt_leave_personal_no->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
+// $stmt_leave_personal_no->bindParam(':startDate', $startDate);
+// $stmt_leave_personal_no->bindParam(':endDate', $endDate);
 $stmt_leave_personal_no->execute();
 $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -1035,11 +1041,20 @@ if ($result_other) {
                                     <input type="text" class="form-control" id="startDate" required>
                                 </div>
                                 <div class=" col-6">
+
+
+
+
+
+
+
+                                    .
                                     <label for="startTime" class="form-label">เวลาที่เริ่มต้น</label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select" id="startTime" name="startTime" required>
                                         <option value="08:00" selected>08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="09:00">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
                                         <option value="10:00">10:00</option>
@@ -1052,6 +1067,7 @@ if ($result_other) {
                                         <option value="13:30">13:30</option>
                                         <option value="14:00">14:00</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="15:00">14:40</option>
                                         <option value="15:00">15:00</option>
                                         <option value="15:30">15:30</option>
                                         <option value="16:00">16:00</option>
@@ -1084,6 +1100,7 @@ if ($result_other) {
                                         <option value="13:30">13:30</option>
                                         <option value="14:00">14:00</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="15:00">14:40</option>
                                         <option value="15:00">15:00</option>
                                         <option value="15:30">15:30</option>
                                         <option value="16:00">16:00</option>
@@ -1196,6 +1213,7 @@ if ($result2->rowCount() > 0) {
                                         <option value="13:30">13:30</option>
                                         <option value="14:00">14:00</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="15:00">14:40</option>
                                         <option value="15:00">15:00</option>
                                         <option value="15:30">15:30</option>
                                         <option value="16:00">16:00</option>
@@ -1229,6 +1247,7 @@ if ($result2->rowCount() > 0) {
                                         <option value="13:30">13:30</option>
                                         <option value="14:00">14:00</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="15:00">14:40</option>
                                         <option value="15:00">15:00</option>
                                         <option value="15:30">15:30</option>
                                         <option value="16:00">16:00</option>
@@ -1312,7 +1331,7 @@ if (!isset($_GET['page'])) {
 // สร้างคำสั่ง SQL
 $sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
 
-if($selectedMonth != "ALL"){
+if($selectedMonth != "All"){
 $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
 }
 
@@ -1548,6 +1567,9 @@ if ($result->rowCount() > 0) {
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
         }
+        elseif ($row['l_approve_status'] == 6) {
+            echo '';
+        }
         // ไม่มีสถานะ
         else {
             echo 'ไม่มีสถานะ';
@@ -1579,6 +1601,9 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        }
+        elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
