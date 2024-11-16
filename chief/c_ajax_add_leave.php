@@ -213,8 +213,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } 
         } else if ($level == 'chief') {
             if ($depart == 'Management') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-                $stmt->bindParam(':workplace', $workplace);
+                if($subDepart == 'Sales'){
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'GM'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+                else {
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
             }
         } else {
             echo "ไม่พบเงื่อนไข";

@@ -22,15 +22,24 @@ $subDepart2 = $_POST['subDepart2'];
 $subDepart3 = $_POST['subDepart3'];
 $subDepart4 = $_POST['subDepart4'];
 $subDepart5 = $_POST['subDepart5'];
+
+if($subDepart == ''){
+    $proveStatus = 6;
+    $proveStatus2 = 1;
+} else {
+    $proveStatus = 0;
+    $proveStatus2 = 1;
+}
+
 // คืนจำนวนวันลา
 $sqlReturn = "UPDATE leave_list SET
                 l_leave_status = 1,
                 l_cancel_datetime = :canDatetime,
-                l_approve_status = 0,
+                l_approve_status = :proveStatus,
                 l_approve_name = '',
                 l_approve_datetime = NULL,
                 l_reason = '',
-                l_approve_status2 = 1,
+                l_approve_status2 = :proveStatus2,
                 l_approve_name2 = '',
                 l_approve_datetime2 = NULL,
                 l_reason2 = '',
@@ -42,6 +51,8 @@ $stmtReturn = $conn->prepare($sqlReturn);
 $stmtReturn->bindParam(':leaveID', $leaveID);
 $stmtReturn->bindParam(':createDatetime', $createDatetime);
 $stmtReturn->bindParam(':canDatetime', $canDatetime);
+$stmtReturn->bindParam(':proveStatus', $proveStatus);
+$stmtReturn->bindParam(':proveStatus2', $proveStatus2);
 
 if ($stmtReturn->execute()) {
     $sURL = 'https://lms.system-samt.com/';

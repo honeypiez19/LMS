@@ -64,8 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveStatusName = ($leaveStatus == 0) ? 'ปกติ' : 'ยกเลิก';
 
     $comfirmStatus = 0;
-    $proveStatus = 0;
-    $proveStatus2 = 1;
+
 
     $subDepart = $_POST['subDepart'];
     $subDepart2 = $_POST['subDepart2'];
@@ -87,31 +86,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
-    l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace)
-    VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
-    :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace)");
-
-    $stmt->bindParam(':userCode', $userCode);
-    $stmt->bindParam(':userName', $userName);
-    $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':depart', $depart);
-    $stmt->bindParam(':telPhone', $telPhone);
-    $stmt->bindParam(':leaveType', $leaveType);
-    $stmt->bindParam(':leaveReason', $leaveReason);
-    $stmt->bindParam(':leaveDateStart', $leaveDateStart);
-    $stmt->bindParam(':leaveTimeStart', $leaveTimeStart);
-    $stmt->bindParam(':leaveDateEnd', $leaveDateEnd);
-    $stmt->bindParam(':leaveTimeEnd', $leaveTimeEnd);
-    $stmt->bindParam(':formattedDate', $formattedDate);
-    $stmt->bindParam(':filename', $filename);
-    $stmt->bindParam(':leaveStatus', $leaveStatus);
-    $stmt->bindParam(':comfirmStatus', $comfirmStatus);
-    $stmt->bindParam(':proveStatus', $proveStatus);
-    $stmt->bindParam(':proveStatus2', $proveStatus2);
-    $stmt->bindParam(':level', $level);
-    $stmt->bindParam(':workplace', $workplace);
-
+    if($subDepart == ''){
+        $proveStatus = 6;
+        $proveStatus2 = 1;
+    } else {
+        $proveStatus = 0;
+        $proveStatus2 = 1;
+    }
+        $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
+        l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace)
+        VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
+        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace)");
+    
+        $stmt->bindParam(':userCode', $userCode);
+        $stmt->bindParam(':userName', $userName);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':depart', $depart);
+        $stmt->bindParam(':telPhone', $telPhone);
+        $stmt->bindParam(':leaveType', $leaveType);
+        $stmt->bindParam(':leaveReason', $leaveReason);
+        $stmt->bindParam(':leaveDateStart', $leaveDateStart);
+        $stmt->bindParam(':leaveTimeStart', $leaveTimeStart);
+        $stmt->bindParam(':leaveDateEnd', $leaveDateEnd);
+        $stmt->bindParam(':leaveTimeEnd', $leaveTimeEnd);
+        $stmt->bindParam(':formattedDate', $formattedDate);
+        $stmt->bindParam(':filename', $filename);
+        $stmt->bindParam(':leaveStatus', $leaveStatus);
+        $stmt->bindParam(':comfirmStatus', $comfirmStatus);
+        $stmt->bindParam(':proveStatus', $proveStatus);
+        $stmt->bindParam(':proveStatus2', $proveStatus2);
+        $stmt->bindParam(':level', $level);
+        $stmt->bindParam(':workplace', $workplace);
+    
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
         $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
