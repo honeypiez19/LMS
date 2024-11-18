@@ -279,7 +279,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
             </thead>
             <tbody class="text-center">
                 <?php
-$itemsPerPage = 10;
+$itemsPerPage = 15;
 
 // คำนวณหน้าปัจจุบัน
 if (!isset($_GET['page'])) {
@@ -574,12 +574,13 @@ if ($currentPage < $totalPages) {
 echo '</ul>';
 
 // Input to jump to a specific page
-echo '<input type="number" id="page-input" max="' . $totalPages . '" class="mx-2 form-control d-inline" style="width: 100px; height: 40px; text-align: center;" placeholder="เลขหน้า" value="' . $currentPage . '" onchange="changePage(this.value)">';
+echo '<input type="number" id="page-input" max="' . $totalPages . '" class="mx-2 form-control d-inline" style="width: 100px; height: 40px; text-align: center;" placeholder="เลขหน้า" value="' . $currentPage . '" onchange="changePage(this.value, \'' . $selectedMonth . '\', \'' . $searchCode . '\')">';
 
 echo '</div>';
 
-?>
 
+
+?>
 
         <!-- Modal เช็คการลา -->
         <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -1233,33 +1234,49 @@ echo '</div>';
 
     $("#codeSearch").on("keyup", function() {
         var value3 = $(this).val().toLowerCase(); // ค่าที่กรอกในช่องค้นหา
-        // เมื่อกรอกข้อความในช่องค้นหา ให้ส่งค่าค้นหาไปใน URL
         var page = "<?php echo $currentPage; ?>"; // หน้าปัจจุบันที่แสดงอยู่
         var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
+        var selectedYear = "<?php echo $selectedYear; ?>"; // เดือนที่เลือก
+
         var searchCode = value3; // ค่าของ codeSearch ที่กรอก
 
-        // ส่งค่าผ่าน URL ไปยัง query string
-        var newUrl = "?page=" + page + "&month=" + encodeURIComponent(selectedMonth) +
-            "&codeSearch=" + encodeURIComponent(searchCode); // ส่งค่า codeSearch ใหม่
-
-        window.location.href = newUrl; // รีเฟรชหน้าโดยการโหลด URL ใหม่
+        $.ajax({
+            url: "a_ajax_get_data_usercode.php", // เปลี่ยนเป็นชื่อไฟล์ PHP ที่ใช้แสดงข้อมูล
+            type: "GET",
+            data: {
+                page: page,
+                month: selectedMonth,
+                year: selectedYear, // ใช้ year แทน selectedYear
+                codeSearch: searchCode
+            },
+            success: function(response) {
+                // แทนที่เนื้อหาตารางด้วยข้อมูลใหม่ที่ได้จาก response
+                $("tbody").html(response);
+            }
+        });
     });
 
     // ฟังก์ชันเพื่อเปลี่ยนหน้าเมื่อกรอกหมายเลขหน้า
-    function changePage(page) {
-        var totalPages = <?php echo $totalPages; ?>; // จำนวนหน้าทั้งหมด
-        if (page < 1) page = 1;
-        if (page > totalPages) page = totalPages;
+    // function changePage(page) {
+    //     var totalPages = <?php echo $totalPages; ?>; // จำนวนหน้าทั้งหมด
+    //     if (page < 1) page = 1;
+    //     if (page > totalPages) page = totalPages;
 
-        var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
-        var searchCode = $("#codeSearch").val(); // ค่าค้นหาจากช่องค้นหา
+    //     var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
+    //     var searchCode = $("#codeSearch").val(); // ค่าค้นหาจากช่องค้นหา
 
+    //     var newUrl = "?page=" + page + "&month=" + encodeURIComponent(selectedMonth) +
+    //         "&codeSearch=" + encodeURIComponent(searchCode); // ส่งค่า codeSearch ใหม่
+
+    //     window.location.href = newUrl; // เปลี่ยนหน้าโดยการโหลด URL ใหม่
+    // }
+
+    function changePage(page, selectedMonth, searchCode) {
+        // สร้าง URL ใหม่โดยส่งค่าทั้งหมด (page, selectedMonth, และ codeSearch)
         var newUrl = "?page=" + page + "&month=" + encodeURIComponent(selectedMonth) +
-            "&codeSearch=" + encodeURIComponent(searchCode); // ส่งค่า codeSearch ใหม่
-
-        window.location.href = newUrl; // เปลี่ยนหน้าโดยการโหลด URL ใหม่
+            "&codeSearch=" + encodeURIComponent(searchCode);
+        window.location.href = newUrl; // รีเฟรชหน้าโดยการโหลด URL ใหม่
     }
-
     document.getElementById('page-input').addEventListener('input', function() {
         const page = this.value;
         const month = '<?php echo urlencode($selectedMonth); ?>';

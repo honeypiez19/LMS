@@ -996,6 +996,7 @@ if ($result_other) {
                 </button>
             </div>
         </div>
+
         <!-- Modal ยื่นใบลา -->
         <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -1050,10 +1051,10 @@ if ($result_other) {
                                         <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
-                                        <option value="10:00">09:45</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
-                                        <option value="11:00">10:45</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
@@ -1425,26 +1426,47 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        // ตรวจสอบเงื่อนไขที่ให้เวลาเป็น '12:00', '13:00', '17:00'
-        if ($row['l_leave_start_time'] == '12:00:00') {
+        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        } else if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '09:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:00:00</td>';
+        } else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        } else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '10:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:00:00</td>';
+        } else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+        } else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '11:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:00:00</td>';
+        } 
+        else if ($row['l_leave_start_time'] == '12:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
         } else if ($row['l_leave_start_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
         } else if ($row['l_leave_start_time'] == '17:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
-        }  else if ($row['l_leave_start_time'] == '08:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
         } else {
             // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
         }
-       
+        
         // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-
         // 10
-        if ($row['l_leave_end_time'] == '12:00:00') {
+        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        } else if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '09:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:00:00</td>';
+        } else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        } else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '10:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:00:00</td>';
+        } else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+        } else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '11:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:00:00</td>';
+        } 
+        else if ($row['l_leave_end_time'] == '12:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
-
         } else if ($row['l_leave_end_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
         } else if ($row['l_leave_end_time'] == '17:00:00') {
@@ -1924,6 +1946,17 @@ echo '</div>';
             var endDate = $('#endDate').val();
             var endTime = $('#endTime').val();
             var files = $('#file')[0].files;
+
+            alert(startTime)
+            // if (startTime == '08:45') {
+            //     startTime = '09:00';
+            // } else if (startTime == '09:45') {
+            //     startTime = '10:00';
+            // } else if (startTime == '10:45') {
+            //     startTime = '11:00';
+            // } else {
+            //     startTime;
+            // }
 
             // เพิ่มข้อมูลจากฟอร์มลงใน FormData object
             fd.append('leaveType', leaveType);

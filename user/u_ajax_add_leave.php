@@ -35,7 +35,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($_POST['endDate']));
     $leaveTimeEnd = $_POST['endTime'];
 
-    if($leaveTimeStart == '12:00'){
+    if($leaveTimeStart == '08:45'){
+        $leaveTimeStartLine = '08:45';
+        $leaveTimeStart = '09:00';
+        $remark = '08:45:00';
+    } else if($leaveTimeStart == '09:00'){
+        $leaveTimeStartLine = '09:00';
+        $leaveTimeStart = '09:00';
+        $remark = '09:00:00';
+    } else if($leaveTimeStart == '09:45'){
+        $leaveTimeStartLine = '09:45';
+        $leaveTimeStart = '10:00';
+        $remark = '09:45:00';
+    } else if($leaveTimeStart == '10:00'){
+        $leaveTimeStartLine = '10:00';
+        $leaveTimeStart = '10:00';
+        $remark = '10:00:00';
+    } else if($leaveTimeStart == '10:45'){
+        $leaveTimeStartLine = '10:45';
+        $leaveTimeStart = '11:00';
+        $remark = '10:45:00';
+    } else if($leaveTimeStart == '11:00'){
+        $leaveTimeStartLine = '11:00';
+        $leaveTimeStart = '11:00';
+        $remark = '11:00:00';
+    } 
+    else if($leaveTimeStart == '12:00'){
         $leaveTimeStartLine = '11:45';
     } else if($leaveTimeStart == '13:00'){
         $leaveTimeStartLine = '12:45';
@@ -65,7 +90,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $comfirmStatus = 0;
 
-
     $subDepart = $_POST['subDepart'];
     $subDepart2 = $_POST['subDepart2'];
     $subDepart3 = $_POST['subDepart3'];
@@ -94,9 +118,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $proveStatus2 = 1;
     }
         $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
-        l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace)
+        l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status, 
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
-        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace)");
+        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace, :remark)");
     
         $stmt->bindParam(':userCode', $userCode);
         $stmt->bindParam(':userName', $userName);
@@ -117,7 +142,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':proveStatus2', $proveStatus2);
         $stmt->bindParam(':level', $level);
         $stmt->bindParam(':workplace', $workplace);
-    
+        $stmt->bindParam(':remark', $remark);
+
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
         $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
