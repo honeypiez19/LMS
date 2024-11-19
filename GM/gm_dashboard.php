@@ -901,45 +901,45 @@ $stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
 
 if ($stop_work) {
 // Fetch total personal leave and leave durations
-$stop_work_days = $stop_work['total_leave_days'] ?? 0;
-$stop_work_hours = $stop_work['total_leave_hours'] ?? 0;
-$stop_work_minutes = $stop_work['total_leave_minutes'] ?? 0;
+    $stop_work_days = $stop_work['total_leave_days'] ?? 0;
+    $stop_work_hours = $stop_work['total_leave_hours'] ?? 0;
+    $stop_work_minutes = $stop_work['total_leave_minutes'] ?? 0;
 
 // Convert total hours to days (8 hours = 1 day)
-$stop_work_days += floor($stop_work_hours / 8);
-$stop_work_hours = $stop_work_hours % 8; // Remaining hours after converting to days
+    $stop_work_days += floor($stop_work_hours / 8);
+    $stop_work_hours = $stop_work_hours % 8; // Remaining hours after converting to days
 
 // Convert minutes to hours if applicable
-if ($stop_work_minutes >= 60) {
-    $stop_work_hours += floor($stop_work_minutes / 60);
-    $stop_work_minutes = $stop_work_minutes % 60;
-}
+    if ($stop_work_minutes >= 60) {
+        $stop_work_hours += floor($stop_work_minutes / 60);
+        $stop_work_minutes = $stop_work_minutes % 60;
+    }
 
 // Round minutes to either 30 or 0
-if ($stop_work_minutes > 0 && $stop_work_minutes <= 30) {
-    $stop_work_minutes = 30; // ปัดขึ้นเป็น 30 นาที
-} elseif ($stop_work_minutes > 30) {
-    $stop_work_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
-    $stop_work_hours += 1;
-}
+    if ($stop_work_minutes > 0 && $stop_work_minutes <= 30) {
+        $stop_work_minutes = 30; // ปัดขึ้นเป็น 30 นาที
+    } elseif ($stop_work_minutes > 30) {
+        $stop_work_minutes = 0; // ปัดกลับเป็น 0 แล้วเพิ่มชั่วโมง
+        $stop_work_hours += 1;
+    }
 
 // ปรับจำนวน minutes ให้เป็น 5 นาทีในกรณี 30 นาที
-if ($stop_work_minutes == 30) {
-    $stop_work_minutes = 5;
-}
+    if ($stop_work_minutes == 30) {
+        $stop_work_minutes = 5;
+    }
 
-echo '<div class="d-flex justify-content-between">';
-echo '<div>';
-echo '<h5>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')'.'</h5>';
-echo '<input type="hidden" name="leave_annual_days" value="' . $stop_work_days . '">';
-echo '<input type="hidden" name="total_annual" value="' . $total_annual . '">'; // Ensure $total_annual is fetched or calculated properly
-echo '</div>';
-echo '<div>';
-echo '<i class="mx-2 fa-solid fa-business-time fa-2xl"></i>';
-echo '</div>';
-echo '</div>';
+    echo '<div class="d-flex justify-content-between">';
+    echo '<div>';
+    echo '<h5>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')' . '</h5>';
+    echo '<input type="hidden" name="leave_annual_days" value="' . $stop_work_days . '">';
+    echo '<input type="hidden" name="total_annual" value="' . $total_annual . '">'; // Ensure $total_annual is fetched or calculated properly
+    echo '</div>';
+    echo '<div>';
+    echo '<i class="mx-2 fa-solid fa-business-time fa-2xl"></i>';
+    echo '</div>';
+    echo '</div>';
 } else {
-echo '<p>No data found</p>';
+    echo '<p>No data found</p>';
 }
 ?>
                             <p class="card-text">
@@ -1103,22 +1103,29 @@ if ($result_other) {
                                     <select class="form-select" id="startTime" name="startTime" required>
                                         <option value="08:00" selected>08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00">16:40</option>
                                     </select>
                                 </div>
@@ -1135,22 +1142,29 @@ if ($result_other) {
                                     <select class="form-select" id="endTime" name="endTime" required>
                                         <option value="08:00">08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00" selected>16:40</option>
                                     </select>
                                 </div>
@@ -1247,22 +1261,29 @@ if ($result2->rowCount() > 0) {
                                     <select class="form-select" id="urgentStartTime" name="urgentStartTime" required>
                                         <option value="08:00" selected>08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00">16:40</option>
                                     </select>
                                 </div>
@@ -1280,22 +1301,29 @@ if ($result2->rowCount() > 0) {
                                     <select class="form-select" id="urgentEndTime" name="urgentEndTime" required>
                                         <option value="08:00">08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00" selected>16:40</option>
                                     </select>
                                 </div>
@@ -1468,31 +1496,118 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        if ($row['l_leave_start_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        // 08:45
+        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
         }
 
-        // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-
-        // 10
-        if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
-
-        } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
+// 10
+        // 08:45
+        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
-
-        // echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
 
         // 11
         echo '<td>';

@@ -22,7 +22,7 @@ $sql = "SELECT
     em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode
-WHERE 
+WHERE
     li.l_level IN ('user', 'chief', 'leader', 'admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :year";
@@ -39,7 +39,9 @@ $sql .= " AND (
         OR (li.l_department = :subDepart3)
         OR (li.l_department = :subDepart4)
         OR (li.l_department = :subDepart5)
-    )";
+    )
+        AND em.e_sub_department = 'AC'
+";
 
 // Conditionally add filters based on status
 if ($status != 'all') {

@@ -26,10 +26,10 @@ WHERE
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :year";
 
-    if($month != "All"){
+    if ($month != "All") {
         $sql .= " AND Month(li.l_leave_end_date) = :month ";
     }
-    
+
     $sql .= " AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
@@ -39,27 +39,27 @@ WHERE
     )
     ORDER BY li.l_create_datetime DESC";
 //     $sql = "SELECT li.*,
-//     em.e_sub_department,
-//     em.e_sub_department2,
-//     em.e_sub_department3,
-//     em.e_sub_department4,
-//     em.e_sub_department5
-// FROM leave_list li
-// INNER JOIN employees em
-//     ON li.l_usercode = em.e_usercode
-//     AND (CASE
-//             WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
-//             ELSE em.e_sub_department = :subDepart
-//          END)
-//     AND Month(li.l_create_datetime) = :month
-//     AND li.l_level = 'user'
-//     -- AND l_approve_status2 = 1
-//     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
-//     ORDER BY li.l_create_datetime DESC";
+    //     em.e_sub_department,
+    //     em.e_sub_department2,
+    //     em.e_sub_department3,
+    //     em.e_sub_department4,
+    //     em.e_sub_department5
+    // FROM leave_list li
+    // INNER JOIN employees em
+    //     ON li.l_usercode = em.e_usercode
+    //     AND (CASE
+    //             WHEN em.e_sub_department IS NULL OR em.e_sub_department = '' THEN li.l_department = :depart
+    //             ELSE em.e_sub_department = :subDepart
+    //          END)
+    //     AND Month(li.l_create_datetime) = :month
+    //     AND li.l_level = 'user'
+    //     -- AND l_approve_status2 = 1
+    //     AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+    //     ORDER BY li.l_create_datetime DESC";
 }
 // รออนุมัติ -----------------------------------------------------------------------
 else if ($status == 0) {
-    $sql = "SELECT 
+    $sql = "SELECT
     li.*,
     em.*
 FROM leave_list li
@@ -71,10 +71,10 @@ WHERE
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :year";
 
-    if($month != "All"){
+    if ($month != "All") {
         $sql .= " AND Month(li.l_leave_end_date) = :month ";
     }
-    
+
     $sql .= " AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
@@ -86,7 +86,7 @@ WHERE
 }
 // อนุมัติ -----------------------------------------------------------------------
 else if ($status == 2) {
-    $sql = "SELECT 
+    $sql = "SELECT
     li.*,
     em.*
 FROM leave_list li
@@ -98,10 +98,10 @@ WHERE
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :year";
 
-    if($month != "All"){
+    if ($month != "All") {
         $sql .= " AND Month(li.l_leave_end_date) = :month ";
     }
-    
+
     $sql .= " AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
@@ -113,7 +113,7 @@ WHERE
 }
 // ไม่อนุมัติ -----------------------------------------------------------------------
 else if ($status == 3) {
-    $sql = "SELECT 
+    $sql = "SELECT
     li.*,
     em.*
 FROM leave_list li
@@ -125,10 +125,10 @@ WHERE
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :year";
 
-    if($month != "All"){
+    if ($month != "All") {
         $sql .= " AND Month(li.l_leave_end_date) = :month ";
     }
-    
+
     $sql .= " AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
         OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
@@ -143,10 +143,11 @@ WHERE
 
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-if($month != "ALL"){
+if ($month != "ALL") {
     $stmt->bindParam(':month', $month, PDO::PARAM_INT);
-    
-}$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+}
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
 $stmt->bindParam(':subDepart2', $subDepart2);
 $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
