@@ -118,7 +118,6 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         6 => 'หยุดงาน',
         8 => 'อื่น ๆ'
         ,
-
     ];
 
     foreach ($leave_types as $leave_id => $leave_name) {
@@ -135,32 +134,80 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $month = $i - 1;
                 $year = $selectedYear;
             }
-            
-            $approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
-            
-            $sql_count = "SELECT COUNT(l_list_id) AS leave_count
-                          FROM leave_list
-                          WHERE l_leave_id = :leave_id
-                          AND YEAR(l_leave_start_date) = :year
-                          AND MONTH(l_leave_start_date) = :month
-                          AND l_usercode = :userCode
-                        AND l_approve_status = :approveStatus
-                        AND l_approve_status2 = 4";
-                        
-            $stmt_count = $conn->prepare($sql_count);
-            $stmt_count->bindParam(':leave_id', $leave_id);
-            $stmt_count->bindParam(':year', $year); // bind ปีที่คำนวณ
-            $stmt_count->bindParam(':month', $month); // bind เดือนที่คำนวณ
-            $stmt_count->bindParam(':userCode', $userCode); // bind userCode
-            $stmt_count->bindParam(':approveStatus', $approveStatus);
-            $stmt_count->execute();
 
-            $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
+            // Query to calculate leave days, hours, and minutes
+            $sql_leave_personal = "SELECT
+            SUM(
+                DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+                -
+                (SELECT COUNT(1)
+                 FROM holiday
+                 WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+                 AND h_holiday_status = 'วันหยุด'
+                 AND h_status = 0)
+            ) AS total_leave_days,
+            SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+            SUM(CASE
+                WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+                     AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+                THEN 1
+                ELSE 0
+            END) AS total_leave_hours,
+            SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+            (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
+        FROM leave_list
+        WHERE l_leave_id = :leave_id
+        AND YEAR(l_leave_start_date) = :year
+        AND MONTH(l_leave_start_date) = :month
+        AND l_usercode = :userCode
+        AND l_approve_status IN (2,6)
+        AND l_approve_status2 = 4";
 
-            if ($row_count['leave_count'] == 0) {
-                echo '<td>' . '-' . '</td>';
+            $stmt_leave_personal = $conn->prepare($sql_leave_personal);
+            $stmt_leave_personal->bindParam(':userCode', $userCode);
+            $stmt_leave_personal->bindParam(':year', $year, PDO::PARAM_INT);
+            // $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
+            $stmt_leave_personal->bindParam(':leave_id', $leave_id);
+            $stmt_leave_personal->bindParam(':month', $month, PDO::PARAM_INT);
+            $stmt_leave_personal->execute();
+            $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
+
+            if ($result_leave_personal) {
+                // Fetch total personal leave and leave durations
+                $total_personal = $result_leave_personal['total_personal'] ?? 0;
+                $leave_personal_days = $result_leave_personal['total_leave_days'] ?? 0;
+                $leave_personal_hours = $result_leave_personal['total_leave_hours'] ?? 0;
+                $leave_personal_minutes = $result_leave_personal['total_leave_minutes'] ?? 0;
+
+                // Convert total hours to days (8 hours = 1 day)
+                $leave_personal_days += floor($leave_personal_hours / 8);
+                $leave_personal_hours = $leave_personal_hours % 8; // Remaining hours after converting to days
+
+                if ($leave_personal_minutes >= 60) {
+                    $leave_personal_hours += floor($leave_personal_minutes / 60);
+                    $leave_personal_minutes = $leave_personal_minutes % 60;
+                }
+
+                // Round minutes to 30 minutes increment
+                if ($leave_personal_minutes > 0 && $leave_personal_minutes <= 30) {
+                    $leave_personal_minutes = 30; // Round up to 30 minutes
+                } elseif ($leave_personal_minutes > 30) {
+                    $leave_personal_minutes = 0; // Round back to 0 and add an extra hour
+                    $leave_personal_hours += 1;
+                }
+
+                if ($leave_personal_minutes == 30) {
+                    $leave_personal_minutes = 5;
+                }
+                // Format the result as days, hours, minutes
+                if ($leave_personal_days == 0 && $leave_personal_hours == 0 && $leave_personal_minutes == 0) {
+                    echo '<td>-</td>';
+                } else {
+                    // Display leave duration in days, hours, and minutes
+                    echo '<td>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ')</td>';
+                }
             } else {
-                echo '<td>' . $row_count['leave_count'] . '</td>';
+                echo '<td>-</td>';
             }
         }
 

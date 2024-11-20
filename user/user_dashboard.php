@@ -1147,7 +1147,6 @@ if ($result2->rowCount() > 0) {
             </div>
         </div>
 
-
         <!-- Modal ลาฉุกเฉิน -->
         <div class="modal fade" id="urgentLeaveModal" tabindex="-1" aria-labelledby="urgentLeaveModalLabel"
             aria-hidden="true">

@@ -6,12 +6,12 @@ if (isset($_POST['userCode'])) {
     $currentYear = date("Y");
     $lastYear = $currentYear - 1;
 
-    $sql = "SELECT * FROM leave_list 
+    $sql = "SELECT * FROM leave_list
             WHERE l_usercode = :userCode
             AND (
-                (l_leave_id IN (1, 2, 3, 4, 8) 
-                AND l_create_datetime BETWEEN :startDateLastYear AND :endDateThisYear) 
-                OR (l_leave_id = 5 
+                (l_leave_id IN (1, 2, 3, 4, 8)
+                AND l_create_datetime BETWEEN :startDateLastYear AND :endDateThisYear)
+                OR (l_leave_id = 5
                 AND l_create_datetime BETWEEN :startDateThisYear AND :endDateThisYear)
             )
             ORDER BY l_create_datetime DESC";

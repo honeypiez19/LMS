@@ -130,13 +130,19 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// เตรียมคำสั่ง SQL
+$checkSubDepart = $subDepart;
+$checkSubDepart2 = $subDepart2;
+$checkSubDepart3 = $subDepart3;
+$checkSubDepart4 = $subDepart4;
+$checkSubDepart5 = $subDepart5;
+
 $sql = "SELECT
-    COUNT(li.l_list_id) AS totalLeaveItems,
+COUNT(li.l_list_id) AS totalLeaveItems,
     li.l_username,
     li.l_name,
     li.l_department,
-       em.e_sub_department,
+    em.e_department,
+    em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
     em.e_sub_department4,
@@ -145,36 +151,49 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (1, 2, 3, 6)
+    li.l_approve_status IN (2,3,6)
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :selectedYear";
+
 if ($selectedMonth != "All") {
     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
 }
-$sql .= " AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-";
+
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql .= " AND (
+        em.e_department = :checkSubDepart AND li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        AND em.e_sub_department = 'AC'
+    )";
+} else {
+    $sql .= " AND (
+           (em.e_department = :subDepart AND li.l_department = :subDepart)
+            OR (li.l_department = :subDepart2)
+            OR (li.l_department = :subDepart3)
+            OR (li.l_department = :subDepart4)
+            OR (li.l_department = :subDepart5)
+        )";
+}
 
 $stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-
 if ($selectedMonth != "All") {
     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+if ($checkSubDepart === "Office") {
+    $stmt->bindParam(':checkSubDepart', $checkSubDepart);
+    $stmt->bindParam(':checkSubDepart2', $checkSubDepart2);
+    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+} else {
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 }
 // Execute and check for errors
 if ($stmt->execute()) {
@@ -206,11 +225,18 @@ if ($stmt->execute()) {
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
+$checkSubDepart = $subDepart;
+$checkSubDepart2 = $subDepart2;
+$checkSubDepart3 = $subDepart3;
+$checkSubDepart4 = $subDepart4;
+$checkSubDepart5 = $subDepart5;
+
 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
-li.l_username,
-li.l_name,
-li.l_department,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_department,
     em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
@@ -220,37 +246,81 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 2
+    li.l_approve_status IN (2,3,6)
     AND li.l_approve_status2 = 1
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :selectedYear";
+
 if ($selectedMonth != "All") {
     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
 }
-$sql .= " AND (
-       (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-";
+
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql .= " AND (
+        em.e_department = :checkSubDepart AND li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        AND em.e_sub_department = 'AC'
+    )";
+} else {
+    $sql .= " AND (
+           (em.e_department = :subDepart AND li.l_department = :subDepart)
+            OR (li.l_department = :subDepart2)
+            OR (li.l_department = :subDepart3)
+            OR (li.l_department = :subDepart4)
+            OR (li.l_department = :subDepart5)
+        )";
+}
+// $sql = "SELECT
+// COUNT(li.l_list_id) AS totalLeaveItems,
+// li.l_username,
+// li.l_name,
+// li.l_department,
+//     em.e_sub_department,
+//     em.e_sub_department2,
+//     em.e_sub_department3,
+//     em.e_sub_department4,
+//     em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+// WHERE
+//     li.l_approve_status = 2
+//     AND li.l_approve_status2 = 1
+//     AND li.l_level IN ('user', 'chief', 'leader','admin')
+//     AND li.l_leave_id NOT IN (6, 7)
+//     AND YEAR(li.l_leave_end_date) = :selectedYear";
+// if ($selectedMonth != "All") {
+//     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+// }
+// $sql .= " AND (
+//        (em.e_department = :subDepart AND li.l_department = :subDepart)
+//         OR (li.l_department = :subDepart2)
+//         OR (li.l_department = :subDepart3)
+//         OR (li.l_department = :subDepart4)
+//         OR (li.l_department = :subDepart5)
+//     )
+//     AND em.e_sub_department = 'AC'
+// ";
 
 $stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-
 if ($selectedMonth != "All") {
     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+if ($checkSubDepart === "Office") {
+    $stmt->bindParam(':checkSubDepart', $checkSubDepart);
+    $stmt->bindParam(':checkSubDepart2', $checkSubDepart2);
+    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+} else {
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 }
 // Execute and check for errors
 if ($stmt->execute()) {
@@ -280,11 +350,18 @@ if ($stmt->execute()) {
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
+$checkSubDepart = $subDepart;
+$checkSubDepart2 = $subDepart2;
+$checkSubDepart3 = $subDepart3;
+$checkSubDepart4 = $subDepart4;
+$checkSubDepart5 = $subDepart5;
+
 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
-li.l_username,
-li.l_name,
-li.l_department,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_department,
     em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
@@ -294,37 +371,82 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 2
+    li.l_approve_status IN (2,3,6)
     AND li.l_approve_status2 = 4
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-      AND YEAR(li.l_leave_end_date) = :selectedYear";
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+
 if ($selectedMonth != "All") {
     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
 }
-$sql .= " AND (
-       (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-";
+
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql .= " AND (
+        em.e_department = :checkSubDepart AND li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        AND em.e_sub_department = 'AC'
+    )";
+} else {
+    $sql .= " AND (
+           (em.e_department = :subDepart AND li.l_department = :subDepart)
+            OR (li.l_department = :subDepart2)
+            OR (li.l_department = :subDepart3)
+            OR (li.l_department = :subDepart4)
+            OR (li.l_department = :subDepart5)
+        )";
+}
+
+// $sql = "SELECT
+// COUNT(li.l_list_id) AS totalLeaveItems,
+// li.l_username,
+// li.l_name,
+// li.l_department,
+//     em.e_sub_department,
+//     em.e_sub_department2,
+//     em.e_sub_department3,
+//     em.e_sub_department4,
+//     em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+// WHERE
+//     li.l_approve_status = 2
+//     AND li.l_approve_status2 = 4
+//     AND li.l_level IN ('user', 'chief', 'leader','admin')
+//     AND li.l_leave_id NOT IN (6, 7)
+//       AND YEAR(li.l_leave_end_date) = :selectedYear";
+// if ($selectedMonth != "All") {
+//     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+// }
+// $sql .= " AND (
+//        (em.e_department = :subDepart AND li.l_department = :subDepart)
+//         OR (li.l_department = :subDepart2)
+//         OR (li.l_department = :subDepart3)
+//         OR (li.l_department = :subDepart4)
+//         OR (li.l_department = :subDepart5)
+//     )
+//     AND em.e_sub_department = 'AC'
+// ";
 
 $stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-
 if ($selectedMonth != "All") {
     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+if ($checkSubDepart === "Office") {
+    $stmt->bindParam(':checkSubDepart', $checkSubDepart);
+    $stmt->bindParam(':checkSubDepart2', $checkSubDepart2);
+    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+} else {
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 }
 $stmt->execute();
 
@@ -349,11 +471,18 @@ $totalLeaveItems = $stmt->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
+$checkSubDepart = $subDepart;
+$checkSubDepart2 = $subDepart2;
+$checkSubDepart3 = $subDepart3;
+$checkSubDepart4 = $subDepart4;
+$checkSubDepart5 = $subDepart5;
+
 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
-li.l_username,
-li.l_name,
-li.l_department,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_department,
     em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
@@ -363,37 +492,82 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 2
+    li.l_approve_status IN (2,3,6)
     AND li.l_approve_status2 = 5
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :selectedYear";
+
 if ($selectedMonth != "All") {
     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
 }
-$sql .= " AND (
-       (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-";
+
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql .= " AND (
+        em.e_department = :checkSubDepart AND li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        AND em.e_sub_department = 'AC'
+    )";
+} else {
+    $sql .= " AND (
+           (em.e_department = :subDepart AND li.l_department = :subDepart)
+            OR (li.l_department = :subDepart2)
+            OR (li.l_department = :subDepart3)
+            OR (li.l_department = :subDepart4)
+            OR (li.l_department = :subDepart5)
+        )";
+}
+
+// $sql = "SELECT
+// COUNT(li.l_list_id) AS totalLeaveItems,
+// li.l_username,
+// li.l_name,
+// li.l_department,
+//     em.e_sub_department,
+//     em.e_sub_department2,
+//     em.e_sub_department3,
+//     em.e_sub_department4,
+//     em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em
+//     ON li.l_usercode = em.e_usercode
+// WHERE
+//     li.l_approve_status = 2
+//     AND li.l_approve_status2 = 5
+//     AND li.l_level IN ('user', 'chief', 'leader','admin')
+//     AND li.l_leave_id NOT IN (6, 7)
+//     AND YEAR(li.l_leave_end_date) = :selectedYear";
+// if ($selectedMonth != "All") {
+//     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+// }
+// $sql .= " AND (
+//        (em.e_department = :subDepart AND li.l_department = :subDepart)
+//         OR (li.l_department = :subDepart2)
+//         OR (li.l_department = :subDepart3)
+//         OR (li.l_department = :subDepart4)
+//         OR (li.l_department = :subDepart5)
+//     )
+//     AND em.e_sub_department = 'AC'
+// ";
 
 $stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-
 if ($selectedMonth != "All") {
     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+if ($checkSubDepart === "Office") {
+    $stmt->bindParam(':checkSubDepart', $checkSubDepart);
+    $stmt->bindParam(':checkSubDepart2', $checkSubDepart2);
+    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+} else {
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 }
 $stmt->execute();
 
@@ -466,6 +640,12 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
+$checkSubDepart = $subDepart;
+$checkSubDepart2 = $subDepart2;
+$checkSubDepart3 = $subDepart3;
+$checkSubDepart4 = $subDepart4;
+$checkSubDepart5 = $subDepart5;
+
 $sql = "SELECT
     li.*,
     em.e_department,
@@ -478,33 +658,52 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (1, 2, 3, 6)
+    li.l_approve_status IN (2,3,6)
     AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
     AND YEAR(li.l_leave_end_date) = :selectedYear";
+
 if ($selectedMonth != "All") {
     $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
 }
-$sql .= " AND (
-       (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-ORDER BY li.l_create_datetime DESC";
-// Calculate total rows for pagination
+
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql .= " AND (
+        em.e_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        AND em.e_sub_department = 'AC'
+    )";
+} else {
+    $sql .= " AND (
+           (em.e_department = :subDepart AND li.l_department = :subDepart)
+            OR (li.l_department = :subDepart2)
+            OR (li.l_department = :subDepart3)
+            OR (li.l_department = :subDepart4)
+            OR (li.l_department = :subDepart5)
+        )";
+}
+
+// Prepare query for calculating total rows
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':selectedYear', $selectedYear);
 if ($selectedMonth != "All") {
     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
 }
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
+if ($checkSubDepart === "Office") {
+    $stmt->bindParam(':checkSubDepart', $checkSubDepart);
+    $stmt->bindParam(':checkSubDepart2', $checkSubDepart2);
+    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+} else {
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
+}
+
 $stmt->execute();
 $totalRows = $stmt->rowCount();
 
@@ -515,21 +714,29 @@ $totalPages = ceil($totalRows / $itemsPerPage);
 $offset = ($currentPage - 1) * $itemsPerPage;
 
 // Add LIMIT and OFFSET for pagination
-$sql .= " LIMIT :itemsPerPage OFFSET :offset";
+$sql .= " ORDER BY li.l_create_datetime DESC LIMIT :itemsPerPage OFFSET :offset";
 
-// Prepare and execute the final paginated query
+// Prepare query with LIMIT and OFFSET
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':selectedYear', $selectedYear);
 if ($selectedMonth != "All") {
     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
 }
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+if ($checkSubDepart === "Office") {
+    $stmt->bindParam(':checkSubDepart', $checkSubDepart);
+    $stmt->bindParam(':checkSubDepart2', $checkSubDepart2);
+    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+} else {
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
+}
+$stmt->bindValue(':itemsPerPage', (int) $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
 $stmt->execute();
 
 // Row numbering
@@ -865,19 +1072,34 @@ if ($stmt->rowCount() > 0) {
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
+// กำหนดจำนวนหน้าที่จะแสดงรอบ ๆ หน้าปัจจุบัน
+$range = 2;
+
 // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
     echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
     echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
 }
 
-// สร้างลิงก์สำหรับแต่ละหน้า
-for ($i = 1; $i <= $totalPages; $i++) {
+// แสดงลิงก์สำหรับหน้าที่อยู่ในช่วง
+for ($i = max(1, $currentPage - $range); $i <= min($totalPages, $currentPage + $range); $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
         echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
     }
+}
+
+// เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าสุดท้าย
+if ($currentPage + $range < $totalPages) {
+    echo '<li class="page-item"><span class="page-link">...</span></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">' . $totalPages . '</a></li>';
+}
+
+// เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าแรก
+if ($currentPage - $range > 1) {
+    echo '<li class="page-item"><span class="page-link">...</span></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">' . 1 . '</a></li>';
 }
 
 // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
@@ -887,6 +1109,15 @@ if ($currentPage < $totalPages) {
 }
 
 echo '</ul>';
+
+// ฟอร์มสำหรับกรอกหมายเลขหน้า
+echo '<form method="GET" action="" class="mb-2 d-inline-flex">';
+echo '<input type="hidden" name="month" value="' . htmlspecialchars($selectedMonth) . '">';
+// echo '<label for="customPage" class="me-2">ไปหน้าที่:</label>';
+echo '<input type="number" name="page" id="customPage" class="form-control mb-3 mx-2" style="width: 80px;" min="1" max="' . $totalPages . '" value="' . $currentPage . '">';
+echo '<button type="submit" class="mx-2 mb-3 btn btn-primary" style="width: 50px;">Go</button>';
+echo '</form>';
+
 echo '</div>';
 
 ?>
@@ -1137,8 +1368,8 @@ echo '</div>';
             method: 'GET',
             data: {
                 status: status,
-                month: selectedMonth,
-                year: selectedYear,
+                selectedMonth: selectedMonth,
+                selectedYear: selectedYear,
                 depart: depart,
                 subDepart: subDepart,
                 subDepart2: subDepart2,
@@ -1633,7 +1864,6 @@ echo '</div>';
                                     Swal.showLoading(); // แสดง icon โหลด
                                 }
                             });
-
 
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
