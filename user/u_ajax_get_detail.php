@@ -11,22 +11,22 @@ if (isset($_POST['leaveType'])) {
     $startDate = date(($selectedYear - 1) . "-12-01"); // วันที่เริ่มต้น 1 ธันวาคมของปีที่เลือก
     $endDate = date(($selectedYear) . "-11-30"); // วันที่สิ้นสุด 30 พฤศจิกายนของปีถัดไป
 
-    if ($leaveType == 'ลากิจได้รับค่าจ้าง') {
-        $conType = str_replace("ลากิจได้รับค่าจ้าง", "1", $leaveType);
-    } else if ($leaveType == 'ลากิจไม่ได้รับค่าจ้าง') {
-        $conType = str_replace("ลากิจไม่ได้รับค่าจ้าง", "2", $leaveType);
-    } else if ($leaveType == 'ลาป่วย') {
-        $conType = str_replace("ลาป่วย", "3", $leaveType);
-    } else if ($leaveType == 'ลาป่วยจากงาน') {
-        $conType = str_replace("ลาป่วยจากงาน", "4", $leaveType);
-    } else if ($leaveType == 'ลาพักร้อน') {
-        $conType = str_replace("ลาพักร้อน", "5", $leaveType);
-    } else if ($leaveType == 'หยุดงาน') {
-        $conType = str_replace("หยุดงาน", "6", $leaveType);
-    } else if ($leaveType == 'มาสาย') {
-        $conType = str_replace("มาสาย", "7", $leaveType);
-    } else if ($leaveType == 'อื่น ๆ') {
-        $conType = str_replace("อื่น ๆ", "8", $leaveType);
+    if ($leaveType == 1) {
+        $conType = "ลากิจได้รับค่าจ้าง";
+    } else if ($leaveType == 2) {
+        $conType = "ลากิจไม่ได้รับค่าจ้าง";
+    } else if ($leaveType == 3) {
+        $conType = "ลาป่วย";
+    } else if ($leaveType == 4) {
+        $conType = "ลาป่วยจากงาน";
+    } else if ($leaveType == 5) {
+        $conType = "ลาพักร้อน";
+    } else if ($leaveType == 6) {
+        $conType = "หยุดงาน";
+    } else if ($leaveType == 7) {
+        $conType = "มาสาย";
+    } else if ($leaveType == 8) {
+        $conType = "อื่น ๆ";
     } else {
         echo 'ไม่มีประเภทการลา';
     }
@@ -39,7 +39,7 @@ if (isset($_POST['leaveType'])) {
 
     // ดึงข้อมูลการลาจากฐานข้อมูล
     $sql = "  SELECT * FROM leave_list
-    WHERE l_leave_id = $conTypeQuoted
+    WHERE l_leave_id = $leaveType
     AND l_usercode = $userCodeQuoted
     AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
     AND l_approve_status = $approveStatus
@@ -49,7 +49,7 @@ if (isset($_POST['leaveType'])) {
     $totalRows = $result->rowCount();
     $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
     if ($totalRows > 0) {
-        echo '<h5>' . $leaveType . '</h5>';
+        echo '<h5>' . $conType . '</h5>';
         echo '<table class="table table-hover" >';
         echo '<thead>';
         echo '<tr class="text-center align-middle">';
