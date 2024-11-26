@@ -396,9 +396,9 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
-        echo '<input type="hidden" name="leave_personal_days" value="' . $leave_personal_days . '">';
-        echo '<input type="hidden" name="leave_personal_hours" value="' . $leave_personal_hours . '">';
-        echo '<input type="hidden" name="leave_personal_minutes" value="' . $leave_personal_minutes . '">';
+        echo '<input type="hidden" name="personnel_days" value="' . $leave_personal_days . '">';
+        echo '<input type="hidden" name="personal_hours" value="' . $leave_personal_hours . '">';
+        echo '<input type="hidden" name="personal_minutes" value="' . $leave_personal_minutes . '">';
         echo '<input type="hidden" name="total_personal" value="' . $total_personal . '">';
     } else if ($leave_id == 2) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #0339A2;" data-leave-id="2">';
@@ -419,7 +419,7 @@ WHERE l_leave_id = :leave_id
         echo '<input type="hidden" name="personnel_no_days" value="' . $leave_personal_days . '">';
         echo '<input type="hidden" name="personnel_no_hours" value="' . $leave_personal_hours . '">';
         echo '<input type="hidden" name="personnel_no_minutes" value="' . $leave_personal_minutes . '">';
-        echo '<input type="hidden" name="personnel_no_total" value="' . $total_personal . '">';
+        echo '<input type="hidden" name="personnel_no_total" value="' . $total_personal_no . '">';
 
     } else if ($leave_id == 3) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #0357C4;" data-leave-id="3">';
@@ -610,7 +610,8 @@ echo '</div>'; // Close the row div
                                         <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ -
                                             วัน</span>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="leaveType" required ">
+                                        <select class="form-select" id="leaveType" required
+                                            onchange="checkDays(this.value)">
                                             <option selected>เลือกประเภทการลา</option>
                                             <option value=" 1">ลากิจได้รับค่าจ้าง</option>
                                             <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
@@ -1471,7 +1472,7 @@ echo '</div>';
             // ถ้าเป็นปีหน้าให้คืนสิทธิ์
             if (startYear > currentYear) {
                 if (typeLeave == 1) {
-                    currentLeaveDays = parseFloat($('input[name="leave_personal_days"]').val()) || 0;
+                    currentLeaveDays = parseFloat($('input[name="personnel_days"]').val()) || 0;
                     totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
                     totalLeaveDays = currentLeaveDays + leaveDays;
                     alertMessage = currentLeaveDays >= totalLeave ?
@@ -1507,15 +1508,15 @@ echo '</div>';
             } else {
                 // คำนวณตามปกติสำหรับปีปัจจุบัน
                 if (typeLeave == 1) {
-                    currentLeaveDays = parseFloat($('input[name="leave_personal_days"]').val()) || 0;
+                    currentLeaveDays = parseFloat($('input[name="personnel_days"]').val()) || 0;
                     totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
                     totalLeaveDays = currentLeaveDays + leaveDays;
                     alertMessage = currentLeaveDays >= totalLeave ?
                         'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลากิจได้รับค่าจ้างครบกำหนดแล้ว' : '';
                     totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน');
                 } else if (typeLeave == 2) {
-                    currentLeaveDays = parseFloat($('input[name="leave_personal_days"]').val()) || 0;
-                    totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
+                    currentLeaveDays = parseFloat($('input[name="personnel_no_days"]').val()) || 0;
+                    totalLeave = parseFloat($('input[name="personnel_no_total"]').val()) || 0;
                     alertMessage = currentLeaveDays >= totalLeave ?
                         'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลากิจไม่ได้รับค่าจ้างครบกำหนดแล้ว' : '';
                     totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน');
