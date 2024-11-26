@@ -28,7 +28,7 @@ if (isset($_POST['leaveType'])) {
     } else if ($leaveType == 8) {
         $conType = "อื่น ๆ";
     } else {
-        echo 'ไม่มีประเภทการลา';
+        echo 'ไม่พบประเภทการลา';
     }
 
     // ทำความสะอาดข้อมูลก่อนนำไปใช้ใน SQL
@@ -42,14 +42,15 @@ if (isset($_POST['leaveType'])) {
     WHERE l_leave_id = $leaveType
     AND l_usercode = $userCodeQuoted
     AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
-    AND l_approve_status = $approveStatus
-    AND l_approve_status2 = 4
+    AND l_approve_status IN (2,3)
+    AND l_approve_status2 IN (4,5)
     ORDER BY l_leave_start_date DESC";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();
     $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
     if ($totalRows > 0) {
-        echo '<h5>' . $conType . '</h5>';
+        // echo '<h5>' . $conType . '</h5>';
+        echo '<div class="table-responsive">';
         echo '<table class="table table-hover" >';
         echo '<thead>';
         echo '<tr class="text-center align-middle">';
@@ -306,12 +307,13 @@ if (isset($_POST['leaveType'])) {
 
         echo '</tbody>';
         echo '</table>';
+        echo '</div>';
 
     } else {
         // ถ้าไม่มีข้อมูลการลา
         echo '<div class="leave-details">';
-        echo '<h4>' . $leaveType . '</h4>';
-        echo '<p>ไม่มีข้อมูลการลา</p>';
+        // echo '<h4>' . $leaveType . '</h4>';
+        echo '<p>ไม่พบข้อมูลการลา</p>';
         echo '</div>';
     }
 }

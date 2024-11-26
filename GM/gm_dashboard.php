@@ -1082,10 +1082,9 @@ if ($result_other) {
                                     <label for="leaveType" class="form-label">ประเภทการลา</label>
                                     <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ - วัน</span>
                                     <span style="color: red;">*</span>
-                                    <select class="form-select" id="leaveType" required
-                                        onchange="checkDays(this.value)">
+                                    <select class="form-select" id="leaveType" required ">
                                         <option selected>เลือกประเภทการลา</option>
-                                        <option value="1">ลากิจได้รับค่าจ้าง</option>
+                                        <option value=" 1">ลากิจได้รับค่าจ้าง</option>
                                         <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
                                         <option value="3">ลาป่วย</option>
                                         <option value="4">ลาป่วยจากงาน</option>
@@ -2184,6 +2183,24 @@ echo '</div>';
                     }
                 }
 
+                var checkStartDate = $('#startDate').val();
+                var checkEndDate = $('#endDate').val();
+
+                // แปลงวันที่จาก string เป็น Date object
+                var startDateParts = checkStartDate.split("-");
+                var endDateParts = checkEndDate.split("-");
+
+                // แปลงเป็น Date object
+                var startDate = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[
+                    0]); // ปี, เดือน (0-based), วัน
+                var endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[
+                    0]); // ปี, เดือน (0-based), วัน
+
+                // แสดงข้อมูลวันที่ที่ถูกแปลงแล้ว (ตรวจสอบได้)
+                // alert("Start Date:" + startDate);
+                // alert("End Date:" + endDate);
+
+                // ตรวจสอบวันที่
                 if (endDate < startDate) {
                     Swal.fire({
                         title: "ไม่สามารถลาได้",

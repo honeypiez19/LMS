@@ -1345,24 +1345,7 @@ echo '</ul>';
 echo '</div>';
 
 ?>
-            <div class="modal fade" id="imageModal<?=$rowNumber?>" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">รูปภาพ</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- แสดงรูปภาพ โดยเรียกใช้ชื่อฟิลด์ที่เก็บชื่อไฟล์ภาพ -->
-                            <img src="../upload/<?=$row['Img_file']?>" class="img-fluid">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <script>
@@ -1517,9 +1500,25 @@ echo '</div>';
                 var userCode = '<?php echo $userCode; ?>';
                 var depart = '<?php echo $depart; ?>';
                 var selectedYear = <?php echo json_encode($selectedYear); ?>;
+                var nameType = '';
 
-                console.log(leaveType);
-                // alert(userCode)
+                if (leaveType == 1) {
+                    nameType = "ลากิจได้รับค่าจ้าง";
+                } else if (leaveType == 2) {
+                    nameType = "ลากิจไม่ได้รับค่าจ้าง";
+                } else if (leaveType == 3) {
+                    nameType = "ลาป่วย";
+                } else if (leaveType == 4) {
+                    nameType = "ลาป่วยจากงาน";
+                } else if (leaveType == 5) {
+                    nameType = "ลาพักร้อน";
+                } else if (leaveType == 6) {
+                    nameType = "หยุดงาน";
+                } else if (leaveType == 7) {
+                    nameType = "มาสาย";
+                } else if (leaveType == 8) {
+                    nameType = "อื่น ๆ";
+                }
                 $.ajax({
                     url: 'u_ajax_get_detail.php',
                     method: 'POST',
@@ -1530,8 +1529,7 @@ echo '</div>';
                         depart: depart
                     },
                     success: function(response) {
-                        $('#leaveDetailsModal .modal-title').text('Leave Details for ' +
-                            leaveType);
+                        $('#leaveDetailsModal .modal-title').text(nameType);
                         $('#leaveDetailsModal .modal-body').html(response);
                         $('#leaveDetailsModal').modal('show');
                     },
@@ -1671,6 +1669,7 @@ echo '</div>';
                     // ลบ - ออกจากวันที่
                     var startDate = $('#startDate').val().replace(/-/g, '');
                     var endDate = $('#endDate').val().replace(/-/g, '');
+
                     var startTime = $('#startTime').val(); // เช่น "08:00"
                     var endTime = $('#endTime').val(); // เช่น "17:00"
 
@@ -1759,6 +1758,24 @@ echo '</div>';
                         }
                     }
 
+                    var checkStartDate = $('#startDate').val();
+                    var checkEndDate = $('#endDate').val();
+
+                    // แปลงวันที่จาก string เป็น Date object
+                    var startDateParts = checkStartDate.split("-");
+                    var endDateParts = checkEndDate.split("-");
+
+                    // แปลงเป็น Date object
+                    var startDate = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[
+                        0]); // ปี, เดือน (0-based), วัน
+                    var endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[
+                        0]); // ปี, เดือน (0-based), วัน
+
+                    // แสดงข้อมูลวันที่ที่ถูกแปลงแล้ว (ตรวจสอบได้)
+                    // alert("Start Date:" + startDate);
+                    // alert("End Date:" + endDate);
+
+                    // ตรวจสอบวันที่
                     if (endDate < startDate) {
                         Swal.fire({
                             title: "ไม่สามารถลาได้",

@@ -2101,6 +2101,24 @@ echo '</div>';
                     }
                 }
 
+                var checkStartDate = $('#startDate').val();
+                var checkEndDate = $('#endDate').val();
+
+                // แปลงวันที่จาก string เป็น Date object
+                var startDateParts = checkStartDate.split("-");
+                var endDateParts = checkEndDate.split("-");
+
+                // แปลงเป็น Date object
+                var startDate = new Date(startDateParts[2], startDateParts[1] - 1, startDateParts[
+                    0]); // ปี, เดือน (0-based), วัน
+                var endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[
+                    0]); // ปี, เดือน (0-based), วัน
+
+                // แสดงข้อมูลวันที่ที่ถูกแปลงแล้ว (ตรวจสอบได้)
+                // alert("Start Date:" + startDate);
+                // alert("End Date:" + endDate);
+
+                // ตรวจสอบวันที่
                 if (endDate < startDate) {
                     Swal.fire({
                         title: "ไม่สามารถลาได้",

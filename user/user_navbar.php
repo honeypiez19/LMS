@@ -103,7 +103,7 @@ if (isset($_POST['logoutButton'])) {
                                         data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
                             </ul>
                         </li>
-                        <?php endif; ?>
+                        <?php endif;?>
                         <li class="nav-item d-flex align-items-center">
                             <a href="#"><img src="../logo/th.png" alt="TH Language"
                                     style="width:30px;height:30px; margin: auto 0;"></a>
