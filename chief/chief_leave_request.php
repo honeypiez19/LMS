@@ -92,7 +92,7 @@ $months = [
     '12' => 'ธันวาคม',
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
