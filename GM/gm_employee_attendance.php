@@ -92,21 +92,23 @@ echo "</select>";
                     <div class="col-auto">
                         <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+// $selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -153,9 +155,12 @@ li.l_department <> 'RD'
 -- AND li.l_leave_status = 0
 AND li.l_leave_id IN (6,7)
 AND li.l_approve_status IN (2,3)
-AND Year(li.l_leave_end_date) = '$selectedYear'
-AND Month(li.l_leave_end_date) = '$selectedMonth'
-ORDER BY li.l_leave_end_date DESC";
+AND Year(li.l_leave_end_date) = '$selectedYear'";
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+}
+
+$sql .= " ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -228,7 +233,7 @@ if (count($result) > 0) {
             echo $row['l_leave_id'];
         }
         echo '</td>';
-        
+
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 

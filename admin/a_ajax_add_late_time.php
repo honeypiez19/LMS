@@ -47,11 +47,11 @@ try {
             l_usercode, l_username, l_name, l_department, l_level, l_phone, l_leave_id,
             l_leave_reason, l_leave_start_date, l_leave_start_time, l_leave_end_date,
             l_leave_end_time, l_leave_status, l_remark,
-            l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime, l_workplace, l_create_datetime
+            l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime, l_workplace, l_create_datetime, l_hr_status
         ) VALUES (
             :userCode, :userName, :name, :department, :level, :telPhone, :leaveType,
             :reason, :startDate, :startTime, :endDate, :endTime, :leaveStatus,
-             :remark, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime
+             :remark, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime,1
         )";
 
         $stmt = $conn->prepare($leaveSql);

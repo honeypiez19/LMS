@@ -82,21 +82,23 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+// $selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -131,18 +133,23 @@ $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
-    leave_list li
+leave_list li
 WHERE
-    li.l_department <> 'RD'
-    -- AND li.l_leave_status = 0
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_leave_end_date) = :selectedYear
-    AND Month(li.l_leave_end_date) = :selectedMonth";
+li.l_department <> 'RD'
+AND li.l_leave_status = 0
+AND li.l_leave_id NOT IN (6, 7)
+AND li.l_level IN ('user', 'chief', 'leader','admin')
+AND Year(li.l_leave_end_date) = '$selectedYear'";
 
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
 // $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 $stmt->bindParam(':selectedYear', $selectedYear);
 
 $stmt->execute();
@@ -347,9 +354,13 @@ WHERE
 li.l_department <> 'RD'
 AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_leave_end_date) = '$selectedYear'
-AND Month(li.l_leave_end_date) = '$selectedMonth'
-ORDER BY li.l_create_datetime DESC";
+AND li.l_level IN ('user', 'chief', 'leader','admin')
+AND Year(li.l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+$sql .= "ORDER BY li.l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();

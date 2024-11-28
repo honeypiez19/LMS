@@ -406,7 +406,7 @@ if ($stmt->execute()) {
                 <thead>
                     <tr class="text-center align-middle">
                         <th rowspan="2"><?php echo $strNo; ?></th>
-                        <th rowspan="2"><?php echo $strEmpCode; ?></th>
+                        <th rowspan="1"><?php echo $strEmpCode; ?></th>
                         <th rowspan="1"><?php echo $strEmpName; ?></th>
                         <th rowspan="2"><?php echo $strSubDate; ?></th>
                         <th rowspan="1"><?php echo $strLeaveType; ?></th>
@@ -425,6 +425,10 @@ if ($stmt->execute()) {
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
+                        <?php $searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
+?>
+                        <th><input type="text" class="form-control" id="codeSearch"
+                                value="<?php echo htmlspecialchars($searchCode); ?>"></th>
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
                         <th> <input type="text" class="form-control" id="leaveSearch"></th>
                         <th style="width: 8%;"><?php echo $strFrom; ?></th>
@@ -1739,6 +1743,13 @@ echo '</div>';
         var value2 = $(this).val().toLowerCase();
         $("tbody tr").filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
+        });
+    });
+
+    $("#codeSearch").on("keyup", function() {
+        var value3 = $(this).val().toLowerCase();
+        $("tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
         });
     });
     </script>

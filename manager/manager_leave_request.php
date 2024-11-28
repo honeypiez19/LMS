@@ -1352,6 +1352,12 @@ echo '</div>';
     });
 
     $(".filter-card").click(function() {
+        // ลบ active จากการ์ดทั้งหมด
+        $(".filter-card .card").removeClass("active");
+
+        // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
+        $(this).find(".card").addClass("active");
+
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();

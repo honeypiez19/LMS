@@ -171,8 +171,8 @@ if (count($result) > 0) {
         <th>ประเภท</th>
         <th>วันที่เวลา</th>
         <th>สถานะรายการ</th>
-        <th>สถานะอนุมัติ_1</th>
-        <th>สถานะอนุมัติ_2</th>
+        <th>สถานะ_1</th>
+        <th>สถานะ_2</th>
         <th>สถานะ (เฉพาะ HR)</th>
         <th>หมายเหตุ</th>
         <th></th>
@@ -214,7 +214,7 @@ if (count($result) > 0) {
             echo $row['l_leave_id'];
         }
         echo '</td>';
-        
+
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 
@@ -229,69 +229,69 @@ if (count($result) > 0) {
 
         // 10
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+// รอหัวหน้ารับทราบ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+// รอผจกรับทราบ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+// หัวหน้ารับทราบ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
-        // หัวหน้าไม่อนุมัติ
+// หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+//  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+//  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
-        // ไม่พบสถานะ
+// ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
         echo '</td>';
 
-        // 11
+// 11
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+// รอหัวหน้ารับทราบ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+// รอผจกรับทราบ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+// หัวหน้ารับทราบ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
-        // หัวหน้าไม่อนุมัติ
+// หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+//  ผจก รับทราบ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+//  ผจก ไม่รับทราบ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>ผู้จัดการไม่รับทราบ</b></div>';
         }
-        //
+//
         elseif ($row['l_approve_status2'] == 6) {
             echo '';
         }
-        // ไม่พบสถานะ
+// ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
@@ -314,10 +314,15 @@ if (count($result) > 0) {
         echo '<td>' . $row['l_remark'] . '</td>';
 
         // 14
-        echo '<td>';
-        echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '">ตรวจสอบ</button>';
-        echo '</td>';
-
+        if ($row['l_approve_status'] == 2) {
+            echo '<td>';
+            echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '" disabled>ยืนยัน</button>';
+            echo '</td>';
+        } else {
+            echo '<td>';
+            echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '">ยืนยัน</button>';
+            echo '</td>';
+        }
         echo '</tr>';
     }
     echo '</tbody>';
@@ -463,8 +468,8 @@ if (count($result) > 0) {
     <th>ประเภท</th>
     <th>วันที่มาสาย</th>
     <th>สถานะรายการ</th>
-    <th>สถานะอนุมัติ_1</th>
-    <th>สถานะอนุมัติ_2</th>
+    <th>สถานะ_1</th>
+    <th>สถานะ_2</th>
     <th>สถานะ (เฉพาะ HR)</th>
     <th>หมายเหตุ</th>
     </tr>';
@@ -512,17 +517,17 @@ if (count($result) > 0) {
 
         // 10
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+        // รอหัวหน้ารับทราบ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+        // รอผจกรับทราบ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+        // หัวหน้ารับทราบ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
@@ -530,13 +535,15 @@ if (count($result) > 0) {
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
-        // ไม่มีสถานะ
+        // ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
@@ -544,31 +551,35 @@ if (count($result) > 0) {
 
         // 11
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+        // รอหัวหน้ารับทราบ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+        // รอผจกรับทราบ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+        // หัวหน้ารับทราบ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+        //  ผจก รับทราบ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+        //  ผจก ไม่รับทราบ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>ผู้จัดการไม่รับทราบ</b></div>';
         }
-        // ไม่มีสถานะ
+        //
+        elseif ($row['l_approve_status2'] == 6) {
+            echo '';
+        }
+        // ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
@@ -646,7 +657,8 @@ if (!isset($_GET['page'])) {
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 $sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$depart'
-AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear";
+AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear
+ORDER BY l_create_datetime DESC";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -912,17 +924,15 @@ if (count($result) > 0) {
             // alert(leaveStatus)
             $('.btn-approve').off('click');
             Swal.fire({
-                title: "ต้องการอนุมัติ" +
-                    leaveType + "หรือไม่ ?",
-                text: "กรุณายืนยันการอนุมัติ",
+                title: "ต้องการยืนยันหรือไม่ ?",
+                text: name + " " + leaveType,
                 icon: "question",
-                showCancelButton: true,
                 showDenyButton: true,
                 confirmButtonColor: '#198754',
-                cancelButtonColor: '#DC3545',
-                denyButtonColor: '#0D6EFD',
-                confirmButtonText: 'อนุมัติ',
-                cancelButtonText: 'ไม่อนุมัติ',
+                /*  cancelButtonColor: '#DC3545', */
+                denyButtonColor: '#DC3545',
+                confirmButtonText: 'รับทราบ',
+                /* cancelButtonText: 'ไม่อนุมัติ', */
                 denyButtonText: 'ยกเลิก',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
@@ -962,7 +972,7 @@ if (count($result) > 0) {
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                text: 'อนุมัติ' +
+                                text: 'รับทราบ' +
                                     leaveType +
                                     'ของ ' + name +
                                     ' ของวันที่ ' +
@@ -976,7 +986,7 @@ if (count($result) > 0) {
                         error: function(xhr, status, error) {
                             Swal.fire({
                                 title: 'ไม่สำเร็จ!',
-                                text: 'เกิดข้อผิดพลาดในการอนุมัติ',
+                                text: 'เกิดข้อผิดพลาดในการรับทราบ',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
@@ -1010,7 +1020,7 @@ if (count($result) > 0) {
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                html: 'ไม่อนุมัติ' + leaveType +
+                                html: 'ไม่รับทราบ' + leaveType +
                                     'ของ ' + name +
                                     '<br>ของวันที่ ' + lateDate,
                                 icon: 'success',
@@ -1022,7 +1032,7 @@ if (count($result) > 0) {
                         error: function(xhr, status, error) {
                             Swal.fire({
                                 title: 'ไม่สำเร็จ!',
-                                text: 'เกิดข้อผิดพลาดในการไม่อนุมัติ',
+                                text: 'เกิดข้อผิดพลาดในการไม่รับทราบ',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });

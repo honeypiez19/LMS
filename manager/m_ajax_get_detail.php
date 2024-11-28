@@ -40,9 +40,10 @@ if (isset($_POST['leaveType'])) {
     $sql = "SELECT * FROM leave_list
             WHERE l_leave_id = $leaveType
             AND l_usercode = $userCodeQuoted
-            AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
+            -- AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
             AND l_approve_status2 IN (4,5)
-            ORDER BY l_leave_start_date DESC";
+            AND YEAR(l_leave_end_date) = $selectedYear
+            ORDER BY l_create_datetime DESC";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();
     $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่

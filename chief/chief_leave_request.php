@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -78,20 +80,22 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
+// $selectedMonth = date('m'); // เดือนปัจจุบัน
 $selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
@@ -122,16 +126,19 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em
-ON li.l_usercode = em.e_usercode
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
 AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'
-AND Month(l_leave_end_date) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7";
+AND Year(l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+
+$sql .= " AND l_level = 'user'
+AND l_leave_id NOT IN (6,7)";
+
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -156,16 +163,22 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 // $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
 // AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'
-AND Month(l_leave_end_date) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
+AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+
+$sql .= " AND l_level = 'user'
+AND l_leave_id NOT IN (6,7)
 AND l_approve_status = 0";
+
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
+
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -185,15 +198,20 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'
-AND Month(l_leave_end_date) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
+AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+
+$sql .= " AND l_level = 'user'
+AND l_leave_id NOT IN (6,7)
 AND l_approve_status = 2";
+
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -214,16 +232,22 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'
-AND Month(l_leave_end_date) = '$selectedMonth'
-AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
+AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+
+$sql .= " AND l_level = 'user'
+AND l_leave_id NOT IN (6,7)
 AND l_approve_status = 3";
+
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
+
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -247,7 +271,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                 <thead>
                     <tr class="text-center align-middle">
                         <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">รหัสพนักงาน</th>
+                        <th rowspan="1">รหัสพนักงาน</th>
                         <th rowspan="1">ชื่อ - นามสกุล</th>
                         <th rowspan="2">วันที่ยื่นใบลา</th>
                         <th rowspan="1">ประเภทการลา</th>
@@ -264,9 +288,12 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                         <th rowspan="2">ผู้จัดการขึ้นไป</th>
                         <th rowspan="2">สถานะ (เฉพาะ HR)</th>
                         <th rowspan="2"></th>
-                        <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
+                        <?php $searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
+?>
+                        <th><input type="text" class="form-control" id="codeSearch"
+                                value="<?php echo htmlspecialchars($searchCode); ?>"></th>
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
                         <th> <input type="text" class="form-control" id="leaveSearch"></th>
                         <th style="width: 8%;">จาก</th>
@@ -286,9 +313,13 @@ if (!isset($_GET['page'])) {
 $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'
-AND Month(l_leave_end_date) = '$selectedMonth'
-AND l_level = 'user'
+AND Year(l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+
+$sql .= " AND l_level = 'user'
 AND l_leave_id <> 6
 AND l_leave_id <> 7
 ORDER BY l_create_datetime DESC";
@@ -901,8 +932,14 @@ echo '</div>';
     });
 
     $(".filter-card").click(function() {
+        // ลบ active จากการ์ดทั้งหมด
+        $(".filter-card .card").removeClass("active");
+
+        // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
+        $(this).find(".card").addClass("active");
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
+        var selectedYear = $("#selectedYear").val();
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
 
@@ -913,6 +950,7 @@ echo '</div>';
             data: {
                 status: status,
                 month: selectedMonth,
+                year: selectedYear,
                 depart: depart,
                 subDepart: subDepart
             },
@@ -1501,6 +1539,13 @@ echo '</div>';
         var value2 = $(this).val().toLowerCase();
         $("tbody tr").filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
+        });
+    });
+
+    $("#codeSearch").on("keyup", function() {
+        var value3 = $(this).val().toLowerCase();
+        $("tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
         });
     });
     </script>

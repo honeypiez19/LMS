@@ -145,7 +145,6 @@ $stmt = $conn->prepare($sql);
 $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
 if ($month != "ALL") {
     $stmt->bindParam(':month', $month, PDO::PARAM_INT);
-
 }
 $stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
 $stmt->bindParam(':subDepart2', $subDepart2);

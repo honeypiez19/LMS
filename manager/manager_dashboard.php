@@ -85,11 +85,11 @@ $checkSubDepart3 = $subDepart3;
 $checkSubDepart4 = $subDepart4;
 $checkSubDepart5 = $subDepart5;
 
-$sql_check_leave = "SELECT
-    COUNT(li.l_list_id) AS leave_count,
+$sql_check_leave = "SELECT Distinct
     li.l_username,
     li.l_name,
     li.l_department,
+    em.e_department,
     em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
@@ -100,27 +100,41 @@ INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
     li.l_approve_status IN (2,3,6)
+    AND li.l_leave_status = 0
     AND li.l_approve_status2 = 1
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-       (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-GROUP BY li.l_name";
+    AND li.l_level IN ('user', 'chief', 'leader', 'admin')
+    AND li.l_leave_id NOT IN (6,7)";
+
+// Add conditions based on department
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql_check_leave .= " AND (
+        em.e_department = :checkSubDepart OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        OR (li.l_department = :checkSubDepart AND em.e_sub_department = 'AC')
+    )";
+} else {
+    $sql_check_leave .= " AND (
+        em.e_department = :subDepart OR li.l_department = :subDepart
+        OR li.l_department = :subDepart2
+        OR li.l_department = :subDepart3
+        OR li.l_department = :subDepart4
+        OR li.l_department = :subDepart5
+    )";
+}
+$sql_check_leave .= " ORDER BY li.l_name";
 
 $stmt_check_leave = $conn->prepare($sql_check_leave);
 
-// Binding the parameters
-$stmt_check_leave->bindParam(':subDepart', $subDepart);
-$stmt_check_leave->bindParam(':subDepart2', $subDepart2);
-$stmt_check_leave->bindParam(':subDepart3', $subDepart3);
-$stmt_check_leave->bindParam(':subDepart4', $subDepart4);
-$stmt_check_leave->bindParam(':subDepart5', $subDepart5);
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $stmt_check_leave->bindParam(':checkSubDepart', $checkSubDepart, PDO::PARAM_STR);
+    $stmt_check_leave->bindParam(':checkSubDepart2', $checkSubDepart2, PDO::PARAM_STR);
+} else {
+    $stmt_check_leave->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+    $stmt_check_leave->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+    $stmt_check_leave->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+    $stmt_check_leave->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+    $stmt_check_leave->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+}
 
 $stmt_check_leave->execute();
 
@@ -148,12 +162,11 @@ $checkSubDepart3 = $subDepart3;
 $checkSubDepart4 = $subDepart4;
 $checkSubDepart5 = $subDepart5;
 
-// echo $checkSubDepart;
-$sql_cancel_leave = "SELECT
-COUNT(li.l_list_id) AS leave_count,
+$sql_cancel_leave = "SELECT Distinct
     li.l_username,
     li.l_name,
     li.l_department,
+    em.e_department,
     em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
@@ -162,94 +175,74 @@ COUNT(li.l_list_id) AS leave_count,
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE li.l_leave_status = 1
-    AND li.l_approve_status IN (2, 3, 6)
+WHERE
+    li.l_approve_status IN (2,3,6)
+    AND li.l_leave_status = 1
     AND li.l_approve_status2 = 1
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-       (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR (li.l_department = :subDepart2)
-        OR (li.l_department = :subDepart3)
-        OR (li.l_department = :subDepart4)
-        OR (li.l_department = :subDepart5)
-    )
-    AND em.e_sub_department = 'AC'
-GROUP BY li.l_name";
-$stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
-// $stmt_cancel_leave->bindParam(':depart', $depart);
-$stmt_cancel_leave->bindParam(':subDepart', $subDepart);
-$stmt_cancel_leave->bindParam(':subDepart2', $subDepart2);
-$stmt_cancel_leave->bindParam(':subDepart3', $subDepart3);
-$stmt_cancel_leave->bindParam(':subDepart4', $subDepart4);
-$stmt_cancel_leave->bindParam(':subDepart5', $subDepart5);
+    AND li.l_level IN ('user', 'chief', 'leader', 'admin')
+    AND li.l_leave_id NOT IN (6,7)";
 
+// Add conditions based on department
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql_cancel_leave .= " AND (
+        em.e_department = :checkSubDepart OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        OR (li.l_department = :checkSubDepart AND em.e_sub_department = 'AC')
+    )";
+} else {
+    $sql_cancel_leave .= " AND (
+        em.e_department = :subDepart OR li.l_department = :subDepart
+        OR li.l_department = :subDepart2
+        OR li.l_department = :subDepart3
+        OR li.l_department = :subDepart4
+        OR li.l_department = :subDepart5
+    )";
+}
+$sql_cancel_leave .= " ORDER BY li.l_name";
+
+// Prepare the SQL statement
+$stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
+
+// Bind parameters
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $stmt_cancel_leave->bindParam(':checkSubDepart', $checkSubDepart, PDO::PARAM_STR);
+    $stmt_cancel_leave->bindParam(':checkSubDepart2', $checkSubDepart2, PDO::PARAM_STR);
+} else {
+    $stmt_cancel_leave->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+    $stmt_cancel_leave->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+    $stmt_cancel_leave->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+    $stmt_cancel_leave->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+    $stmt_cancel_leave->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+}
+
+// Execute the query
 $stmt_cancel_leave->execute();
 
-$employee_names = array();
+// Fetch results
+$employee_names = [];
 while ($row_leave = $stmt_cancel_leave->fetch(PDO::FETCH_ASSOC)) {
     $employee_names[] = $row_leave['l_name'];
 }
 
+// Generate the list of employees
 $employee_list = implode(', ', $employee_names);
 
+// Display the alert if there are canceled leaves
 if (!empty($employee_list)) {
     echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
-<i class="fa-solid fa-circle-exclamation me-2"></i>
-<span>มีการยกเลิกใบลาของ ' . $employee_list . ' กรุณาตรวจสอบ</span>
-<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
-<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>';
+    <i class="fa-solid fa-circle-exclamation me-2"></i>
+    <span>มีการยกเลิกใบลาของ ' . htmlspecialchars($employee_list) . ' กรุณาตรวจสอบ</span>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>';
 }
 
 // มีพนักงานมาสาย --------------------------------------------------------------------------------------------
-$sql_check_leave_id_7 = "SELECT
--- COUNT(l_list_id) AS leave_count, l_name
--- FROM leave_list
--- WHERE l_department = 'Office'
--- AND l_leave_id = 7
--- AND l_approve_status = 2
--- OR  l_approve_status = 6
--- AND l_approve_status2 = 1
-
--- COUNT(li.l_list_id) AS leave_count,
---     li.l_username,
---     li.l_name,
---     li.l_department,
---     em.e_sub_department,
---     em.e_sub_department2,
---     em.e_sub_department3,
---     em.e_sub_department4,
---     em.e_sub_department5
--- FROM leave_list li
--- INNER JOIN employees em
---     ON li.l_usercode = em.e_usercode
--- WHERE
---      li.l_approve_status IN (0,2,3,6)
---     AND li.l_approve_status2 = 1
---     AND li.l_leave_status = 2
---     AND li.l_level IN ('user', 'chief', 'leader')
---     AND li.l_leave_id = 7
---      AND (
---         -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
---         (em.e_department = :subDepart AND li.l_department = :subDepart)
---         OR
---         -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
---         (li.l_level = 'chief' AND em.e_department = 'Management')
---         OR
---         -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
---         (em.e_department = 'Management' AND li.l_department IN (
---             em.e_sub_department,
---             em.e_sub_department2,
---             em.e_sub_department3,
---             em.e_sub_department4,
---             em.e_sub_department5))
---     )
--- GROUP BY l_name
-    COUNT(li.l_list_id) AS leave_count,
+$sql_check_leave_id_7 = "SELECT Distinct
     li.l_username,
     li.l_name,
     li.l_department,
+    em.e_department,
     em.e_sub_department,
     em.e_sub_department2,
     em.e_sub_department3,
@@ -258,24 +251,43 @@ $sql_check_leave_id_7 = "SELECT
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE li.l_leave_status = 0
-    AND li.l_approve_status IN (1, 2, 3, 6)
+WHERE
+    li.l_approve_status IN (2,3,6)
+    AND li.l_leave_status = 1
     AND li.l_approve_status2 = 1
-    AND li.l_level IN ('user', 'chief', 'leader')
-    AND li.l_leave_id = 7
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-GROUP BY li.l_name";
-$stmt_check_leave_id_7 = $conn->prepare($sql_check_leave_id_7);
-// $stmt_check_leave_id_7->bindParam(':depart', $depart);
-$stmt_check_leave_id_7->bindParam(':subDepart', $subDepart);
-$stmt_check_leave_id_7->bindParam(':subDepart2', $subDepart2);
-$stmt_check_leave_id_7->bindParam(':subDepart3', $subDepart3);
-$stmt_check_leave_id_7->bindParam(':subDepart4', $subDepart4);
-$stmt_check_leave_id_7->bindParam(':subDepart5', $subDepart5);
+    AND li.l_level IN ('user', 'chief', 'leader', 'admin')
+    AND li.l_leave_id NOT IN (6,7)";
 
+// Add conditions based on department
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $sql_check_leave_id_7 .= " AND (
+        em.e_department = :checkSubDepart OR li.l_department = :checkSubDepart
+        OR li.l_department = :checkSubDepart2
+        OR (li.l_department = :checkSubDepart AND em.e_sub_department = 'AC')
+    )";
+} else {
+    $sql_check_leave_id_7 .= " AND (
+        em.e_department = :subDepart OR li.l_department = :subDepart
+        OR li.l_department = :subDepart2
+        OR li.l_department = :subDepart3
+        OR li.l_department = :subDepart4
+        OR li.l_department = :subDepart5
+    )";
+}
+$sql_check_leave_id_7 .= " ORDER BY li.l_name";
+
+$stmt_check_leave_id_7 = $conn->prepare($sql_check_leave_id_7);
+// Bind parameters
+if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {
+    $stmt_check_leave_id_7->bindParam(':checkSubDepart', $checkSubDepart, PDO::PARAM_STR);
+    $stmt_check_leave_id_7->bindParam(':checkSubDepart2', $checkSubDepart2, PDO::PARAM_STR);
+} else {
+    $stmt_check_leave_id_7->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+    $stmt_check_leave_id_7->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+    $stmt_check_leave_id_7->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+    $stmt_check_leave_id_7->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+    $stmt_check_leave_id_7->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+}
 $stmt_check_leave_id_7->execute();
 
 if ($stmt_check_leave_id_7->rowCount() > 0) {
@@ -364,7 +376,7 @@ if ($sum_day >= 10) {
     <div class="mt-3 container-fluid">
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
-                <form class="mt-3 mb-3 row" method="post">
+                <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
                     <div class="col-auto">
                         <?php
@@ -379,7 +391,7 @@ if (isset($_POST['year'])) {
     $selectedYear = $currentYear;
 }
 
-echo "<select class='form-select' name='year' id='selectedYear'>";
+echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 
 // เพิ่มตัวเลือกของปีหน้า
 $nextYear = $currentYear + 1;
@@ -418,7 +430,7 @@ if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
 }
 
-echo "<select class='form-select' name='month' id='selectedMonth'>";
+echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 foreach ($months as $key => $monthName) {
     echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
 }
@@ -426,7 +438,7 @@ echo "</select>";
 ?>
                     </div>
 
-                    <div class="col-auto">
+                    <div class="col-auto" hidden>
                         <button type="submit" class="btn btn-primary">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
@@ -597,9 +609,8 @@ FROM leave_list
 JOIN employees ON employees.e_usercode = leave_list.l_usercode
 WHERE l_leave_id = :leave_id
   AND l_usercode = :userCode
-  AND YEAR(l_create_datetime) = :selectedYear
+  AND YEAR(l_leave_end_date) = :selectedYear
   AND l_leave_status = 0
-  AND l_approve_status IN (2,6)
   AND l_approve_status2 = 4";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
@@ -607,41 +618,41 @@ WHERE l_leave_id = :leave_id
     $stmt_leave_personal->bindParam(':userCode', $userCode);
     $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
     $stmt_leave_personal->execute();
-    $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
+    $result_leave = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
-    if ($result_leave_personal) {
-        $leave_personal_days = $result_leave_personal['total_leave_days'] ?? 0;
-        $leave_personal_hours = $result_leave_personal['total_leave_hours'] ?? 0;
-        $leave_personal_minutes = $result_leave_personal['total_leave_minutes'] ?? 0;
+    if ($result_leave) {
+        $days = $result_leave['total_leave_days'] ?? 0;
+        $hours = $result_leave['total_leave_hours'] ?? 0;
+        $minutes = $result_leave['total_leave_minutes'] ?? 0;
 
         // Employee leave balances
-        $total_personal = $result_leave_personal['total_personal'] ?? 0;
-        $total_personal_no = $result_leave_personal['total_personal_no'] ?? 0;
-        $total_sick = $result_leave_personal['total_sick'] ?? 0;
-        $total_sick_work = $result_leave_personal['total_sick_work'] ?? 0;
-        $total_annual = $result_leave_personal['total_annual'] ?? 0;
-        $total_other = $result_leave_personal['total_other'] ?? 0;
-        $total_late = $result_leave_personal['late_count'] ?? 0;
+        $total_personal = $result_leave['total_personal'] ?? 0;
+        $total_personal_no = $result_leave['total_personal_no'] ?? 0;
+        $total_sick = $result_leave['total_sick'] ?? 0;
+        $total_sick_work = $result_leave['total_sick_work'] ?? 0;
+        $total_annual = $result_leave['total_annual'] ?? 0;
+        $total_other = $result_leave['total_other'] ?? 0;
+        $total_late = $result_leave['late_count'] ?? 0;
 
         // Convert hours to days if applicable
-        $leave_personal_days += floor($leave_personal_hours / 8);
-        $leave_personal_hours = $leave_personal_hours % 8;
+        $days += floor($hours / 8);
+        $hours = $hours % 8;
 
         // Adjust minutes if necessary
-        if ($leave_personal_minutes >= 60) {
-            $leave_personal_hours += floor($leave_personal_minutes / 60);
-            $leave_personal_minutes = $leave_personal_minutes % 60;
+        if ($minutes >= 60) {
+            $hours += floor($minutes / 60);
+            $minutes = $minutes % 60;
         }
 
-        if ($leave_personal_minutes > 0 && $leave_personal_minutes <= 30) {
-            $leave_personal_minutes = 30;
-        } elseif ($leave_personal_minutes > 30) {
-            $leave_personal_minutes = 0;
-            $leave_personal_hours += 1;
+        if ($minutes > 0 && $minutes <= 30) {
+            $minutes = 30;
+        } elseif ($minutes > 30) {
+            $minutes = 0;
+            $hours += 1;
         }
 
-        if ($leave_personal_minutes == 30) {
-            $leave_personal_minutes = 5;
+        if ($minutes == 30) {
+            $minutes = 5;
         }
     }
 
@@ -655,7 +666,7 @@ WHERE l_leave_id = :leave_id
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ') / ' . $total_personal . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_personal . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -665,13 +676,17 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
+        echo '<input type="hidden" name="personal_days" value="' . $days . '">';
+        echo '<input type="hidden" name="personal_hours" value="' . $hours . '">';
+        echo '<input type="hidden" name="personal_minutes" value="' . $minutes . '">';
+        echo '<input type="hidden" name="total_personal" value="' . $total_personal . '">';
     } else if ($leave_id == 2) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #0339A2;" data-leave-id="2">';
         echo '<div class="card-body">';
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ') / ' . $total_personal_no . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_personal_no . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -681,13 +696,17 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
+        echo '<input type="hidden" name="personnel_no_days" value="' . $days . '">';
+        echo '<input type="hidden" name="personal_no_hours" value="' . $hours . '">';
+        echo '<input type="hidden" name="personal_no_minutes" value="' . $minutes . '">';
+        echo '<input type="hidden" name="total_personal_no" value="' . $total_personal_no . '">';
     } else if ($leave_id == 3) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #0357C4;" data-leave-id="3">';
         echo '<div class="card-body">';
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ') / ' . $total_sick . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_sick . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -697,13 +716,18 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
+        echo '<input type="hidden" name="sick_days" value="' . $days . '">';
+        echo '<input type="hidden" name="sick_hours" value="' . $hours . '">';
+        echo '<input type="hidden" name="sick_minutes" value="' . $minutes . '">';
+        echo '<input type="hidden" name="total_sick" value="' . $total_sick . '">';
+
     } else if ($leave_id == 4) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #0357C4;" data-leave-id="4">';
         echo '<div class="card-body">';
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ') / ' . $total_sick_work . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_sick_work . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -713,13 +737,17 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
+        echo '<input type="hidden" name="sick_work_days" value="' . $days . '">';
+        echo '<input type="hidden" name="sick_work_hours" value="' . $hours . '">';
+        echo '<input type="hidden" name="sick_work_minutes" value="' . $minutes . '">';
+        echo '<input type="hidden" name="total_sick_work" value="' . $total_sick_work . '">';
     } else if ($leave_id == 5) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #0475E6;" data-leave-id="5">';
         echo '<div class="card-body">';
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ') / ' . $total_annual . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_annual . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -729,13 +757,18 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
+        echo '<input type="hidden" name="annual_days" value="' . $days . '">';
+        echo '<input type="hidden" name="annual_hours" value="' . $hours . '">';
+        echo '<input type="hidden" name="annual_minutes" value="' . $minutes . '">';
+        echo '<input type="hidden" name="total_annual" value="' . $total_annual . '">';
+
     } else if ($leave_id == 6) {
         echo '<div class="card text-light mb-3 filter-card" style="background-color: #4B9CED;" data-leave-id="6">';
         echo '<div class="card-body">';
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ')' . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ')' . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -767,7 +800,7 @@ WHERE l_leave_id = :leave_id
         echo '    <div class="card-title">';
         echo '        <div class="d-flex justify-content-between">';
         echo '            <div>';
-        echo '<h5>' . $leave_personal_days . '(' . $leave_personal_hours . '.' . $leave_personal_minutes . ')' . '</h5>';
+        echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ')' . '</h5>';
         echo '<p class="card-text">' . $leave_name . '</p>';
         echo '            </div>';
         echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
@@ -777,6 +810,11 @@ WHERE l_leave_id = :leave_id
         echo '    </div>'; // Close card-title
         echo '</div>'; // Close card-body
         echo '</div>'; // Close card
+        echo '<input type="hidden" name="other_days" value="' . $days . '">';
+        echo '<input type="hidden" name="other_hours" value="' . $hours . '">';
+        echo '<input type="hidden" name="other_minutes" value="' . $minutes . '">';
+        echo '<input type="hidden" name="total_other" value="' . $total_other . '">';
+
     } else {
         echo 'ไม่พบประเภทการลา';
     }
@@ -834,18 +872,19 @@ echo '</div>'; // Close the row div
                                         ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ครบกำหนดแล้ว
                                     </div>
                                     <div class="col-12">
-                                        <label for="leaveType" class="form-label"><?php echo $strLeaveType; ?></label>
-                                        <span class="badge rounded-pill text-bg-info" id="totalDays">เหลือ -
+                                        <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ -
                                             วัน</span>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="leaveType" required ">
-                                            <option selected><?php echo $strLeaveSelect; ?></option>
-                                            <option value=" 1"><?php echo $strPersonal; ?></option>
-                                            <option value="2"><?php echo $strPersonalNo; ?></option>
-                                            <option value="3"><?php echo $strSick; ?></option>
-                                            <option value="4"><?php echo $strSickWork; ?></option>
-                                            <option value="5"><?php echo $strAnnual; ?></option>
-                                            <option value="8"><?php echo $strOther; ?></option>
+                                        <select class="form-select" id="leaveType" required
+                                            onchange="checkDays(this.value)">
+                                            <option selected>เลือกประเภทการลา</option>
+                                            <option value=" 1">ลากิจได้รับค่าจ้าง</option>
+                                            <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
+                                            <option value="3">ลาป่วย</option>
+                                            <option value="4">ลาป่วยจากงาน</option>
+                                            <option value="5">ลาพักร้อน</option>
+                                            <option value="8">อื่น ๆ</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1622,6 +1661,21 @@ echo '</div>';
         </div>
 
         <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true // ใช้ HTML ใน tooltip
+            })
+        })
+        // เมื่อ urgentLeaveModal เปิด
+        $('#urgentLeaveModal').on('show.bs.modal', function() {
+            var totalDaysAlert = $('[name="totalDays"]');
+            $('#urgentLeaveType').val('0'); // รีเซ็ตค่า select
+            totalDaysAlert.text('คงเหลือ ' + '-' + ' วัน')
+            $('*[name="alertCheckDays"]').addClass('d-none'); // ซ่อนข้อความ
+
+        });
+
         function calculateLeaveDays(startDate, startTime, endDate, endTime) {
             var start = new Date(startDate + ' ' + startTime); // สร้างวันที่เริ่มต้น
             var end = new Date(endDate + ' ' + endTime); // สร้างวันที่สิ้นสุด
@@ -1647,69 +1701,143 @@ echo '</div>';
         }
 
         function checkDays(typeLeave) {
+            var totalDaysAlert = $('[name="totalDays"]');
             var startDate = $('#startDate').val();
-            var startTime = $('#startTime').val();
-            var endDate = $('#endDate').val();
-            var endTime = $('#endTime').val();
-
-            // แสดงค่าที่ดึงได้
-            console.log("Start Date: ", startDate);
-            console.log("Start Time: ", startTime);
-            console.log("End Date: ", endDate);
-            console.log("End Time: ", endTime);
-
-            var leaveDays = calculateLeaveDays(startDate, startTime, endDate, endTime);
-
             var alertMessage = '';
-            var totalLeaveDays = 0;
-            var currentLeaveDays = 0;
-            var totalLeave = 0;
-            var totalDaysAlert = $('#totalDays');
-            // แสดงค่าที่คำนวณได้
-            console.log("Leave Days: ", leaveDays);
+            var remainingDays = 0,
+                remainingHours = 0,
+                remainingMinutes = 0;
 
-            if (typeLeave == 1) {
-                currentLeaveDays = parseFloat($('input[name="leave_personal_days"]').val()) || 0;
-                totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
-                totalLeaveDays = currentLeaveDays + leaveDays;
-                alertMessage = currentLeaveDays > totalLeave ?
-                    'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลากิจได้รับค่าจ้างครบกำหนดแล้ว' : '';
-                totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน')
-            } else if (typeLeave == 2) {
-                currentLeaveDays = parseFloat($('input[name="leave_personal_no_days"]').val()) || 0;
-                totalLeave = parseFloat($('input[name="total_personal_no"]').val()) || 0;
-                alertMessage = currentLeaveDays >= totalLeave ?
-                    'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลากิจไม่ได้รับค่าจ้างครบกำหนดแล้ว' : '';
-                totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน')
-            } else if (typeLeave == 3) {
-                currentLeaveDays = parseFloat($('input[name="leave_sick_days"]').val()) || 0;
-                totalLeave = parseFloat($('input[name="total_sick"]').val()) || 0;
-                alertMessage = currentLeaveDays >= totalLeave ? 'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลาป่วยครบกำหนดแล้ว' :
-                    '';
-                totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน')
-            } else if (typeLeave == 4) {
-                currentLeaveDays = parseFloat($('input[name="leave_sick_work_days"]').val()) || 0;
-                totalLeave = parseFloat($('input[name="total_sick_work"]').val()) || 0;
-                alertMessage = currentLeaveDays >= totalLeave ?
-                    'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลาป่วยจากงานครบกำหนดแล้ว' :
-                    '';
-                totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน')
-            } else if (typeLeave == 5) {
-                currentLeaveDays = parseFloat($('input[name="leave_annual_days"]').val()) || 0;
-                totalLeave = parseFloat($('input[name="total_annual"]').val()) || 0;
-                alertMessage = currentLeaveDays >= totalLeave ?
-                    'ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ลาพักร้อนครบกำหนดแล้ว' : '';
-                totalDaysAlert.text('คงเหลือ ' + (totalLeave - currentLeaveDays) + ' วัน')
+            var currentLeaveDays = 0,
+                currentLeaveHours = 0,
+                currentLeaveMinutes = 0,
+                totalLeave = 0;
+
+            // เช็คปีว่าเป็นปีปัจจุบันหรือปีถัดไป
+            var currentYear = new Date().getFullYear(); // ปีปัจจุบัน
+            var startDateObj = new Date(startDate); // สร้างตัวแปร Date จาก startDate
+            var startYear = startDateObj.getFullYear(); // ปีของวันที่ลาเริ่มต้น
+
+            // เช็คว่า startDate เป็นปีถัดไปหรือไม่
+            if (startYear > currentYear) {
+                // รีเซ็ตสิทธิ์การลา
+                if (typeLeave == 1) {
+                    $('input[name="personal_days"]').val(0);
+                    $('input[name="personal_hours"]').val(0);
+                    $('input[name="personal_minutes"]').val(0);
+                    currentLeaveDays = 0;
+                    currentLeaveHours = 0;
+                    currentLeaveMinutes = 0;
+                    totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
+                } else if (typeLeave == 2) {
+                    $('input[name="personnel_no_days"]').val(0);
+                    $('input[name="personal_no_hours"]').val(0);
+                    $('input[name="personal_no_minutes"]').val(0);
+                    currentLeaveDays = 0;
+                    currentLeaveHours = 0;
+                    currentLeaveMinutes = 0;
+                    totalLeave = parseFloat($('input[name="total_personal_no"]').val()) || 0;
+                } else if (typeLeave == 3) {
+                    $('input[name="sick_days"]').val(0);
+                    $('input[name="sick_hours"]').val(0);
+                    $('input[name="sick_minutes"]').val(0);
+                    currentLeaveDays = 0;
+                    currentLeaveHours = 0;
+                    currentLeaveMinutes = 0;
+                    totalLeave = parseFloat($('input[name="total_sick"]').val()) || 0;
+                } else if (typeLeave == 4) {
+                    $('input[name="sick_work_days"]').val(0);
+                    $('input[name="sick_work_hours"]').val(0);
+                    $('input[name="sick_work_minutes"]').val(0);
+                    currentLeaveDays = 0;
+                    currentLeaveHours = 0;
+                    currentLeaveMinutes = 0;
+                    totalLeave = parseFloat($('input[name="total_sick_work"]').val()) || 0;
+                } else if (typeLeave == 5) {
+                    $('input[name="annual_days"]').val(0);
+                    $('input[name="annual_hours"]').val(0);
+                    $('input[name="annual_minutes"]').val(0);
+                    currentLeaveDays = 0;
+                    currentLeaveHours = 0;
+                    currentLeaveMinutes = 0;
+                    totalLeave = parseFloat($('input[name="total_annual"]').val()) || 0;
+                }
             } else {
-                totalDaysAlert.text('คงเหลือ ' + '-' + ' วัน')
-
+                // กรณีปีปัจจุบันหรือปีที่เท่ากัน
+                if (typeLeave == 1) {
+                    currentLeaveDays = parseFloat($('input[name="personal_days"]').val()) || 0;
+                    currentLeaveHours = parseFloat($('input[name="personal_hours"]').val()) || 0;
+                    currentLeaveMinutes = parseFloat($('input[name="personal_minutes"]').val()) || 0;
+                    totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
+                } else if (typeLeave == 2) {
+                    currentLeaveDays = parseFloat($('input[name="personnel_no_days"]').val()) || 0;
+                    currentLeaveHours = parseFloat($('input[name="personal_no_hours"]').val()) || 0;
+                    currentLeaveMinutes = parseFloat($('input[name="personal_no_minutes"]').val()) || 0;
+                    totalLeave = parseFloat($('input[name="total_personal_no"]').val()) || 0;
+                } else if (typeLeave == 3) {
+                    currentLeaveDays = parseFloat($('input[name="sick_days"]').val()) || 0;
+                    currentLeaveHours = parseFloat($('input[name="sick_hours"]').val()) || 0;
+                    currentLeaveMinutes = parseFloat($('input[name="sick_minutes"]').val()) || 0;
+                    totalLeave = parseFloat($('input[name="total_sick"]').val()) || 0;
+                } else if (typeLeave == 4) {
+                    currentLeaveDays = parseFloat($('input[name="sick_work_days"]').val()) || 0;
+                    currentLeaveHours = parseFloat($('input[name="sick_work_hours"]').val()) || 0;
+                    currentLeaveMinutes = parseFloat($('input[name="sick_work_minutes"]').val()) || 0;
+                    totalLeave = parseFloat($('input[name="total_sick_work"]').val()) || 0;
+                } else if (typeLeave == 5) {
+                    currentLeaveDays = parseFloat($('input[name="annual_days"]').val()) || 0;
+                    currentLeaveHours = parseFloat($('input[name="annual_hours"]').val()) || 0;
+                    currentLeaveMinutes = parseFloat($('input[name="annual_minutes"]').val()) || 0;
+                    totalLeave = parseFloat($('input[name="total_annual"]').val()) || 0;
+                }
             }
 
-            // แสดงข้อความแจ้งเตือนถ้าจำเป็น
-            if (alertMessage) {
-                $('#alertCheckDays').text(alertMessage).removeClass('d-none'); // แสดงข้อความ
+            // แปลงนาทีที่ใช้ไปเป็น 30 นาที
+            if (currentLeaveMinutes > 0 && currentLeaveMinutes <= 30) {
+                currentLeaveMinutes = 30;
             } else {
-                $('#alertCheckDays').addClass('d-none'); // ซ่อนข้อความ
+                currentLeaveMinutes = 0;
+            }
+
+            // คำนวณเวลาที่ใช้ไปทั้งหมด (ในหน่วยนาที)
+            var totalCurrentMinutes = (currentLeaveDays * 8 * 60) + (currentLeaveHours * 60) + currentLeaveMinutes;
+
+            // สิทธิ์ทั้งหมดแปลงเป็นนาที
+            var totalLeaveMinutes = totalLeave * 8 * 60;
+
+            // คำนวณเวลาที่เหลือ (ในหน่วยนาที)
+            var remainingMinutesTotal = totalLeaveMinutes - totalCurrentMinutes;
+
+            if (remainingMinutesTotal < 0) {
+                alertMessage = 'ไม่สามารถลาได้ ใช้สิทธิ์ครบกำหนดแล้ว';
+                totalDaysAlert.text('คงเหลือ 0 วัน 0 ชั่วโมง 0 นาที');
+            } else {
+                remainingDays = Math.floor(remainingMinutesTotal / (8 * 60)); // แปลงนาทีที่เหลือเป็นวัน
+                remainingHours = Math.floor((remainingMinutesTotal % (8 * 60)) / 60); // แปลงนาทีเป็นชั่วโมง
+                remainingMinutes = remainingMinutesTotal % 60; // นาทีที่เหลือ
+
+                // ปรับนาทีเป็น 30 นาที
+                if (remainingMinutes > 0 && remainingMinutes <= 30) {
+                    remainingMinutes = 30;
+                } else {
+                    remainingMinutes = 0;
+                }
+
+                // ถ้าชั่วโมงเกิน 8 ให้เพิ่มวัน
+                if (remainingHours >= 8) {
+                    remainingDays += Math.floor(remainingHours / 8);
+                    remainingHours = remainingHours % 8;
+                }
+
+                totalDaysAlert.text(
+                    `คงเหลือ ${remainingDays} วัน ${remainingHours} ชั่วโมง ${remainingMinutes} นาที`
+                );
+            }
+
+            if (alertMessage) {
+                $('*[name="alertCheckDays"]').text(alertMessage).removeClass('d-none');
+            } else {
+                $('*[name="alertCheckDays"]').addClass('d-none');
             }
         }
 
@@ -1768,28 +1896,28 @@ echo '</div>';
                     flatpickr("#startDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                        minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
 
                     flatpickr("#endDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                        minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
 
                     flatpickr("#urgentStartDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                        minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
 
                     flatpickr("#urgentEndDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                        minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
                 }
@@ -2341,3 +2469,5 @@ echo '</div>';
         <script src="../js/bootstrap.bundle.js"></script>
         <script src="../js/bootstrap.bundle.min.js"></script>
 </body>
+
+</html>
