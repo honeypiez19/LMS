@@ -1589,12 +1589,24 @@ if ($result->rowCount() > 0) {
 
         // 18
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
-        if ($row['l_leave_id'] != 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+
+        $dateNow = date('Y-m-d');
+        $disabledCancalCheck = (
+            $row['l_approve_status'] != 0
+            && $row['l_approve_status2'] != 1
+            && $row['l_leave_start_date'] < $dateNow
+        ) ? 'disabled' : '';
+
+        $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
+
+        if ($row['l_leave_id'] == 6) {
+            echo '<td></td>';
         } else if ($row['l_leave_id'] == 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '>ยืนยันรายการ</button></td>';
+            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+        } else if ($row['l_leave_id'] != 7) {
+            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
         } else {
-            echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
+            echo '<td></td>';
         }
 
         echo '</tr>';

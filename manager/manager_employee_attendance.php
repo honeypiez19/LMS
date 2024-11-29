@@ -352,7 +352,7 @@ if (count($result) > 0) {
         // 13
         echo '<td>' . $row['l_remark'] . '</td>';
 
-        if ($row['l_approve_status'] == 2) {
+        if ($row['l_approve_status'] == 4) {
             echo '<td>';
             echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '" disabled>ยืนยัน</button>';
             echo '</td>';

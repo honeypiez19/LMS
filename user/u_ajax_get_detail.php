@@ -42,7 +42,7 @@ if (isset($_POST['leaveType'])) {
     WHERE l_leave_id = $leaveType
     AND l_usercode = $userCodeQuoted
     -- AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
-    AND l_approve_status IN (2,3)
+    AND l_approve_status IN (2,3,6)
     AND l_approve_status2 IN (4,5)
     AND YEAR(l_leave_end_date) = $selectedYear
     ORDER BY l_create_datetime DESC";

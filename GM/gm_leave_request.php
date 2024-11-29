@@ -57,7 +57,7 @@ $userCode = $_SESSION['s_usercode'];
     </nav>
 
     <div class="container-fluid">
-        <form class="mt-3 mb-3 row" method="post">
+        <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
             <label for="" class="mt-2 col-auto">เลือกปี</label>
             <div class="col-auto">
                 <?php
@@ -65,11 +65,18 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
 
-echo "<select class='form-select' name='year' id='selectedYear'>";
+echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+
+// เพิ่มตัวเลือกของปีหน้า
+$nextYear = $currentYear + 1;
+echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+
 for ($i = 0; $i <= 4; $i++) {
     $year = $currentYear - $i;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
@@ -82,40 +89,33 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    'All' => $strAllMonth,
-    '01' => $strJan,
-    '02' => $strFeb,
-    '03' => $strMar,
-    '04' => $strApr,
-    '05' => $strMay,
-    '06' => $strJun,
-    '07' => $strJul,
-    '08' => $strAug,
-    '09' => $strSep,
-    '10' => $strOct,
-    '11' => $strNov,
-    '12' => $strDec,
+    'All' => 'ทั้งหมด',
+    '01' => 'มกราคม',
+    '02' => 'กุมภาพันธ์',
+    '03' => 'มีนาคม',
+    '04' => 'เมษายน',
+    '05' => 'พฤษภาคม',
+    '06' => 'มิถุนายน',
+    '07' => 'กรกฎาคม',
+    '08' => 'สิงหาคม',
+    '09' => 'กันยายน',
+    '10' => 'ตุลาคม',
+    '11' => 'พฤศจิกายน',
+    '12' => 'ธันวาคม',
 ];
 
-// $selectedMonth = date('m'); // เดือนปัจจุบัน
 $selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
 }
 
-echo "<select class='form-select' name='month' id='selectedMonth'>";
+echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 foreach ($months as $key => $monthName) {
     echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
 }
 echo "</select>";
 ?>
-            </div>
-
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
             </div>
         </form>
     </div>
@@ -181,19 +181,25 @@ $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
-    leave_list li
+leave_list li
 WHERE
-    li.l_department <> 'RD'
-    -- AND li.l_leave_status = 0
-    AND li.l_approve_status2 = 1
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_leave_end_date) = :selectedYear
-    AND Month(li.l_leave_end_date) = :selectedMonth";
+li.l_department <> 'RD'
+AND li.l_leave_status = 0
+AND li.l_leave_id NOT IN (6, 7)
+AND li.l_level IN ('user', 'chief', 'leader','admin')
+AND li.l_approve_status2 = 1
+AND Year(li.l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
 // $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 $stmt->bindParam(':selectedYear', $selectedYear);
 
 $stmt->execute();
@@ -220,22 +226,29 @@ $totalLeaveItems = $stmt->fetchColumn();
                         <h5 class="card-title">
                             <?php
 $sql = "SELECT
-COUNT(li.l_list_id) AS leave_count,
-li.l_name
+    COUNT(li.l_list_id) AS leave_count,
+    li.l_name
 FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
--- AND li.l_leave_status = 0
-AND li.l_approve_status2 = 4
+AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_leave_end_date) = :selectedYear
-AND Month(li.l_leave_end_date) = :selectedMonth";
+AND li.l_level IN ('user', 'chief', 'leader','admin')
+AND li.l_approve_status2 = 4
+AND Year(li.l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
 // $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+
 $stmt->bindParam(':selectedYear', $selectedYear);
 $stmt->execute();
 
@@ -261,22 +274,29 @@ $totalLeaveItems = $stmt->fetchColumn();
                         <h5 class="card-title">
                             <?php
 $sql = "SELECT
-COUNT(li.l_list_id) AS leave_count,
-li.l_name
+    COUNT(li.l_list_id) AS leave_count,
+    li.l_name
 FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
--- AND li.l_leave_status = 0
-AND li.l_approve_status2 = 5
+AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
-AND Year(li.l_leave_end_date) = :selectedYear
-AND Month(li.l_leave_end_date) = :selectedMonth";
+AND li.l_level IN ('user', 'chief', 'leader','admin')
+AND li.l_approve_status2 = 5
+AND Year(li.l_leave_end_date) = '$selectedYear'";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
 // $stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+
 $stmt->bindParam(':selectedYear', $selectedYear);
 $stmt->execute();
 
@@ -354,6 +374,7 @@ WHERE
 li.l_department <> 'RD'
 AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
+-- AND li.l_approve_status2 = 4
 AND li.l_level IN ('user', 'chief', 'leader','admin')
 AND Year(li.l_leave_end_date) = '$selectedYear'";
 
@@ -710,28 +731,52 @@ if ($result->rowCount() > 0) {
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
+// กำหนดจำนวนหน้าที่จะแสดงรอบ ๆ หน้าปัจจุบัน
+$range = 2;
+
 // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
 }
 
-// สร้างลิงก์สำหรับแต่ละหน้า
-for ($i = 1; $i <= $totalPages; $i++) {
+// แสดงลิงก์สำหรับหน้าที่อยู่ในช่วง
+for ($i = max(1, $currentPage - $range); $i <= min($totalPages, $currentPage + $range); $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
     }
+}
+
+// เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าสุดท้าย
+if ($currentPage + $range < $totalPages) {
+    echo '<li class="page-item"><span class="page-link">...</span></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">' . $totalPages . '</a></li>';
+}
+
+// เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าแรก
+if ($currentPage - $range > 1) {
+    echo '<li class="page-item"><span class="page-link">...</span></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">' . 1 . '</a></li>';
 }
 
 // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
 if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
 }
 
 echo '</ul>';
+
+// ฟอร์มสำหรับกรอกหมายเลขหน้า
+echo '<form method="GET" action="" class="mb-2 d-inline-flex">';
+echo '<input type="hidden" name="month" value="' . htmlspecialchars($selectedMonth) . '">';
+// echo '<label for="customPage" class="me-2">ไปหน้าที่:</label>';
+echo '<input type="number" name="page" id="customPage" class="form-control mb-3 mx-2" style="width: 80px;" min="1" max="' . $totalPages . '" value="' . $currentPage . '">';
+echo '<button type="submit" class="mx-2 mb-3 btn btn-primary" style="width: 50px;">Go</button>';
+echo '</form>';
+
 echo '</div>';
 
 ?>
@@ -967,6 +1012,12 @@ echo '</div>';
     });
 
     $(".filter-card").click(function() {
+        // ลบ active จากการ์ดทั้งหมด
+        $(".filter-card .card").removeClass("active");
+
+        // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
+        $(this).find(".card").addClass("active");
+
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();

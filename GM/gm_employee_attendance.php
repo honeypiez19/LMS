@@ -67,7 +67,7 @@ $userCode = $_SESSION['s_usercode'];
         <div class="tab-content">
             <!-- การมาสาย -->
             <div class="tab-pane fade show active" id="tab1">
-                <form class="mt-3 mb-3 row" method="post">
+                <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
                     <div class="col-auto">
                         <?php
@@ -75,11 +75,18 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
 
-echo "<select class='form-select' name='year' id='selectedYear'>";
+echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+
+// เพิ่มตัวเลือกของปีหน้า
+$nextYear = $currentYear + 1;
+echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+
 for ($i = 0; $i <= 4; $i++) {
     $year = $currentYear - $i;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
@@ -92,40 +99,33 @@ echo "</select>";
                     <div class="col-auto">
                         <?php
 $months = [
-    'All' => $strAllMonth,
-    '01' => $strJan,
-    '02' => $strFeb,
-    '03' => $strMar,
-    '04' => $strApr,
-    '05' => $strMay,
-    '06' => $strJun,
-    '07' => $strJul,
-    '08' => $strAug,
-    '09' => $strSep,
-    '10' => $strOct,
-    '11' => $strNov,
-    '12' => $strDec,
+    'All' => 'ทั้งหมด',
+    '01' => 'มกราคม',
+    '02' => 'กุมภาพันธ์',
+    '03' => 'มีนาคม',
+    '04' => 'เมษายน',
+    '05' => 'พฤษภาคม',
+    '06' => 'มิถุนายน',
+    '07' => 'กรกฎาคม',
+    '08' => 'สิงหาคม',
+    '09' => 'กันยายน',
+    '10' => 'ตุลาคม',
+    '11' => 'พฤศจิกายน',
+    '12' => 'ธันวาคม',
 ];
 
-// $selectedMonth = date('m'); // เดือนปัจจุบัน
 $selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
 }
 
-echo "<select class='form-select' name='month' id='selectedMonth'>";
+echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 foreach ($months as $key => $monthName) {
     echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
 }
 echo "</select>";
 ?>
-                    </div>
-
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
                     </div>
                 </form>
                 <div class="mt-3 row">
@@ -157,10 +157,10 @@ AND li.l_leave_id IN (6,7)
 AND li.l_approve_status IN (2,3)
 AND Year(li.l_leave_end_date) = '$selectedYear'";
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
 }
 
-$sql .= " ORDER BY li.l_leave_end_date DESC";
+$sql .= " ORDER BY li.l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -190,8 +190,8 @@ if (count($result) > 0) {
         <th>ประเภท</th>
         <th>วันที่มาสาย</th>
         <th>สถานะรายการ</th>
-        <th>สถานะอนุมัติ_1</th>
-        <th>สถานะอนุมัติ_2</th>
+        <th>สถานะ_1</th>
+        <th>สถานะ_2</th>
         <th>สถานะ (เฉพาะ HR)</th>
         <th>หมายเหตุ</th>
         <th></th>
@@ -248,65 +248,69 @@ if (count($result) > 0) {
 
         // 10
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+// รอหัวหน้ารับทราบ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+// รอผจกรับทราบ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+// หัวหน้ารับทราบ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
-        // หัวหน้าไม่อนุมัติ
+// หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+//  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+//  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
-        // ไม่มีสถานะ
+// ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
         echo '</td>';
 
-        // 11
+// 11
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+// รอหัวหน้ารับทราบ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+// รอผจกรับทราบ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+// หัวหน้ารับทราบ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
-        // หัวหน้าไม่อนุมัติ
+// หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+//  ผจก รับทราบ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+//  ผจก ไม่รับทราบ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>ผู้จัดการไม่รับทราบ</b></div>';
         }
-        // ไม่มีสถานะ
+//
+        elseif ($row['l_approve_status2'] == 6) {
+            echo '';
+        }
+// ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
@@ -328,9 +332,15 @@ if (count($result) > 0) {
         // 13
         echo '<td>' . $row['l_remark'] . '</td>';
 
-        echo '<td>';
-        echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '">ตรวจสอบ</button>';
-        echo '</td>';
+        if ($row['l_approve_status2'] == 4) {
+            echo '<td>';
+            echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '" disabled>ยืนยัน</button>';
+            echo '</td>';
+        } else {
+            echo '<td>';
+            echo '<button type="button" class="btn btn-primary button-shadow btn-approve" data-usercode="' . $row['l_usercode'] . '" data-create-datetime="' . $row['l_create_datetime'] . '">ยืนยัน</button>';
+            echo '</td>';
+        }
 
         echo '</tr>';
     }
@@ -372,7 +382,7 @@ if (count($result) > 0) {
 
             <!-- ประวัติมาสาย -->
             <div class="tab-pane fade" id="tab2">
-                <form class="mt-3 mb-3 row" method="post">
+                <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
                     <div class="col-auto">
                         <?php
@@ -380,11 +390,18 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
 
-echo "<select class='form-select' name='year' id='selectedYear'>";
+echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+
+// เพิ่มตัวเลือกของปีหน้า
+$nextYear = $currentYear + 1;
+echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+
 for ($i = 0; $i <= 4; $i++) {
     $year = $currentYear - $i;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
@@ -397,6 +414,7 @@ echo "</select>";
                     <div class="col-auto">
                         <?php
 $months = [
+    'All' => 'ทั้งหมด',
     '01' => 'มกราคม',
     '02' => 'กุมภาพันธ์',
     '03' => 'มีนาคม',
@@ -411,24 +429,18 @@ $months = [
     '12' => 'ธันวาคม',
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
 }
 
-echo "<select class='form-select' name='month' id='selectedMonth'>";
+echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 foreach ($months as $key => $monthName) {
     echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
 }
 echo "</select>";
 ?>
-                    </div>
-
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
                     </div>
                 </form>
                 <div class="mt-3 row">
@@ -459,11 +471,14 @@ leave_list li
 WHERE
 li.l_department <> 'RD'
 -- AND li.l_leave_status = 0
-AND li.l_leave_id = 7
+AND li.l_leave_id IN (6,7)
 AND li.l_approve_status IN (2,3)
-AND Year(li.l_leave_end_date) = '$selectedYear'
-AND Month(li.l_leave_end_date) = '$selectedMonth'
-ORDER BY li.l_leave_end_date DESC";
+AND Year(li.l_leave_end_date) = '$selectedYear'";
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+}
+
+$sql .= " ORDER BY li.l_leave_end_date DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -549,63 +564,69 @@ if (count($result) > 0) {
 
         // 10
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+// รอหัวหน้ารับทราบ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+// รอผจกรับทราบ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+// หัวหน้ารับทราบ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
-        // หัวหน้าไม่อนุมัติ
+// หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+//  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+//  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
-        // ไม่มีสถานะ
+// ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
         echo '</td>';
 
-        // 11
+// 11
         echo '<td>';
-        // รอหัวหน้าอนุมัติ
+// รอหัวหน้ารับทราบ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอหัวหน้ารับทราบ</b></div>';
         }
-        // รอผจกอนุมัติ
+// รอผจกรับทราบ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการรับทราบ</b></div>';
         }
-        // หัวหน้าอนุมัติ
+// หัวหน้ารับทราบ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>หัวหน้ารับทราบ</b></div>';
         }
-        // หัวหน้าไม่อนุมัติ
+// หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
             echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
         }
-        //  ผจก อนุมัติ
+//  ผจก รับทราบ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการรับทราบ</b></div>';
         }
-        //  ผจก ไม่อนุมัติ
+//  ผจก ไม่รับทราบ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>ผู้จัดการไม่รับทราบ</b></div>';
         }
-        // ไม่มีสถานะ
+//
+        elseif ($row['l_approve_status2'] == 6) {
+            echo '';
+        }
+// ไม่พบสถานะ
         else {
             echo 'ไม่พบสถานะ';
         }
@@ -948,17 +969,15 @@ if (count($result) > 0) {
             $('.btn-approve').off('click');
 
             Swal.fire({
-                title: "ต้องการอนุมัติ" +
-                    leaveType + "หรือไม่ ?",
-                text: "กรุณายืนยันการอนุมัติ",
+                title: "ต้องการยืนยันหรือไม่ ?",
+                text: name + " " + leaveType,
                 icon: "question",
-                showCancelButton: true,
                 showDenyButton: true,
                 confirmButtonColor: '#198754',
-                cancelButtonColor: '#DC3545',
-                denyButtonColor: '#0D6EFD',
-                confirmButtonText: 'อนุมัติ',
-                cancelButtonText: 'ไม่อนุมัติ',
+                /*  cancelButtonColor: '#DC3545', */
+                denyButtonColor: '#DC3545',
+                confirmButtonText: 'รับทราบ',
+                /* cancelButtonText: 'ไม่อนุมัติ', */
                 denyButtonText: 'ยกเลิก',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
@@ -998,7 +1017,7 @@ if (count($result) > 0) {
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                text: 'อนุมัติ' +
+                                text: 'รับทราบ' +
                                     leaveType +
                                     'ของ ' + name +
                                     ' ของวันที่ ' +
@@ -1012,7 +1031,7 @@ if (count($result) > 0) {
                         error: function(xhr, status, error) {
                             Swal.fire({
                                 title: 'ไม่สำเร็จ!',
-                                text: 'เกิดข้อผิดพลาดในการอนุมัติ',
+                                text: 'เกิดข้อผิดพลาดในการรับทราบ',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
@@ -1046,7 +1065,7 @@ if (count($result) > 0) {
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                html: 'ไม่อนุมัติ' + leaveType +
+                                html: 'ไม่รับทราบ' + leaveType +
                                     'ของ ' + name +
                                     '<br>ของวันที่ ' + lateDate,
                                 icon: 'success',
@@ -1058,7 +1077,7 @@ if (count($result) > 0) {
                         error: function(xhr, status, error) {
                             Swal.fire({
                                 title: 'ไม่สำเร็จ!',
-                                text: 'เกิดข้อผิดพลาดในการไม่อนุมัติ',
+                                text: 'เกิดข้อผิดพลาดในการไม่รับทราบ',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
