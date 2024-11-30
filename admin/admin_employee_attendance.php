@@ -589,7 +589,7 @@ if (count($result) > 0) {
             <!-- //////////////////////////////////////////////////////////////////////////////// -->
             <!-- ประวัติพนักงานมาสาย -->
             <div class="tab-pane fade" id="tab2">
-                <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
+                <form class="mt-3 mb-3 row" method="post" id="yearMonthHis">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
                     <div class="col-auto">
                         <?php
@@ -603,7 +603,7 @@ if (isset($_POST['year'])) {
     $selectedYear = $currentYear;
 }
 
-echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthHis\").submit();'>";
 
 // เพิ่มตัวเลือกของปีหน้า
 $nextYear = $currentYear + 1;
@@ -636,13 +636,13 @@ $months = [
     '12' => 'ธันวาคม',
 ];
 
-$selectedMonth = 'All'; // กำหนดค่าเริ่มต้นให้เป็น 'All'
+$selectedMonth = 'All';
 
-if (isset($_POST['month']) && $_POST['month'] !== '') {
-    $selectedMonth = $_POST['month']; // ถ้ามีการเลือกเดือนใหม่ ให้ใช้ค่าใหม่
+if (isset($_POST['month'])) {
+    $selectedMonth = $_POST['month'];
 }
 
-echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthHis\").submit();'>";
 foreach ($months as $key => $monthName) {
     echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
 }
@@ -653,7 +653,7 @@ echo "</select>";
                 <div class="mt-3 row">
                     <div class="col-4">
                         <label for="userCodeLabel" class="form-label">รหัสพนักงาน</label>
-                        <input type="text" class="form-control" id="codeSearch2">
+                        <input type="text" class="form-control" id="codeSearch3">
                     </div>
                 </div>
                 <?php
@@ -665,9 +665,12 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 // $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 ORDER BY l_create_datetime DESC";
+// $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7
+// AND Month(l_create_datetime) = '$selectedMonth'
+// AND Year(l_create_datetime) = $selectedYear
+// ORDER BY l_create_datetime DESC";
 $sql = "SELECT * FROM leave_list WHERE l_leave_id IN (6,7)
 AND Year(l_leave_end_date) = $selectedYear";
 if ($selectedMonth != "All") {
@@ -708,7 +711,7 @@ if (count($result) > 0) {
         <th>สถานะ_2</th>
         <th>สถานะ (เฉพาะ HR)</th>
         <th>หมายเหตุ</th>
-        </tr>';
+    </tr>';
     echo '</thead>';
     echo '<tbody>';
     foreach ($result as $index => $row) {
@@ -789,7 +792,7 @@ if (count($result) > 0) {
         }
         echo '</td>';
 
-// 11
+        // 11
         echo '<td>';
 // รอหัวหน้ารับทราบ
         if ($row['l_approve_status2'] == 0) {
@@ -840,11 +843,9 @@ if (count($result) > 0) {
 
         // 12
         echo '<td>' . $row['l_remark'] . '</td>';
-
-        // 13
-        echo '<td hidden data-datetime="' . $row['l_create_datetime'] . '">' . $row['l_create_datetime'] . '</td>';
-
         echo '</tr>';
+        // $rowNumber--;
+
     }
     echo '</tbody>';
     echo '</table>';
@@ -879,6 +880,7 @@ if (count($result) > 0) {
 } else {
     echo '<span style="text-align: left; color:red;">ไม่พบข้อมูลการมาสายและขาดงาน</span>';
 }
+
 ?>
             </div>
             <!-- //////////////////////////////////////////////////////////////////////////////// -->

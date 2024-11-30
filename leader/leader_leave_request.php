@@ -431,9 +431,11 @@ if ($stmt->execute()) {
                         <th rowspan="2"><?php echo $strReason2; ?></th>
                         <th rowspan="2">ชื่ออนุมติ GM</th>
                         <th rowspan="2">สถานะอนุมัติ GM</th>
+                        <th rowspan="2">วันเวลาที่อนุมัติ_3</th>
+                        <th rowspan="2">เหตุผล_3</th>
                         <th rowspan="2"><?php echo $strStatusHR; ?></th>
                         <th rowspan="2"></th>
-                        <th rowspan="2"></th>
+                        <!-- <th rowspan="2"></th> -->
                     </tr>
                     <tr class="text-center">
                         <?php $searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
@@ -782,7 +784,6 @@ if ($stmt->rowCount() > 0) {
             $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
         }
 
-        // แสดงผลลัพธ์
         if ($row['l_leave_id'] == 7) {
             echo '';
         } else {
@@ -845,15 +846,16 @@ if ($stmt->rowCount() > 0) {
         }
         echo '</td>';
 
+        // 16
         echo '<td>' . $row['l_approve_datetime'] . '</td>';
 
-        // 16
+        // 17
         echo '<td>' . $row['l_reason'] . '</td>';
 
-        // 17
+        // 18
         echo '<td>' . $row['l_approve_name2'] . '</td>';
 
-        // 18
+        // 19
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
@@ -887,15 +889,70 @@ if ($stmt->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 19
+        // 20
         echo '<td>' . $row['l_approve_datetime2'] . '</td>';
 
-        // 20
+        // 21
         echo '<td>' . $row['l_reason2'] . '</td>';
 
-        // 21
-
         // 22
+        echo '<td>' . $row['l_approve_name3'] . '</td>';
+
+        // 23
+        echo '<td>';
+        // รอหัวหน้าอนุมัติ
+        if ($row['l_approve_status3'] == 0) {
+            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+        }
+        // รอผจกอนุมัติ
+        elseif ($row['l_approve_status3'] == 1) {
+            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+        }
+        // หัวหน้าอนุมัติ
+        elseif ($row['l_approve_status3'] == 2) {
+            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+        }
+        // หัวหน้าไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 3) {
+            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+        }
+        //  ผจก อนุมัติ
+        elseif ($row['l_approve_status3'] == 4) {
+            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+        }
+        //  ผจก ไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 5) {
+            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+        }
+        // ช่องว่าง
+        elseif ($row['l_approve_status3'] == 6) {
+            echo '';
+        }
+        // รอ GM
+        elseif ($row['l_approve_status3'] == 7) {
+            echo '<div class="text-warning"><b>' . 'รอ GM อนุมัติ' . '</b></div>';
+        }
+        // GM อนุมัติ
+        elseif ($row['l_approve_status3'] == 8) {
+            echo '<div class="text-success"><b>' . 'GM อนุมัติ' . '</b></div>';
+        }
+        // GM ไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 9) {
+            echo '<div class="text-danger"><b>' . 'GM ไม่อนุมัติ' . '</b></div>';
+        }
+        // ไม่มีสถานะ
+        else {
+            echo 'ไม่พบสถานะ';
+        }
+        echo '</td>';
+
+        // 24
+        echo '<td>' . $row['l_approve_datetime3'] . '</td>';
+
+        // 25
+        echo '<td>' . $row['l_reason3'] . '</td>';
+
+        // 26
         echo '<td >';
         if ($row['l_hr_status'] == 0) {
             echo '<span class="text-warning"><b>' . $strStatusHR0 . '</b></span>';
@@ -908,14 +965,14 @@ if ($stmt->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 23
+        // 27
         if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         }
 
-        // 24
+        // 28
         echo '<td>
         <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
         echo '</tr>';

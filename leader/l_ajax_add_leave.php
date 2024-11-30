@@ -82,6 +82,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeStart = '14:00';
         $remark = '13:40:00';
     }
+    // 13:45
+    else if ($leaveTimeStart == '13:45') {
+        $leaveTimeStartLine = '13:45';
+        $leaveTimeStart = '14:00';
+        $remark = '13:45:00';
+    }
     // 14:10
     else if ($leaveTimeStart == '14:10') {
         $leaveTimeStartLine = '14:10';
@@ -94,6 +100,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeStart = '15:00';
         $remark = '14:40:00';
     }
+    // 14:45
+    else if ($leaveTimeStart == '14:45') {
+        $leaveTimeStartLine = '14:45';
+        $leaveTimeStart = '15:00';
+        $remark = '14:45:00';
+    }
     // 15:10
     else if ($leaveTimeStart == '15:10') {
         $leaveTimeStartLine = '15:10';
@@ -105,6 +117,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeStartLine = '15:40';
         $leaveTimeStart = '16:00';
         $remark = '15:40:00';
+    }
+    // 15:45
+    else if ($leaveTimeStart == '15:45') {
+        $leaveTimeStartLine = '15:45';
+        $leaveTimeStart = '16:00';
+        $remark = '15:45:00';
     }
     // 16:10
     else if ($leaveTimeStart == '16:10') {
@@ -157,6 +175,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEnd = '14:00';
         $remark = '13:40:00';
     }
+    // 13:45
+    else if ($leaveTimeEnd == '13:45') {
+        $leaveTimeEndLine = '13:45';
+        $leaveTimeEnd = '14:00';
+        $remark = '13:45:00';
+    }
     // 14:10
     else if ($leaveTimeEnd == '14:10') {
         $leaveTimeEndLine = '14:10';
@@ -169,6 +193,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEnd = '15:00';
         $remark = '14:40:00';
     }
+    // 14:45
+    else if ($leaveTimeEnd == '14:45') {
+        $leaveTimeEndLine = '14:45';
+        $leaveTimeEnd = '15:00';
+        $remark = '14:45:00';
+    }
     // 15:10
     else if ($leaveTimeEnd == '15:10') {
         $leaveTimeEndLine = '15:10';
@@ -180,6 +210,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEndLine = '15:40';
         $leaveTimeEnd = '16:00';
         $remark = '15:40:00';
+    }
+    // 15:45
+    else if ($leaveTimeEnd == '15:45') {
+        $leaveTimeEndLine = '15:45';
+        $leaveTimeEnd = '16:00';
+        $remark = '15:45:00';
     }
     // 16:10
     else if ($leaveTimeEnd == '16:10') {

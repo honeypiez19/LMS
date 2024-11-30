@@ -44,150 +44,186 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($leaveDateEnd)); // แปลงรูปแบบวันที่เป็น YYYY-MM-DD
     $leaveTimeEnd = $_POST['endTime'];
 
-// 08:45
+    // 08:45
     if ($leaveTimeStart == '08:45') {
         $leaveTimeStartLine = '08:45';
         $leaveTimeStart = '09:00';
         $remark = '08:45:00';
     }
-// 09:45
+    // 09:45
     else if ($leaveTimeStart == '09:45') {
         $leaveTimeStartLine = '09:45';
         $leaveTimeStart = '10:00';
         $remark = '09:45:00';
     }
-// 10:45
+    // 10:45
     else if ($leaveTimeStart == '10:45') {
         $leaveTimeStartLine = '10:45';
         $leaveTimeStart = '11:00';
         $remark = '10:45:00';
     }
-// 11:45
+    // 11:45
     else if ($leaveTimeStart == '12:00') {
         $leaveTimeStartLine = '11:45';
     }
-// 12:45
+    // 12:45
     else if ($leaveTimeStart == '13:00') {
         $leaveTimeStartLine = '12:45';
     }
-// 13:10
+    // 13:10
     else if ($leaveTimeStart == '13:10') {
         $leaveTimeStartLine = '13:10';
         $leaveTimeStart = '13:30';
         $remark = '13:10:00';
     }
-// 13:40
+    // 13:40
     else if ($leaveTimeStart == '13:40') {
         $leaveTimeStartLine = '13:40';
         $leaveTimeStart = '14:00';
         $remark = '13:40:00';
     }
-// 14:10
+    // 13:45
+    else if ($leaveTimeStart == '13:45') {
+        $leaveTimeStartLine = '13:45';
+        $leaveTimeStart = '14:00';
+        $remark = '13:45:00';
+    }
+    // 14:10
     else if ($leaveTimeStart == '14:10') {
         $leaveTimeStartLine = '14:10';
         $leaveTimeStart = '14:30';
         $remark = '14:10:00';
     }
-// 14:40
+    // 14:40
     else if ($leaveTimeStart == '14:40') {
         $leaveTimeStartLine = '14:40';
         $leaveTimeStart = '15:00';
         $remark = '14:40:00';
     }
-// 15:10
+    // 14:45
+    else if ($leaveTimeStart == '14:45') {
+        $leaveTimeStartLine = '14:45';
+        $leaveTimeStart = '15:00';
+        $remark = '14:45:00';
+    }
+    // 15:10
     else if ($leaveTimeStart == '15:10') {
         $leaveTimeStartLine = '15:10';
         $leaveTimeStart = '15:30';
         $remark = '15:10:00';
     }
-// 15:40
+    // 15:40
     else if ($leaveTimeStart == '15:40') {
         $leaveTimeStartLine = '15:40';
         $leaveTimeStart = '16:00';
         $remark = '15:40:00';
     }
-// 16:10
+    // 15:45
+    else if ($leaveTimeStart == '15:45') {
+        $leaveTimeStartLine = '15:45';
+        $leaveTimeStart = '16:00';
+        $remark = '15:45:00';
+    }
+    // 16:10
     else if ($leaveTimeStart == '16:10') {
         $leaveTimeStartLine = '16:10';
         $leaveTimeStart = '16:30';
         $remark = '16:10:00';
     }
-// 16:40
+    // 16:40
     else if ($leaveTimeStart == '17:00') {
         $leaveTimeStartLine = '16:40';
     } else {
         $leaveTimeStartLine = $leaveTimeStart;
     }
 
-// 08:45
+    // 08:45
     if ($leaveTimeEnd == '08:45') {
         $leaveTimeEndLine = '08:45';
         $leaveTimeEnd = '09:00';
         $remark = '08:45:00';
     }
-// 09:45
+    // 09:45
     else if ($leaveTimeEnd == '09:45') {
         $leaveTimeEndLine = '09:45';
         $leaveTimeEnd = '10:00';
         $remark = '09:45:00';
     }
-// 10:45
+    // 10:45
     else if ($leaveTimeEnd == '10:45') {
         $leaveTimeEndLine = '10:45';
         $leaveTimeEnd = '11:00';
         $remark = '10:45:00';
     }
-// 11:45
+    // 11:45
     else if ($leaveTimeEnd == '12:00') {
         $leaveTimeEndLine = '11:45';
     }
-// 12:45
+    // 12:45
     else if ($leaveTimeEnd == '13:00') {
         $leaveTimeEndLine = '12:45';
     }
-// 13:10
+    // 13:10
     else if ($leaveTimeEnd == '13:10') {
         $leaveTimeEndLine = '13:10';
         $leaveTimeEnd = '13:30';
         $remark = '13:10:00';
     }
-// 13:40
+    // 13:40
     else if ($leaveTimeEnd == '13:40') {
         $leaveTimeEndLine = '13:40';
         $leaveTimeEnd = '14:00';
         $remark = '13:40:00';
     }
-// 14:10
+    // 13:45
+    else if ($leaveTimeEnd == '13:45') {
+        $leaveTimeEndLine = '13:45';
+        $leaveTimeEnd = '14:00';
+        $remark = '13:45:00';
+    }
+    // 14:10
     else if ($leaveTimeEnd == '14:10') {
         $leaveTimeEndLine = '14:10';
         $leaveTimeEnd = '14:30';
         $remark = '14:10:00';
     }
-// 14:40
+    // 14:40
     else if ($leaveTimeEnd == '14:40') {
         $leaveTimeEndLine = '14:40';
         $leaveTimeEnd = '15:00';
         $remark = '14:40:00';
     }
-// 15:10
+    // 14:45
+    else if ($leaveTimeEnd == '14:45') {
+        $leaveTimeEndLine = '14:45';
+        $leaveTimeEnd = '15:00';
+        $remark = '14:45:00';
+    }
+    // 15:10
     else if ($leaveTimeEnd == '15:10') {
         $leaveTimeEndLine = '15:10';
         $leaveTimeEnd = '15:30';
         $remark = '15:10:00';
     }
-// 15:40
+    // 15:40
     else if ($leaveTimeEnd == '15:40') {
         $leaveTimeEndLine = '15:40';
         $leaveTimeEnd = '16:00';
         $remark = '15:40:00';
     }
-// 16:10
+    // 15:45
+    else if ($leaveTimeEnd == '15:45') {
+        $leaveTimeEndLine = '15:45';
+        $leaveTimeEnd = '16:00';
+        $remark = '15:45:00';
+    }
+    // 16:10
     else if ($leaveTimeEnd == '16:10') {
         $leaveTimeEndLine = '16:10';
         $leaveTimeEnd = '16:30';
         $remark = '16:10:00';
     }
-// 16:40
+    // 16:40
     else if ($leaveTimeEnd == '17:00') {
         $leaveTimeEndLine = '16:40';
     } else {

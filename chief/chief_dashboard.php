@@ -903,14 +903,17 @@ echo '</div>'; // Close the row div
                                             <option value="13:10">13:10</option>
                                             <option value="13:30">13:30</option>
                                             <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
                                             <option value="14:00">14:00</option>
                                             <option value="14:10">14:10</option>
                                             <option value="14:30">14:30</option>
                                             <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
                                             <option value="15:00">15:00</option>
                                             <option value="15:10">15:10</option>
                                             <option value="15:30">15:30</option>
                                             <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
                                             <option value="16:00">16:00</option>
                                             <option value="16:10">16:10</option>
                                             <option value="17:00">16:40</option>
@@ -942,14 +945,17 @@ echo '</div>'; // Close the row div
                                             <option value="13:10">13:10</option>
                                             <option value="13:30">13:30</option>
                                             <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
                                             <option value="14:00">14:00</option>
                                             <option value="14:10">14:10</option>
                                             <option value="14:30">14:30</option>
                                             <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
                                             <option value="15:00">15:00</option>
                                             <option value="15:10">15:10</option>
                                             <option value="15:30">15:30</option>
                                             <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
                                             <option value="16:00">16:00</option>
                                             <option value="16:10">16:10</option>
                                             <option value="17:00" selected>16:40</option>
@@ -1062,14 +1068,17 @@ if ($result2->rowCount() > 0) {
                                             <option value="13:10">13:10</option>
                                             <option value="13:30">13:30</option>
                                             <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
                                             <option value="14:00">14:00</option>
                                             <option value="14:10">14:10</option>
                                             <option value="14:30">14:30</option>
                                             <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
                                             <option value="15:00">15:00</option>
                                             <option value="15:10">15:10</option>
                                             <option value="15:30">15:30</option>
                                             <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
                                             <option value="16:00">16:00</option>
                                             <option value="16:10">16:10</option>
                                             <option value="17:00">16:40</option>
@@ -1102,14 +1111,17 @@ if ($result2->rowCount() > 0) {
                                             <option value="13:10">13:10</option>
                                             <option value="13:30">13:30</option>
                                             <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
                                             <option value="14:00">14:00</option>
                                             <option value="14:10">14:10</option>
                                             <option value="14:30">14:30</option>
                                             <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
                                             <option value="15:00">15:00</option>
                                             <option value="15:10">15:10</option>
                                             <option value="15:30">15:30</option>
                                             <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
                                             <option value="16:00">16:00</option>
                                             <option value="16:10">16:10</option>
                                             <option value="17:00" selected>16:40</option>
@@ -1318,6 +1330,10 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
         }
+        // 13:45
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
+        }
         // 14:10
         else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
@@ -1326,6 +1342,10 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
         }
+        // 14:45
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
+        }
         // 15:10
         else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
@@ -1333,6 +1353,10 @@ if ($result->rowCount() > 0) {
         // 15:40
         else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+        // 15:45
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
         }
         // 16:10
         else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
@@ -1375,6 +1399,10 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
         }
+        // 13:45
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
+        }
         // 14:10
         else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
@@ -1383,6 +1411,10 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
         }
+        // 14:45
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
+        }
         // 15:10
         else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
@@ -1390,6 +1422,10 @@ if ($result->rowCount() > 0) {
         // 15:40
         else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+        // 15:45
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
         }
         // 16:10
         else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
