@@ -59,6 +59,7 @@ if (isset($_POST['year'])) {
     // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
     $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
     $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
+
 }
 echo "<select class='form-select' name='year' id='selectYear'>";
 for ($i = -1; $i <= 2; $i++) {
@@ -129,7 +130,7 @@ if (isset($_POST['year'])) {
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
-AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
 AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4";
@@ -191,7 +192,7 @@ AND l_approve_status2 = 4";
 FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
-AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
 AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4";
@@ -774,30 +775,31 @@ else {
     $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? null : 2));
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
-    $sql_leave_personal = "SELECT
+    $sql_leave_personal = "SELECT l_leave_start_date, l_leave_end_date,
        SUM(
-        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+        DATEDIFF(CONCAT('2024-11-22', ' ', '17:00'), CONCAT('2024-11-22', ' ', '08:00'))
         -
         (SELECT COUNT(1)
          FROM holiday
-         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         WHERE h_start_date BETWEEN '2024-11-22' AND '2024-11-22'
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
-    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
+    SUM(HOUR(TIMEDIFF(CONCAT('2024-11-22', ' ', '17:00'), CONCAT('2024-11-22', ' ', '08:00'))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        WHEN HOUR(CONCAT('2024-11-22', ' ', '08:00')) < 12
+             AND HOUR(CONCAT('2024-11-22', ' ', '17:00')) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
-    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
+    SUM(MINUTE(TIMEDIFF(CONCAT('2024-11-22', ' ', '17:00'), CONCAT('2024-11-22', ' ', '08:00')))) AS total_leave_minutes,
 
     (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
-AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+-- AND (l_leave_start_date BETWEEN '2023-12-01' AND '2024-11-30')
+AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
 AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4";
@@ -859,7 +861,7 @@ AND l_approve_status2 = 4";
 FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
-AND (l_leave_end_date BETWEEN :startDate AND :endDate)
+AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
 AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4";
