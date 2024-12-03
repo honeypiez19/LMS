@@ -649,6 +649,10 @@ if ($stmt->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
         }
+        // 13:45
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
+        }
         // 14:10
         else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
@@ -657,6 +661,10 @@ if ($stmt->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
         }
+        // 14:45
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
+        }
         // 15:10
         else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
@@ -664,6 +672,10 @@ if ($stmt->rowCount() > 0) {
         // 15:40
         else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+        // 15:45
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
         }
         // 16:10
         else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
@@ -706,6 +718,10 @@ if ($stmt->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
         }
+        // 13:45
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
+        }
         // 14:10
         else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
@@ -714,6 +730,10 @@ if ($stmt->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
         }
+        // 14:45
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
+        }
         // 15:10
         else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
@@ -721,6 +741,10 @@ if ($stmt->rowCount() > 0) {
         // 15:40
         else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+        // 15:45
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
         }
         // 16:10
         else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
@@ -970,7 +994,7 @@ if ($stmt->rowCount() > 0) {
         echo '<td>' . $row['l_remark2'] . '</td>';
 
         // 28
-        if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
+        if ($row['l_approve_status2'] == 4 || $row['l_approve_status2'] == 5) {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
@@ -1542,14 +1566,78 @@ echo '</div>';
                             // 9
                             '<td>' + (row['l_leave_start_date'] ? row[
                                 'l_leave_start_date'] : '') + '<br>' +
-                            ' ' + (row['l_leave_start_time'] ? row['l_leave_start_time'] :
-                                '') +
+                            (row['l_leave_start_time'] ? (
+                                // Check if the l_leave_start_time and l_remark match certain values
+                                (row['l_leave_start_time'] == '09:00:00' && row[
+                                    'l_remark'] == '08:45:00') ? '08:45:00' :
+                                (row['l_leave_start_time'] == '10:00:00' && row[
+                                    'l_remark'] == '09:45:00') ? '09:45:00' :
+                                (row['l_leave_start_time'] == '11:00:00' && row[
+                                    'l_remark'] == '10:45:00') ? '10:45:00' :
+                                (row['l_leave_start_time'] == '12:00:00') ? '11:45:00' :
+                                (row['l_leave_start_time'] == '13:00:00') ? '12:45:00' :
+                                (row['l_leave_start_time'] == '13:30:00' && row[
+                                    'l_remark'] == '13:10:00') ? '13:10:00' :
+                                (row['l_leave_start_time'] == '14:00:00' && row[
+                                    'l_remark'] == '13:40:00') ? '13:40:00' :
+                                (row['l_leave_start_time'] == '14:00:00' && row[
+                                    'l_remark'] == '13:45:00') ? '13:45:00' :
+                                (row['l_leave_start_time'] == '14:30:00' && row[
+                                    'l_remark'] == '14:10:00') ? '14:10:00' :
+                                (row['l_leave_start_time'] == '15:00:00' && row[
+                                    'l_remark'] == '14:40:00') ? '14:40:00' :
+                                (row['l_leave_start_time'] == '15:00:00' && row[
+                                    'l_remark'] == '14:45:00') ? '14:45:00' :
+                                (row['l_leave_start_time'] == '15:30:00' && row[
+                                    'l_remark'] == '15:10:00') ? '15:10:00' :
+                                (row['l_leave_start_time'] == '16:00:00' && row[
+                                    'l_remark'] == '15:40:00') ? '15:40:00' :
+                                (row['l_leave_start_time'] == '16:00:00' && row[
+                                    'l_remark'] == '15:45:00') ? '15:45:00' :
+                                (row['l_leave_start_time'] == '16:30:00' && row[
+                                    'l_remark'] == '16:10:00') ? '16:10:00' :
+                                (row['l_leave_start_time'] == '17:00:00') ? '16:40:00' :
+                                row['l_leave_start_time']
+                            ) : '') +
                             '</td>' +
 
                             // 10
-                            '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] :
-                                '') + '<br>' +
-                            ' ' + (row['l_leave_end_time'] ? row['l_leave_end_time'] : '') +
+                            '<td>' + (row['l_leave_end_date'] ? row[
+                                'l_leave_end_date'] : '') + '<br>' +
+                            (row['l_leave_end_time'] ? (
+                                // Check if the l_leave_start_time and l_remark match certain values
+                                (row['l_leave_end_time'] == '09:00:00' && row[
+                                    'l_remark'] == '08:45:00') ? '08:45:00' :
+                                (row['l_leave_end_time'] == '10:00:00' && row[
+                                    'l_remark'] == '09:45:00') ? '09:45:00' :
+                                (row['l_leave_end_time'] == '11:00:00' && row[
+                                    'l_remark'] == '10:45:00') ? '10:45:00' :
+                                (row['l_leave_end_time'] == '12:00:00') ? '11:45:00' :
+                                (row['l_leave_end_time'] == '13:00:00') ? '12:45:00' :
+                                (row['l_leave_end_time'] == '13:30:00' && row[
+                                    'l_remark'] == '13:10:00') ? '13:10:00' :
+                                (row['l_leave_end_time'] == '14:00:00' && row[
+                                    'l_remark'] == '13:40:00') ? '13:40:00' :
+                                (row['l_leave_end_time'] == '14:00:00' && row[
+                                    'l_remark'] == '13:45:00') ? '13:45:00' :
+                                (row['l_leave_end_time'] == '14:30:00' && row[
+                                    'l_remark'] == '14:10:00') ? '14:10:00' :
+                                (row['l_leave_end_time'] ==
+                                    '15:00:00' && row[
+                                        'l_remark'] == '14:40:00') ? '14:40:00' :
+                                (row['l_leave_end_time'] == '15:00:00' && row[
+                                    'l_remark'] == '14:45:00') ? '14:45:00' :
+                                (row['l_leave_end_time'] == '15:30:00' && row[
+                                    'l_remark'] == '15:10:00') ? '15:10:00' :
+                                (row['l_leave_end_time'] == '16:00:00' && row[
+                                    'l_remark'] == '15:40:00') ? '15:40:00' :
+                                (row['l_leave_end_time'] == '16:00:00' && row[
+                                    'l_remark'] == '15:45:00') ? '15:45:00' :
+                                (row['l_leave_end_time'] == '16:30:00' && row[
+                                    'l_remark'] == '16:10:00') ? '16:10:00' :
+                                (row['l_leave_end_time'] == '17:00:00') ? '16:40:00' :
+                                row['l_leave_end_time']
+                            ) : '') +
                             '</td>' +
 
                             // 11

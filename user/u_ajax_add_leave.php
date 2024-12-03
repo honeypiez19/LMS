@@ -221,16 +221,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEndLine = $leaveTimeEnd;
     }
 
-    // if($leaveTimeEnd == '12:00'){
-    //     $leaveTimeEndLine = '11:45';
-    // } else if($leaveTimeEnd == '13:00'){
-    //     $leaveTimeEndLine = '12:45';
-    // } else if($leaveTimeEnd == '17:00'){
-    //     $leaveTimeEndLine = '16:40';
-    // }else{
-    //     $leaveTimeEndLine = $leaveTimeEnd;
-    // }
-
     // วันที่สร้างใบลา
     $formattedDate = $_POST['formattedDate'];
     // $formattedDate = date('Y-m-d', strtotime($_POST['formattedDate']));
@@ -264,15 +254,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($subDepart == '') {
         $proveStatus = 6;
         $proveStatus2 = 1;
+        $proveStatus3 = 6;
+    }
+    if ($subDepart == 'RD') {
+        $proveStatus = 0;
+        $proveStatus2 = 1;
+        $proveStatus3 = 6;
     } else {
         $proveStatus = 0;
         $proveStatus2 = 1;
+        $proveStatus3 = 7;
     }
+
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
-        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark)
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
-        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace, :remark)");
+        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -294,6 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':level', $level);
     $stmt->bindParam(':workplace', $workplace);
     $stmt->bindParam(':remark', $remark);
+    $stmt->bindParam(':proveStatus3', $proveStatus3);
 
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';

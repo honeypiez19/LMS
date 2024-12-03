@@ -246,6 +246,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // รอ ผจก อนุมัติ
     $proveStatus2 = 1;
 
+    // GM
+    $proveStatus3 = 6;
+
     // รอตรวจสอบ
     $comfirmStatus = 0;
 
@@ -276,6 +279,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    if ($subDepart == '') {
+        $proveStatus = 6;
+        $proveStatus2 = 1;
+        $proveStatus3 = 6;
+    } else if ($subDepart == 'Sales') {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else {
+        $proveStatus = 0;
+        $proveStatus2 = 1;
+        $proveStatus3 = 6;
+    }
+
     $stmt = $conn->prepare("INSERT INTO leave_list
     (l_usercode,
     l_username,
@@ -297,6 +314,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     l_approve_name,
     l_approve_datetime,
     l_approve_status2,
+    l_approve_status3,
     l_remark,
     l_hr_status)
 
@@ -321,6 +339,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     :proveName,
     :proveDate,
     :proveStatus2,
+    :proveStatus3,
     :remark,
     :comfirmStatus)");
 
@@ -344,6 +363,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveName', $proveName);
     $stmt->bindParam(':proveDate', $proveDate);
     $stmt->bindParam(':proveStatus2', $proveStatus2);
+    $stmt->bindParam(':proveStatus3', $proveStatus3);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':remark', $remark);
 

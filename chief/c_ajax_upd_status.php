@@ -34,7 +34,7 @@ if ($status == '2') {
         ':appDate' => $appDate,
         ':userName' => $userName,
         ':userCode' => $userCode,
-        ':createDate' => $createDate
+        ':createDate' => $createDate,
     ]);
 
     // แจ้งเตือน พนง
@@ -93,7 +93,7 @@ if ($status == '2') {
     } else {
         echo "ไม่พบเงื่อนไข";
     }
-    
+
     $stmt->execute();
     $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $managerMessage = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
@@ -131,10 +131,9 @@ if ($status == '2') {
     } else {
         echo "No tokens found for managers";
     }
-}
-else if ($status == '3') {
+} else if ($status == '3') {
     // อัปเดตสถานะการลาในฐานข้อมูล
-    $sql = "UPDATE leave_list SET l_approve_status = :status, l_approve_datetime = :appDate, l_approve_name = :userName
+    $sql = "UPDATE leave_list SET l_approve_status = :status, l_approve_datetime = :appDate, l_approve_name = :userName, l_reason = :reasonNoProve
             WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
     $stmt = $conn->prepare($sql);
     $stmt->execute([
@@ -142,7 +141,8 @@ else if ($status == '3') {
         ':appDate' => $appDate,
         ':userName' => $userName,
         ':userCode' => $userCode,
-        ':createDate' => $createDate
+        ':createDate' => $createDate,
+        ':reasonNoProve' => $reasonNoProve,
     ]);
 
     // แจ้งเตือน พนง
@@ -196,8 +196,7 @@ else if ($status == '3') {
             // แจ้งเตือนไปที่พี่ตุ๊ก
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
             $stmt->bindParam(':workplace', $workplace);
-        }
-        else if ($depart == 'CAD1') {
+        } else if ($depart == 'CAD1') {
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
             $stmt->bindParam(':workplace', $workplace);
         } else if ($depart == 'CAD2') {
@@ -207,7 +206,7 @@ else if ($status == '3') {
         } else if ($depart == 'CAM') {
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM'");
             $stmt->bindParam(':workplace', $workplace);
-        } 
+        }
     } else if ($level == 'chief') {
         if ($depart == 'Management') {
             // แจ้งเตือนไปที่พี่ตุ๊ก
@@ -219,13 +218,13 @@ else if ($status == '3') {
     }
     $stmt->execute();
     $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-   
+
     $managerMessage = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
     if ($leaveStatus == 'ยกเลิกใบลา') {
         $managerMessage = "$empName ยกเลิกใบลา\n$proveName ไม่อนุมัติยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
     }
-    
+
     if ($managers) {
         foreach ($managers as $manager) {
             $sToken = $manager['e_token'];

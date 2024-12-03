@@ -805,14 +805,17 @@ if ($result2->rowCount() > 0) {
                                             <option value="13:10">13:10</option>
                                             <option value="13:30">13:30</option>
                                             <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
                                             <option value="14:00">14:00</option>
                                             <option value="14:10">14:10</option>
                                             <option value="14:30">14:30</option>
                                             <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
                                             <option value="15:00">15:00</option>
                                             <option value="15:10">15:10</option>
                                             <option value="15:30">15:30</option>
                                             <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
                                             <option value="16:00">16:00</option>
                                             <option value="16:10">16:10</option>
                                             <option value="17:00">16:40</option>
@@ -845,14 +848,17 @@ if ($result2->rowCount() > 0) {
                                             <option value="13:10">13:10</option>
                                             <option value="13:30">13:30</option>
                                             <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
                                             <option value="14:00">14:00</option>
                                             <option value="14:10">14:10</option>
                                             <option value="14:30">14:30</option>
                                             <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
                                             <option value="15:00">15:00</option>
                                             <option value="15:10">15:10</option>
                                             <option value="15:30">15:30</option>
                                             <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
                                             <option value="16:00">16:00</option>
                                             <option value="16:10">16:10</option>
                                             <option value="17:00" selected>16:40</option>
@@ -911,6 +917,7 @@ if ($result2->rowCount() > 0) {
                             <th rowspan="2">สถานะมาสาย</th>
                             <th rowspan="2">สถานะอนุมัติ_1</th>
                             <th rowspan="2">สถานะอนุมัติ_2</th>
+                            <th rowspan="2">สถานะอนุมัติ_3</th>
                             <th rowspan="2">สถานะ (เฉพาะ HR)</th>
                             <th rowspan="2"></th>
                         </tr>
@@ -1325,6 +1332,54 @@ if ($result->rowCount() > 0) {
 
         // 17
         echo '<td>';
+        // รอหัวหน้าอนุมัติ
+        if ($row['l_approve_status3'] == 0) {
+            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+        }
+        // รอผจกอนุมัติ
+        elseif ($row['l_approve_status3'] == 1) {
+            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+        }
+        // หัวหน้าอนุมัติ
+        elseif ($row['l_approve_status3'] == 2) {
+            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+        }
+        // หัวหน้าไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 3) {
+            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+        }
+        //  ผจก อนุมัติ
+        elseif ($row['l_approve_status3'] == 4) {
+            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+        }
+        //  ผจก ไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 5) {
+            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+        }
+        // ช่องว่าง
+        elseif ($row['l_approve_status3'] == 6) {
+            echo '';
+        }
+        // รอ GM
+        elseif ($row['l_approve_status3'] == 7) {
+            echo '<div class="text-warning"><b>' . 'รอ GM อนุมัติ' . '</b></div>';
+        }
+        // GM อนุมัติ
+        elseif ($row['l_approve_status3'] == 8) {
+            echo '<div class="text-success"><b>' . 'GM อนุมัติ' . '</b></div>';
+        }
+        // GM ไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 9) {
+            echo '<div class="text-danger"><b>' . 'GM ไม่อนุมัติ' . '</b></div>';
+        }
+        // ไม่มีสถานะ
+        else {
+            echo 'ไม่พบสถานะ';
+        }
+        echo '</td>';
+
+        // 18
+        echo '<td>';
         if ($row['l_hr_status'] == 0) {
             echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
@@ -1334,7 +1389,7 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 18
+        // 19
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
 
         $dateNow = date('Y-m-d');

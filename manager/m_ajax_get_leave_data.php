@@ -80,6 +80,54 @@ try {
 
     // Fetch the results as an associative array
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($results as &$row) {
+        $holiday_query = "SELECT COUNT(*) as holiday_count
+                      FROM holiday
+                      WHERE h_start_date BETWEEN :start_date AND :end_date
+                        AND h_holiday_status = 'วันหยุด'
+                        AND h_status = 0";
+
+        $holiday_stmt = $conn->prepare($holiday_query);
+        $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
+        $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
+        $holiday_stmt->execute();
+
+        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+        $holiday_count = $holiday_data['holiday_count'] ?? 0;
+
+        // Calculate leave duration
+        $start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
+        $end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+        $interval = $start_date->diff($end_date);
+
+        $leave_days = $interval->days - $holiday_count;
+        $leave_hours = $interval->h;
+        $leave_minutes = $interval->i;
+
+        // Adjust hours for out-of-range times
+        $start_hour = (int) $start_date->format('H');
+        $end_hour = (int) $end_date->format('H');
+
+        if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+            (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
+            $leave_hours -= 1;
+        }
+
+        if ($leave_hours >= 8) {
+            $leave_days += floor($leave_hours / 8);
+            $leave_hours %= 8;
+        }
+
+        if ($leave_minutes >= 30) {
+            $leave_minutes = 30;
+        }
+
+        $row['calculated_leave'] = [
+            'days' => $leave_days,
+            'hours' => $leave_hours,
+            'minutes' => $leave_minutes,
+        ];
+    }
 
     // Send the results as JSON
     header('Content-Type: application/json');

@@ -231,6 +231,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $comfirmStatus = 0;
     $proveStatus = 6;
     $proveStatus2 = 1;
+    $proveStatus3 = 7;
 
     $subDepart = $_POST['subDepart'];
     $subDepart2 = $_POST['subDepart2'];
@@ -254,10 +255,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
     l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time,
-    l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark)
+    l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark
+    , l_approve_status3)
     VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
     :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus,
-    :level, :proveStatus2, :workplace, :remark)");
+    :level, :proveStatus2, :workplace, :remark, :proveStatus3)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -276,6 +278,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
     $stmt->bindParam(':proveStatus2', $proveStatus2);
+    $stmt->bindParam(':proveStatus3', $proveStatus3);
     $stmt->bindParam(':level', $level);
     $stmt->bindParam(':workplace', $workplace);
     $stmt->bindParam(':remark', $remark);
