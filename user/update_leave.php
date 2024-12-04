@@ -13,7 +13,9 @@ $sql = "UPDATE leave_list
                 SET l_leave_id = :editLeaveType,
                     l_leave_reason = :editLeaveReason,
                     l_leave_start_date = :editleaveStartDate,
-                    l_leave_start_time = :editleaveStartTime
+                    l_leave_start_time = :editleaveStartTime,
+                    l_approve_status = 0,
+                    l_approve_status2 = 1
                 WHERE l_create_datetime = :createDatetime";
 
 // เตรียมคำสั่ง SQL

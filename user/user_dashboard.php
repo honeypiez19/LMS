@@ -1518,7 +1518,7 @@ echo '</div>';
                                     <div class=" col-6">
                                         <label for="editleaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select editleaveStartTime" required>
+                                        <select class="form-select" id="editleaveStartTime" required>
                                             <option value="08:00" selected>08:00</option>
                                             <option value="08:30">08:30</option>
                                             <option value="08:45">08:45</option>
@@ -2436,16 +2436,7 @@ echo '</div>';
                             $('.editLeaveType').val(response.l_leave_id);
                             $('#editLeaveReason').val(response.l_leave_reason);
                             $('#editleaveStartDate').val(response.l_leave_start_date);
-
-                            // ตั้งค่าเวลาเริ่มต้น (กรณีเลือกค่าใน select)
-                            var startTime = response.l_leave_start_time;
-                            if (startTime) {
-                                $('#editleaveStartTime').val(startTime);
-                            } else {
-                                // กรณีไม่มีข้อมูลเวลาเริ่มต้น
-                                $('#editleaveStartTime').val(
-                                    '08:00'); // กำหนดค่าเริ่มต้นให้เป็น 08:00
-                            }
+                            $('#editleaveStartTime').val(response.l_leave_start_time);
                         }
                     },
                     error: function(xhr, status, error) {
