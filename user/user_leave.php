@@ -75,10 +75,10 @@ echo "</select>";
                 </button>
             </div>
         </form>
-        <span id="textNotice" class="text-danger"> *สถิติการลา ตั้งแต่เดือนธันวาคม <?php echo $selectedYear - 1 ?> -
+        <span id="textNotice" class="text-danger"> * สถิติการลา ตั้งแต่เดือนธันวาคม <?php echo $selectedYear - 1 ?> -
             พฤศจิกายน
             <?php echo $selectedYear ?> <br>
-            **สถิติการลาพักร้อน ตั้งแต่เดือนมกราคม - ธันวาคม <?php echo $selectedYear ?><br>
+            ** สถิติการลาพักร้อน ตั้งแต่เดือนมกราคม - ธันวาคม <?php echo $selectedYear ?><br>
             *** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว
         </span>
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"

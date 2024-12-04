@@ -279,7 +279,7 @@ echo "</select>";
     <div class="container">
         <div class="row">
             <span class="text-danger">** 0(0.0) = วัน(ชั่วโมง.นาที)</span>
-            <span class="text-danger">*** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
+            <span class="text-danger">** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
             <?php
 $leave_types = [
     1 => 'ลากิจได้รับค่าจ้าง',
@@ -920,6 +920,7 @@ if ($result2->rowCount() > 0) {
                             <th rowspan="2">สถานะอนุมัติ_3</th>
                             <th rowspan="2">สถานะ (เฉพาะ HR)</th>
                             <th rowspan="2"></th>
+                            <th rowspan="2"></th>
                         </tr>
                         <tr class="text-center">
                             <th>จาก</th>
@@ -1037,7 +1038,6 @@ if ($result->rowCount() > 0) {
             echo $row['l_leave_reason'];
         }
         echo '</td>';
-        echo '';
 
         // 9
         // 08:45
@@ -1390,8 +1390,12 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 19
-        $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
+        echo '<td>';
+        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+        echo '</td>';
 
+        // 20
+        $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
         $dateNow = date('Y-m-d');
         $disabledCancalCheck = (
             $row['l_approve_status'] != 0
@@ -1467,6 +1471,89 @@ echo '</div>';
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="editLeaveModal" tabindex="-1" aria-labelledby="editLeaveModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editLeaveModalLabel">แก้ไขการลา</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editLeaveForm">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                        <span style="color: red;">*</span>
+                                        <select class="form-select editLeaveType" required>
+                                            <option selected>เลือกประเภทการลา</option>
+                                            <option value="1">ลากิจได้รับค่าจ้าง</option>
+                                            <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
+                                            <option value="3">ลาป่วย</option>
+                                            <option value="4">ลาป่วยจากงาน</option>
+                                            <option value="5">ลาพักร้อน</option>
+                                            <option value="8">อื่น ๆ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3 row">
+                                    <div class="col-12">
+                                        <label for="leaveReason" class="form-label">เหตุผลการลา</label>
+                                        <span style="color: red;">*</span>
+                                        <textarea class="form-control mt-2" id="editLeaveReason" rows="3"
+                                            placeholder="กรุณาระบุเหตุผล"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 row">
+                                    <div class="col-6">
+                                        <label for="startDate" class="form-label">วันที่เริ่มต้น</label>
+                                        <span style="color: red;">*</span>
+                                        <input type="date" class="form-control" id="editleaveStartDate" required>
+                                    </div>
+                                    <div class=" col-6">
+                                        <label for="editleaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
+                                        <span style="color: red;">*</span>
+                                        <select class="form-select editleaveStartTime" required>
+                                            <option value="08:00" selected>08:00</option>
+                                            <option value="08:30">08:30</option>
+                                            <option value="08:45">08:45</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="09:30">09:30</option>
+                                            <option value="09:45">09:45</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="10:30">10:30</option>
+                                            <option value="10:45">10:45</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:00">11:45</option>
+                                            <option value="13:00">12:45</option>
+                                            <option value="13:10">13:10</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
+                                            <option value="14:00">14:00</option>
+                                            <option value="14:10">14:10</option>
+                                            <option value="14:30">14:30</option>
+                                            <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
+                                            <option value="15:00">15:00</option>
+                                            <option value="15:10">15:10</option>
+                                            <option value="15:30">15:30</option>
+                                            <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
+                                            <option value="16:00">16:00</option>
+                                            <option value="16:10">16:10</option>
+                                            <option value="17:00">16:40</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- สามารถเพิ่มฟิลด์อื่น ๆ ได้ที่นี่ -->
+                                <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -2322,6 +2409,94 @@ echo '</div>';
                                     icon: 'error'
                                 });
                             }
+                        });
+                    }
+                });
+            });
+            $('.edit-btn').click(function() {
+                var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime
+                var userCode = $(this).data('usercode');
+
+                // ตั้งค่า createDatetime ให้กับฟอร์ม
+                $('#editLeaveForm').data('createdatetime', createDatetime);
+
+                $.ajax({
+                    url: 'get_leave_data.php', // ไฟล์ PHP ที่ดึงข้อมูล
+                    type: 'POST',
+                    data: {
+                        createDatetime: createDatetime,
+                        userCode: userCode
+                    },
+                    dataType: 'json', // แจ้งว่าเราคาดหวังผลลัพธ์เป็น JSON
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error); // แสดงข้อความข้อผิดพลาด
+                        } else {
+                            // ใส่ข้อมูลในฟอร์ม Modal
+                            $('.editLeaveType').val(response.l_leave_id);
+                            $('#editLeaveReason').val(response.l_leave_reason);
+                            $('#editleaveStartDate').val(response.l_leave_start_date);
+
+                            // ตั้งค่าเวลาเริ่มต้น (กรณีเลือกค่าใน select)
+                            var startTime = response.l_leave_start_time;
+                            if (startTime) {
+                                $('#editleaveStartTime').val(startTime);
+                            } else {
+                                // กรณีไม่มีข้อมูลเวลาเริ่มต้น
+                                $('#editleaveStartTime').val(
+                                    '08:00'); // กำหนดค่าเริ่มต้นให้เป็น 08:00
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('ไม่สามารถดึงข้อมูลการลาได้');
+                        console.log(xhr.responseText); // ดูข้อความข้อผิดพลาดจากเซิร์ฟเวอร์
+                    }
+                });
+            });
+
+            // เมื่อ submit ฟอร์ม
+            $('#editLeaveForm').on('submit', function(e) {
+                e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+                // เก็บค่าจากฟอร์ม
+                var editLeaveType = $('.editLeaveType').val();
+                var editLeaveReason = $('#editLeaveReason').val();
+                var editleaveStartDate = $('#editleaveStartDate').val();
+                var editleaveStartTime = $('#editleaveStartTime').val();
+
+                var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime จากฟอร์ม
+
+                // ส่งข้อมูลไปยังเซิร์ฟเวอร์ผ่าน AJAX
+                $.ajax({
+                    url: 'update_leave.php', // ไฟล์ PHP ที่ใช้ในการอัปเดต
+                    type: 'POST',
+                    data: {
+                        createDatetime: createDatetime,
+                        editLeaveType: editLeaveType,
+                        editLeaveReason: editLeaveReason,
+                        editleaveStartDate: editleaveStartDate,
+                        editleaveStartTime: editleaveStartTime
+                    },
+                    success: function(response) {
+                        // แสดงข้อความสำเร็จและปิด Modal
+                        Swal.fire({
+                            title: 'สำเร็จ!',
+                            text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง'
+                        }).then(() => {
+                            $('#editLeaveModal').modal('hide');
+                            location.reload(); // โหลดหน้าซ้ำเพื่ออัปเดตข้อมูล
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        // แสดงข้อความข้อผิดพลาด
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาด',
+                            text: 'ไม่สามารถแก้ไขข้อมูลได้',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง'
                         });
                     }
                 });
