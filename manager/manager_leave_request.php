@@ -599,7 +599,6 @@ $totalLeaveItems = $stmt->fetchColumn();
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
         <div class="table-responsive">
-
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
@@ -1202,7 +1201,7 @@ if ($stmt->rowCount() > 0) {
         echo '<td>' . $row['l_remark2'] . '</td>';
 
         // 28
-        if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
+        if ($row['l_approve_status2'] == 4 || $row['l_approve_status2'] == 5) {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
