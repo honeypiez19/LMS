@@ -1180,7 +1180,9 @@ if ($result2->rowCount() > 0) {
                             <th rowspan="2">สถานะมาสาย</th>
                             <th rowspan="2">สถานะอนุมัติ_1</th>
                             <th rowspan="2">สถานะอนุมัติ_2</th>
+                            <th rowspan="2">สถานะอนุมัติ_3</th>
                             <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                            <th rowspan="2"></th>
                             <th rowspan="2"></th>
                         </tr>
                         <tr class="text-center">
@@ -1233,7 +1235,7 @@ if ($result->rowCount() > 0) {
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
         echo '<tr class="text-center align-middle">';
 
-        // 0
+       // 0
         echo '<td hidden>';
         if ($row['l_leave_id'] == 1) {
             echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>';
@@ -1299,7 +1301,6 @@ if ($result->rowCount() > 0) {
             echo $row['l_leave_reason'];
         }
         echo '</td>';
-        echo '';
 
         // 9
         // 08:45
@@ -1441,35 +1442,35 @@ if ($result->rowCount() > 0) {
 
         // 11
         echo '<td>';
-// Query to check holidays in the leave period
+        // Query to check holidays in the leave period
         $holiday_query = "SELECT COUNT(*) as holiday_count
                   FROM holiday
                   WHERE h_start_date BETWEEN :start_date AND :end_date
                   AND h_holiday_status = 'วันหยุด'
                   AND h_status = 0";
 
-// Prepare the query
+        // Prepare the query
         $holiday_stmt = $conn->prepare($holiday_query);
         $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
         $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
         $holiday_stmt->execute();
 
-// Fetch the holiday count
+        // Fetch the holiday count
         $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
         $holiday_count = $holiday_data['holiday_count'];
-// คำนวณระยะเวลาการลา
+        // คำนวณระยะเวลาการลา
         $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
         $l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
         $interval = $l_leave_start_date->diff($l_leave_end_date);
 
-// คำนวณจำนวนวันลา
+        // คำนวณจำนวนวันลา
         $leave_days = $interval->days - $holiday_count;
 
-// คำนวณจำนวนชั่วโมงและนาทีลา
+        // คำนวณจำนวนชั่วโมงและนาทีลา
         $leave_hours = $interval->h;
         $leave_minutes = $interval->i;
 
-// ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
+        // ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
         $start_hour = (int) $l_leave_start_date->format('H');
         $end_hour = (int) $l_leave_end_date->format('H');
 
@@ -1479,23 +1480,22 @@ if ($result->rowCount() > 0) {
             $leave_hours -= 1;
         }
 
-// ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
+        // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
         if ($leave_hours >= 8) {
             $leave_days += floor($leave_hours / 8);
             $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
         }
 
-// ตรวจสอบการนาที
+        // ตรวจสอบการนาที
         if ($leave_minutes >= 30) {
             $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
         }
 
-// แสดงผลลัพธ์
+        // แสดงผลลัพธ์
         if ($row['l_leave_id'] == 7) {
             echo '';
         } else {
             echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
-
         }
 
         echo '</td>';
@@ -1595,6 +1595,54 @@ if ($result->rowCount() > 0) {
 
         // 17
         echo '<td>';
+        // รอหัวหน้าอนุมัติ
+        if ($row['l_approve_status3'] == 0) {
+            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+        }
+        // รอผจกอนุมัติ
+        elseif ($row['l_approve_status3'] == 1) {
+            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+        }
+        // หัวหน้าอนุมัติ
+        elseif ($row['l_approve_status3'] == 2) {
+            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+        }
+        // หัวหน้าไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 3) {
+            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+        }
+        //  ผจก อนุมัติ
+        elseif ($row['l_approve_status3'] == 4) {
+            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+        }
+        //  ผจก ไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 5) {
+            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+        }
+        // ช่องว่าง
+        elseif ($row['l_approve_status3'] == 6) {
+            echo '';
+        }
+        // รอ GM
+        elseif ($row['l_approve_status3'] == 7) {
+            echo '<div class="text-warning"><b>' . 'รอ GM อนุมัติ' . '</b></div>';
+        }
+        // GM อนุมัติ
+        elseif ($row['l_approve_status3'] == 8) {
+            echo '<div class="text-success"><b>' . 'GM อนุมัติ' . '</b></div>';
+        }
+        // GM ไม่อนุมัติ
+        elseif ($row['l_approve_status3'] == 9) {
+            echo '<div class="text-danger"><b>' . 'GM ไม่อนุมัติ' . '</b></div>';
+        }
+        // ไม่มีสถานะ
+        else {
+            echo 'ไม่พบสถานะ';
+        }
+        echo '</td>';
+
+        // 18
+        echo '<td>';
         if ($row['l_hr_status'] == 0) {
             echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
@@ -1604,9 +1652,24 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 18
-        $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
+        // 19
+        $leaveDate = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
+        $currentDate = date('Y-m-d'); // วันที่ปัจจุบัน
 
+        if ($leaveDate < $currentDate) {
+            // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
+            echo '<td>';
+            echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+            echo '</td>';
+        } else {
+            // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
+            echo '<td>';
+            echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+            echo '</td>';
+        }
+
+        // 20
+        $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
         $dateNow = date('Y-m-d');
         $disabledCancalCheck = (
             $row['l_approve_status'] != 0
@@ -1683,6 +1746,161 @@ echo '</div>';
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal แก้ไขใบลา -->
+        <div class="modal fade" id="editLeaveModal" tabindex="-1" aria-labelledby="editLeaveModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editLeaveModalLabel">แก้ไขการลา</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editLeaveForm">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                    <span style="color: red;">*</span>
+                                    <select class="form-select editLeaveType" required>
+                                        <option selected>เลือกประเภทการลา</option>
+                                        <option value="1">ลากิจได้รับค่าจ้าง</option>
+                                        <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
+                                        <option value="3">ลาป่วย</option>
+                                        <option value="4">ลาป่วยจากงาน</option>
+                                        <option value="5">ลาพักร้อน</option>
+                                        <option value="8">อื่น ๆ</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-12">
+                                    <label for="leaveReason" class="form-label">เหตุผลการลา</label>
+                                    <span style="color: red;">*</span>
+                                    <textarea class="form-control mt-2" id="editLeaveReason" rows="3"
+                                        placeholder="กรุณาระบุเหตุผล"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 row">
+                                <div class="col-6">
+                                    <label for="editLeaveStartDate" class="form-label">วันที่เริ่มต้น</label>
+                                    <span style="color: red;">*</span>
+                                    <input type="text" class="form-control" id="editLeaveStartDate" required>
+                                </div>
+                                <div class=" col-6">
+                                    <label for="editLeaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
+                                    <span style="color: red;">* (<input class="form-label" id="editLeaveStartTime2"
+                                            value="" style="border: none; width: 70px;  color: red;">เวลาเดิม)
+                                    </span>
+                                    <select class="form-select" id="editLeaveStartTime" name="editLeaveStartTime"
+                                        required>
+                                        <option value="08:00" selected>08:00</option>
+                                        <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
+                                        <option value="09:00">09:00</option>
+                                        <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
+                                        <option value="10:00">10:00</option>
+                                        <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
+                                        <option value="11:00">11:00</option>
+                                        <option value="12:00">11:45</option>
+                                        <option value="13:00">12:45</option>
+                                        <option value="13:10">13:10</option>
+                                        <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
+                                        <option value="13:45">13:45</option>
+                                        <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
+                                        <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
+                                        <option value="14:45">14:45</option>
+                                        <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
+                                        <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
+                                        <option value="15:45">15:45</option>
+                                        <option value="16:00">16:00</option>
+                                        <option value="16:10">16:10</option>
+                                        <option value="17:00">16:40</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-6">
+                                    <label for="editleaveEndDate" class="form-label">วันที่สิ้นสุด</label>
+                                    <span style="color: red;">*</span>
+                                    <input type="text" class="form-control" id="editLeaveEndDate" required>
+                                </div>
+                                <div class="col-6">
+                                    <label for="editleaveEndTime" class="form-label">เวลาที่สิ้นสุด</label>
+                                    <span style="color: red;">* (<input class="form-label" id="editLeaveEndTime2"
+                                            value="" style="border: none; width: 70px; color: red;">เวลาเดิม)
+                                    </span><select class="form-select" id="editLeaveEndTime" name="editLeaveEndTime"
+                                        required>
+                                        <option value="08:00">08:00</option>
+                                        <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
+                                        <option value="09:00">09:00</option>
+                                        <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
+                                        <option value="10:00">10:00</option>
+                                        <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
+                                        <option value="11:00">11:00</option>
+                                        <option value="12:00">11:45</option>
+                                        <option value="13:00">12:45</option>
+                                        <option value="13:10">13:10</option>
+                                        <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
+                                        <option value="13:45">13:45</option>
+                                        <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
+                                        <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
+                                        <option value="14:45">14:45</option>
+                                        <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
+                                        <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
+                                        <option value="15:45">15:45</option>
+                                        <option value="16:00">16:00</option>
+                                        <option value="16:10">16:10</option>
+                                        <option value="17:00" selected>16:40</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-12">
+                                    <label for="editTelPhone" class="form-label">เบอร์โทร</label>
+                                    <input type="text" class="form-control" id="editTelPhone">
+                                </div>
+                            </div>
+                            <div class=" mt-3 row">
+                                <div class="col-12">
+                                    <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
+                                    <input class="form-control" type="file" id="editFile" name="editFile" />
+                                    <!-- แสดงชื่อไฟล์เดิม -->
+                                    <small id="currentFile" class="form-text text-muted">
+                                        <!-- ชื่อไฟล์เดิมจะแสดงที่นี่ -->
+                                    </small>
+                                    <!-- Preview รูป -->
+                                    <div class="mt-3"
+                                        style="display: flex; justify-content: center; align-items: center;">
+                                        <img id="imagePreview" src="#" alt="Preview Image"
+                                            style="max-width: 100%; display: none; width: 200px; height: 200px;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -2539,6 +2757,309 @@ echo '</div>';
                             }
                         });
                     }
+                });
+            });
+            $('.edit-btn').click(function() {
+                var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime
+                var userCode = $(this).data('usercode');
+
+                // ตั้งค่า createDatetime ให้กับฟอร์ม
+                $('#editLeaveForm').data('createdatetime', createDatetime);
+
+                $.ajax({
+                    url: 'c_ajax_get_leave.php', // ไฟล์ PHP ที่ดึงข้อมูล
+                    type: 'POST',
+                    data: {
+                        createDatetime: createDatetime,
+                        userCode: userCode
+                    },
+                    dataType: 'json', // แจ้งว่าเราคาดหวังผลลัพธ์เป็น JSON
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error); // แสดงข้อความข้อผิดพลาด
+                        } else {
+
+                            // ใส่ข้อมูลในฟอร์ม Modal
+                            $('.editLeaveType').val(response.l_leave_id);
+                            $('#editLeaveReason').val(response.l_leave_reason);
+                            $('#editLeaveStartDate').val(response.l_leave_start_date);
+                            $('#editLeaveEndDate').val(response.l_leave_end_date);
+                            $('#editTelPhone').val(response.l_phone);
+
+                            var existingFile = response.l_file;
+
+                            // ถ้ามีไฟล์เดิม ให้แสดงชื่อไฟล์และพรีวิว
+                            if (existingFile && existingFile.trim() !== "") {
+                                // แสดงชื่อไฟล์
+                                $('#currentFile').text('ไฟล์เดิม: ' + existingFile);
+
+                                // สร้าง URL สำหรับไฟล์พรีวิว
+                                var fileUrl = '../upload/' +
+                                    existingFile; // เปลี่ยนเป็นเส้นทางของไฟล์ที่ถูกต้องในเซิร์ฟเวอร์
+
+                                // แสดงรูปพรีวิว
+                                var previewImage = $(
+                                    '#imagePreview'); // สมมติว่ามี <img id="imagePreview">
+                                previewImage.attr('src',
+                                    fileUrl); // ตั้งค่า src ของรูปให้เป็น URL ของไฟล์
+                                previewImage.show(); // แสดงรูปพรีวิว
+                            } else {
+                                // ถ้าไม่มีไฟล์ ให้เคลียร์ชื่อไฟล์และซ่อนรูปพรีวิว
+                                $('#currentFile').text('');
+                                $('#imagePreview').hide(); // ซ่อนรูปพรีวิวเมื่อไม่มีไฟล์
+                            }
+
+
+                            // เวลาที่เริ่มต้น
+                            // 08:45
+                            if (response.l_leave_start_time === "09:00:00" && response
+                                .l_remark === "08:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 09:45
+                            else if (response.l_leave_start_time === "10:00:00" && response
+                                .l_remark === "09:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 10:45
+                            else if (response.l_leave_start_time === "11:00:00" && response
+                                .l_remark === "10:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 11:45
+                            else if (response.l_leave_start_time === "12:00:00" && response
+                                .l_remark === "11:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 12:45
+                            else if (response.l_leave_start_time === "13:00:00") {
+                                $('#editLeaveStartTime2').val('12:45:00'); // กำหนดค่าใหม่
+                            }
+                            // 13:10
+                            else if (response.l_leave_start_time === "13:30:00" && response
+                                .l_remark === "13:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 13:40
+                            else if (response.l_leave_start_time === "14:00:00" && response
+                                .l_remark === "13:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 13:45
+                            else if (response.l_leave_start_time === "14:00:00" && response
+                                .l_remark === "13:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 14:10
+                            else if (response.l_leave_start_time === "14:30:00" && response
+                                .l_remark === "14:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 14:40
+                            else if (response.l_leave_start_time === "15:00:00" && response
+                                .l_remark === "14:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 14:45
+                            else if (response.l_leave_start_time === "15:00:00" && response
+                                .l_remark === "14:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 15:10
+                            else if (response.l_leave_start_time === "15:30:00" && response
+                                .l_remark === "15:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 15:40
+                            else if (response.l_leave_start_time === "16:00:00" && response
+                                .l_remark === "15:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 15:45
+                            else if (response.l_leave_start_time === "16:00:00" && response
+                                .l_remark === "15:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 16:10
+                            else if (response.l_leave_start_time === "16:30:00" && response
+                                .l_remark === "16:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_remark);
+                            }
+                            // 16:40
+                            else if (response.l_leave_start_time === "17:00:00") {
+                                $('#editLeaveStartTime2').val('16:40:00');
+                            } else {
+                                $('#editLeaveStartTime2').val(response
+                                    .l_leave_start_time);
+                            }
+
+                            // เวลาที่สิ้นสุด
+                            // 08:45
+                            if (response.l_leave_end_time === "09:00:00" && response
+                                .l_remark === "08:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 09:45
+                            else if (response.l_leave_end_time === "10:00:00" && response
+                                .l_remark === "09:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 10:45
+                            else if (response.l_leave_end_time === "11:00:00" && response
+                                .l_remark === "10:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 11:45
+                            else if (response.l_leave_end_time === "12:00:00" && response
+                                .l_remark === "11:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 12:45
+                            else if (response.l_leave_end_time === "13:00:00" && response
+                                .l_remark === "12:45:00") {
+                                $('#editLeaveEndTime2').val('12:45:00'); // กำหนดค่าใหม่
+                            }
+                            // 13:10
+                            else if (response.l_leave_end_time === "13:30:00" && response
+                                .l_remark === "13:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 13:40
+                            else if (response.l_leave_end_time === "14:00:00" && response
+                                .l_remark === "13:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 13:45
+                            else if (response.l_leave_end_time === "14:00:00" && response
+                                .l_remark === "13:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 14:10
+                            else if (response.l_leave_end_time === "14:30:00" && response
+                                .l_remark === "14:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 14:40
+                            else if (response.l_leave_end_time === "15:00:00" && response
+                                .l_remark === "14:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 14:45
+                            else if (response.l_leave_end_time === "15:00:00" && response
+                                .l_remark === "14:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 15:10
+                            else if (response.l_leave_end_time === "15:30:00" && response
+                                .l_remark === "15:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 15:40
+                            else if (response.l_leave_end_time === "16:00:00" && response
+                                .l_remark === "15:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 15:45
+                            else if (response.l_leave_end_time === "16:00:00" && response
+                                .l_remark === "15:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 16:10
+                            else if (response.l_leave_end_time === "16:30:00" && response
+                                .l_remark === "16:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_remark);
+                            }
+                            // 16:40
+                            else if (response.l_leave_end_time === "17:00:00") {
+                                $('#editLeaveEndTime2').val('16:40:00');
+                            } else {
+                                $('#editLeaveEndTime2').val(response
+                                    .l_leave_end_time);
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('ไม่สามารถดึงข้อมูลการลาได้');
+                        console.log(xhr
+                            .responseText); // ดูข้อความข้อผิดพลาดจากเซิร์ฟเวอร์
+                    }
+                });
+            });
+
+            $('#editLeaveForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var formData = new FormData();
+                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
+                var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+
+                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
+                if (editFile) {
+                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
+                } else if (currentFile) {
+                    formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                }
+
+                // เพิ่มค่าฟอร์มอื่นๆ
+                formData.append('userCode', '<?php echo $userCode; ?>');
+                formData.append('userName', '<?php echo $userName ?>');
+                formData.append('name', '<?php echo $name ?>');
+                formData.append('workplace', '<?php echo $workplace; ?>');
+                formData.append('depart', '<?php echo $depart; ?>');
+                formData.append('subDepart', '<?php echo $subDepart; ?>');
+                formData.append('createDatetime', $(this).data('createdatetime'));
+                formData.append('editLeaveType', $('.editLeaveType').val());
+                formData.append('editLeaveReason', $('#editLeaveReason').val());
+                formData.append('editLeaveStartDate', $('#editLeaveStartDate').val());
+                formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
+                formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
+                formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
+                formData.append('editTelPhone', $('#editTelPhone').val());
+
+                // ส่งข้อมูลผ่าน AJAX
+                $.ajax({
+                    url: 'c_upd_leave.php',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
+                    processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
+                    success: function(response) {
+                        try {
+                            var res = JSON.parse(response);
+                            if (res.status === 'success') {
+                                Swal.fire({
+                                    title: 'สำเร็จ!',
+                                    text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
+                                    icon: 'success',
+                                    confirmButtonText: 'ตกลง',
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: res.message || 'ไม่สามารถแก้ไขข้อมูลได้',
+                                    icon: 'error',
+                                    confirmButtonText: 'ตกลง',
+                                });
+                            }
+                        } catch (error) {
+                            Swal.fire({
+                                title: 'ข้อผิดพลาดในการประมวลผล',
+                                text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
+                                icon: 'error',
+                                confirmButtonText: 'ตกลง',
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาด',
+                            text: 'ไม่สามารถแก้ไขข้อมูลได้',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
+                        });
+                    },
                 });
             });
         });

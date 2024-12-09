@@ -1259,7 +1259,7 @@ if ($result->rowCount() > 0) {
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
         echo '<tr class="text-center align-middle">';
 
-// 0
+        // 0
         echo '<td hidden>';
         if ($row['l_leave_id'] == 1) {
             echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>';
@@ -1712,6 +1712,7 @@ if ($result->rowCount() > 0) {
         } else {
             echo '<td></td>';
         }
+        
         echo '</tr>';
         $rowNumber--;
         // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';

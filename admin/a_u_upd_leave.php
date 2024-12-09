@@ -214,8 +214,9 @@ $sql = "UPDATE leave_list
             l_leave_start_time = :editLeaveStartTime,
             l_leave_end_date = :editLeaveEndDate,
             l_leave_end_time = :editLeaveEndTime,
-            l_approve_status = :proveStatus,
+            l_approve_status = 6,
             l_approve_status2 = 1,
+            l_approve_status3 = 7,
             l_phone = :editTelPhone,
             l_hr_status = 0,
             l_remark = :remark";
@@ -237,7 +238,7 @@ $stmt->bindParam(':editLeaveEndDate', $editLeaveEndDate);
 $stmt->bindParam(':editLeaveEndTime', $editLeaveEndTime);
 $stmt->bindParam(':remark', $remark);
 $stmt->bindParam(':editTelPhone', $editTelPhone);
-$stmt->bindParam(':proveStatus', $proveStatus);
+// $stmt->bindParam(':proveStatus', $proveStatus);
 $stmt->bindParam(':createDatetime', $createDatetime);
 
 // ตรวจสอบว่าไฟล์ถูกอัปโหลดก่อนที่จะ bind ค่า $filename

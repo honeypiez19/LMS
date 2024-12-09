@@ -201,11 +201,11 @@ if ($subDepart == '') {
 //     $proveStatus = 0;
 //     $proveStatus2 = 1;
 //     $proveStatus3 = 6;
-// } else {
-//     $proveStatus = 0;
-//     $proveStatus2 = 1;
-//     $proveStatus3 = 7;
-// }
+else {
+    $proveStatus = 2;
+    $proveStatus2 = 1;
+    $proveStatus3 = 7;
+}
 
 $sql = "UPDATE leave_list
         SET l_leave_id = :editLeaveType,
@@ -214,8 +214,7 @@ $sql = "UPDATE leave_list
             l_leave_start_time = :editLeaveStartTime,
             l_leave_end_date = :editLeaveEndDate,
             l_leave_end_time = :editLeaveEndTime,
-            l_approve_status = :proveStatus,
-            l_approve_status2 = 1,
+            l_approve_status3 = 8,
             l_phone = :editTelPhone,
             l_hr_status = 0,
             l_remark = :remark";
@@ -237,7 +236,7 @@ $stmt->bindParam(':editLeaveEndDate', $editLeaveEndDate);
 $stmt->bindParam(':editLeaveEndTime', $editLeaveEndTime);
 $stmt->bindParam(':remark', $remark);
 $stmt->bindParam(':editTelPhone', $editTelPhone);
-$stmt->bindParam(':proveStatus', $proveStatus);
+// $stmt->bindParam(':proveStatus', $proveStatus);
 $stmt->bindParam(':createDatetime', $createDatetime);
 
 // ตรวจสอบว่าไฟล์ถูกอัปโหลดก่อนที่จะ bind ค่า $filename
@@ -253,80 +252,44 @@ if ($stmt->execute()) {
     $URL = 'https://lms.system-samt.com/';
     $message = "มีการแก้ไขใบลา $name\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $URL";
 
+    // ตรวจสอบเงื่อนไขตามแผนก
     if ($depart == 'RD') {
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'RD'");
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
 
-    } else if ($depart == 'Office') {
-        // บัญชี
-        if ($subDepart == 'AC') {
-            // แจ้งเตือนพี่แวว
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'AC'");
-        }
-        // เซลล์
-        else if ($subDepart == 'Sales') {
-            // แจ้งเตือนพี่เจี๊ยบหรือพี่อ้อม
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'Sales'");
-        }
-        // สโตร์
-        else if ($subDepart == 'Store') {
-            // แจ้งเตือนพี่เก๋
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Store'");
-        }
-        // HR
-        else if ($subDepart == 'All') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-        }
-        // พี่เต๋ / พี่น้อย / พี่ไว
-        else if ($subDepart == '') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-        }
-    } else if ($depart == 'CAD1') {
-        if ($subDepart == 'Modeling') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Modeling'");
-        } else if ($subDepart == 'Design') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Design'");
-        } else {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Design'");
-        }
-    } else if ($depart == 'CAD2') {
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAD2'");
-    } else if ($depart == 'CAM') {
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAM'");
     } else {
-        echo "ไม่พบเงื่อนไข";
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
     }
 
+    // Bind และ Execute
     $stmt->bindParam(':workplace', $workplace);
     $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // ถ้ามีผลลัพธ์ของการค้นหาก็ส่ง Line Notify
+    // ตรวจสอบผลลัพธ์
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($result) {
         $token = $result['e_token'];
 
         // การส่ง LINE Notify
         $url = "https://notify-api.line.me/api/notify";
-        $data = [
-            'message' => $message,
-        ];
-        $headers = [
-            'Authorization: Bearer ' . $token,
-        ];
+        $data = ['message' => $message];
+        $headers = ['Authorization: Bearer ' . $token];
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // เปลี่ยนเป็น http_build_query
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         // ส่งคำขอ
-        $result = curl_exec($ch);
+        $notifyResult = curl_exec($ch);
         curl_close($ch);
-    }
 
-    // ส่งผลลัพธ์การอัปเดตข้อมูล
-    echo json_encode(['status' => 'success', 'message' => 'อัปเดตข้อมูลสำเร็จ']);
+        // ส่งผลลัพธ์การอัปเดตข้อมูล
+        echo json_encode(['status' => 'success', 'message' => 'อัปเดตข้อมูลสำเร็จ']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'ไม่พบผู้รับการแจ้งเตือน']);
+    }
 } else {
     echo json_encode(['status' => 'error', 'message' => 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล']);
 }

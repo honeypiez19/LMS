@@ -252,40 +252,52 @@ if ($stmt->execute()) {
     $URL = 'https://lms.system-samt.com/';
     $message = "มีการแก้ไขใบลา $name\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $URL";
 
+    // ตรวจสอบเงื่อนไขตามแผนก
     if ($depart == 'RD') {
         $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'RD'");
-        $stmt->bindParam(':workplace', $workplace);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // ถ้ามีผลลัพธ์ของการค้นหาก็ส่ง Line Notify
-        if ($result) {
-            $token = $result['e_token'];
-
-            // การส่ง LINE Notify
-            $url = "https://notify-api.line.me/api/notify";
-            $data = [
-                'message' => $message,
-            ];
-            $headers = [
-                'Authorization: Bearer ' . $token,
-            ];
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // เปลี่ยนเป็น http_build_query
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-            // ส่งคำขอ
-            $result = curl_exec($ch);
-            curl_close($ch);
-        }
+    } elseif ($depart == 'Office' || $depart == 'Management') {
+        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+    } elseif ($depart == 'CAD1') {
+        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
+    } elseif ($depart == 'CAD2') {
+        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department2 = 'CAD2'");
+    } elseif ($depart == 'CAM') {
+        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM'");
+    } else {
+        echo "ไม่พบเงื่อนไข";
+        exit;
     }
 
-    // ส่งผลลัพธ์การอัปเดตข้อมูล
-    echo json_encode(['status' => 'success', 'message' => 'อัปเดตข้อมูลสำเร็จ']);
+    // Bind และ Execute
+    $stmt->bindParam(':workplace', $workplace);
+    $stmt->execute();
+
+    // ตรวจสอบผลลัพธ์
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) {
+        $token = $result['e_token'];
+
+        // การส่ง LINE Notify
+        $url = "https://notify-api.line.me/api/notify";
+        $data = ['message' => $message];
+        $headers = ['Authorization: Bearer ' . $token];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        // ส่งคำขอ
+        $notifyResult = curl_exec($ch);
+        curl_close($ch);
+
+        // ส่งผลลัพธ์การอัปเดตข้อมูล
+        echo json_encode(['status' => 'success', 'message' => 'อัปเดตข้อมูลสำเร็จ']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'ไม่พบผู้รับการแจ้งเตือน']);
+    }
 } else {
     echo json_encode(['status' => 'error', 'message' => 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล']);
 }
