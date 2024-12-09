@@ -94,7 +94,7 @@ if (!empty($late_entries_list)) {
         </button> -->
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
-                <form class="mt-3 mb-3 row" method="post">
+                <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
                     <div class="col-auto">
                         <?php
@@ -109,7 +109,7 @@ if (isset($_POST['year'])) {
     $selectedYear = $currentYear;
 }
 
-echo "<select class='form-select' name='year' id='selectedYear'>";
+echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 
 // เพิ่มตัวเลือกของปีหน้า
 $nextYear = $currentYear + 1;
@@ -148,7 +148,7 @@ if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
 }
 
-echo "<select class='form-select' name='month' id='selectedMonth'>";
+echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 foreach ($months as $key => $monthName) {
     echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
 }
@@ -156,12 +156,13 @@ echo "</select>";
 ?>
                     </div>
 
-                    <div class="col-auto">
+                    <div class="col-auto" hidden>
                         <button type="submit" class="btn btn-primary">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </div>
                 </form>
+
 
                 <!-- ปุ่มระเบียบการลา -->
                 <button type="button" class="button-shadow btn btn-primary" data-bs-toggle="modal"

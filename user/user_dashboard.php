@@ -43,6 +43,18 @@ $userCode = $_SESSION['s_usercode'];
             max-width: 100%;
         }
     }
+
+    #imagePreview {
+        transition: transform 0.3s ease;
+        /* เพิ่มการเคลื่อนไหวเนียนๆ */
+    }
+
+    #imagePreview:hover {
+        transform: scale(3.0);
+        /* ขยายขนาดรูป 1.5 เท่า */
+        cursor: pointer;
+        /* แสดงเคอร์เซอร์เป็น pointer เมื่อวางเมาส์ที่รูป */
+    }
     </style>
 </head>
 
@@ -1390,9 +1402,20 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 19
-        echo '<td>';
-        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-        echo '</td>';
+        $leaveDate = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
+        $currentDate = date('Y-m-d'); // วันที่ปัจจุบัน
+
+        if ($leaveDate < $currentDate) {
+            // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
+            echo '<td>';
+            echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+            echo '</td>';
+        } else {
+            // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
+            echo '<td>';
+            echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+            echo '</td>';
+        }
 
         // 20
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
@@ -1614,9 +1637,14 @@ echo '</div>';
                                         <small id="currentFile" class="form-text text-muted">
                                             <!-- ชื่อไฟล์เดิมจะแสดงที่นี่ -->
                                         </small>
+                                        <!-- Preview รูป -->
+                                        <div class="mt-3"
+                                            style="display: flex; justify-content: center; align-items: center;">
+                                            <img id="imagePreview" src="#" alt="Preview Image"
+                                                style="max-width: 100%; display: none; width: 200px; height: 200px;" />
+                                        </div>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 d-flex justify-content-end">
                                     <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
                                 </div>
@@ -1809,6 +1837,30 @@ echo '</div>';
         }
 
         $(document).ready(function() {
+            document.getElementById("editFile").addEventListener("change", function(event) {
+                const fileInput = event.target;
+                const file = fileInput.files[0]; // ไฟล์ที่อัปโหลด
+                const preview = document.getElementById("imagePreview");
+                const currentFile = document.getElementById("currentFile");
+
+                if (file) {
+                    // แสดงชื่อไฟล์
+                    currentFile.textContent = `ชื่อไฟล์: ${file.name}`;
+
+                    // แสดงพรีวิวรูปภาพ
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result; // ตั้งค่า src ให้ preview
+                        preview.style.display = "block"; // แสดง img
+                    };
+                    reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL
+                } else {
+                    currentFile.textContent = "ยังไม่มีไฟล์ที่เลือก";
+                    preview.src = "#";
+                    preview.style.display = "none"; // ซ่อน img
+                }
+            });
+
             $('.filter-card').click(function() {
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
                 var userCode = '<?php echo $userCode; ?>';
@@ -2396,7 +2448,7 @@ echo '</div>';
                 $('#editLeaveForm').data('createdatetime', createDatetime);
 
                 $.ajax({
-                    url: 'get_leave_data.php', // ไฟล์ PHP ที่ดึงข้อมูล
+                    url: 'u_ajax_get_leave.php', // ไฟล์ PHP ที่ดึงข้อมูล
                     type: 'POST',
                     data: {
                         createDatetime: createDatetime,
@@ -2415,13 +2467,29 @@ echo '</div>';
                             $('#editLeaveEndDate').val(response.l_leave_end_date);
                             $('#editTelPhone').val(response.l_phone);
 
-                            // สมมติว่า response.l_file คือชื่อไฟล์เดิมที่ได้รับจาก server
                             var existingFile = response.l_file;
 
-                            // ถ้ามีไฟล์เดิม ให้แสดงชื่อไฟล์
-                            if (existingFile) {
+                            // ถ้ามีไฟล์เดิม ให้แสดงชื่อไฟล์และพรีวิว
+                            if (existingFile && existingFile.trim() !== "") {
+                                // แสดงชื่อไฟล์
                                 $('#currentFile').text('ไฟล์เดิม: ' + existingFile);
+
+                                // สร้าง URL สำหรับไฟล์พรีวิว
+                                var fileUrl = '../upload/' +
+                                    existingFile; // เปลี่ยนเป็นเส้นทางของไฟล์ที่ถูกต้องในเซิร์ฟเวอร์
+
+                                // แสดงรูปพรีวิว
+                                var previewImage = $(
+                                    '#imagePreview'); // สมมติว่ามี <img id="imagePreview">
+                                previewImage.attr('src',
+                                    fileUrl); // ตั้งค่า src ของรูปให้เป็น URL ของไฟล์
+                                previewImage.show(); // แสดงรูปพรีวิว
+                            } else {
+                                // ถ้าไม่มีไฟล์ ให้เคลียร์ชื่อไฟล์และซ่อนรูปพรีวิว
+                                $('#currentFile').text('');
+                                $('#imagePreview').hide(); // ซ่อนรูปพรีวิวเมื่อไม่มีไฟล์
                             }
+
 
                             // เวลาที่เริ่มต้น
                             // 08:45
@@ -2445,9 +2513,8 @@ echo '</div>';
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
                             // 12:45
-                            else if (response.l_leave_start_time === "13:00:00" && response
-                                .l_remark === "12:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                            else if (response.l_leave_start_time === "13:00:00") {
+                                $('#editLeaveStartTime2').val('12:45:00'); // กำหนดค่าใหม่
                             }
                             // 13:10
                             else if (response.l_leave_start_time === "13:30:00" && response
@@ -2500,9 +2567,8 @@ echo '</div>';
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
                             // 16:40
-                            else if (response.l_leave_start_time === "17:00:00" && response
-                                .l_remark === "16:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                            else if (response.l_leave_start_time === "17:00:00") {
+                                $('#editLeaveStartTime2').val('16:40:00');
                             } else {
                                 $('#editLeaveStartTime2').val(response
                                     .l_leave_start_time);
@@ -2532,7 +2598,7 @@ echo '</div>';
                             // 12:45
                             else if (response.l_leave_end_time === "13:00:00" && response
                                 .l_remark === "12:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val('12:45:00'); // กำหนดค่าใหม่
                             }
                             // 13:10
                             else if (response.l_leave_end_time === "13:30:00" && response
@@ -2585,9 +2651,8 @@ echo '</div>';
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 16:40
-                            else if (response.l_leave_end_time === "17:00:00" && response
-                                .l_remark === "16:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                            else if (response.l_leave_end_time === "17:00:00") {
+                                $('#editLeaveEndTime2').val('16:40:00');
                             } else {
                                 $('#editLeaveEndTime2').val(response
                                     .l_leave_end_time);
@@ -2617,7 +2682,12 @@ echo '</div>';
                 }
 
                 // เพิ่มค่าฟอร์มอื่นๆ
+                formData.append('userCode', '<?php echo $userCode; ?>');
+                formData.append('userName', '<?php echo $userName ?>');
+                formData.append('name', '<?php echo $name ?>');
                 formData.append('workplace', '<?php echo $workplace; ?>');
+                formData.append('depart', '<?php echo $depart; ?>');
+                formData.append('subDepart', '<?php echo $subDepart; ?>');
                 formData.append('createDatetime', $(this).data('createdatetime'));
                 formData.append('editLeaveType', $('.editLeaveType').val());
                 formData.append('editLeaveReason', $('#editLeaveReason').val());
@@ -2629,7 +2699,7 @@ echo '</div>';
 
                 // ส่งข้อมูลผ่าน AJAX
                 $.ajax({
-                    url: 'update_leave.php',
+                    url: 'u_upd_leave.php',
                     type: 'POST',
                     data: formData,
                     contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData

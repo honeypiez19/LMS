@@ -481,10 +481,10 @@ WHERE
     li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (7)
-    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    AND YEAR(li.l_create_datetime) = :selectedYear";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    $sql .= " AND Month(li.l_create_datetime) = :selectedMonth ";
 }
 
 $sql .= " AND (
