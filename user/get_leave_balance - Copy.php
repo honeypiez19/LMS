@@ -62,36 +62,43 @@ $stmt_leave->execute();
 $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
 
 if ($result_leave) {
-    $days = $result_leave['total_leave_days'] ?? 0; // จำนวนวันที่ใช้ลาไปแล้ว
-    $hours = $result_leave['total_leave_hours'] ?? 0; // จำนวนชั่วโมงที่ใช้ลาไปแล้ว
-    $minutes = $result_leave['total_leave_minutes'] ?? 0; // จำนวนที่ใช้ลาไปแล้วเป็นนาที
+    // จำนวนวันและเวลาในการใช้ลา
+    $days_used = $result_leave['total_leave_days'] ?? 0; // วันที่ใช้ไป
+    $hours_used = $result_leave['total_leave_hours'] ?? 0; // ชั่วโมงที่ใช้ไป
+    $minutes_used = $result_leave['total_leave_minutes'] ?? 0; // นาทีที่ใช้ไป
 
-    // Employee leave balances
-    $total_personal = $result_leave['total_personal'] ?? 0; // จำนวนวันลาทั้งหมด
-    $total_personal_no = $result_leave['total_personal_no'] ?? 0; // วันลาแบบไม่ระบุเหตุผล
-    $total_sick = $result_leave['total_sick'] ?? 0; // วันลาป่วย
-    $total_sick_work = $result_leave['total_sick_work'] ?? 0; // วันลาป่วยจากงาน
-    $total_annual = $result_leave['total_annual'] ?? 0; // วันลาประจำปี
-    $total_other = $result_leave['total_other'] ?? 0; // วันลาประเภทอื่น
-    $total_late = $result_leave['late_count'] ?? 0; // จำนวนวันที่มาสาย
+    // จำนวนวันลาแบบต่างๆ
+    $total_personal = $result_leave['total_personal'] ?? 0; // จำนวนวันลาโดยรวม
+    $total_sick = $result_leave['total_sick'] ?? 0;
+    $total_annual = $result_leave['total_annual'] ?? 0;
+    $total_other = $result_leave['total_other'] ?? 0;
 
-    // คำนวณหาจำนวนวันคงเหลือจากจำนวนวันลา (ทำงาน 1 วัน 8 ชั่วโมง)
-    $total_hours_available = $total_personal * 8;  // แปลงจำนวนวันทั้งหมดเป็นชั่วโมง (1 วัน = 8 ชั่วโมง)
-    $total_hours_used = $days * 8 + $hours + floor($minutes / 60);  // คำนวณจำนวนชั่วโมงที่ใช้ไปแล้ว
-    $remaining_hours = $total_hours_available - $total_hours_used;  // คำนวณชั่วโมงที่เหลือ
+    // คำนวณวันลาเต็มวันจากการใช้ชั่วโมง
+    // 1 วัน = 8 ชั่วโมง
+    $days_used += floor($hours_used / 8); // คำนวณวันจากชั่วโมง
+    $hours_used = $hours_used % 8; // คงเหลือชั่วโมงที่ไม่ครบ 8
 
-    // คำนวณวันคงเหลือจากชั่วโมงที่เหลือ
-    $remaining_days = floor($remaining_hours / 8);  // แปลงชั่วโมงที่เหลือเป็นวัน
-    $remaining_hours = $remaining_hours % 8;  // คำนวณชั่วโมงที่เหลือหลังจากแปลงเป็นวัน
-
-    // คำนวณนาทีคงเหลือ
-    $remaining_minutes = $remaining_hours * 60 - $minutes;  // คำนวณนาทีที่เหลือจากชั่วโมงที่เหลือ
-
-    if ($remaining_minutes < 0) {
-        $remaining_minutes = 0;
+    // ปรับนาทีเป็นชั่วโมง ถ้านาทีมากกว่า 60 นาที
+    if ($minutes_used >= 60) {
+        $hours_used += floor($minutes_used / 60);
+        $minutes_used = $minutes_used % 60;
     }
 
-    // ผลลัพธ์ที่จะแสดง
+    // คำนวณวันคงเหลือ
+    $remaining_days = $total_personal - $days_used;
+
+    // คำนวณชั่วโมงคงเหลือ
+    $remaining_hours = ($total_personal * 8) - ($days_used * 8 + $hours_used);
+
+    // คำนวณนาทีคงเหลือ
+    $remaining_minutes = $remaining_hours * 60 - $minutes_used;
+
+    // ถ้านาทีคงเหลือเป็นค่าลบ จะตั้งให้เป็น 0
+    if ($remaining_minutes < 0) {
+        $remaining_minutes = 0;
+    }    
+
+    // แสดงผลลัพธ์
     if ($leaveType == 1) {
         echo json_encode([
             'remaining_days' => $remaining_days,
@@ -100,3 +107,4 @@ if ($result_leave) {
         ]);
     }
 }
+
