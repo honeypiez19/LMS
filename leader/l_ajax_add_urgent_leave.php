@@ -32,9 +32,159 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentEndDate = date('Y-m-d', strtotime($_POST['urgentEndDate']));
     $urgentEndTime = $_POST['urgentEndTime'];
 
+    // 08:45
+    if ($urgentStartTime == '08:45') {
+        $urgentStartTimeLine = '08:45';
+        $urgentStartTime = '09:00';
+        $remark = '08:45:00';
+    }
+    // 09:45
+    else if ($urgentStartTime == '09:45') {
+        $urgentStartTimeLine = '09:45';
+        $urgentStartTime = '10:00';
+        $remark = '09:45:00';
+    }
+    // 10:45
+    else if ($urgentStartTime == '10:45') {
+        $urgentStartTimeLine = '10:45';
+        $urgentStartTime = '11:00';
+        $remark = '10:45:00';
+    }
+    // 11:45
+    else if ($urgentStartTime == '12:00') {
+        $urgentStartTimeLine = '11:45';
+    }
+    // 12:45
+    else if ($urgentStartTime == '13:00') {
+        $urgentStartTimeLine = '12:45';
+    }
+    // 13:15
+    else if ($urgentStartTime == '13:30') {
+        $urgentStartTimeLine = '13:15';
+        $urgentStartTime = '13:30';
+        $remark = '13:15:00';
+    }
+    // 13:45
+    else if ($urgentStartTime == '14:00') {
+        $urgentStartTimeLine = '13:45';
+        $urgentStartTime = '14:00';
+        $remark = '13:45:00';
+    }
+    // 14:15
+    else if ($urgentStartTime == '14:30') {
+        $urgentStartTimeLine = '14:15';
+        $urgentStartTime = '14:30';
+        $remark = '14:15:00';
+    }
+    // 14:45
+    else if ($urgentStartTime == '15:00') {
+        $urgentStartTimeLine = '14:45';
+        $urgentStartTime = '15:00';
+        $remark = '14:45:00';
+    }
+    // 15:15
+    else if ($urgentStartTime == '15:30') {
+        $urgentStartTimeLine = '15:15';
+        $urgentStartTime = '15:30';
+        $remark = '15:15:00';
+    }
+    // 15:45
+    else if ($urgentStartTime == '16:00') {
+        $urgentStartTimeLine = '15:45';
+        $urgentStartTime = '16:00';
+        $remark = '15:45:00';
+    }
+    // 16:15
+    else if ($urgentStartTime == '16:30') {
+        $urgentStartTimeLine = '16:10';
+        $urgentStartTime = '16:30';
+        $remark = '16:10:00';
+    }
+    // 16:40
+    else if ($urgentStartTime == '17:00') {
+        $urgentStartTimeLine = '16:40';
+    } else {
+        $urgentStartTimeLine = $urgentStartTime;
+    }
+
+    // 08:45
+    if ($urgentEndTime == '08:45') {
+        $urgentEndTimeLine = '08:45';
+        $urgentEndTime = '09:00';
+        $remark = '08:45:00';
+    }
+    // 09:45
+    else if ($leaveTimeEnd == '09:45') {
+        $urgentEndTimeLine = '09:45';
+        $urgentEndTime = '10:00';
+        $remark = '09:45:00';
+    }
+    // 10:45
+    else if ($urgentEndTime == '10:45') {
+        $urgentEndTimeLine = '10:45';
+        $urgentEndTime = '11:00';
+        $remark = '10:45:00';
+    }
+    // 11:45
+    else if ($urgentEndTime == '12:00') {
+        $urgentEndTimeLine = '11:45';
+    }
+    // 12:45
+    else if ($urgentEndTime == '13:00') {
+        $urgentEndTimeLine = '12:45';
+    }
+    // 13:15
+    else if ($urgentEndTime == '13:30') {
+        $urgentEndTimeLine = '13:15';
+        $urgentEndTime = '13:30';
+        $remark = '13:15:00';
+    }
+    // 13:45
+    else if ($urgentEndTime == '14:00') {
+        $urgentEndTimeLine = '13:45';
+        $urgentEndTime = '14:00';
+        $remark = '13:45:00';
+    }
+    // 14:15
+    else if ($urgentEndTime == '14:30') {
+        $urgentEndTimeLine = '14:15';
+        $urgentEndTime = '14:30';
+        $remark = '14:15:00';
+    }
+    // 14:45
+    else if ($urgentEndTime == '15:00') {
+        $urgentEndTimeLine = '14:45';
+        $urgentEndTime = '15:00';
+        $remark = '14:45:00';
+    }
+    // 15:15
+    else if ($urgentEndTime == '15:30') {
+        $urgentEndTimeLine = '15:15';
+        $urgentEndTime = '15:30';
+        $remark = '15:15:00';
+    }
+    // 15:45
+    else if ($urgentEndTime == '16:00') {
+        $urgentEndTimeLine = '15:45';
+        $urgentEndTime = '16:00';
+        $remark = '15:45:00';
+    }
+    // 16:15
+    else if ($urgentEndTime == '16:30') {
+        $urgentEndTimeLine = '16:15';
+        $urgentEndTime = '16:30';
+        $remark = '16:15:00';
+    }
+    // 16:40
+    else if ($urgentEndTime == '17:00') {
+        $urgentEndTimeLine = '16:40';
+    } else {
+        $urgentEndTimeLine = $urgentEndTime;
+    }
+
     // วันที่สร้างใบลาเร่งด่วน
     $createDatetime = date('Y-m-d H:i:s');
-    $remark = 'ลาฉุกเฉิน';
+    $remark2 = 'ลาฉุกเฉิน';
 
     $leaveStatus = 0;
 
@@ -64,10 +214,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_remark, l_leave_status, l_hr_status, l_approve_status,
     l_approve_name,
     l_approve_datetime,
-    l_level, l_approve_status2, l_workplace)
+    l_level, l_approve_status2, l_workplace, l_remark)
     VALUES (:userCode, :userName, :name, :depart, :telPhone, :urgentLeaveType, :urgentLeaveReason, :urgentStartDate, :urgentStartTime,
     :urgentEndDate, :urgentEndTime, :createDatetime, :filename, :remark, :leaveStatus, :comfirmStatus, :proveStatus,   :proveName,
-    :proveDate, :level, :proveStatus2, :workplace)");
+    :proveDate, :level, :proveStatus2, :workplace,  :remark2)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -84,6 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':createDatetime', $createDatetime);
     $stmt->bindParam(':filename', $filename);
     $stmt->bindParam(':remark', $remark);
+    $stmt->bindParam(':remark2', $remark2);
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
@@ -110,18 +261,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // แจ้งเตือนไปที่พี่ตุ๊ก
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
                 $stmt->bindParam(':workplace', $workplace);
-            }
-            else if ($depart == 'CAD1') {
+            } else if ($depart == 'CAD1') {
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
                 $stmt->bindParam(':workplace', $workplace);
             } else if ($depart == 'CAD2') {
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department2 = 'CAD2'");
                 $stmt->bindParam(':workplace', $workplace);
-    
+
             } else if ($depart == 'CAM') {
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM'");
                 $stmt->bindParam(':workplace', $workplace);
-            } 
+            }
         } else if ($level == 'chief') {
             if ($depart == 'Management') {
                 // แจ้งเตือนไปที่พี่ตุ๊ก
@@ -143,7 +293,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($managers) {
             foreach ($managers as $manager) {
                 $sToken = $manager['e_token'];
-                $sMessage = "มีใบลาด่วนของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\nวันเวลาที่ลา : $urgentStartDate $urgentStartTime ถึง $urgentEndDate $urgentEndTime\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+                $sMessage = "มีใบลาด่วนของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\nวันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
 
                 $chOne = curl_init();
                 curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");

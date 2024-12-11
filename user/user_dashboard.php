@@ -607,8 +607,7 @@ echo '</div>'; // Close the row div
                                         <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ -
                                             วัน</span>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="leaveType" required
-                                            onchange="checkDays(this.value)">
+                                        <select class="form-select" id="leaveType" required>
                                             <option selected>เลือกประเภทการลา</option>
                                             <option value=" 1">ลากิจได้รับค่าจ้าง</option>
                                             <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
@@ -617,6 +616,11 @@ echo '</div>'; // Close the row div
                                             <option value="5">ลาพักร้อน</option>
                                             <option value="8">อื่น ๆ</option>
                                         </select>
+                                    </div>
+                                    <div id="leave-balance">
+                                        <p>วันเหลือ: <span id="remaining-days">0</span></p>
+                                        <p>ชั่วโมงเหลือ: <span id="remaining-hours">0</span></p>
+                                        <p>นาทีเหลือ: <span id="remaining-minutes">0</span></p>
                                     </div>
                                 </div>
                                 <div class="mt-3 row">
@@ -649,22 +653,13 @@ echo '</div>'; // Close the row div
                                             <option value="11:00">11:00</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:00">14:00</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:30">14:30</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:30">15:30</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="16:10">16:10</option>
+                                            <option value="13:30">13:15</option>
+                                            <option value="14:00">13:45</option>
+                                            <option value="14:30">14:15</option>
+                                            <option value="15:00">14:45</option>
+                                            <option value="15:30">15:15</option>
+                                            <option value="16:00">15:45</option>
+                                            <option value="16:30">16:15</option>
                                             <option value="17:00">16:40</option>
                                         </select>
                                     </div>
@@ -691,22 +686,13 @@ echo '</div>'; // Close the row div
                                             <option value="11:00">11:00</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:00">14:00</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:30">14:30</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:30">15:30</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="16:10">16:10</option>
+                                            <option value="13:30">13:15</option>
+                                            <option value="14:00">13:45</option>
+                                            <option value="14:30">14:15</option>
+                                            <option value="15:00">14:45</option>
+                                            <option value="15:30">15:15</option>
+                                            <option value="16:00">15:45</option>
+                                            <option value="16:30">16:15</option>
                                             <option value="17:00" selected>16:40</option>
                                         </select>
                                     </div>
@@ -814,22 +800,13 @@ if ($result2->rowCount() > 0) {
                                             <option value="11:00">11:00</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:00">14:00</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:30">14:30</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:30">15:30</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="16:10">16:10</option>
+                                            <option value="13:30">13:15</option>
+                                            <option value="14:00">13:45</option>
+                                            <option value="14:30">14:15</option>
+                                            <option value="15:00">14:45</option>
+                                            <option value="15:30">15:15</option>
+                                            <option value="16:00">15:45</option>
+                                            <option value="16:30">16:15</option>
                                             <option value="17:00">16:40</option>
                                         </select>
                                     </div>
@@ -857,22 +834,13 @@ if ($result2->rowCount() > 0) {
                                             <option value="11:00">11:00</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:00">14:00</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:30">14:30</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:30">15:30</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="16:10">16:10</option>
+                                            <option value="13:30">13:15</option>
+                                            <option value="14:00">13:45</option>
+                                            <option value="14:30">14:15</option>
+                                            <option value="15:00">14:45</option>
+                                            <option value="15:30">15:15</option>
+                                            <option value="16:00">15:45</option>
+                                            <option value="16:30">16:15</option>
                                             <option value="17:00" selected>16:40</option>
                                         </select>
                                     </div>
@@ -1072,45 +1040,33 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
         }
-        // 13:10
-        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        // 13:15
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:15:00</td>';
         }
         // 13:45
         else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
         }
-        // 14:10
-        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        // 14:15
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:15:00</td>';
         }
         // 14:45
         else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
         }
-        // 15:10
-        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        // 15:15
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:15:00</td>';
         }
         // 15:45
         else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
         }
-        // 16:10
-        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        // 16:15
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:15:00</td>';
         }
         // 16:40
         else if ($row['l_leave_start_time'] == '17:00:00') {
@@ -1141,51 +1097,39 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
         }
-        // 13:10
-        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        // 13:15
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:15:00</td>';
         }
         // 13:45
         else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
         }
-        // 14:10
-        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        // 14:15
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:15:00</td>';
         }
         // 14:45
         else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
         }
-        // 15:10
-        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        // 15:15
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:15:00</td>';
         }
         // 15:45
         else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
         }
-        // 16:10
-        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        // 16:15
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:15:00</td>';
         }
         // 16:40
         else if ($row['l_leave_end_time'] == '17:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
-            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_end_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
@@ -1402,8 +1346,11 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 19
-        $leaveDate = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
+        $leaveDate = $row['l_leave_end_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
         $currentDate = date('Y-m-d'); // วันที่ปัจจุบัน
+
+        // echo "วันที่ลาสิ้นสุด :" . $leaveDate . " ";
+        // echo "วันที่ปัจจุบัน\n" . $currentDate;
 
         if ($leaveDate < $currentDate) {
             // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
@@ -1420,10 +1367,11 @@ if ($result->rowCount() > 0) {
         // 20
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
         $dateNow = date('Y-m-d');
+
         $disabledCancalCheck = (
             $row['l_approve_status'] != 0
             && $row['l_approve_status2'] != 1
-            && $row['l_leave_start_date'] < $dateNow
+            && $row['l_leave_end_date'] < $dateNow
         ) ? 'disabled' : '';
 
         $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
@@ -1559,22 +1507,13 @@ echo '</div>';
                                             <option value="11:00">11:00</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:00">14:00</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:30">14:30</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:30">15:30</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="16:10">16:10</option>
+                                            <option value="13:30">13:15</option>
+                                            <option value="14:00">13:45</option>
+                                            <option value="14:30">14:15</option>
+                                            <option value="15:00">14:45</option>
+                                            <option value="15:30">15:15</option>
+                                            <option value="16:00">15:45</option>
+                                            <option value="16:30">16:15</option>
                                             <option value="17:00">16:40</option>
                                         </select>
                                     </div>
@@ -1603,22 +1542,13 @@ echo '</div>';
                                             <option value="11:00">11:00</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:00">14:00</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:30">14:30</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:30">15:30</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="16:10">16:10</option>
+                                            <option value="13:30">13:15</option>
+                                            <option value="14:00">13:45</option>
+                                            <option value="14:30">14:15</option>
+                                            <option value="15:00">14:45</option>
+                                            <option value="15:30">15:15</option>
+                                            <option value="16:00">15:45</option>
+                                            <option value="16:30">16:15</option>
                                             <option value="17:00" selected>16:40</option>
                                         </select>
                                     </div>
@@ -1695,147 +1625,6 @@ echo '</div>';
             return days; // คืนค่าจำนวนวันที่คำนวณได้
         }
 
-        function checkDays(typeLeave) {
-            var totalDaysAlert = $('[name="totalDays"]');
-            var startDate = $('#startDate').val();
-            var alertMessage = '';
-            var remainingDays = 0,
-                remainingHours = 0,
-                remainingMinutes = 0;
-
-            var currentLeaveDays = 0,
-                currentLeaveHours = 0,
-                currentLeaveMinutes = 0,
-                totalLeave = 0;
-
-            // เช็คปีว่าเป็นปีปัจจุบันหรือปีถัดไป
-            var currentYear = new Date().getFullYear(); // ปีปัจจุบัน
-            var startDateObj = new Date(startDate); // สร้างตัวแปร Date จาก startDate
-            var startYear = startDateObj.getFullYear(); // ปีของวันที่ลาเริ่มต้น
-
-            // เช็คว่า startDate เป็นปีถัดไปหรือไม่
-            if (startYear > currentYear) {
-                // รีเซ็ตสิทธิ์การลา
-                if (typeLeave == 1) {
-                    $('input[name="personal_days"]').val(0);
-                    $('input[name="personal_hours"]').val(0);
-                    $('input[name="personal_minutes"]').val(0);
-                    currentLeaveDays = 0;
-                    currentLeaveHours = 0;
-                    currentLeaveMinutes = 0;
-                    totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
-                } else if (typeLeave == 2) {
-                    $('input[name="personnel_no_days"]').val(0);
-                    $('input[name="personal_no_hours"]').val(0);
-                    $('input[name="personal_no_minutes"]').val(0);
-                    currentLeaveDays = 0;
-                    currentLeaveHours = 0;
-                    currentLeaveMinutes = 0;
-                    totalLeave = parseFloat($('input[name="total_personal_no"]').val()) || 0;
-                } else if (typeLeave == 3) {
-                    $('input[name="sick_days"]').val(0);
-                    $('input[name="sick_hours"]').val(0);
-                    $('input[name="sick_minutes"]').val(0);
-                    currentLeaveDays = 0;
-                    currentLeaveHours = 0;
-                    currentLeaveMinutes = 0;
-                    totalLeave = parseFloat($('input[name="total_sick"]').val()) || 0;
-                } else if (typeLeave == 4) {
-                    $('input[name="sick_work_days"]').val(0);
-                    $('input[name="sick_work_hours"]').val(0);
-                    $('input[name="sick_work_minutes"]').val(0);
-                    currentLeaveDays = 0;
-                    currentLeaveHours = 0;
-                    currentLeaveMinutes = 0;
-                    totalLeave = parseFloat($('input[name="total_sick_work"]').val()) || 0;
-                } else if (typeLeave == 5) {
-                    $('input[name="annual_days"]').val(0);
-                    $('input[name="annual_hours"]').val(0);
-                    $('input[name="annual_minutes"]').val(0);
-                    currentLeaveDays = 0;
-                    currentLeaveHours = 0;
-                    currentLeaveMinutes = 0;
-                    totalLeave = parseFloat($('input[name="total_annual"]').val()) || 0;
-                }
-            } else {
-                // กรณีปีปัจจุบันหรือปีที่เท่ากัน
-                if (typeLeave == 1) {
-                    currentLeaveDays = parseFloat($('input[name="personal_days"]').val()) || 0;
-                    currentLeaveHours = parseFloat($('input[name="personal_hours"]').val()) || 0;
-                    currentLeaveMinutes = parseFloat($('input[name="personal_minutes"]').val()) || 0;
-                    totalLeave = parseFloat($('input[name="total_personal"]').val()) || 0;
-                } else if (typeLeave == 2) {
-                    currentLeaveDays = parseFloat($('input[name="personnel_no_days"]').val()) || 0;
-                    currentLeaveHours = parseFloat($('input[name="personal_no_hours"]').val()) || 0;
-                    currentLeaveMinutes = parseFloat($('input[name="personal_no_minutes"]').val()) || 0;
-                    totalLeave = parseFloat($('input[name="total_personal_no"]').val()) || 0;
-                } else if (typeLeave == 3) {
-                    currentLeaveDays = parseFloat($('input[name="sick_days"]').val()) || 0;
-                    currentLeaveHours = parseFloat($('input[name="sick_hours"]').val()) || 0;
-                    currentLeaveMinutes = parseFloat($('input[name="sick_minutes"]').val()) || 0;
-                    totalLeave = parseFloat($('input[name="total_sick"]').val()) || 0;
-                } else if (typeLeave == 4) {
-                    currentLeaveDays = parseFloat($('input[name="sick_work_days"]').val()) || 0;
-                    currentLeaveHours = parseFloat($('input[name="sick_work_hours"]').val()) || 0;
-                    currentLeaveMinutes = parseFloat($('input[name="sick_work_minutes"]').val()) || 0;
-                    totalLeave = parseFloat($('input[name="total_sick_work"]').val()) || 0;
-                } else if (typeLeave == 5) {
-                    currentLeaveDays = parseFloat($('input[name="annual_days"]').val()) || 0;
-                    currentLeaveHours = parseFloat($('input[name="annual_hours"]').val()) || 0;
-                    currentLeaveMinutes = parseFloat($('input[name="annual_minutes"]').val()) || 0;
-                    totalLeave = parseFloat($('input[name="total_annual"]').val()) || 0;
-                }
-            }
-
-            // แปลงนาทีที่ใช้ไปเป็น 30 นาที
-            if (currentLeaveMinutes > 0 && currentLeaveMinutes <= 30) {
-                currentLeaveMinutes = 30;
-            } else {
-                currentLeaveMinutes = 0;
-            }
-
-            // คำนวณเวลาที่ใช้ไปทั้งหมด (ในหน่วยนาที)
-            var totalCurrentMinutes = (currentLeaveDays * 8 * 60) + (currentLeaveHours * 60) + currentLeaveMinutes;
-
-            // สิทธิ์ทั้งหมดแปลงเป็นนาที
-            var totalLeaveMinutes = totalLeave * 8 * 60;
-
-            // คำนวณเวลาที่เหลือ (ในหน่วยนาที)
-            var remainingMinutesTotal = totalLeaveMinutes - totalCurrentMinutes;
-
-            if (remainingMinutesTotal < 0) {
-                alertMessage = 'ไม่สามารถลาได้ ใช้สิทธิ์ครบกำหนดแล้ว';
-                totalDaysAlert.text('คงเหลือ 0 วัน 0 ชั่วโมง 0 นาที');
-            } else {
-                remainingDays = Math.floor(remainingMinutesTotal / (8 * 60)); // แปลงนาทีที่เหลือเป็นวัน
-                remainingHours = Math.floor((remainingMinutesTotal % (8 * 60)) / 60); // แปลงนาทีเป็นชั่วโมง
-                remainingMinutes = remainingMinutesTotal % 60; // นาทีที่เหลือ
-
-                // ปรับนาทีเป็น 30 นาที
-                if (remainingMinutes > 0 && remainingMinutes <= 30) {
-                    remainingMinutes = 30;
-                } else {
-                    remainingMinutes = 0;
-                }
-
-                // ถ้าชั่วโมงเกิน 8 ให้เพิ่มวัน
-                if (remainingHours >= 8) {
-                    remainingDays += Math.floor(remainingHours / 8);
-                    remainingHours = remainingHours % 8;
-                }
-
-                totalDaysAlert.text(
-                    `คงเหลือ ${remainingDays} วัน ${remainingHours} ชั่วโมง ${remainingMinutes} นาที`
-                );
-            }
-
-            if (alertMessage) {
-                $('*[name="alertCheckDays"]').text(alertMessage).removeClass('d-none');
-            } else {
-                $('*[name="alertCheckDays"]').addClass('d-none');
-            }
-        }
-
         $(document).ready(function() {
             document.getElementById("editFile").addEventListener("change", function(event) {
                 const fileInput = event.target;
@@ -1860,6 +1649,57 @@ echo '</div>';
                     preview.style.display = "none"; // ซ่อน img
                 }
             });
+
+            $('#leaveType').on('change', function() {
+                var leaveType = $(this).val();
+                var userCode = '<?php echo $userCode; ?>'; // รหัสผู้ใช้จาก PHP
+
+                // ตรวจสอบว่าเลือกวันที่แล้ว
+                var selectedDate = $('#startDate').val();
+                if (selectedDate) {
+                    var dateObject = new Date(selectedDate);
+                    var selectedYear = dateObject.getFullYear(); // ดึงแค่ปี
+
+                    // ตรวจสอบค่าที่ได้
+                    console.log("Year: " + selectedYear);
+                    console.log("User Code: " + userCode);
+                    console.log("Leave Type: " + leaveType);
+
+                    if (leaveType && userCode && selectedYear) {
+                        // ส่ง AJAX ไปยัง PHP เพื่อดึงข้อมูลที่คำนวณจากประเภทการลา
+                        $.ajax({
+                            url: 'get_leave_balance.php', // ชื่อไฟล์ PHP ที่จะคำนวณข้อมูล
+                            type: 'POST',
+                            data: {
+                                leaveType: leaveType, // ส่งประเภทการลา
+                                userCode: userCode, // ส่งรหัสผู้ใช้
+                                selectedYear: selectedYear // ส่งปี
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                // ตรวจสอบผลลัพธ์ที่ได้รับจาก PHP
+                                if (response.error) {
+                                    alert(response.error);
+                                } else {
+                                    // อัปเดตค่าการแสดงผลในหน้าเว็บ
+                                    $('#remaining-days').text(response.remaining_days);
+                                    $('#remaining-hours').text(response.remaining_hours);
+                                    $('#remaining-minutes').text(response
+                                        .remaining_minutes);
+                                }
+                            },
+                            error: function() {
+                                alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+                            }
+                        });
+                    } else {
+                        alert('กรุณาเลือกวันที่และประเภทการลา');
+                    }
+                } else {
+                    alert('กรุณาเลือกวันที่');
+                }
+            });
+
 
             $('.filter-card').click(function() {
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
@@ -1903,11 +1743,6 @@ echo '</div>';
                         alert('เกิดข้อผิดพลาด: ' + error);
                     }
                 });
-            });
-
-            $('#startDate').change(function() {
-                var leaveType = $('#leaveType').val();
-                checkDays(leaveType);
             });
 
             $.ajax({
@@ -2755,53 +2590,6 @@ echo '</div>';
             }
         }
 
-        /* function updateLeaveReasonField() {
-            var leaveType = document.getElementById('leaveType').value;
-
-            var leaveReasonField = document.getElementById('leaveReason');
-            var otherReasonField = document.getElementById('otherReason');
-
-            // อัปเดตเหตุผลการลา
-            if (leaveType === '1') { // ลากิจได้รับค่าจ้าง
-                leaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '2') { // ลากิจไม่ได้รับค่าจ้าง
-                leaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '3') { // ลาป่วย
-                leaveReasonField.innerHTML = '<option value="ป่วย">ป่วย</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '4') { // ลาป่วยจากงาน
-                leaveReasonField.innerHTML = '<option value="ป่วย">ป่วย</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '5') { // ลาพักร้อน
-                leaveReasonField.innerHTML = '<option value="พักร้อน">พักร้อน</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '8') { // อื่น ๆ
-                leaveReasonField.innerHTML = '<option value="ลาเพื่อทำหมัน">ลาเพื่อทำหมัน</option>' +
-                    '<option value="ลาคลอด">ลาคลอด</option>' +
-                    '<option value="ลาอุปสมบท">ลาอุปสมบท</option>' +
-                    '<option value="ลาเพื่อรับราชการทหาร">ลาเพื่อรับราชการทหาร</option>' +
-                    '<option value="ลาเพื่อจัดการงานศพ">ลาเพื่อจัดการงานศพ</option>' +
-                    '<option value="ลาเพื่อพัฒนาและเรียนรู้">ลาเพื่อพัฒนาและเรียนรู้</option>' +
-                    '<option value="ลาเพื่อการสมรส">ลาเพื่อการสมรส</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else {
-                leaveReasonField.innerHTML = '<option selected disabled>เลือกเหตุผลการลา</option>';
-            }
-
-            // การจัดการการแสดง/ซ่อนฟิลด์เหตุผล "อื่น ๆ"
-            if (leaveType === '5' || leaveType === '8') { // หากเป็นลาพักร้อนหรือประเภทอื่น ๆ
-                if (leaveReasonField.value === 'อื่น ๆ') {
-                    otherReasonField.classList.remove('d-none');
-                } else {
-                    otherReasonField.classList.add('d-none');
-                }
-            } else {
-                otherReasonField.classList.add('d-none');
-            }
-        } */
-
         // ลาฉุกเฉิน
         function checkUrgentOther(select) {
             var urgentOtherReasonInput = document.getElementById('urgentOtherReason');
@@ -2813,26 +2601,6 @@ echo '</div>';
                 urgentOtherReasonInput.classList.add('d-none');
             }
         }
-
-        /*  function updateUrgentLeaveReasonField() {
-             var urgentLeaveType = document.getElementById('urgentLeaveType').value;
-             var urgentLeaveReasonField = document.getElementById('urgentLeaveReason');
-             var urgentOtherReasonField = document.getElementById('urgentOtherReason');
-
-             // อัปเดตเหตุผลการลา
-             if (urgentLeaveType === '1' || urgentLeaveType === '2') { // ลากิจได้รับ/ไม่ได้รับค่าจ้าง
-                 urgentLeaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
-                     '<option value="อื่น ๆ">อื่น ๆ</option>';
-             } else if (urgentLeaveType === '5') { // ลาพักร้อน
-                 urgentLeaveReasonField.innerHTML = '<option value="พักร้อน">พักร้อน</option>' +
-                     '<option value="อื่น ๆ">อื่น ๆ</option>';
-             } else {
-                 urgentLeaveReasonField.innerHTML = '<option value="" selected disabled>เลือกเหตุผลการลา</option>';
-             }
-
-             // รีเซ็ตการแสดง textarea
-             urgentOtherReasonField.classList.add('d-none');
-         } */
         </script>
         <script src="../js/popper.min.js"></script>
         <script src="../js/bootstrap.min.js"></script>

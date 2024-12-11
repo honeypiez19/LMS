@@ -190,18 +190,58 @@ if ($editTelPhone) {
         exit;
     }
 }
-
-if ($subDepart == '') {
-    $proveStatus = 6;
-    $proveStatus2 = 1;
-    $proveStatus3 = 6;
+// Office
+if ($depart == 'Office') {
+    if ($subDepart == 'Store' || $subDepart == 'AC') {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else if ($subDepart == '' || $subDepart == 'All') {
+        $proveStatus = 6;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else if ($subDepart == 'Sales') {
+        $proveStatus = 2;
+        $proveStatus2 = 6;
+        $proveStatus3 = 7;
+    } else {
+        echo 'ไม่พบแผนก';
+    }
 }
-
-// if ($subDepart == 'RD') {
-//     $proveStatus = 0;
-//     $proveStatus2 = 1;
-//     $proveStatus3 = 6;
-else {
+// CAD1
+else if ($depart == 'CAD1') {
+    if ($subDepart == 'Design' || $subDepart == 'Modeling') {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else if ($subDepart == 'CAD1') {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else {
+        echo 'ไม่พบแผนก';
+    }
+}
+// CAD2
+else if ($depart == 'CAD2') {
+    if ($subDepart == 'CAD2') {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else {
+        echo 'ไม่พบแผนก';
+    }
+}
+// CAM
+else if ($depart == 'CAM') {
+    if ($subDepart == 'CAM') {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    } else {
+        echo 'ไม่พบแผนก';
+    }
+} else {
     $proveStatus = 2;
     $proveStatus2 = 1;
     $proveStatus3 = 7;

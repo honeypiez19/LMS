@@ -65,10 +65,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_remark, l_leave_status, l_hr_status, l_approve_status,
     l_approve_name,
     l_approve_datetime,
-    l_level, l_approve_status2, l_workplace)
+    l_level, l_approve_status2, l_workplace, l_remark2)
     VALUES (:userCode, :userName, :name, :depart, :telPhone, :urgentLeaveType, :urgentLeaveReason, :urgentStartDate, :urgentStartTime,
     :urgentEndDate, :urgentEndTime, :createDatetime, :filename, :remark, :leaveStatus, :comfirmStatus, :proveStatus,   :proveName,
-    :proveDate, :level, :proveStatus2, :workplace)");
+    :proveDate, :level, :proveStatus2, :workplace,  :remark2)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -84,6 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':createDatetime', $createDatetime);
     $stmt->bindParam(':filename', $filename);
     $stmt->bindParam(':remark', $remark);
+    $stmt->bindParam(':remark2', $remark2);
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
@@ -112,11 +113,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else if ($level == 'chief') {
             if ($depart == 'Management') {
-                if($subDepart == 'Sales'){
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'GM'");
-                $stmt->bindParam(':workplace', $workplace);
-                }
-                else {
+                if ($subDepart == 'Sales') {
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'GM'");
+                    $stmt->bindParam(':workplace', $workplace);
+                } else {
                     $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
                     $stmt->bindParam(':workplace', $workplace);
                 }
@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($managers) {
             foreach ($managers as $manager) {
                 $sToken = $manager['e_token'];
-                $sMessage = "มีใบลาด่วนของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\nวันเวลาที่ลา : $urgentStartDate $urgentStartTime ถึง $urgentEndDate $urgentEndTime\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+                $sMessage = "มีใบลาด่วนของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\nวันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
 
                 $chOne = curl_init();
                 curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
