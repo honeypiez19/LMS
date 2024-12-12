@@ -132,14 +132,14 @@ WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
     $stmt_leave_personal->bindParam(':startDate', $startDate);
     $stmt_leave_personal->bindParam(':endDate', $endDate);
-    $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal->execute();
     $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -194,14 +194,14 @@ WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
     $stmt_leave_personal_no->bindParam(':startDate', $startDate);
     $stmt_leave_personal_no->bindParam(':endDate', $endDate);
-    $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal_no->execute();
     $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -256,14 +256,14 @@ WHERE l_leave_id = 3
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
     $stmt_leave_sick->bindParam(':startDate', $startDate);
     $stmt_leave_sick->bindParam(':endDate', $endDate);
-    $stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick->execute();
     $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -319,14 +319,14 @@ WHERE l_leave_id = 4
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
     $stmt_leave_sick_work->bindParam(':startDate', $startDate);
     $stmt_leave_sick_work->bindParam(':endDate', $endDate);
-    $stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick_work->execute();
     $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -383,13 +383,13 @@ WHERE l_leave_id = 5
 AND l_usercode = :userCode
 AND YEAR(l_leave_end_date) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
     $stmt_leave_annual->bindParam(':userCode', $userCode);
     $stmt_leave_annual->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-    $stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_annual->execute();
     $result_leave_annual = $stmt_leave_annual->fetch(PDO::FETCH_ASSOC);
 
@@ -452,13 +452,13 @@ WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_hr_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $result_absence_work = $conn->prepare($sql_absence_work);
     $result_absence_work->bindParam(':userCode', $userCode);
     $result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-    $result_absence_work->bindParam(':approveStatus', $approveStatus);
+    // $result_absence_work->bindParam(':approveStatus', $approveStatus);
     $result_absence_work->execute();
     $stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
 
@@ -515,14 +515,14 @@ WHERE l_leave_id = 8
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
     $stmt_other->bindParam(':startDate', $startDate);
     $stmt_other->bindParam(':endDate', $endDate);
-    $stmt_other->bindParam(':approveStatus', $approveStatus);
+    // $stmt_other->bindParam(':approveStatus', $approveStatus);
     $stmt_other->execute();
     $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 
@@ -776,23 +776,23 @@ else {
 
     // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
     $sql_leave_personal = "SELECT l_leave_start_date, l_leave_end_date,
-       SUM(
-        DATEDIFF(CONCAT('2024-11-22', ' ', '17:00'), CONCAT('2024-11-22', ' ', '08:00'))
+    SUM(
+        DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
         -
         (SELECT COUNT(1)
          FROM holiday
-         WHERE h_start_date BETWEEN '2024-11-22' AND '2024-11-22'
+         WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
          AND h_holiday_status = 'วันหยุด'
          AND h_status = 0)
     ) AS total_leave_days,
-    SUM(HOUR(TIMEDIFF(CONCAT('2024-11-22', ' ', '17:00'), CONCAT('2024-11-22', ' ', '08:00'))) % 24) -
+    SUM(HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24) -
     SUM(CASE
-        WHEN HOUR(CONCAT('2024-11-22', ' ', '08:00')) < 12
-             AND HOUR(CONCAT('2024-11-22', ' ', '17:00')) > 12
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
         THEN 1
         ELSE 0
     END) AS total_leave_hours,
-    SUM(MINUTE(TIMEDIFF(CONCAT('2024-11-22', ' ', '17:00'), CONCAT('2024-11-22', ' ', '08:00')))) AS total_leave_minutes,
+    SUM(MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))) AS total_leave_minutes,
 
     (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
@@ -801,14 +801,14 @@ AND l_usercode = :userCode
 -- AND (l_leave_start_date BETWEEN '2023-12-01' AND '2024-11-30')
 AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
     $stmt_leave_personal->bindParam(':userCode', $userCode);
     $stmt_leave_personal->bindParam(':startDate', $startDate);
     $stmt_leave_personal->bindParam(':endDate', $endDate);
-    $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal->execute();
     $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -863,14 +863,14 @@ WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND (l_leave_start_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
     $stmt_leave_personal_no->bindParam(':userCode', $userCode);
     $stmt_leave_personal_no->bindParam(':startDate', $startDate);
     $stmt_leave_personal_no->bindParam(':endDate', $endDate);
-    $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_personal_no->execute();
     $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -925,14 +925,14 @@ WHERE l_leave_id = 3
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_sick = $conn->prepare($sql_leave_sick);
     $stmt_leave_sick->bindParam(':userCode', $userCode);
     $stmt_leave_sick->bindParam(':startDate', $startDate);
     $stmt_leave_sick->bindParam(':endDate', $endDate);
-    $stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick->execute();
     $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -988,14 +988,14 @@ WHERE l_leave_id = 4
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
     $stmt_leave_sick_work->bindParam(':userCode', $userCode);
     $stmt_leave_sick_work->bindParam(':startDate', $startDate);
     $stmt_leave_sick_work->bindParam(':endDate', $endDate);
-    $stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_sick_work->execute();
     $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -1052,13 +1052,13 @@ WHERE l_leave_id = 5
 AND l_usercode = :userCode
 AND YEAR(l_leave_end_date) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_leave_annual = $conn->prepare($sql_leave_annual);
     $stmt_leave_annual->bindParam(':userCode', $userCode);
     $stmt_leave_annual->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-    $stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
+    // $stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
     $stmt_leave_annual->execute();
     $result_leave_annual = $stmt_leave_annual->fetch(PDO::FETCH_ASSOC);
 
@@ -1121,13 +1121,13 @@ WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_hr_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $result_absence_work = $conn->prepare($sql_absence_work);
     $result_absence_work->bindParam(':userCode', $userCode);
     $result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-    $result_absence_work->bindParam(':approveStatus', $approveStatus);
+    // $result_absence_work->bindParam(':approveStatus', $approveStatus);
     $result_absence_work->execute();
     $stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
 
@@ -1184,14 +1184,14 @@ WHERE l_leave_id = 8
 AND l_usercode = :userCode
 AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
+  AND l_approve_status IN (2,6)
 AND l_approve_status2 = 4";
 
     $stmt_other = $conn->prepare($sql_other);
     $stmt_other->bindParam(':userCode', $userCode);
     $stmt_other->bindParam(':startDate', $startDate);
     $stmt_other->bindParam(':endDate', $endDate);
-    $stmt_other->bindParam(':approveStatus', $approveStatus);
+    // $stmt_other->bindParam(':approveStatus', $approveStatus);
     $stmt_other->execute();
     $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 

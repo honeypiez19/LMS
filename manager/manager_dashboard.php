@@ -463,6 +463,33 @@ echo "</select>";
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-6">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <h5><b>- การลารายชั่วโมง</b></h5>
+                                                <tr class="text-center align-middle">
+                                                    <th>ช่วงเช้า</th>
+                                                    <th>ช่วงบ่าย</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="text-center align-middle">
+                                                    <td>08:00 - 09:00</td>
+                                                    <td>12:45 - 13:45</td>
+                                                </tr>
+                                                <tr class="text-center align-middle">
+                                                    <td>09:00 - 10:00</td>
+                                                    <td>13:45 - 14:45</td>
+                                                </tr>
+                                                <tr class="text-center align-middle">
+                                                    <td>10:00 - 11:00</td>
+                                                    <td>14:45 - 15:45</td>
+                                                </tr>
+                                                <tr class="text-center align-middle">
+                                                    <td>11:00 - 11:45</td>
+                                                    <td>15:45 - 16:40</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                         <h5><b>- ลาป่วย</b></h5>
                                         <p>พนักงานมีสิทธิ์ลาได้ 30 วัน <span
                                                 class="red-text">(มีผลเรื่องการหักโบนัส)</span>

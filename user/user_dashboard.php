@@ -46,7 +46,6 @@ $userCode = $_SESSION['s_usercode'];
 
     #imagePreview {
         transition: transform 0.3s ease;
-        /* เพิ่มการเคลื่อนไหวเนียนๆ */
     }
 
     #imagePreview:hover {
@@ -193,6 +192,34 @@ echo "</select>";
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-6">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <h5><b>- การลารายชั่วโมง</b></h5>
+                                                <tr class="text-center align-middle">
+                                                    <th>ช่วงเช้า</th>
+                                                    <th>ช่วงบ่าย</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="text-center align-middle">
+                                                    <td>08:00 - 09:00</td>
+                                                    <td>12:45 - 13:45</td>
+                                                </tr>
+                                                <tr class="text-center align-middle">
+                                                    <td>09:00 - 10:00</td>
+                                                    <td>13:45 - 14:45</td>
+                                                </tr>
+                                                <tr class="text-center align-middle">
+                                                    <td>10:00 - 11:00</td>
+                                                    <td>14:45 - 15:45</td>
+                                                </tr>
+                                                <tr class="text-center align-middle">
+                                                    <td>11:00 - 11:45</td>
+                                                    <td>15:45 - 16:40</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
                                         <h5><b>- ลาป่วย</b></h5>
                                         <p>พนักงานมีสิทธิ์ลาได้ 30 วัน <span
                                                 class="red-text">(มีผลเรื่องการหักโบนัส)</span>
@@ -617,11 +644,11 @@ echo '</div>'; // Close the row div
                                             <option value="8">อื่น ๆ</option>
                                         </select>
                                     </div>
-                                    <div id="leave-balance">
+                                    <!-- <div id="leave-balance">
                                         <p>วันเหลือ: <span id="remaining-days">0</span></p>
                                         <p>ชั่วโมงเหลือ: <span id="remaining-hours">0</span></p>
                                         <p>นาทีเหลือ: <span id="remaining-minutes">0</span></p>
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <div class="mt-3 row">
                                     <div class="col-12">
@@ -2325,7 +2352,6 @@ echo '</div>';
                                 $('#imagePreview').hide(); // ซ่อนรูปพรีวิวเมื่อไม่มีไฟล์
                             }
 
-
                             // เวลาที่เริ่มต้น
                             // 08:45
                             if (response.l_leave_start_time === "09:00:00" && response
@@ -2351,14 +2377,9 @@ echo '</div>';
                             else if (response.l_leave_start_time === "13:00:00") {
                                 $('#editLeaveStartTime2').val('12:45:00'); // กำหนดค่าใหม่
                             }
-                            // 13:10
+                            // 13:15
                             else if (response.l_leave_start_time === "13:30:00" && response
-                                .l_remark === "13:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
-                            }
-                            // 13:40
-                            else if (response.l_leave_start_time === "14:00:00" && response
-                                .l_remark === "13:40:00") {
+                                .l_remark === "13:15:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
                             // 13:45
@@ -2366,14 +2387,9 @@ echo '</div>';
                                 .l_remark === "13:45:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
-                            // 14:10
+                            // 14:15
                             else if (response.l_leave_start_time === "14:30:00" && response
-                                .l_remark === "14:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
-                            }
-                            // 14:40
-                            else if (response.l_leave_start_time === "15:00:00" && response
-                                .l_remark === "14:40:00") {
+                                .l_remark === "14:15:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
                             // 14:45
@@ -2381,14 +2397,9 @@ echo '</div>';
                                 .l_remark === "14:45:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
-                            // 15:10
+                            // 15:15
                             else if (response.l_leave_start_time === "15:30:00" && response
-                                .l_remark === "15:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
-                            }
-                            // 15:40
-                            else if (response.l_leave_start_time === "16:00:00" && response
-                                .l_remark === "15:40:00") {
+                                .l_remark === "15:15:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
                             // 15:45
@@ -2396,9 +2407,9 @@ echo '</div>';
                                 .l_remark === "15:45:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
-                            // 16:10
+                            // 16:15
                             else if (response.l_leave_start_time === "16:30:00" && response
-                                .l_remark === "16:10:00") {
+                                .l_remark === "16:15:00") {
                                 $('#editLeaveStartTime2').val(response.l_remark);
                             }
                             // 16:40
@@ -2435,14 +2446,9 @@ echo '</div>';
                                 .l_remark === "12:45:00") {
                                 $('#editLeaveEndTime2').val('12:45:00'); // กำหนดค่าใหม่
                             }
-                            // 13:10
+                            // 13:15
                             else if (response.l_leave_end_time === "13:30:00" && response
-                                .l_remark === "13:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
-                            }
-                            // 13:40
-                            else if (response.l_leave_end_time === "14:00:00" && response
-                                .l_remark === "13:40:00") {
+                                .l_remark === "13:15:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 13:45
@@ -2450,14 +2456,9 @@ echo '</div>';
                                 .l_remark === "13:45:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
-                            // 14:10
+                            // 14:15
                             else if (response.l_leave_end_time === "14:30:00" && response
-                                .l_remark === "14:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
-                            }
-                            // 14:40
-                            else if (response.l_leave_end_time === "15:00:00" && response
-                                .l_remark === "14:40:00") {
+                                .l_remark === "14:15:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 14:45
@@ -2465,14 +2466,9 @@ echo '</div>';
                                 .l_remark === "14:45:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
-                            // 15:10
+                            // 15:15
                             else if (response.l_leave_end_time === "15:30:00" && response
-                                .l_remark === "15:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
-                            }
-                            // 15:40
-                            else if (response.l_leave_end_time === "16:00:00" && response
-                                .l_remark === "15:40:00") {
+                                .l_remark === "15:15:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 15:45
@@ -2480,9 +2476,9 @@ echo '</div>';
                                 .l_remark === "15:45:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
-                            // 16:10
+                            // 16:15
                             else if (response.l_leave_end_time === "16:30:00" && response
-                                .l_remark === "16:10:00") {
+                                .l_remark === "16:15:00") {
                                 $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 16:40
