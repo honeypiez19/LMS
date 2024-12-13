@@ -2638,7 +2638,6 @@ echo '</div>';
                                 $('#imagePreview').hide(); // ซ่อนรูปพรีวิวเมื่อไม่มีไฟล์
                             }
 
-
                             // เวลาที่เริ่มต้น
                             // 08:45
                             if (response.l_leave_start_time === "09:00:00" && response

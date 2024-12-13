@@ -44,155 +44,156 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($leaveDateEnd)); // แปลงรูปแบบวันที่เป็น YYYY-MM-DD
     $leaveTimeEnd = $_POST['endTime'];
 
-    // 08:45
-    if ($leaveTimeStart == '08:45') {
-        $leaveTimeStartLine = '08:45';
-        $leaveTimeStart = '09:00';
-        $remark = '08:45:00';
-    }
-    // 09:45
-    else if ($leaveTimeStart == '09:45') {
-        $leaveTimeStartLine = '09:45';
-        $leaveTimeStart = '10:00';
-        $remark = '09:45:00';
-    }
-    // 10:45
-    else if ($leaveTimeStart == '10:45') {
-        $leaveTimeStartLine = '10:45';
-        $leaveTimeStart = '11:00';
-        $remark = '10:45:00';
-    }
-    // 11:45
-    else if ($leaveTimeStart == '12:00') {
-        $leaveTimeStartLine = '11:45';
-    }
-    // 12:45
-    else if ($leaveTimeStart == '13:00') {
-        $leaveTimeStartLine = '12:45';
-    }
-    // 13:15
-    else if ($leaveTimeStart == '13:30') {
-        $leaveTimeStartLine = '13:15';
-        $leaveTimeStart = '13:30';
-        $remark = '13:15:00';
-    }
-    // 13:45
-    else if ($leaveTimeStart == '14:00') {
-        $leaveTimeStartLine = '13:45';
-        $leaveTimeStart = '14:00';
-        $remark = '13:45:00';
-    }
-    // 14:15
-    else if ($leaveTimeStart == '14:30') {
-        $leaveTimeStartLine = '14:15';
-        $leaveTimeStart = '14:30';
-        $remark = '14:15:00';
-    }
-    // 14:45
-    else if ($leaveTimeStart == '15:00') {
-        $leaveTimeStartLine = '14:45';
-        $leaveTimeStart = '15:00';
-        $remark = '14:45:00';
-    }
-    // 15:15
-    else if ($leaveTimeStart == '15:30') {
-        $leaveTimeStartLine = '15:15';
-        $leaveTimeStart = '15:30';
-        $remark = '15:15:00';
-    }
-    // 15:45
-    else if ($leaveTimeStart == '16:00') {
-        $leaveTimeStartLine = '15:45';
-        $leaveTimeStart = '16:00';
-        $remark = '15:45:00';
-    }
-    // 16:15
-    else if ($leaveTimeStart == '16:30') {
-        $leaveTimeStartLine = '16:10';
-        $leaveTimeStart = '16:30';
-        $remark = '16:10:00';
-    }
-    // 16:40
-    else if ($leaveTimeStart == '17:00') {
-        $leaveTimeStartLine = '16:40';
-    } else {
-        $leaveTimeStartLine = $leaveTimeStart;
-    }
+  // 08:45
+if ($leaveTimeStart == '08:45') {
+    $leaveTimeStartLine = '08:45';
+    $leaveTimeStart = '09:00';
+    $remark = '08:45:00';
+}
+// 09:45
+else if ($leaveTimeStart == '09:45') {
+    $leaveTimeStartLine = '09:45';
+    $leaveTimeStart = '10:00';
+    $remark = '09:45:00';
+}
+// 10:45
+else if ($leaveTimeStart == '10:45') {
+    $leaveTimeStartLine = '10:45';
+    $leaveTimeStart = '11:00';
+    $remark = '10:45:00';
+}
+// 11:45
+else if ($leaveTimeStart == '12:00') {
+    $leaveTimeStartLine = '11:45';
+}
+// 12:45
+else if ($leaveTimeStart == '13:00') {
+    $leaveTimeStartLine = '12:45';
+}
+// 13:15
+else if ($leaveTimeStart == '13:30') {
+    $leaveTimeStartLine = '13:15';
+    $leaveTimeStart = '13:30';
+    $remark = '13:15:00';
+}
+// 13:45
+else if ($leaveTimeStart == '14:00') {
+    $leaveTimeStartLine = '13:45';
+    $leaveTimeStart = '14:00';
+    $remark = '13:45:00';
+}
+// 14:15
+else if ($leaveTimeStart == '14:30') {
+    $leaveTimeStartLine = '14:15';
+    $leaveTimeStart = '14:30';
+    $remark = '14:15:00';
+}
+// 14:45
+else if ($leaveTimeStart == '15:00') {
+    $leaveTimeStartLine = '14:45';
+    $leaveTimeStart = '15:00';
+    $remark = '14:45:00';
+}
+// 15:15
+else if ($leaveTimeStart == '15:30') {
+    $leaveTimeStartLine = '15:15';
+    $leaveTimeStart = '15:30';
+    $remark = '15:15:00';
+}
+// 15:45
+else if ($leaveTimeStart == '16:00') {
+    $leaveTimeStartLine = '15:45';
+    $leaveTimeStart = '16:00';
+    $remark = '15:45:00';
+}
+// 16:15
+else if ($leaveTimeStart == '16:30') {
+    $leaveTimeStartLine = '16:10';
+    $leaveTimeStart = '16:30';
+    $remark = '16:10:00';
+}
+// 16:40
+else if ($leaveTimeStart == '17:00') {
+    $leaveTimeStartLine = '16:40';
+} else {
+    $leaveTimeStartLine = $leaveTimeStart;
+}
 
-    // 08:45
-    if ($leaveTimeEnd == '08:45') {
-        $leaveTimeEndLine = '08:45';
-        $leaveTimeEnd = '09:00';
-        $remark = '08:45:00';
-    }
-    // 09:45
-    else if ($leaveTimeEnd == '09:45') {
-        $leaveTimeEndLine = '09:45';
-        $leaveTimeEnd = '10:00';
-        $remark = '09:45:00';
-    }
-    // 10:45
-    else if ($leaveTimeEnd == '10:45') {
-        $leaveTimeEndLine = '10:45';
-        $leaveTimeEnd = '11:00';
-        $remark = '10:45:00';
-    }
-    // 11:45
-    else if ($leaveTimeEnd == '12:00') {
-        $leaveTimeEndLine = '11:45';
-    }
-    // 12:45
-    else if ($leaveTimeEnd == '13:00') {
-        $leaveTimeEndLine = '12:45';
-    }
-    // 13:15
-    else if ($leaveTimeEnd == '13:30') {
-        $leaveTimeEndLine = '13:15';
-        $leaveTimeEnd = '13:30';
-        $remark = '13:15:00';
-    }
-    // 13:45
-    else if ($leaveTimeEnd == '14:00') {
-        $leaveTimeEndLine = '13:45';
-        $leaveTimeEnd = '14:00';
-        $remark = '13:45:00';
-    }
-    // 14:15
-    else if ($leaveTimeEnd == '14:30') {
-        $leaveTimeEndLine = '14:15';
-        $leaveTimeEnd = '14:30';
-        $remark = '14:15:00';
-    }
-    // 14:45
-    else if ($leaveTimeEnd == '15:00') {
-        $leaveTimeEndLine = '14:45';
-        $leaveTimeEnd = '15:00';
-        $remark = '14:45:00';
-    }
-    // 15:15
-    else if ($leaveTimeEnd == '15:30') {
-        $leaveTimeEndLine = '15:15';
-        $leaveTimeEnd = '15:30';
-        $remark = '15:15:00';
-    }
-    // 15:45
-    else if ($leaveTimeEnd == '16:00') {
-        $leaveTimeEndLine = '15:45';
-        $leaveTimeEnd = '16:00';
-        $remark = '15:45:00';
-    }
-    // 16:15
-    else if ($leaveTimeEnd == '16:30') {
-        $leaveTimeEndLine = '16:15';
-        $leaveTimeEnd = '16:30';
-        $remark = '16:15:00';
-    }
-    // 16:40
-    else if ($leaveTimeEnd == '17:00') {
-        $leaveTimeEndLine = '16:40';
-    } else {
-        $leaveTimeEndLine = $leaveTimeEnd;
-    }
+// 08:45
+if ($leaveTimeEnd == '08:45') {
+    $leaveTimeEndLine = '08:45';
+    $leaveTimeEnd = '09:00';
+    $remark = '08:45:00';
+}
+// 09:45
+else if ($leaveTimeEnd == '09:45') {
+    $leaveTimeEndLine = '09:45';
+    $leaveTimeEnd = '10:00';
+    $remark = '09:45:00';
+}
+// 10:45
+else if ($leaveTimeEnd == '10:45') {
+    $leaveTimeEndLine = '10:45';
+    $leaveTimeEnd = '11:00';
+    $remark = '10:45:00';
+}
+// 11:45
+else if ($leaveTimeEnd == '12:00') {
+    $leaveTimeEndLine = '11:45';
+}
+// 12:45
+else if ($leaveTimeEnd == '13:00') {
+    $leaveTimeEndLine = '12:45';
+}
+// 13:15
+else if ($leaveTimeEnd == '13:30') {
+    $leaveTimeEndLine = '13:15';
+    $leaveTimeEnd = '13:30';
+    $remark = '13:15:00';
+}
+// 13:45
+else if ($leaveTimeEnd == '14:00') {
+    $leaveTimeEndLine = '13:45';
+    $leaveTimeEnd = '14:00';
+    $remark = '13:45:00';
+}
+// 14:15
+else if ($leaveTimeEnd == '14:30') {
+    $leaveTimeEndLine = '14:15';
+    $leaveTimeEnd = '14:30';
+    $remark = '14:15:00';
+}
+// 14:45
+else if ($leaveTimeEnd == '15:00') {
+    $leaveTimeEndLine = '14:45';
+    $leaveTimeEnd = '15:00';
+    $remark = '14:45:00';
+}
+// 15:15
+else if ($leaveTimeEnd == '15:30') {
+    $leaveTimeEndLine = '15:15';
+    $leaveTimeEnd = '15:30';
+    $remark = '15:15:00';
+}
+// 15:45
+else if ($leaveTimeEnd == '16:00') {
+    $leaveTimeEndLine = '15:45';
+    $leaveTimeEnd = '16:00';
+    $remark = '15:45:00';
+}
+// 16:15
+else if ($leaveTimeEnd == '16:30') {
+    $leaveTimeEndLine = '16:15';
+    $leaveTimeEnd = '16:30';
+    $remark = '16:15:00';
+}
+// 16:40
+else if ($leaveTimeEnd == '17:00') {
+    $leaveTimeEndLine = '16:40';
+} else {
+    $leaveTimeEndLine = $leaveTimeEnd;
+}
+
 
     // สถานะใบลา
     $leaveStatus = 0;

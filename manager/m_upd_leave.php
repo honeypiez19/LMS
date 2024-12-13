@@ -19,136 +19,154 @@ $workplace = $_POST['workplace'];
 $depart = $_POST['depart'];
 $subDepart = $_POST['subDepart'];
 
+// 08:45
 if ($editLeaveStartTime == '08:45') {
     $editLeaveStartTimeLine = '08:45';
     $editLeaveStartTime = '09:00';
     $remark = '08:45:00';
-} else if ($editLeaveStartTime == '09:45') {
+}
+// 09:45
+else if ($editLeaveStartTime == '09:45') {
     $editLeaveStartTimeLine = '09:45';
     $editLeaveStartTime = '10:00';
     $remark = '09:45:00';
-} else if ($editLeaveStartTime == '10:45') {
+}
+// 10:45
+else if ($editLeaveStartTime == '10:45') {
     $editLeaveStartTimeLine = '10:45';
     $editLeaveStartTime = '11:00';
     $remark = '10:45:00';
-} else if ($editLeaveStartTime == '12:00') {
+}
+// 11:45
+else if ($editLeaveStartTime == '12:00') {
     $editLeaveStartTimeLine = '11:45';
-    $remark = '11:45:00';
-} else if ($editLeaveStartTime == '13:00') {
+}
+// 12:45
+else if ($editLeaveStartTime == '13:00') {
     $editLeaveStartTimeLine = '12:45';
-    $remark = '12:45:00';
-} else if ($editLeaveStartTime == '13:10') {
-    $editLeaveStartTimeLine = '13:10';
+}
+// 13:15
+else if ($editLeaveStartTime == '13:30') {
+    $editLeaveStartTimeLine = '13:15';
     $editLeaveStartTime = '13:30';
-    $remark = '13:10:00';
-} else if ($editLeaveStartTime == '13:40') {
-    $editLeaveStartTimeLine = '13:40';
-    $editLeaveStartTime = '14:00';
-    $remark = '13:40:00';
-} else if ($editLeaveStartTime == '13:45') {
+    $remark = '13:15:00';
+}
+// 13:45
+else if ($editLeaveStartTime == '14:00') {
     $editLeaveStartTimeLine = '13:45';
     $editLeaveStartTime = '14:00';
     $remark = '13:45:00';
-} else if ($editLeaveStartTime == '14:10') {
-    $editLeaveStartTimeLine = '14:10';
+}
+// 14:15
+else if ($editLeaveStartTime == '14:30') {
+    $editLeaveStartTimeLine = '14:15';
     $editLeaveStartTime = '14:30';
-    $remark = '14:10:00';
-} else if ($editLeaveStartTime == '14:40') {
-    $editLeaveStartTimeLine = '14:40';
-    $editLeaveStartTime = '15:00';
-    $remark = '14:40:00';
-} else if ($editLeaveStartTime == '14:45') {
+    $remark = '14:15:00';
+}
+// 14:45
+else if ($editLeaveStartTime == '15:00') {
     $editLeaveStartTimeLine = '14:45';
     $editLeaveStartTime = '15:00';
     $remark = '14:45:00';
-} else if ($editLeaveStartTime == '15:10') {
-    $editLeaveStartTimeLine = '15:10';
+}
+// 15:15
+else if ($editLeaveStartTime == '15:30') {
+    $editLeaveStartTimeLine = '15:15';
     $editLeaveStartTime = '15:30';
-    $remark = '15:10:00';
-} else if ($editLeaveStartTime == '15:40') {
-    $editLeaveStartTimeLine = '15:40';
-    $editLeaveStartTime = '16:00';
-    $remark = '15:40:00';
-} else if ($editLeaveStartTime == '15:45') {
+    $remark = '15:15:00';
+}
+// 15:45
+else if ($editLeaveStartTime == '16:00') {
     $editLeaveStartTimeLine = '15:45';
     $editLeaveStartTime = '16:00';
     $remark = '15:45:00';
-} else if ($editLeaveStartTime == '16:10') {
+}
+// 16:15
+else if ($editLeaveStartTime == '16:30') {
     $editLeaveStartTimeLine = '16:10';
     $editLeaveStartTime = '16:30';
     $remark = '16:10:00';
-} else if ($editLeaveStartTime == '17:00') {
+}
+// 16:40
+else if ($editLeaveStartTime == '17:00') {
     $editLeaveStartTimeLine = '16:40';
 } else {
     $editLeaveStartTimeLine = $editLeaveStartTime;
-    $remark = isset($remark) ? $remark : ''; // ตรวจสอบค่า remark หากไม่มีค่าให้เป็นค่าว่าง
 }
 
-// เวลาที่สิ้นสุด
+// 08:45
 if ($editLeaveEndTime == '08:45') {
     $editLeaveEndTimeLine = '08:45';
     $editLeaveEndTime = '09:00';
     $remark = '08:45:00';
-} else if ($editLeaveEndTime == '09:45') {
+}
+// 09:45
+else if ($editLeaveEndTime == '09:45') {
     $editLeaveEndTimeLine = '09:45';
     $editLeaveEndTime = '10:00';
     $remark = '09:45:00';
-} else if ($editLeaveEndTime == '10:45') {
+}
+// 10:45
+else if ($editLeaveEndTime == '10:45') {
     $editLeaveEndTimeLine = '10:45';
     $editLeaveEndTime = '11:00';
     $remark = '10:45:00';
-} else if ($editLeaveEndTime == '12:00') {
+}
+// 11:45
+else if ($editLeaveEndTime == '12:00') {
     $editLeaveEndTimeLine = '11:45';
-    $remark = '11:45:00';
-} else if ($editLeaveEndTime == '13:00') {
+}
+// 12:45
+else if ($editLeaveEndTime == '13:00') {
     $editLeaveEndTimeLine = '12:45';
-    $remark = '12:45:00';
-} else if ($editLeaveEndTime == '13:10') {
-    $editLeaveEndTimeLine = '13:10';
+}
+// 13:15
+else if ($editLeaveEndTime == '13:30') {
+    $editLeaveEndTimeLine = '13:15';
     $editLeaveEndTime = '13:30';
-    $remark = '13:10:00';
-} else if ($editLeaveEndTime == '13:40') {
-    $editLeaveEndTimeLine = '13:40';
-    $editLeaveEndTime = '14:00';
-    $remark = '13:40:00';
-} else if ($editLeaveEndTime == '13:45') {
+    $remark = '13:15:00';
+}
+// 13:45
+else if ($editLeaveEndTime == '14:00') {
     $editLeaveEndTimeLine = '13:45';
     $editLeaveEndTime = '14:00';
     $remark = '13:45:00';
-} else if ($editLeaveEndTime == '14:10') {
-    $editLeaveEndTimeLine = '14:10';
+}
+// 14:15
+else if ($editLeaveEndTime == '14:30') {
+    $editLeaveEndTimeLine = '14:15';
     $editLeaveEndTime = '14:30';
-    $remark = '14:10:00';
-} else if ($editLeaveEndTime == '14:40') {
-    $editLeaveEndTimeLine = '14:40';
-    $editLeaveEndTime = '15:00';
-    $remark = '14:40:00';
-} else if ($editLeaveEndTime == '14:45') {
+    $remark = '14:15:00';
+}
+// 14:45
+else if ($editLeaveEndTime == '15:00') {
     $editLeaveEndTimeLine = '14:45';
     $editLeaveEndTime = '15:00';
     $remark = '14:45:00';
-} else if ($editLeaveEndTime == '15:10') {
-    $editLeaveEndTimeLine = '15:10';
+}
+// 15:15
+else if ($editLeaveEndTime == '15:30') {
+    $editLeaveEndTimeLine = '15:15';
     $editLeaveEndTime = '15:30';
-    $remark = '15:10:00';
-} else if ($editLeaveEndTime == '15:40') {
-    $editLeaveEndTimeLine = '15:40';
-    $editLeaveEndTime = '16:00';
-    $remark = '15:40:00';
-} else if ($editLeaveEndTime == '15:45') {
+    $remark = '15:15:00';
+}
+// 15:45
+else if ($editLeaveEndTime == '16:00') {
     $editLeaveEndTimeLine = '15:45';
     $editLeaveEndTime = '16:00';
     $remark = '15:45:00';
-} else if ($editLeaveEndTime == '16:10') {
-    $editLeaveEndTimeLine = '16:10';
+}
+// 16:15
+else if ($editLeaveEndTime == '16:30') {
+    $editLeaveEndTimeLine = '16:15';
     $editLeaveEndTime = '16:30';
-    $remark = '16:10:00';
-} else if ($editLeaveEndTime == '17:00') {
+    $remark = '16:15:00';
+}
+// 16:40
+else if ($editLeaveEndTime == '17:00') {
     $editLeaveEndTimeLine = '16:40';
-    $remark = '16:40:00';
 } else {
-    $editLeaveStartTimeLine = $editLeaveEndTime;
-    $remark = isset($remark) ? $remark : ''; // ตรวจสอบค่า remark หากไม่มีค่าให้เป็นค่าว่าง
+    $editLeaveEndTimeLine = $editLeaveEndTime;
 }
 
 // จัดการอัปโหลดไฟล์
@@ -252,7 +270,7 @@ if ($stmt->execute()) {
     $URL = 'https://lms.system-samt.com/';
     $message = "มีการแก้ไขใบลา $name\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $URL";
 
-   if ($depart == 'RD') {
+    if ($depart == 'RD') {
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
     } else {
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");

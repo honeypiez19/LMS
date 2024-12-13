@@ -13,11 +13,11 @@ $editLeaveEndTime = $_POST['editLeaveEndTime'] ?? null;
 $editTelPhone = $_POST['editTelPhone'] ?? null;
 
 $userCode = $_POST['userCode'];
-$userName = $_POST['userName'];
-$name = $_POST['name'];
+// $userName = $_POST['userName'];
+// $name = $_POST['name'];
 $workplace = $_POST['workplace'];
 $depart = $_POST['depart'];
-$subDepart = $_POST['subDepart'];
+// $subDepart = $_POST['subDepart'];
 
 // 08:45
 if ($editLeaveStartTime == '08:45') {
@@ -209,22 +209,6 @@ if ($editTelPhone) {
     }
 }
 
-if ($subDepart == '') {
-    $proveStatus = 6;
-    $proveStatus2 = 1;
-    $proveStatus3 = 6;
-}
-
-// if ($subDepart == 'RD') {
-//     $proveStatus = 0;
-//     $proveStatus2 = 1;
-//     $proveStatus3 = 6;
-// } else {
-//     $proveStatus = 0;
-//     $proveStatus2 = 1;
-//     $proveStatus3 = 7;
-// }
-
 $sql = "UPDATE leave_list
         SET l_leave_id = :editLeaveType,
             l_leave_reason = :editLeaveReason,
@@ -232,11 +216,7 @@ $sql = "UPDATE leave_list
             l_leave_start_time = :editLeaveStartTime,
             l_leave_end_date = :editLeaveEndDate,
             l_leave_end_time = :editLeaveEndTime,
-            l_approve_status = 6,
-            l_approve_status2 = 1,
-            l_approve_status3 = 7,
             l_phone = :editTelPhone,
-            l_hr_status = 0,
             l_remark = :remark";
 
 // ตรวจสอบว่า $filename มีค่า (หมายความว่าไฟล์ใหม่ถูกอัปโหลด) แล้วอัปเดตข้อมูลไฟล์
@@ -256,7 +236,6 @@ $stmt->bindParam(':editLeaveEndDate', $editLeaveEndDate);
 $stmt->bindParam(':editLeaveEndTime', $editLeaveEndTime);
 $stmt->bindParam(':remark', $remark);
 $stmt->bindParam(':editTelPhone', $editTelPhone);
-// $stmt->bindParam(':proveStatus', $proveStatus);
 $stmt->bindParam(':createDatetime', $createDatetime);
 
 // ตรวจสอบว่าไฟล์ถูกอัปโหลดก่อนที่จะ bind ค่า $filename
@@ -272,50 +251,11 @@ if ($stmt->execute()) {
     $URL = 'https://lms.system-samt.com/';
     $message = "มีการแก้ไขใบลา $name\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $URL";
 
-    if ($depart == 'RD') {
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'RD'");
-
-    } else if ($depart == 'Office') {
-        // บัญชี
-        if ($subDepart == 'AC') {
-            // แจ้งเตือนพี่แวว
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'AC'");
-        }
-        // เซลล์
-        else if ($subDepart == 'Sales') {
-            // แจ้งเตือนพี่เจี๊ยบหรือพี่อ้อม
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'Sales'");
-        }
-        // สโตร์
-        else if ($subDepart == 'Store') {
-            // แจ้งเตือนพี่เก๋
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Store'");
-        }
-        // HR
-        else if ($subDepart == 'All') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-        }
-        // พี่เต๋ / พี่น้อย / พี่ไว
-        else if ($subDepart == '') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-        }
-    } else if ($depart == 'CAD1') {
-        if ($subDepart == 'Modeling') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Modeling'");
-        } else if ($subDepart == 'Design') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Design'");
-        } else {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Design'");
-        }
-    } else if ($depart == 'CAD2') {
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAD2'");
-    } else if ($depart == 'CAM') {
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'CAM'");
-    } else {
-        echo "ไม่พบเงื่อนไข";
-    }
+    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_usercode = :userCode");
 
     $stmt->bindParam(':workplace', $workplace);
+    $stmt->bindParam(':userCode', $userCode);
+
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 

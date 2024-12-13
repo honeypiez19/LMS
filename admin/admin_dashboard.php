@@ -438,45 +438,33 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
         }
-        // 13:10
-        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        // 13:15
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:15:00</td>';
         }
         // 13:45
         else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
         }
-        // 14:10
-        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        // 14:15
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:15:00</td>';
         }
         // 14:45
         else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
         }
-        // 15:10
-        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        // 15:15
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:15:00</td>';
         }
         // 15:45
         else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
         }
-        // 16:10
-        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        // 16:15
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:15:00</td>';
         }
         // 16:40
         else if ($row['l_leave_start_time'] == '17:00:00') {
@@ -507,51 +495,39 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
         }
-        // 13:10
-        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        // 13:15
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:15:00</td>';
         }
         // 13:45
         else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
         }
-        // 14:10
-        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        // 14:15
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:15:00</td>';
         }
         // 14:45
         else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
         }
-        // 15:10
-        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        // 15:15
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:15:00</td>';
         }
         // 15:45
         else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
         }
-        // 16:10
-        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        // 16:15
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:15:00</td>';
         }
         // 16:40
         else if ($row['l_leave_end_time'] == '17:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
-            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_end_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
@@ -791,6 +767,12 @@ if ($result->rowCount() > 0) {
         echo '<td>' . $row['l_remark2'] . '</td>';
 
         // 28
+        echo '<td hidden>' . $row['l_workplace'] . '</td>';
+
+        // 29
+        echo '<td><button class="btn btn-primary edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $row['l_usercode'] . '">แก้ไข</button></td>';
+
+        // 30
         if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
             echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
@@ -860,863 +842,1200 @@ echo '</div>';
                 </div>
             </div>
         </div>
+
+        <!-- Modal แก้ไข-->
+        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog  modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editLeaveModalLabel">แก้ไขการลา</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editForm">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                    <span style="color: red;">*</span>
+                                    <select class="form-select editLeaveType" required>
+                                        <option selected>เลือกประเภทการลา</option>
+                                        <option value="1">ลากิจได้รับค่าจ้าง</option>
+                                        <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
+                                        <option value="3">ลาป่วย</option>
+                                        <option value="4">ลาป่วยจากงาน</option>
+                                        <option value="5">ลาพักร้อน</option>
+                                        <option value="8">อื่น ๆ</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-12">
+                                    <label for="leaveReason" class="form-label">เหตุผลการลา</label>
+                                    <span style="color: red;">*</span>
+                                    <textarea class="form-control mt-2" id="editLeaveReason" rows="3"
+                                        placeholder="กรุณาระบุเหตุผล"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 row">
+                                <div class="col-6">
+                                    <label for="editLeaveStartDate" class="form-label">วันที่เริ่มต้น</label>
+                                    <span style="color: red;">*</span>
+                                    <input type="text" class="form-control" id="editLeaveStartDate" required>
+                                </div>
+                                <div class=" col-6">
+                                    <label for="editLeaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
+                                    <span style="color: red;">* (<input class="form-label" id="editLeaveStartTime2"
+                                            value="" style="border: none; width: 70px;  color: red;">เวลาเดิม)
+                                    </span>
+                                    <select class="form-select" id="editLeaveStartTime" name="editLeaveStartTime"
+                                        required>
+                                        <option value="08:00" selected>08:00</option>
+                                        <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
+                                        <option value="09:00">09:00</option>
+                                        <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
+                                        <option value="10:00">10:00</option>
+                                        <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
+                                        <option value="11:00">11:00</option>
+                                        <option value="12:00">11:45</option>
+                                        <option value="13:00">12:45</option>
+                                        <option value="13:30">13:15</option>
+                                        <option value="14:00">13:45</option>
+                                        <option value="14:30">14:15</option>
+                                        <option value="15:00">14:45</option>
+                                        <option value="15:30">15:15</option>
+                                        <option value="16:00">15:45</option>
+                                        <option value="16:30">16:15</option>
+                                        <option value="17:00">16:40</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-6">
+                                    <label for="editleaveEndDate" class="form-label">วันที่สิ้นสุด</label>
+                                    <span style="color: red;">*</span>
+                                    <input type="text" class="form-control" id="editLeaveEndDate" required>
+                                </div>
+                                <div class="col-6">
+                                    <label for="editleaveEndTime" class="form-label">เวลาที่สิ้นสุด</label>
+                                    <span style="color: red;">* (<input class="form-label" id="editLeaveEndTime2"
+                                            value="" style="border: none; width: 70px; color: red;">เวลาเดิม)
+                                    </span><select class="form-select" id="editLeaveEndTime" name="editLeaveEndTime"
+                                        required>
+                                        <option value="08:00">08:00</option>
+                                        <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
+                                        <option value="09:00">09:00</option>
+                                        <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
+                                        <option value="10:00">10:00</option>
+                                        <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
+                                        <option value="11:00">11:00</option>
+                                        <option value="12:00">11:45</option>
+                                        <option value="13:00">12:45</option>
+                                        <option value="13:30">13:15</option>
+                                        <option value="14:00">13:45</option>
+                                        <option value="14:30">14:15</option>
+                                        <option value="15:00">14:45</option>
+                                        <option value="15:30">15:15</option>
+                                        <option value="16:00">15:45</option>
+                                        <option value="16:30">16:15</option>
+                                        <option value="17:00" selected>16:40</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-12">
+                                    <label for="editTelPhone" class="form-label">เบอร์โทร</label>
+                                    <input type="text" class="form-control" id="editTelPhone">
+                                </div>
+                            </div>
+                            <div class=" mt-3 row">
+                                <div class="col-12">
+                                    <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
+                                    <input class="form-control" type="file" id="editFile" name="editFile" />
+                                    <!-- แสดงชื่อไฟล์เดิม -->
+                                    <small id="currentFile" class="form-text text-muted">
+                                        <!-- ชื่อไฟล์เดิมจะแสดงที่นี่ -->
+                                    </small>
+                                    <!-- Preview รูป -->
+                                    <div class="mt-3"
+                                        style="display: flex; justify-content: center; align-items: center;">
+                                        <img id="imagePreview" src="#" alt="Preview Image"
+                                            style="max-width: 100%; display: none; width: 200px; height: 200px;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
-    $(".leaveChk").click(function() {
-        var rowData = $(this).closest("tr").find("td");
-
-        $('#leaveModal .modal-body').html(
-            '<table class="table table-bordered">' +
-            '<tr>' +
-            '<th>รหัสพนักงาน</th>' +
-            '<td>' + $(rowData[5]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>ชื่อ - นามสกุล</th>' +
-            '<td>' + $(rowData[1]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>แผนก</th>' +
-            '<td>' + $(rowData[2]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>วันที่ยื่นใบลา</th>' +
-            '<td>' + $(rowData[7]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>ประเภทการลา</th>' +
-            '<td>' + $(rowData[0]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>เหตุผลการลา</th>' +
-            '<td>' + $(rowData[3]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>วันเวลาที่ลา</th>' +
-            '<td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10]).text() + '</td>' +
-            '</tr>' +
-            '<tr>' +
-            '<th>สถานะใบลา</th>' +
-            '<td>' + $(rowData[13]).html() + '</td>' +
-            '</tr>' +
-            '</table>'
-        );
-
-        $('.modal-footer .btn-success').off('click').on('click', function() {
-            var userCode = $(rowData[5]).text(); // รหัสพนักงาน
-            var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
-            var leaveType = $(rowData[0]).text(); // ประเภทการลา
-            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
-            var depart = $(rowData[2]).text(); // แผนก
-            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
-            var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
-            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
-            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
-            var checkFirm = '1'; // ผ่าน
-
-            var userName = '<?php echo $userName; ?>';
-
-            // alert(userCode)
-            $.ajax({
-                url: 'a_ajax_upd_status.php',
-                method: 'POST',
-                data: {
-                    createDate: createDate,
-                    userCode: userCode,
-                    userName: userName,
-                    leaveType: leaveType,
-                    leaveReason: leaveReason,
-                    leaveStartDate: leaveStartDate,
-                    leaveEndDate: leaveEndDate,
-                    depart: depart,
-                    checkFirm: checkFirm,
-                    empName: empName,
-                    leaveStatus: leaveStatus
-
-                },
-                success: function(response) {
-                    $('#leaveModal').modal('hide');
-                    Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ตรวจสอบผ่านสำเร็จ',
-                        icon: 'success',
-                        confirmButtonText: 'ตกลง'
-                    }).then(() => {
-                        location
-                            .reload(); // Reload the page after user clicks confirm
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                }
-            });
-        });
-        $('.modal-footer .btn-danger').off('click').on('click', function() {
-            var userCode = $(rowData[5]).text(); // รหัสพนักงาน
-            var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
-            var leaveType = $(rowData[0]).text(); // ประเภทการลา
-            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
-            var depart = $(rowData[2]).text(); // แผนก
-            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
-            var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
-            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
-            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
-
-            var checkFirm = '2'; // ไม่ผ่าน
-            var userName = '<?php echo $userName; ?>';
-
-            $.ajax({
-                url: 'a_ajax_upd_status.php',
-                method: 'POST',
-                data: {
-                    createDate: createDate,
-                    userCode: userCode,
-                    userName: userName,
-                    leaveType: leaveType,
-                    leaveReason: leaveReason,
-                    leaveStartDate: leaveStartDate,
-                    leaveEndDate: leaveEndDate,
-                    depart: depart,
-                    checkFirm: checkFirm,
-                    empName: empName,
-                    leaveStatus: leaveStatus
-
-                },
-                success: function(response) {
-                    $('#leaveModal').modal('hide');
-                    Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ตรวจสอบไม่ผ่านสำเร็จ',
-                        icon: 'success',
-                        confirmButtonText: 'ตกลง'
-                    }).then(() => {
-                        location
-                            .reload(); // Reload the page after user clicks confirm
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                }
-            });
-        });
-    });
-
-    $(".filter-card").click(function() {
-        var status = $(this).data("status");
-        var selectedMonth = $("#selectedMonth").val();
-        var selectedYear = $("#selectedYear").val();
-
-        // alert(status)
+    $(document).ready(function() {
         $.ajax({
-            url: 'a_ajax_get_leave_data.php',
-            method: 'GET',
-            data: {
-                status: status,
-                month: selectedMonth,
-                year: selectedYear
-            },
+            url: 'a_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
+            type: 'GET',
             dataType: 'json',
-            success: function(data) {
-                $("tbody").empty();
-                if (data.length === 0) {
-                    $("tbody").append(
-                        '<tr><td colspan="19" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
-                    );
-                } else {
-                    var totalItems = data.length;
+            success: function(response) {
+                var today = new Date(); // วันที่ปัจจุบัน
 
-                    $.each(data, function(index, row) {
-                        // สถานะใบลา
-                        var leaveStatus = '';
-                        if (row['l_leave_status'] == 0) {
-                            leaveStatus =
-                                '<div class="text-success"><?=$strStatusNormal?></div>';
-                        } else if (row['l_leave_status'] == 1) {
-                            leaveStatus =
-                                '<div class="text-danger"><?=$strStatusCancel?></div>';
-                        } else {
-                            leaveStatus = 'ไม่พบสถานะใบลา';
-                        }
+                flatpickr("#editLeaveStartDate", {
+                    dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                    // defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
+                    disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                });
 
-                        // สถานะอนุมัติ 1
-                        var approveStatus;
-                        if (row['l_approve_status'] == 0) {
-                            approveStatus =
-                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
-                        } else if (row['l_approve_status'] == 1) {
-                            approveStatus =
-                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
-                        } else if (row['l_approve_status'] == 2) {
-                            approveStatus =
-                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
-                        } else if (row['l_approve_status'] == 3) {
-                            approveStatus =
-                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
-                        } else if (row['l_approve_status'] == 4) {
-                            approveStatus =
-                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
-                        } else if (row['l_approve_status'] == 5) {
-                            approveStatus =
-                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
-                        } else if (row['l_approve_status'] == 6) {
-                            approveStatus =
-                                '';
-                        } else {
-                            approveStatus = 'ไม่พบสถานะ';
-                        }
+                flatpickr("#editLeaveEndDate", {
+                    dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                    // defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
+                    disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                });
 
-                        // สถานะอนุมัติ 2
-                        var approveStatus2;
-                        if (row['l_approve_status2'] == 0) {
-                            approveStatus2 =
-                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
-                        } else if (row['l_approve_status2'] == 1) {
-                            approveStatus2 =
-                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
-                        } else if (row['l_approve_status2'] == 2) {
-                            approveStatus2 =
-                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
-                        } else if (row['l_approve_status2'] == 3) {
-                            approveStatus2 =
-                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
-                        } else if (row['l_approve_status2'] == 4) {
-                            approveStatus2 =
-                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
-                        } else if (row['l_approve_status2'] == 5) {
-                            approveStatus2 =
-                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
-                        } else if (row['l_approve_status2'] == 6) {
-                            approveStatus2 =
-                                '';
-                        } else {
-                            approveStatus2 = 'ไม่พบสถานะ';
-                        }
+            }
+        });
 
-                        // สถานะอนุมัติ 3
-                        var approveStatus3;
-                        if (row['l_approve_status3'] == 0) {
-                            approveStatus3 =
-                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
-                        } else if (row['l_approve_status3'] == 1) {
-                            approveStatus3 =
-                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
-                        } else if (row['l_approve_status3'] == 2) {
-                            approveStatus3 =
-                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
-                        } else if (row['l_approve_status3'] == 3) {
-                            approveStatus3 =
-                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
-                        } else if (row['l_approve_status3'] == 4) {
-                            approveStatus3 =
-                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
-                        } else if (row['l_approve_status3'] == 5) {
-                            approveStatus3 =
-                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
-                        } else if (row['l_approve_status3'] == 6) {
-                            approveStatus3 =
-                                '';
-                        } else if (row['l_approve_status3'] == 7) {
-                            approveStatus3 =
-                                '<div class="text-warning"><b>รอ GM อนุมัติ</b></div>';
-                        } else if (row['l_approve_status3'] == 8) {
-                            approveStatus3 =
-                                '<div class="text-success"><b>GM อนุมัติ</b></div>';
-                        } else if (row['l_approve_status3'] == 9) {
-                            approveStatus3 =
-                                '<div class="text-danger"><b>GM ไม่อนุมัติ</b></div>';
-                        } else {
-                            approveStatus3 = 'ไม่พบสถานะ';
-                        }
+        $(".leaveChk").click(function() {
+            var rowData = $(this).closest("tr").find("td");
 
-                        // สถานะ HR
-                        var confirmStatus = '';
-                        if (row['l_hr_status'] == 0) {
-                            confirmStatus =
-                                '<div class="text-warning"><b><?=$strStatusHR0?></b></div>';
-                        } else if (row['l_hr_status'] == 1) {
-                            confirmStatus =
-                                '<div class="text-success"><b><?=$strStatusHR1?></b></div>';
-                        } else if (row['l_hr_status'] == 2) {
-                            confirmStatus =
-                                '<div class="text-danger"><b><?=$strStatusHR2?></b></div>';
-                        } else {
-                            confirmStatus = row['l_hr_status'];
-                        }
+            $('#leaveModal .modal-body').html(
+                '<table class="table table-bordered">' +
+                '<tr>' +
+                '<th>รหัสพนักงาน</th>' +
+                '<td>' + $(rowData[5]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>ชื่อ - นามสกุล</th>' +
+                '<td>' + $(rowData[1]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>แผนก</th>' +
+                '<td>' + $(rowData[2]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>วันที่ยื่นใบลา</th>' +
+                '<td>' + $(rowData[7]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>ประเภทการลา</th>' +
+                '<td>' + $(rowData[0]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>เหตุผลการลา</th>' +
+                '<td>' + $(rowData[3]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>วันเวลาที่ลา</th>' +
+                '<td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10]).text() + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<th>สถานะใบลา</th>' +
+                '<td>' + $(rowData[13]).html() + '</td>' +
+                '</tr>' +
+                '</table>'
+            );
 
-                        var newRow = '<tr class="align-middle">' +
-                            // 0
-                            '<td hidden>' +
-                            (row['l_leave_id'] == 1 ?
-                                '<span class="text-primary">ลากิจได้รับค่าจ้าง</span>' :
-                                '') +
-                            (row['l_leave_id'] == 2 ?
-                                '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span>' :
-                                '') +
-                            (row['l_leave_id'] == 3 ?
-                                '<span class="text-primary">ลาป่วย</span>' :
-                                '') +
-                            (row['l_leave_id'] == 4 ?
-                                '<span class="text-primary">ลาป่วยจากงาน</span>' :
-                                '') +
-                            (row['l_leave_id'] == 5 ?
-                                '<span class="text-primary">ลาพักร้อน</span>' :
-                                '') +
-                            (row['l_leave_id'] == 6 ?
-                                '<span class="text-primary">ขาดงาน</span>' :
-                                '') +
-                            (row['l_leave_id'] == 7 ?
-                                '<span class="text-primary">มาสาย</span>' :
-                                '') +
-                            (row['l_leave_id'] == 8 ?
-                                '<span class="text-primary">อื่น ๆ</span>' :
-                                '') +
-                            '</td>' +
+            $('.modal-footer .btn-success').off('click').on('click', function() {
+                var userCode = $(rowData[5]).text(); // รหัสพนักงาน
+                var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
+                var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                var empName = $(rowData[1]).text(); // ชื่อพนักงาน
+                var depart = $(rowData[2]).text(); // แผนก
+                var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
+                var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
+                var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+                var checkFirm = '1'; // ผ่าน
 
-                            // 1
-                            '<td hidden>' + (row['l_name'] ? row['l_name'] : '') +
-                            '</td>' +
+                var userName = '<?php echo $userName; ?>';
 
-                            // 2
-                            '<td hidden>' + (row['l_department'] ? row['l_department'] :
-                                '') +
-                            '</td>' +
+                // alert(userCode)
+                $.ajax({
+                    url: 'a_ajax_upd_status.php',
+                    method: 'POST',
+                    data: {
+                        createDate: createDate,
+                        userCode: userCode,
+                        userName: userName,
+                        leaveType: leaveType,
+                        leaveReason: leaveReason,
+                        leaveStartDate: leaveStartDate,
+                        leaveEndDate: leaveEndDate,
+                        depart: depart,
+                        checkFirm: checkFirm,
+                        empName: empName,
+                        leaveStatus: leaveStatus
 
-                            // 3
-                            '<td hidden>' + (row['l_leave_reason'] ? row[
-                                    'l_leave_reason'] :
-                                '') +
-                            '</td>' +
+                    },
+                    success: function(response) {
+                        $('#leaveModal').modal('hide');
+                        Swal.fire({
+                            title: 'สำเร็จ!',
+                            text: 'ตรวจสอบผ่านสำเร็จ',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง'
+                        }).then(() => {
+                            location
+                                .reload(); // Reload the page after user clicks confirm
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            });
+            $('.modal-footer .btn-danger').off('click').on('click', function() {
+                var userCode = $(rowData[5]).text(); // รหัสพนักงาน
+                var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
+                var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                var empName = $(rowData[1]).text(); // ชื่อพนักงาน
+                var depart = $(rowData[2]).text(); // แผนก
+                var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
+                var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
+                var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-                            // 4
-                            '<td>' + (totalItems - index) + '</td>' +
+                var checkFirm = '2'; // ไม่ผ่าน
+                var userName = '<?php echo $userName; ?>';
 
-                            // 5
-                            '<td>' + (row['l_usercode'] ? row['l_usercode'] : '') +
-                            '</td>' +
+                $.ajax({
+                    url: 'a_ajax_upd_status.php',
+                    method: 'POST',
+                    data: {
+                        createDate: createDate,
+                        userCode: userCode,
+                        userName: userName,
+                        leaveType: leaveType,
+                        leaveReason: leaveReason,
+                        leaveStartDate: leaveStartDate,
+                        leaveEndDate: leaveEndDate,
+                        depart: depart,
+                        checkFirm: checkFirm,
+                        empName: empName,
+                        leaveStatus: leaveStatus
 
-                            // 6
-                            '<td>' + '<span class="text-primary">' + (row['l_name'] ?
-                                row[
-                                    'l_name'] : '') + '</span><br>' +
-                            'แผนก : ' + (row['l_department'] ? row['l_department'] :
-                                '') +
-                            '</td>' +
+                    },
+                    success: function(response) {
+                        $('#leaveModal').modal('hide');
+                        Swal.fire({
+                            title: 'สำเร็จ!',
+                            text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง'
+                        }).then(() => {
+                            location
+                                .reload(); // Reload the page after user clicks confirm
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            });
+        });
 
-                            // 7
-                            '<td>' + (row['l_create_datetime'] ? row[
-                                    'l_create_datetime'] :
-                                '') + '</td>' + // Creation Date Time
-                            '<td>';
+        $(".filter-card").click(function() {
+            var status = $(this).data("status");
+            var selectedMonth = $("#selectedMonth").val();
+            var selectedYear = $("#selectedYear").val();
 
-                        // 8
-                        if (row['l_leave_id'] == 1) {
+            // alert(status)
+            $.ajax({
+                url: 'a_ajax_get_leave_data.php',
+                method: 'GET',
+                data: {
+                    status: status,
+                    month: selectedMonth,
+                    year: selectedYear
+                },
+                dataType: 'json',
+                success: function(data) {
+                    $("tbody").empty();
+                    if (data.length === 0) {
+                        $("tbody").append(
+                            '<tr><td colspan="19" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
+                        );
+                    } else {
+                        var totalItems = data.length;
+
+                        $.each(data, function(index, row) {
+                            // สถานะใบลา
+                            var leaveStatus = '';
+                            if (row['l_leave_status'] == 0) {
+                                leaveStatus =
+                                    '<div class="text-success"><?=$strStatusNormal?></div>';
+                            } else if (row['l_leave_status'] == 1) {
+                                leaveStatus =
+                                    '<div class="text-danger"><?=$strStatusCancel?></div>';
+                            } else {
+                                leaveStatus = 'ไม่พบสถานะใบลา';
+                            }
+
+                            // สถานะอนุมัติ 1
+                            var approveStatus;
+                            if (row['l_approve_status'] == 0) {
+                                approveStatus =
+                                    '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
+                            } else if (row['l_approve_status'] == 1) {
+                                approveStatus =
+                                    '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
+                            } else if (row['l_approve_status'] == 2) {
+                                approveStatus =
+                                    '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
+                            } else if (row['l_approve_status'] == 3) {
+                                approveStatus =
+                                    '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
+                            } else if (row['l_approve_status'] == 4) {
+                                approveStatus =
+                                    '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
+                            } else if (row['l_approve_status'] == 5) {
+                                approveStatus =
+                                    '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                            } else if (row['l_approve_status'] == 6) {
+                                approveStatus =
+                                    '';
+                            } else {
+                                approveStatus = 'ไม่พบสถานะ';
+                            }
+
+                            // สถานะอนุมัติ 2
+                            var approveStatus2;
+                            if (row['l_approve_status2'] == 0) {
+                                approveStatus2 =
+                                    '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
+                            } else if (row['l_approve_status2'] == 1) {
+                                approveStatus2 =
+                                    '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
+                            } else if (row['l_approve_status2'] == 2) {
+                                approveStatus2 =
+                                    '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
+                            } else if (row['l_approve_status2'] == 3) {
+                                approveStatus2 =
+                                    '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
+                            } else if (row['l_approve_status2'] == 4) {
+                                approveStatus2 =
+                                    '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
+                            } else if (row['l_approve_status2'] == 5) {
+                                approveStatus2 =
+                                    '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                            } else if (row['l_approve_status2'] == 6) {
+                                approveStatus2 =
+                                    '';
+                            } else {
+                                approveStatus2 = 'ไม่พบสถานะ';
+                            }
+
+                            // สถานะอนุมัติ 3
+                            var approveStatus3;
+                            if (row['l_approve_status3'] == 0) {
+                                approveStatus3 =
+                                    '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
+                            } else if (row['l_approve_status3'] == 1) {
+                                approveStatus3 =
+                                    '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
+                            } else if (row['l_approve_status3'] == 2) {
+                                approveStatus3 =
+                                    '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
+                            } else if (row['l_approve_status3'] == 3) {
+                                approveStatus3 =
+                                    '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
+                            } else if (row['l_approve_status3'] == 4) {
+                                approveStatus3 =
+                                    '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
+                            } else if (row['l_approve_status3'] == 5) {
+                                approveStatus3 =
+                                    '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                            } else if (row['l_approve_status3'] == 6) {
+                                approveStatus3 =
+                                    '';
+                            } else if (row['l_approve_status3'] == 7) {
+                                approveStatus3 =
+                                    '<div class="text-warning"><b>รอ GM อนุมัติ</b></div>';
+                            } else if (row['l_approve_status3'] == 8) {
+                                approveStatus3 =
+                                    '<div class="text-success"><b>GM อนุมัติ</b></div>';
+                            } else if (row['l_approve_status3'] == 9) {
+                                approveStatus3 =
+                                    '<div class="text-danger"><b>GM ไม่อนุมัติ</b></div>';
+                            } else {
+                                approveStatus3 = 'ไม่พบสถานะ';
+                            }
+
+                            // สถานะ HR
+                            var confirmStatus = '';
+                            if (row['l_hr_status'] == 0) {
+                                confirmStatus =
+                                    '<div class="text-warning"><b><?=$strStatusHR0?></b></div>';
+                            } else if (row['l_hr_status'] == 1) {
+                                confirmStatus =
+                                    '<div class="text-success"><b><?=$strStatusHR1?></b></div>';
+                            } else if (row['l_hr_status'] == 2) {
+                                confirmStatus =
+                                    '<div class="text-danger"><b><?=$strStatusHR2?></b></div>';
+                            } else {
+                                confirmStatus = row['l_hr_status'];
+                            }
+
+                            var newRow = '<tr class="align-middle">' +
+                                // 0
+                                '<td hidden>' +
+                                (row['l_leave_id'] == 1 ?
+                                    '<span class="text-primary">ลากิจได้รับค่าจ้าง</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 2 ?
+                                    '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 3 ?
+                                    '<span class="text-primary">ลาป่วย</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 4 ?
+                                    '<span class="text-primary">ลาป่วยจากงาน</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 5 ?
+                                    '<span class="text-primary">ลาพักร้อน</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 6 ?
+                                    '<span class="text-primary">ขาดงาน</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 7 ?
+                                    '<span class="text-primary">มาสาย</span>' :
+                                    '') +
+                                (row['l_leave_id'] == 8 ?
+                                    '<span class="text-primary">อื่น ๆ</span>' :
+                                    '') +
+                                '</td>' +
+
+                                // 1
+                                '<td hidden>' + (row['l_name'] ? row['l_name'] :
+                                    '') +
+                                '</td>' +
+
+                                // 2
+                                '<td hidden>' + (row['l_department'] ? row[
+                                        'l_department'] :
+                                    '') +
+                                '</td>' +
+
+                                // 3
+                                '<td hidden>' + (row['l_leave_reason'] ? row[
+                                        'l_leave_reason'] :
+                                    '') +
+                                '</td>' +
+
+                                // 4
+                                '<td>' + (totalItems - index) + '</td>' +
+
+                                // 5
+                                '<td>' + (row['l_usercode'] ? row['l_usercode'] :
+                                    '') +
+                                '</td>' +
+
+                                // 6
+                                '<td>' + '<span class="text-primary">' + (row[
+                                        'l_name'] ?
+                                    row[
+                                        'l_name'] : '') + '</span><br>' +
+                                'แผนก : ' + (row['l_department'] ? row[
+                                        'l_department'] :
+                                    '') +
+                                '</td>' +
+
+                                // 7
+                                '<td>' + (row['l_create_datetime'] ? row[
+                                        'l_create_datetime'] :
+                                    '') + '</td>' + // Creation Date Time
+                                '<td>';
+
+                            // 8
+                            if (row['l_leave_id'] == 1) {
+                                newRow +=
+                                    '<span class="text-primary">ลากิจได้รับค่าจ้าง</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 2) {
+                                newRow +=
+                                    '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 3) {
+                                newRow +=
+                                    '<span class="text-primary">ลาป่วย</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 4) {
+                                newRow +=
+                                    '<span class="text-primary">ลาป่วยจากงาน</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 5) {
+                                newRow +=
+                                    '<span class="text-primary">ลาพักร้อน</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 6) {
+                                newRow +=
+                                    '<span class="text-primary">ขาดงาน</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 7) {
+                                newRow +=
+                                    '<span class="text-primary">มาสาย</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else if (row['l_leave_id'] == 8) {
+                                newRow +=
+                                    '<span class="text-primary">อื่น ๆ</span><br>เหตุผล : ' +
+                                    row['l_leave_reason'];
+                            } else {
+                                newRow +=
+                                    '<span class="text-danger">ไม่พบประเภทการลาและเหตุผลการลา</span>';
+                            }
+                            newRow += '</td>' +
+                                // 9
+                                '<td>' + (row['l_leave_start_date'] ? row[
+                                    'l_leave_start_date'] : '') + '<br>' +
+                                (row['l_leave_start_time'] ? (
+                                    (row['l_leave_start_time'] == '09:00:00' &&
+                                        row[
+                                            'l_remark'] == '08:45:00') ?
+                                    '08:45:00' :
+                                    (row['l_leave_start_time'] == '10:00:00' &&
+                                        row[
+                                            'l_remark'] == '09:45:00') ?
+                                    '09:45:00' :
+                                    (row['l_leave_start_time'] == '11:00:00' &&
+                                        row[
+                                            'l_remark'] == '10:45:00') ?
+                                    '10:45:00' :
+                                    (row['l_leave_start_time'] == '12:00:00') ?
+                                    '11:45:00' :
+                                    (row['l_leave_start_time'] == '13:00:00') ?
+                                    '12:45:00' :
+                                    (row['l_leave_start_time'] == '13:30:00' &&
+                                        row[
+                                            'l_remark'] == '13:15:00') ?
+                                    '13:15:00' :
+                                    (row['l_leave_start_time'] == '14:00:00' &&
+                                        row[
+                                            'l_remark'] == '13:45:00') ?
+                                    '13:45:00' :
+                                    (row['l_leave_start_time'] == '14:30:00' &&
+                                        row[
+                                            'l_remark'] == '14:15:00') ?
+                                    '14:15:00' :
+                                    (row['l_leave_start_time'] == '15:00:00' &&
+                                        row[
+                                            'l_remark'] == '14:45:00') ?
+                                    '14:45:00' :
+                                    (row['l_leave_start_time'] == '15:30:00' &&
+                                        row[
+                                            'l_remark'] == '15:15:00') ?
+                                    '15:15:00' :
+                                    (row['l_leave_start_time'] == '16:00:00' &&
+                                        row[
+                                            'l_remark'] == '15:45:00') ?
+                                    '15:45:00' :
+                                    (row['l_leave_start_time'] == '16:30:00' &&
+                                        row[
+                                            'l_remark'] == '16:15:00') ?
+                                    '16:15:00' :
+                                    (row['l_leave_start_time'] == '17:00:00') ?
+                                    '16:40:00' :
+                                    row['l_leave_start_time']
+                                ) : '') +
+                                '</td>' +
+
+                                // 10
+                                '<td>' + (row['l_leave_end_date'] ? row[
+                                    'l_leave_end_date'] : '') + '<br>' +
+                                (row['l_leave_end_time'] ? (
+                                    // Check if the l_leave_start_time and l_remark match certain values
+                                    (row['l_leave_end_time'] == '09:00:00' &&
+                                        row[
+                                            'l_remark'] == '08:45:00') ?
+                                    '08:45:00' :
+                                    (row['l_leave_end_time'] == '10:00:00' &&
+                                        row[
+                                            'l_remark'] == '09:45:00') ?
+                                    '09:45:00' :
+                                    (row['l_leave_end_time'] == '11:00:00' &&
+                                        row[
+                                            'l_remark'] == '10:45:00') ?
+                                    '10:45:00' :
+                                    (row['l_leave_end_time'] == '12:00:00') ?
+                                    '11:45:00' :
+                                    (row['l_leave_end_time'] == '13:00:00') ?
+                                    '12:45:00' :
+                                    (row['l_leave_end_time'] == '13:30:00' &&
+                                        row[
+                                            'l_remark'] == '13:15:00') ?
+                                    '13:15:00' :
+                                    (row['l_leave_end_time'] == '14:00:00' &&
+                                        row[
+                                            'l_remark'] == '13:45:00') ?
+                                    '13:45:00' :
+                                    (row['l_leave_end_time'] == '14:30:00' &&
+                                        row[
+                                            'l_remark'] == '14:15:00') ?
+                                    '14:15:00' :
+                                    (row['l_leave_end_time'] == '15:00:00' &&
+                                        row[
+                                            'l_remark'] == '14:45:00') ?
+                                    '14:45:00' :
+                                    (row['l_leave_end_time'] == '15:30:00' &&
+                                        row[
+                                            'l_remark'] == '15:15:00') ?
+                                    '15:15:00' :
+                                    (row['l_leave_end_time'] == '16:00:00' &&
+                                        row[
+                                            'l_remark'] == '15:45:00') ?
+                                    '15:45:00' :
+                                    (row['l_leave_end_time'] == '16:30:00' &&
+                                        row[
+                                            'l_remark'] == '16:15:00') ?
+                                    '16:15:00' :
+                                    (row['l_leave_end_time'] == '17:00:00') ?
+                                    '16:40:00' :
+                                    row['l_leave_end_time']
+                                ) : '') +
+                                '</td>' +
+
+                                // 11
+                                '<td>' + (row['calculated_leave'] ?
+                                    `<span class="text-primary">${row['calculated_leave'].days} วัน ${row['calculated_leave'].hours} ชั่วโมง ${row['calculated_leave'].minutes} นาที</span>` :
+                                    '') +
+                                '</td>';
+
+                            // 12
+                            if (row['l_file']) {
+                                newRow +=
+                                    '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' +
+                                    row['l_file'] +
+                                    '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
+                            } else {
+                                newRow +=
+                                    '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
+                            }
                             newRow +=
-                                '<span class="text-primary">ลากิจได้รับค่าจ้าง</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 2) {
-                            newRow +=
-                                '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 3) {
-                            newRow +=
-                                '<span class="text-primary">ลาป่วย</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 4) {
-                            newRow +=
-                                '<span class="text-primary">ลาป่วยจากงาน</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 5) {
-                            newRow +=
-                                '<span class="text-primary">ลาพักร้อน</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 6) {
-                            newRow +=
-                                '<span class="text-primary">ขาดงาน</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 7) {
-                            newRow +=
-                                '<span class="text-primary">มาสาย</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else if (row['l_leave_id'] == 8) {
-                            newRow +=
-                                '<span class="text-primary">อื่น ๆ</span><br>เหตุผล : ' +
-                                row['l_leave_reason'];
-                        } else {
-                            newRow +=
-                                '<span class="text-danger">ไม่พบประเภทการลาและเหตุผลการลา</span>';
-                        }
-                        newRow += '</td>' +
-                            // 9
-                            '<td>' + (row['l_leave_start_date'] ? row[
-                                'l_leave_start_date'] : '') + '<br>' +
-                            (row['l_leave_start_time'] ? (
-                                // Check if the l_leave_start_time and l_remark match certain values
-                                (row['l_leave_start_time'] == '09:00:00' && row[
-                                    'l_remark'] == '08:45:00') ? '08:45:00' :
-                                (row['l_leave_start_time'] == '10:00:00' && row[
-                                    'l_remark'] == '09:45:00') ? '09:45:00' :
-                                (row['l_leave_start_time'] == '11:00:00' && row[
-                                    'l_remark'] == '10:45:00') ? '10:45:00' :
-                                (row['l_leave_start_time'] == '12:00:00') ? '11:45:00' :
-                                (row['l_leave_start_time'] == '13:00:00') ? '12:45:00' :
-                                (row['l_leave_start_time'] == '13:30:00' && row[
-                                    'l_remark'] == '13:10:00') ? '13:10:00' :
-                                (row['l_leave_start_time'] == '14:00:00' && row[
-                                    'l_remark'] == '13:40:00') ? '13:40:00' :
-                                (row['l_leave_start_time'] == '14:00:00' && row[
-                                    'l_remark'] == '13:45:00') ? '13:45:00' :
-                                (row['l_leave_start_time'] == '14:30:00' && row[
-                                    'l_remark'] == '14:10:00') ? '14:10:00' :
-                                (row['l_leave_start_time'] == '15:00:00' && row[
-                                    'l_remark'] == '14:40:00') ? '14:40:00' :
-                                (row['l_leave_start_time'] == '15:00:00' && row[
-                                    'l_remark'] == '14:45:00') ? '14:45:00' :
-                                (row['l_leave_start_time'] == '15:30:00' && row[
-                                    'l_remark'] == '15:10:00') ? '15:10:00' :
-                                (row['l_leave_start_time'] == '16:00:00' && row[
-                                    'l_remark'] == '15:40:00') ? '15:40:00' :
-                                (row['l_leave_start_time'] == '16:00:00' && row[
-                                    'l_remark'] == '15:45:00') ? '15:45:00' :
-                                (row['l_leave_start_time'] == '16:30:00' && row[
-                                    'l_remark'] == '16:10:00') ? '16:10:00' :
-                                (row['l_leave_start_time'] == '17:00:00') ? '16:40:00' :
-                                row['l_leave_start_time']
-                            ) : '') +
-                            '</td>' +
+                                // 13
+                                '<td>' + leaveStatus + '</td>' +
 
-                            // 10
-                            '<td>' + (row['l_leave_end_date'] ? row[
-                                'l_leave_end_date'] : '') + '<br>' +
-                            (row['l_leave_end_time'] ? (
-                                // Check if the l_leave_start_time and l_remark match certain values
-                                (row['l_leave_end_time'] == '09:00:00' && row[
-                                    'l_remark'] == '08:45:00') ? '08:45:00' :
-                                (row['l_leave_end_time'] == '10:00:00' && row[
-                                    'l_remark'] == '09:45:00') ? '09:45:00' :
-                                (row['l_leave_end_time'] == '11:00:00' && row[
-                                    'l_remark'] == '10:45:00') ? '10:45:00' :
-                                (row['l_leave_end_time'] == '12:00:00') ? '11:45:00' :
-                                (row['l_leave_end_time'] == '13:00:00') ? '12:45:00' :
-                                (row['l_leave_end_time'] == '13:30:00' && row[
-                                    'l_remark'] == '13:10:00') ? '13:10:00' :
-                                (row['l_leave_end_time'] == '14:00:00' && row[
-                                    'l_remark'] == '13:40:00') ? '13:40:00' :
-                                (row['l_leave_end_time'] == '14:00:00' && row[
-                                    'l_remark'] == '13:45:00') ? '13:45:00' :
-                                (row['l_leave_end_time'] == '14:30:00' && row[
-                                    'l_remark'] == '14:10:00') ? '14:10:00' :
-                                (row['l_leave_end_time'] ==
-                                    '15:00:00' && row[
-                                        'l_remark'] == '14:40:00') ? '14:40:00' :
-                                (row['l_leave_end_time'] == '15:00:00' && row[
-                                    'l_remark'] == '14:45:00') ? '14:45:00' :
-                                (row['l_leave_end_time'] == '15:30:00' && row[
-                                    'l_remark'] == '15:10:00') ? '15:10:00' :
-                                (row['l_leave_end_time'] == '16:00:00' && row[
-                                    'l_remark'] == '15:40:00') ? '15:40:00' :
-                                (row['l_leave_end_time'] == '16:00:00' && row[
-                                    'l_remark'] == '15:45:00') ? '15:45:00' :
-                                (row['l_leave_end_time'] == '16:30:00' && row[
-                                    'l_remark'] == '16:10:00') ? '16:10:00' :
-                                (row['l_leave_end_time'] == '17:00:00') ? '16:40:00' :
-                                row['l_leave_end_time']
-                            ) : '') +
-                            '</td>' +
+                                // 14
+                                '<td>' + (row['l_approve_name'] ? row[
+                                    'l_approve_name'] : '') +
+                                '</td>' +
 
-                            // 11
-                            '<td>' + (row['calculated_leave'] ?
-                                `<span class="text-primary">${row['calculated_leave'].days} วัน ${row['calculated_leave'].hours} ชั่วโมง ${row['calculated_leave'].minutes} นาที</span>` :
-                                '') +
-                            '</td>';
+                                // 15
+                                '<td>' + approveStatus + '</td>' +
 
-                        // 12
-                        if (row['l_file']) {
-                            newRow +=
-                                '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' +
-                                row['l_file'] +
-                                '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
-                        } else {
-                            newRow +=
-                                '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
-                        }
-                        newRow +=
-                            // 13
-                            '<td>' + leaveStatus + '</td>' +
+                                // 16
+                                '<td>' + (row['l_approve_datetime'] !== null ? row[
+                                    'l_approve_datetime'] : '') + '</td>' +
 
-                            // 14
-                            '<td>' + (row['l_approve_name'] ? row['l_approve_name'] : '') +
-                            '</td>' +
+                                // 17
+                                '<td>' + (row['l_reason'] ? row['l_reason'] : '') +
+                                '</td>' +
 
-                            // 15
-                            '<td>' + approveStatus + '</td>' +
+                                // 18
+                                '<td>' + (row['l_approve_name2'] ? row[
+                                        'l_approve_name2'] :
+                                    '') + '</td>' +
 
-                            // 16
-                            '<td>' + (row['l_approve_datetime'] !== null ? row[
-                                'l_approve_datetime'] : '') + '</td>' +
+                                // 19
+                                '<td>' + approveStatus2 + '</td>' +
 
-                            // 17
-                            '<td>' + (row['l_reason'] ? row['l_reason'] : '') + '</td>' +
+                                // 20
+                                '<td>' + (row['l_approve_datetime2'] !== null ? row[
+                                    'l_approve_datetime2'] : '') + '</td>' +
 
-                            // 18
-                            '<td>' + (row['l_approve_name2'] ? row['l_approve_name2'] :
-                                '') + '</td>' +
+                                // 21
+                                '<td>' + (row['l_reason2'] ? row['l_reason2'] :
+                                    '') + '</td>' +
 
-                            // 19
-                            '<td>' + approveStatus2 + '</td>' +
+                                // 22
+                                '<td>' + (row['l_approve_name3'] ? row[
+                                        'l_approve_name3'] :
+                                    '') + '</td>' +
 
-                            // 20
-                            '<td>' + (row['l_approve_datetime2'] !== null ? row[
-                                'l_approve_datetime2'] : '') + '</td>' +
+                                // 23
+                                '<td>' + approveStatus3 + '</td>' +
 
-                            // 21
-                            '<td>' + (row['l_reason2'] ? row['l_reason2'] : '') + '</td>' +
+                                // 24
+                                '<td>' + (row['l_approve_datetime3'] !== null ? row[
+                                    'l_approve_datetime3'] : '') + '</td>' +
 
-                            // 22
-                            '<td>' + (row['l_approve_name3'] ? row['l_approve_name3'] :
-                                '') + '</td>' +
+                                // 25
+                                '<td>' + (row['l_reason3'] ? row['l_reason3'] :
+                                    '') + '</td>' +
 
-                            // 23
-                            '<td>' + approveStatus3 + '</td>' +
+                                // 26
+                                '<td>' + confirmStatus + '</td>' +
 
-                            // 24
-                            '<td>' + (row['l_approve_datetime3'] !== null ? row[
-                                'l_approve_datetime3'] : '') + '</td>' +
+                                // 27
+                                '<td>' + (row['l_remark2'] ? row['l_remark2'] :
+                                    '') + '</td>' +
 
-                            // 25
-                            '<td>' + (row['l_reason3'] ? row['l_reason3'] : '') + '</td>' +
+                                // 28
+                                '<td>';
+                            if (row['l_hr_status'] == 2 || row['l_hr_status'] ==
+                                3) {
+                                newRow +=
+                                    '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                            } else {
+                                newRow +=
+                                    '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                            }
+                            newRow += '</td></tr>';
 
-                            // 26
-                            '<td>' + confirmStatus + '</td>' +
+                            $("tbody").append(newRow);
+                        });
+                        $(".leaveChk").click(function() {
+                            var rowData = $(this).closest("tr").find("td");
 
-                            // 27
-                            '<td>' + (row['l_remark2'] ? row['l_remark2'] : '') + '</td>' +
+                            // Populate modal content
+                            $('#leaveModal .modal-body').html(
+                                '<table class="table table-bordered">' +
+                                '<tr>' +
+                                '<th>รหัสพนักงาน</th>' +
+                                '<td>' + $(rowData[5]).text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>ชื่อ - นามสกุล</th>' +
+                                '<td>' + $(rowData[1]).text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>แผนก</th>' +
+                                '<td>' + $(rowData[2]).text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>วันที่ยื่นใบลา</th>' +
+                                '<td>' + $(rowData[7]).text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>ประเภทการลา</th>' +
+                                '<td>' + $(rowData[0]).text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>เหตุผลการลา</th>' +
+                                '<td>' + $(rowData[3]).text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>วันเวลาที่ลา</th>' +
+                                '<td>' + $(rowData[9]).text() + ' ถึง ' + $(
+                                    rowData[10])
+                                .text() + '</td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                '<th>สถานะใบลา</th>' +
+                                '<td>' + $(rowData[13]).html() + '</td>' +
+                                '</tr>' +
+                                '</table>'
+                            );
 
-                            // 28
-                            '<td>';
-                        if (row['l_hr_status'] == 2 || row['l_hr_status'] == 3) {
-                            newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
-                        } else {
-                            newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
-                        }
-                        newRow += '</td></tr>';
+                            $('#leaveModal').modal('show');
+                            $('.modal-footer .btn-success').off('click').on('click',
+                                function() {
+                                    var leaveType = $(rowData[0])
+                                        .text(); // ประเภทการลา
+                                    var empName = $(rowData[1])
+                                        .text(); // ชื่อพนักงาน
+                                    var depart = $(rowData[2]).text(); // แผนก
+                                    var leaveReason = $(rowData[3])
+                                        .text(); // เหตุผลการลา
+                                    var userCode = $(rowData[5])
+                                        .text(); // รหัสพนักงาน
+                                    var createDate = $(rowData[7])
+                                        .text(); // วันที่ยื่นใบลา
+                                    var leaveStartDate = $(rowData[9])
+                                        .text(); // วันเวลาที่ลาเริ่มต้น
+                                    var leaveEndDate = $(rowData[10])
+                                        .text(); // วันเวลาที่ลาสิ้นสุด
+                                    var leaveStatus = $(rowData[12])
+                                        .text(); // สถานะใบลา
 
-                        $("tbody").append(newRow);
-                    });
+                                    var checkFirm = '1'; // ผ่าน
+                                    var userName = '<?php echo $userName; ?>';
+
+                                    $.ajax({
+                                        url: 'a_ajax_upd_status.php',
+                                        method: 'POST',
+                                        data: {
+                                            leaveType: leaveType,
+                                            empName: empName,
+                                            depart: depart,
+                                            leaveReason: leaveReason,
+                                            userCode: userCode,
+                                            createDate: createDate,
+                                            leaveStartDate: leaveStartDate,
+                                            leaveEndDate: leaveEndDate,
+                                            checkFirm: checkFirm,
+                                            userName: userName,
+                                            empName: empName,
+                                            leaveStatus: leaveStatus
+                                            // name: name,
+                                            // createDate: createDate,
+                                            // userCode: userCode,
+                                            // userName: userName,
+                                            // leaveType: leaveType,
+                                            // leaveReason: leaveReason,
+                                            // leaveStartDate: leaveStartDate,
+                                            // leaveEndDate: leaveEndDate,
+                                            // depart: depart,
+                                            // checkFirm: checkFirm
+                                        },
+                                        success: function(response) {
+                                            $('#leaveModal').modal(
+                                                'hide');
+                                            Swal.fire({
+                                                title: 'สำเร็จ!',
+                                                text: 'ตรวจสอบผ่านสำเร็จ',
+                                                icon: 'success',
+                                                confirmButtonText: 'ตกลง'
+                                            }).then(() => {
+                                                location
+                                                    .reload(); // Reload the page after user clicks confirm
+                                            });
+                                        },
+                                        error: function(xhr, status,
+                                            error) {
+                                            console.error(error);
+                                        }
+                                    });
+                                });
+                            $('.modal-footer .btn-danger').off('click').on('click',
+                                function() {
+                                    var leaveType = $(rowData[0])
+                                        .text(); // ประเภทการลา
+                                    var empName = $(rowData[1])
+                                        .text(); // ชื่อพนักงาน
+                                    var depart = $(rowData[2]).text(); // แผนก
+                                    var leaveReason = $(rowData[3])
+                                        .text(); // เหตุผลการลา
+                                    var userCode = $(rowData[5])
+                                        .text(); // รหัสพนักงาน
+                                    var createDate = $(rowData[7])
+                                        .text(); // วันที่ยื่นใบลา
+                                    var leaveStartDate = $(rowData[9])
+                                        .text(); // วันเวลาที่ลาเริ่มต้น
+                                    var leaveEndDate = $(rowData[10])
+                                        .text(); // วันเวลาที่ลาสิ้นสุด
+                                    var leaveStatus = $(rowData[12])
+                                        .text(); // สถานะใบลา
+
+                                    var checkFirm = '2'; // ไม่ผ่าน
+                                    var userName = '<?php echo $userName; ?>';
+
+                                    console.log(leaveType)
+                                    console.log(name)
+                                    console.log(depart)
+                                    console.log(leaveReason)
+                                    console.log(userCode)
+                                    console.log(createDate)
+                                    console.log(leaveStartDate)
+                                    console.log(leaveEndDate)
+                                    console.log(checkFirm)
+                                    console.log(userName)
+
+                                    $.ajax({
+                                        url: 'a_ajax_upd_status.php',
+                                        method: 'POST',
+                                        data: {
+                                            leaveType: leaveType,
+                                            empName: empName,
+                                            depart: depart,
+                                            leaveReason: leaveReason,
+                                            userCode: userCode,
+                                            createDate: createDate,
+                                            leaveStartDate: leaveStartDate,
+                                            leaveEndDate: leaveEndDate,
+                                            checkFirm: checkFirm,
+                                            userName: userName,
+                                            empName: empName,
+                                            leaveStatus: leaveStatus
+                                        },
+                                        success: function(response) {
+                                            $('#leaveModal').modal(
+                                                'hide');
+                                            Swal.fire({
+                                                title: 'สำเร็จ!',
+                                                text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                                                icon: 'success',
+                                                confirmButtonText: 'ตกลง'
+                                            }).then(() => {
+                                                location
+                                                    .reload(); // Reload the page after user clicks confirm
+                                            });
+                                        },
+                                        error: function(xhr, status,
+                                            error) {
+                                            console.error(error);
+                                        }
+                                    });
+                                });
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        });
+
+        $("#nameSearch").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        $("#leaveSearch").on("keyup", function() {
+            var value2 = $(this).val().toLowerCase();
+            $("tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
+            });
+        });
+
+        $("#codeSearch").on("keyup", function() {
+            var value3 = $(this).val().toLowerCase(); // ค่าที่กรอกในช่องค้นหา
+            var page = "<?php echo $currentPage; ?>"; // หน้าปัจจุบันที่แสดงอยู่
+            var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
+            var selectedYear = "<?php echo $selectedYear; ?>"; // ปีที่เลือก
+
+            var searchCode = value3; // ค่าของ codeSearch ที่กรอก
+
+            $.ajax({
+                url: "a_ajax_get_data_usercode.php", // ชื่อไฟล์ PHP ที่ใช้แสดงข้อมูล
+                type: "GET",
+                data: {
+                    page: page,
+                    month: selectedMonth,
+                    year: selectedYear,
+                    codeSearch: searchCode
+                },
+                success: function(response) {
+                    // แทนที่เนื้อหาตารางด้วยข้อมูลใหม่ที่ได้จาก response
+                    $("tbody").html(response);
+
+                    // เปิด modal และกำหนดเนื้อหา
                     $(".leaveChk").click(function() {
                         var rowData = $(this).closest("tr").find("td");
+                        var modalContent = '<table class="table table-bordered">' +
+                            '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[5]).text() +
+                            '</td></tr>' +
+                            '<tr><th>ชื่อ - นามสกุล</th><td>' + $(rowData[1])
+                            .text() +
+                            '</td></tr>' +
+                            '<tr><th>แผนก</th><td>' + $(rowData[2]).text() +
+                            '</td></tr>' +
+                            '<tr><th>วันที่ยื่นใบลา</th><td>' + $(rowData[7])
+                            .text() +
+                            '</td></tr>' +
+                            '<tr><th>ประเภทการลา</th><td>' + $(rowData[0]).text() +
+                            '</td></tr>' +
+                            '<tr><th>เหตุผลการลา</th><td>' + $(rowData[3]).text() +
+                            '</td></tr>' +
+                            '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[9]).text() +
+                            ' ถึง ' +
+                            $(rowData[10]).text() + '</td></tr>' +
+                            '<tr><th>สถานะใบลา</th><td>' + $(rowData[12]).html() +
+                            '</td></tr>' +
+                            '</table>';
 
-                        // Populate modal content
-                        $('#leaveModal .modal-body').html(
-                            '<table class="table table-bordered">' +
-                            '<tr>' +
-                            '<th>รหัสพนักงาน</th>' +
-                            '<td>' + $(rowData[5]).text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>ชื่อ - นามสกุล</th>' +
-                            '<td>' + $(rowData[1]).text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>แผนก</th>' +
-                            '<td>' + $(rowData[2]).text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>วันที่ยื่นใบลา</th>' +
-                            '<td>' + $(rowData[7]).text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>ประเภทการลา</th>' +
-                            '<td>' + $(rowData[0]).text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>เหตุผลการลา</th>' +
-                            '<td>' + $(rowData[3]).text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>วันเวลาที่ลา</th>' +
-                            '<td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10])
-                            .text() + '</td>' +
-                            '</tr>' +
-                            '<tr>' +
-                            '<th>สถานะใบลา</th>' +
-                            '<td>' + $(rowData[13]).html() + '</td>' +
-                            '</tr>' +
-                            '</table>'
-                        );
+                        $('#leaveModal .modal-body').html(modalContent);
 
-                        $('#leaveModal').modal('show');
+                        // ปรับปรุงปุ่มใน modal สำหรับ "สำเร็จ"
                         $('.modal-footer .btn-success').off('click').on('click',
                             function() {
-                                var leaveType = $(rowData[0]).text(); // ประเภทการลา
-                                var empName = $(rowData[1]).text(); // ชื่อพนักงาน
-                                var depart = $(rowData[2]).text(); // แผนก
-                                var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
-                                var userCode = $(rowData[5]).text(); // รหัสพนักงาน
-                                var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
-                                var leaveStartDate = $(rowData[9])
-                                    .text(); // วันเวลาที่ลาเริ่มต้น
-                                var leaveEndDate = $(rowData[10])
-                                    .text(); // วันเวลาที่ลาสิ้นสุด
-                                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
-
-                                var checkFirm = '1'; // ผ่าน
-                                var userName = '<?php echo $userName; ?>';
+                                var modalData = {
+                                    createDate: $(rowData[7]).text(),
+                                    userCode: $(rowData[5]).text(),
+                                    userName: '<?php echo $userName; ?>',
+                                    leaveType: $(rowData[0]).text(),
+                                    leaveReason: $(rowData[3]).text(),
+                                    leaveStartDate: $(rowData[9]).text(),
+                                    leaveEndDate: $(rowData[10]).text(),
+                                    depart: $(rowData[2]).text(),
+                                    checkFirm: '1', // ผ่าน
+                                    empName: $(rowData[1]).text(),
+                                    leaveStatus: $(rowData[12]).text()
+                                };
 
                                 $.ajax({
                                     url: 'a_ajax_upd_status.php',
                                     method: 'POST',
-                                    data: {
-                                        leaveType: leaveType,
-                                        empName: empName,
-                                        depart: depart,
-                                        leaveReason: leaveReason,
-                                        userCode: userCode,
-                                        createDate: createDate,
-                                        leaveStartDate: leaveStartDate,
-                                        leaveEndDate: leaveEndDate,
-                                        checkFirm: checkFirm,
-                                        userName: userName,
-                                        empName: empName,
-                                        leaveStatus: leaveStatus
-                                        // name: name,
-                                        // createDate: createDate,
-                                        // userCode: userCode,
-                                        // userName: userName,
-                                        // leaveType: leaveType,
-                                        // leaveReason: leaveReason,
-                                        // leaveStartDate: leaveStartDate,
-                                        // leaveEndDate: leaveEndDate,
-                                        // depart: depart,
-                                        // checkFirm: checkFirm
-                                    },
+                                    data: modalData,
                                     success: function(response) {
-                                        $('#leaveModal').modal('hide');
-                                        Swal.fire({
-                                            title: 'สำเร็จ!',
-                                            text: 'ตรวจสอบผ่านสำเร็จ',
-                                            icon: 'success',
-                                            confirmButtonText: 'ตกลง'
-                                        }).then(() => {
-                                            location
-                                                .reload(); // Reload the page after user clicks confirm
-                                        });
+                                        $('#leaveModal').modal(
+                                            'hide');
+                                        location
+                                            .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
                                     },
-                                    error: function(xhr, status, error) {
+                                    error: function(xhr, status,
+                                        error) {
                                         console.error(error);
                                     }
                                 });
                             });
-                        $('.modal-footer .btn-danger').off('click').on('click', function() {
-                            var leaveType = $(rowData[0]).text(); // ประเภทการลา
-                            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
-                            var depart = $(rowData[2]).text(); // แผนก
-                            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
-                            var userCode = $(rowData[5]).text(); // รหัสพนักงาน
-                            var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
-                            var leaveStartDate = $(rowData[9])
-                                .text(); // วันเวลาที่ลาเริ่มต้น
-                            var leaveEndDate = $(rowData[10])
-                                .text(); // วันเวลาที่ลาสิ้นสุด
-                            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-                            var checkFirm = '2'; // ไม่ผ่าน
-                            var userName = '<?php echo $userName; ?>';
+                        // ปรับปรุงปุ่มใน modal สำหรับ "ไม่ผ่าน"
+                        $('.modal-footer .btn-danger').off('click').on('click',
+                            function() {
+                                var modalData = {
+                                    createDate: $(rowData[7]).text(),
+                                    userCode: $(rowData[5]).text(),
+                                    userName: '<?php echo $userName; ?>',
+                                    leaveType: $(rowData[0]).text(),
+                                    leaveReason: $(rowData[3]).text(),
+                                    leaveStartDate: $(rowData[9]).text(),
+                                    leaveEndDate: $(rowData[10]).text(),
+                                    depart: $(rowData[2]).text(),
+                                    checkFirm: '2', // ไม่ผ่าน
+                                    empName: $(rowData[1]).text(),
+                                    leaveStatus: $(rowData[12]).text()
+                                };
 
-                            console.log(leaveType)
-                            console.log(name)
-                            console.log(depart)
-                            console.log(leaveReason)
-                            console.log(userCode)
-                            console.log(createDate)
-                            console.log(leaveStartDate)
-                            console.log(leaveEndDate)
-                            console.log(checkFirm)
-                            console.log(userName)
-
-                            $.ajax({
-                                url: 'a_ajax_upd_status.php',
-                                method: 'POST',
-                                data: {
-                                    leaveType: leaveType,
-                                    empName: empName,
-                                    depart: depart,
-                                    leaveReason: leaveReason,
-                                    userCode: userCode,
-                                    createDate: createDate,
-                                    leaveStartDate: leaveStartDate,
-                                    leaveEndDate: leaveEndDate,
-                                    checkFirm: checkFirm,
-                                    userName: userName,
-                                    empName: empName,
-                                    leaveStatus: leaveStatus
-                                },
-                                success: function(response) {
-                                    $('#leaveModal').modal('hide');
-                                    Swal.fire({
-                                        title: 'สำเร็จ!',
-                                        text: 'ตรวจสอบไม่ผ่านสำเร็จ',
-                                        icon: 'success',
-                                        confirmButtonText: 'ตกลง'
-                                    }).then(() => {
+                                $.ajax({
+                                    url: 'a_ajax_upd_status.php',
+                                    method: 'POST',
+                                    data: modalData,
+                                    success: function(response) {
+                                        $('#leaveModal').modal(
+                                            'hide');
                                         location
-                                            .reload(); // Reload the page after user clicks confirm
-                                    });
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error(error);
-                                }
+                                            .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
+                                    },
+                                    error: function(xhr, status,
+                                        error) {
+                                        console.error(error);
+                                    }
+                                });
                             });
-                        });
                     });
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching data:', error);
+            });
+        });
+
+        $('.edit-btn').click(function() {
+            var createDate = $(this).data('createdatetime');
+            var userCode = $(this).data('usercode');
+
+            $.ajax({
+                url: 'a_ajax_get_leave.php', // ไฟล์ PHP ที่จะดึงข้อมูล
+                method: 'POST',
+                data: {
+                    createDate: createDate,
+                    userCode: userCode
+                },
+                success: function(response) {
+                    try {
+                        // ตรวจสอบว่าข้อมูลที่ได้รับเป็น JSON ที่ถูกต้อง
+                        if (response && response.error) {
+                            alert(response.error); // หากมีข้อผิดพลาดจาก PHP
+                        } else {
+                            // ถ้าไม่มีข้อผิดพลาด แสดงข้อมูลใน Modal
+                            $('.editLeaveType').val(response.l_leave_id);
+                            $('#editLeaveReason').val(response.l_leave_reason);
+                            $('#editLeaveStartDate').val(response.l_leave_start_date);
+                            $('#editLeaveEndDate').val(response.l_leave_end_date);
+                            $('#editTelPhone').val(response.l_phone);
+                            $('#editModal').modal('show');
+                        }
+                    } catch (e) {
+                        // จับข้อผิดพลาดในการแปลง JSON
+                        alert('เกิดข้อผิดพลาดในการแปลงข้อมูล: ' + e.message);
+                    }
+                },
+                error: function() {
+                    alert('เกิดข้อผิดพลาดในการดึงข้อมูล');
+                }
+            });
+        });
+
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var formData = new FormData();
+            var row = $(this).closest("tr"); // ดึงแถวที่ปุ่มอยู่
+            var rowData = row.find("td"); // ดึง `<td>` ทั้งหมดในแถว
+
+            var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
+            var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+
+            var depart = $(rowData[2])?.text().trim(); // ใช้ลำดับ 2
+            var userCode = $(this).data('usercode');
+            var workplace = $(rowData[28])?.text().trim(); // ใช้ลำดับ 28
+
+            console.log('Department:', depart, 'User Code:', userCode, 'Workplace:', workplace);
+
+            if (editFile) {
+                formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
+            } else if (currentFile) {
+                formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
             }
-        });
-    });
 
-    $("#nameSearch").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-        });
-    });
+            // เพิ่มค่าฟอร์มอื่นๆ
+            formData.append('depart', depart);
+            formData.append('userCode', userCode);
+            formData.append('workplace', workplace);
+            formData.append('createDatetime', $(this).data('createdatetime'));
+            formData.append('editLeaveType', $('.editLeaveType').val());
+            formData.append('editLeaveReason', $('#editLeaveReason').val());
+            formData.append('editLeaveStartDate', $('#editLeaveStartDate').val());
+            formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
+            formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
+            formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
+            formData.append('editTelPhone', $('#editTelPhone').val());
 
-    $("#leaveSearch").on("keyup", function() {
-        var value2 = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
-        });
-    });
-
-    $("#codeSearch").on("keyup", function() {
-        var value3 = $(this).val().toLowerCase(); // ค่าที่กรอกในช่องค้นหา
-        var page = "<?php echo $currentPage; ?>"; // หน้าปัจจุบันที่แสดงอยู่
-        var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
-        var selectedYear = "<?php echo $selectedYear; ?>"; // ปีที่เลือก
-
-        var searchCode = value3; // ค่าของ codeSearch ที่กรอก
-
-        $.ajax({
-            url: "a_ajax_get_data_usercode.php", // ชื่อไฟล์ PHP ที่ใช้แสดงข้อมูล
-            type: "GET",
-            data: {
-                page: page,
-                month: selectedMonth,
-                year: selectedYear,
-                codeSearch: searchCode
-            },
-            success: function(response) {
-                // แทนที่เนื้อหาตารางด้วยข้อมูลใหม่ที่ได้จาก response
-                $("tbody").html(response);
-
-                // เปิด modal และกำหนดเนื้อหา
-                $(".leaveChk").click(function() {
-                    var rowData = $(this).closest("tr").find("td");
-                    var modalContent = '<table class="table table-bordered">' +
-                        '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[5]).text() +
-                        '</td></tr>' +
-                        '<tr><th>ชื่อ - นามสกุล</th><td>' + $(rowData[1]).text() +
-                        '</td></tr>' +
-                        '<tr><th>แผนก</th><td>' + $(rowData[2]).text() + '</td></tr>' +
-                        '<tr><th>วันที่ยื่นใบลา</th><td>' + $(rowData[7]).text() +
-                        '</td></tr>' +
-                        '<tr><th>ประเภทการลา</th><td>' + $(rowData[0]).text() +
-                        '</td></tr>' +
-                        '<tr><th>เหตุผลการลา</th><td>' + $(rowData[3]).text() +
-                        '</td></tr>' +
-                        '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[9]).text() + ' ถึง ' +
-                        $(rowData[10]).text() + '</td></tr>' +
-                        '<tr><th>สถานะใบลา</th><td>' + $(rowData[12]).html() +
-                        '</td></tr>' +
-                        '</table>';
-
-                    $('#leaveModal .modal-body').html(modalContent);
-
-                    // ปรับปรุงปุ่มใน modal สำหรับ "สำเร็จ"
-                    $('.modal-footer .btn-success').off('click').on('click', function() {
-                        var modalData = {
-                            createDate: $(rowData[7]).text(),
-                            userCode: $(rowData[5]).text(),
-                            userName: '<?php echo $userName; ?>',
-                            leaveType: $(rowData[0]).text(),
-                            leaveReason: $(rowData[3]).text(),
-                            leaveStartDate: $(rowData[9]).text(),
-                            leaveEndDate: $(rowData[10]).text(),
-                            depart: $(rowData[2]).text(),
-                            checkFirm: '1', // ผ่าน
-                            empName: $(rowData[1]).text(),
-                            leaveStatus: $(rowData[12]).text()
-                        };
-
-                        $.ajax({
-                            url: 'a_ajax_upd_status.php',
-                            method: 'POST',
-                            data: modalData,
-                            success: function(response) {
-                                $('#leaveModal').modal('hide');
-                                location
-                                    .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(error);
-                            }
+            // ส่งข้อมูลผ่าน AJAX
+            $.ajax({
+                url: 'a_upd_leave.php',
+                type: 'POST',
+                data: formData,
+                contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
+                processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
+                success: function(response) {
+                    try {
+                        var res = JSON.parse(response);
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                title: 'สำเร็จ!',
+                                text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
+                                icon: 'success',
+                                confirmButtonText: 'ตกลง',
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: res.message || 'ไม่สามารถแก้ไขข้อมูลได้',
+                                icon: 'error',
+                                confirmButtonText: 'ตกลง',
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            title: 'ข้อผิดพลาดในการประมวลผล',
+                            text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
                         });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'ไม่สามารถแก้ไขข้อมูลได้',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
                     });
-
-                    // ปรับปรุงปุ่มใน modal สำหรับ "ไม่ผ่าน"
-                    $('.modal-footer .btn-danger').off('click').on('click', function() {
-                        var modalData = {
-                            createDate: $(rowData[7]).text(),
-                            userCode: $(rowData[5]).text(),
-                            userName: '<?php echo $userName; ?>',
-                            leaveType: $(rowData[0]).text(),
-                            leaveReason: $(rowData[3]).text(),
-                            leaveStartDate: $(rowData[9]).text(),
-                            leaveEndDate: $(rowData[10]).text(),
-                            depart: $(rowData[2]).text(),
-                            checkFirm: '2', // ไม่ผ่าน
-                            empName: $(rowData[1]).text(),
-                            leaveStatus: $(rowData[12]).text()
-                        };
-
-                        $.ajax({
-                            url: 'a_ajax_upd_status.php',
-                            method: 'POST',
-                            data: modalData,
-                            success: function(response) {
-                                $('#leaveModal').modal('hide');
-                                location
-                                    .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(error);
-                            }
-                        });
-                    });
-                });
-            }
+                },
+            });
         });
+
     });
-
-
-    // ฟังก์ชันเพื่อเปลี่ยนหน้าเมื่อกรอกหมายเลขหน้า
-    // function changePage(page) {
-    //     var totalPages = <?php echo $totalPages; ?>; // จำนวนหน้าทั้งหมด
-    //     if (page < 1) page = 1;
-    //     if (page > totalPages) page = totalPages;
-
-    //     var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
-    //     var searchCode = $("#codeSearch").val(); // ค่าค้นหาจากช่องค้นหา
-
-    //     var newUrl = "?page=" + page + "&month=" + encodeURIComponent(selectedMonth) +
-    //         "&codeSearch=" + encodeURIComponent(searchCode); // ส่งค่า codeSearch ใหม่
-
-    //     window.location.href = newUrl; // เปลี่ยนหน้าโดยการโหลด URL ใหม่
-    // }
 
     function changePage(page, selectedMonth, searchCode) {
         // สร้าง URL ใหม่โดยส่งค่าทั้งหมด (page, selectedMonth, และ codeSearch)

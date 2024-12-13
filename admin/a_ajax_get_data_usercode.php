@@ -136,45 +136,33 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
         }
-        // 13:10
-        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        // 13:15
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:15:00</td>';
         }
         // 13:45
         else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
         }
-        // 14:10
-        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        // 14:15
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:15:00</td>';
         }
         // 14:45
         else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
         }
-        // 15:10
-        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        // 15:15
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:15:00</td>';
         }
         // 15:45
         else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
         }
-        // 16:10
-        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        // 16:15
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:15:00</td>';
         }
         // 16:40
         else if ($row['l_leave_start_time'] == '17:00:00') {
@@ -205,51 +193,39 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
         }
-        // 13:10
-        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        // 13:15
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:15:00</td>';
         }
         // 13:45
         else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
         }
-        // 14:10
-        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        // 14:15
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:15:00</td>';
         }
         // 14:45
         else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
         }
-        // 15:10
-        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        // 15:15
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:15:00</td>';
         }
         // 15:45
         else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
         }
-        // 16:10
-        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        // 16:15
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:15:00</td>';
         }
         // 16:40
         else if ($row['l_leave_end_time'] == '17:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
-            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_end_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
