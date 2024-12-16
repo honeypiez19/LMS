@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($leaveDateEnd)); // แปลงรูปแบบวันที่เป็น YYYY-MM-DD
     $leaveTimeEnd = $_POST['endTime'];
 
-    // 08:45
+   // 08:45
     if ($leaveTimeStart == '08:45') {
         $leaveTimeStartLine = '08:45';
         $leaveTimeStart = '09:00';
@@ -193,6 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $leaveTimeEndLine = $leaveTimeEnd;
     }
+
 
     // สถานะใบลา
     $leaveStatus = 0;

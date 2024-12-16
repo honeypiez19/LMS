@@ -631,8 +631,11 @@ echo '</div>'; // Close the row div
                                     </div>
                                     <div class="col-12">
                                         <label for="leaveType" class="form-label">ประเภทการลา</label>
-                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ -
-                                            วัน</span>
+                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ
+                                            <span id="remaining-days">0 </span> วัน
+                                            <span id="remaining-hours">0 </span> ชั่วโมง
+                                            <span id="remaining-minutes">0 </span> นาที
+                                        </span>
                                         <span style="color: red;">*</span>
                                         <select class="form-select" id="leaveType" required>
                                             <option selected>เลือกประเภทการลา</option>
@@ -669,24 +672,40 @@ echo '</div>'; // Close the row div
                                         <span style="color: red;">*</span>
                                         <select class="form-select" id="startTime" name="startTime" required>
                                             <option value="08:00" selected>08:00</option>
+                                            <option value="08:10">08:10</option>
+                                            <option value="08:15">08:15</option>
                                             <option value="08:30">08:30</option>
                                             <option value="08:45">08:45</option>
                                             <option value="09:00">09:00</option>
+                                            <option value="09:10">09:10</option>
+                                            <option value="09:15">09:15</option>
                                             <option value="09:30">09:30</option>
                                             <option value="09:45">09:45</option>
                                             <option value="10:00">10:00</option>
+                                            <option value="10:10">10:10</option>
+                                            <option value="10:15">10:15</option>
                                             <option value="10:30">10:30</option>
                                             <option value="10:45">10:45</option>
                                             <option value="11:00">11:00</option>
+                                            <option value="11:10">11:10</option>
+                                            <option value="11:15">11:15</option>
+                                            <option value="11:30">11:30</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:30">13:15</option>
-                                            <option value="14:00">13:45</option>
-                                            <option value="14:30">14:15</option>
-                                            <option value="15:00">14:45</option>
-                                            <option value="15:30">15:15</option>
-                                            <option value="16:00">15:45</option>
-                                            <option value="16:30">16:15</option>
+                                            <option value="13:10">13:10</option>
+                                            <option value="13:15">13:15</option>
+                                            <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
+                                            <option value="14:10">14:10</option>
+                                            <option value="14:15">14:15</option>
+                                            <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
+                                            <option value="15:10">15:10</option>
+                                            <option value="15:15">15:15</option>
+                                            <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
+                                            <option value="16:10">16:10</option>
+                                            <option value="16:15">16:15</option>
                                             <option value="17:00">16:40</option>
                                         </select>
                                     </div>
@@ -702,24 +721,40 @@ echo '</div>'; // Close the row div
                                         <span style="color: red;">*</span>
                                         <select class="form-select" id="endTime" name="endTime" required>
                                             <option value="08:00">08:00</option>
+                                            <option value="08:10">08:10</option>
+                                            <option value="08:15">08:15</option>
                                             <option value="08:30">08:30</option>
                                             <option value="08:45">08:45</option>
                                             <option value="09:00">09:00</option>
+                                            <option value="09:10">09:10</option>
+                                            <option value="09:15">09:15</option>
                                             <option value="09:30">09:30</option>
                                             <option value="09:45">09:45</option>
                                             <option value="10:00">10:00</option>
+                                            <option value="10:10">10:10</option>
+                                            <option value="10:15">10:15</option>
                                             <option value="10:30">10:30</option>
                                             <option value="10:45">10:45</option>
                                             <option value="11:00">11:00</option>
+                                            <option value="11:10">11:10</option>
+                                            <option value="11:15">11:15</option>
+                                            <option value="11:30">11:30</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:30">13:15</option>
-                                            <option value="14:00">13:45</option>
-                                            <option value="14:30">14:15</option>
-                                            <option value="15:00">14:45</option>
-                                            <option value="15:30">15:15</option>
-                                            <option value="16:00">15:45</option>
-                                            <option value="16:30">16:15</option>
+                                            <option value="13:10">13:10</option>
+                                            <option value="13:15">13:15</option>
+                                            <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
+                                            <option value="14:10">14:10</option>
+                                            <option value="14:15">14:15</option>
+                                            <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
+                                            <option value="15:10">15:10</option>
+                                            <option value="15:15">15:15</option>
+                                            <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
+                                            <option value="16:10">16:10</option>
+                                            <option value="16:15">16:15</option>
                                             <option value="17:00" selected>16:40</option>
                                         </select>
                                     </div>
@@ -776,18 +811,16 @@ if ($result2->rowCount() > 0) {
                                     <div class="col-12">
                                         <label for="urgentLeaveType" class="form-label">ประเภทการลา</label>
                                         <span style="color: red;">*</span>
-                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ -
-                                            วัน</span>
-                                        <select class="form-select" id="urgentLeaveType"
-                                            onchange="checkDays(this.value)" required>
-                                            <!--  onchange="updateUrgentLeaveReasonField()" -->
+                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ
+                                            <span id="remaining-days">0</span> วัน
+                                            <span id="remaining-hours">0</span> ชั่วโมง
+                                            <span id="remaining-minutes">0</span> นาที
+                                        </span>
+                                        <select class="form-select" id="urgentLeaveType" required>
                                             <option value="0" selected>เลือกประเภทการลา</option>
                                             <option value="1">ลากิจได้รับค่าจ้าง</option>
                                             <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
-                                            <!-- <option value="3">ลาป่วย</option> -->
-                                            <!-- <option value="4">ลาป่วยจากงาน</option> -->
                                             <option value="5">ลาพักร้อนฉุกเฉิน</option>
-                                            <!-- <option value="8">อื่น ๆ</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -816,24 +849,40 @@ if ($result2->rowCount() > 0) {
                                         <select class="form-select" id="urgentStartTime" name="urgentStartTime"
                                             required>
                                             <option value="08:00" selected>08:00</option>
+                                            <option value="08:10">08:10</option>
+                                            <option value="08:15">08:15</option>
                                             <option value="08:30">08:30</option>
                                             <option value="08:45">08:45</option>
                                             <option value="09:00">09:00</option>
+                                            <option value="09:10">09:10</option>
+                                            <option value="09:15">09:15</option>
                                             <option value="09:30">09:30</option>
                                             <option value="09:45">09:45</option>
                                             <option value="10:00">10:00</option>
+                                            <option value="10:10">10:10</option>
+                                            <option value="10:15">10:15</option>
                                             <option value="10:30">10:30</option>
                                             <option value="10:45">10:45</option>
                                             <option value="11:00">11:00</option>
+                                            <option value="11:10">11:10</option>
+                                            <option value="11:15">11:15</option>
+                                            <option value="11:30">11:30</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:30">13:15</option>
-                                            <option value="14:00">13:45</option>
-                                            <option value="14:30">14:15</option>
-                                            <option value="15:00">14:45</option>
-                                            <option value="15:30">15:15</option>
-                                            <option value="16:00">15:45</option>
-                                            <option value="16:30">16:15</option>
+                                            <option value="13:10">13:10</option>
+                                            <option value="13:15">13:15</option>
+                                            <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
+                                            <option value="14:10">14:10</option>
+                                            <option value="14:15">14:15</option>
+                                            <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
+                                            <option value="15:10">15:10</option>
+                                            <option value="15:15">15:15</option>
+                                            <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
+                                            <option value="16:10">16:10</option>
+                                            <option value="16:15">16:15</option>
                                             <option value="17:00">16:40</option>
                                         </select>
                                     </div>
@@ -850,24 +899,40 @@ if ($result2->rowCount() > 0) {
                                         <span style="color: red;">*</span>
                                         <select class="form-select" id="urgentEndTime" name="urgentEndTime" required>
                                             <option value="08:00">08:00</option>
+                                            <option value="08:10">08:10</option>
+                                            <option value="08:15">08:15</option>
                                             <option value="08:30">08:30</option>
                                             <option value="08:45">08:45</option>
                                             <option value="09:00">09:00</option>
+                                            <option value="09:10">09:10</option>
+                                            <option value="09:15">09:15</option>
                                             <option value="09:30">09:30</option>
                                             <option value="09:45">09:45</option>
                                             <option value="10:00">10:00</option>
+                                            <option value="10:10">10:10</option>
+                                            <option value="10:15">10:15</option>
                                             <option value="10:30">10:30</option>
                                             <option value="10:45">10:45</option>
                                             <option value="11:00">11:00</option>
+                                            <option value="11:10">11:10</option>
+                                            <option value="11:15">11:15</option>
+                                            <option value="11:30">11:30</option>
                                             <option value="12:00">11:45</option>
                                             <option value="13:00">12:45</option>
-                                            <option value="13:30">13:15</option>
-                                            <option value="14:00">13:45</option>
-                                            <option value="14:30">14:15</option>
-                                            <option value="15:00">14:45</option>
-                                            <option value="15:30">15:15</option>
-                                            <option value="16:00">15:45</option>
-                                            <option value="16:30">16:15</option>
+                                            <option value="13:10">13:10</option>
+                                            <option value="13:15">13:15</option>
+                                            <option value="13:40">13:40</option>
+                                            <option value="13:45">13:45</option>
+                                            <option value="14:10">14:10</option>
+                                            <option value="14:15">14:15</option>
+                                            <option value="14:40">14:40</option>
+                                            <option value="14:45">14:45</option>
+                                            <option value="15:10">15:10</option>
+                                            <option value="15:15">15:15</option>
+                                            <option value="15:40">15:40</option>
+                                            <option value="15:45">15:45</option>
+                                            <option value="16:10">16:10</option>
+                                            <option value="16:15">16:15</option>
                                             <option value="17:00" selected>16:40</option>
                                         </select>
                                     </div>
@@ -1047,13 +1112,37 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
+        // 08:10
+        if ($row['l_leave_start_time'] == '08:30:00' && $row['l_remark'] == '08:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:10:00</td>';
+        }
+        // 08:15
+        else if ($row['l_leave_start_time'] == '08:30:00' && $row['l_remark'] == '08:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:15:00</td>';
+        }
         // 08:45
-        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+        else if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        }
+        // 09:10
+        else if ($row['l_leave_start_time'] == '09:30:00' && $row['l_remark'] == '09:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:10:00</td>';
+        }
+        // 09:15
+        else if ($row['l_leave_start_time'] == '09:30:00' && $row['l_remark'] == '09:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:15:00</td>';
         }
         // 09:45
         else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        }
+        // 10:10
+        else if ($row['l_leave_start_time'] == '10:30:00' && $row['l_remark'] == '10:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:10:00</td>';
+        }
+        // 10:15
+        else if ($row['l_leave_start_time'] == '10:30:00' && $row['l_remark'] == '10:15:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:15:00</td>';
         }
         // 10:45
         else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
@@ -1067,29 +1156,57 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_start_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
         }
+        // 13:10
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+        }
         // 13:15
         else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:15:00</td>';
+        }
+        // 13:40
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
         }
         // 13:45
         else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
         }
+        // 14:10
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+        }
         // 14:15
         else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:15:00</td>';
+        }
+        // 14:40
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
         }
         // 14:45
         else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
         }
+        // 15:10
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+        }
         // 15:15
         else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:15:00</td>';
         }
+        // 15:40
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
         // 15:45
         else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
+        }
+        // 16:10
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
         }
         // 16:15
         else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
@@ -1104,13 +1221,37 @@ if ($result->rowCount() > 0) {
         }
 
         // 10
+        // 08:10
+        if ($row['l_leave_end_time'] == '08:30:00' && $row['l_remark'] == '08:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:10:00</td>';
+        }
+        // 08:15
+        else if ($row['l_leave_end_time'] == '08:30:00' && $row['l_remark'] == '08:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:15:00</td>';
+        }
         // 08:45
-        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+        else if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        }
+        // 09:10
+        else if ($row['l_leave_end_time'] == '09:30:00' && $row['l_remark'] == '09:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:10:00</td>';
+        }
+        // 09:15
+        else if ($row['l_leave_end_time'] == '09:30:00' && $row['l_remark'] == '09:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:15:00</td>';
         }
         // 09:45
         else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        }
+        // 10:10
+        else if ($row['l_leave_end_time'] == '10:30:00' && $row['l_remark'] == '10:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:10:00</td>';
+        }
+        // 10:15
+        else if ($row['l_leave_end_time'] == '10:30:00' && $row['l_remark'] == '10:15:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:15:00</td>';
         }
         // 10:45
         else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
@@ -1124,29 +1265,57 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '13:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
         }
+        // 13:10
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+        }
         // 13:15
         else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 13:15:00</td>';
         }
+        // 13:40
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        }
         // 13:45
         else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
+        }
+        // 14:10
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
         }
         // 14:15
         else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:15:00</td>';
         }
+        // 14:40
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        }
         // 14:45
         else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
+        }
+        // 15:10
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
         }
         // 15:15
         else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:15:00</td>';
         }
+        // 15:40
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
         // 15:45
         else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
+        }
+        // 16:10
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
         }
         // 16:15
         else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
@@ -1156,7 +1325,7 @@ if ($result->rowCount() > 0) {
         else if ($row['l_leave_end_time'] == '17:00:00') {
             echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
-            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_end_time
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
@@ -1677,42 +1846,109 @@ echo '</div>';
                 }
             });
 
-            $('#leaveType').on('change', function() {
-                var leaveType = $(this).val();
-                var userCode = '<?php echo $userCode; ?>'; // รหัสผู้ใช้จาก PHP
-
-                // ตรวจสอบว่าเลือกวันที่แล้ว
-                var selectedDate = $('#startDate').val();
+            $('#startDate').on('change', function() {
+                var selectedDate = $(this).val();
                 if (selectedDate) {
                     var dateObject = new Date(selectedDate);
-                    var selectedYear = dateObject.getFullYear(); // ดึงแค่ปี
+                    var selectedYear = dateObject.getFullYear();
 
-                    // ตรวจสอบค่าที่ได้
-                    console.log("Year: " + selectedYear);
-                    console.log("User Code: " + userCode);
-                    console.log("Leave Type: " + leaveType);
+                    // รีเซ็ต leaveType และแสดงข้อความให้เลือกใหม่
+                    $('#leaveType').val("เลือกประเภทการลา").trigger('change'); // รีเซ็ต dropdown
+                    $('#remaining-days').text('-'); // รีเซ็ตจำนวนคงเหลือ
+                    $('#remaining-hours').text('-');
+                    $('#remaining-minutes').text('-');
+                    // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
+                }
+            });
 
-                    if (leaveType && userCode && selectedYear) {
-                        // ส่ง AJAX ไปยัง PHP เพื่อดึงข้อมูลที่คำนวณจากประเภทการลา
+            $('#leaveType').on('change', function() {
+                var leaveType = $(this).val();
+                var userCode = '<?php echo $userCode; ?>';
+
+                var selectedDate = $('#startDate').val();
+                console.log("Selected Date: " + selectedDate);
+
+                if (selectedDate) {
+                    var parts = selectedDate.split('-'); // แยกวันที่จากรูปแบบ YYYY-MM-DD
+                    if (parts.length === 3) {
+                        var selectedDay = parseInt(parts[0]); // ดึงวันที่ (ส่วนแรก)
+                        var selectedMonth = parseInt(parts[1]); // ดึงเดือน (ส่วนที่สอง)
+                        var selectedYear = parseInt(parts[
+                            2]); // ดึงปี (ส่วนที่สาม)
+                        // แสดงค่าที่ดึงออกมา
+                        console.log("Day: " + selectedDay);
+                        console.log("Month: " + selectedMonth);
+                        console.log("Year: " + selectedYear);
+                    } else {
+                        console.error("Invalid date format: " + selectedDate);
+                    }
+
+                    $.ajax({
+                        url: 'u_ajax_get_leave_balance.php',
+                        type: 'POST',
+                        data: {
+                            leaveType: leaveType,
+                            userCode: userCode,
+                            selectedYear: selectedYear
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.error) {
+                                alert(response.error);
+                            } else {
+                                $('#remaining-days').text(response.remaining_days);
+                                $('#remaining-hours').text(response.remaining_hours);
+                                $('#remaining-minutes').text(response.remaining_minutes);
+                            }
+                        },
+                        error: function() {
+                            alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+                        }
+                    });
+                } else {
+                    alert('กรุณาเลือกวันที่');
+                }
+            });
+
+            $('#urgentLeaveType').on('change', function() {
+                var leaveType = $(this).val();
+                var userCode = '<?php echo $userCode; ?>';
+
+                // ตรวจสอบวันที่ที่เลือก
+                var selectedDate = $('#startDate').val();
+                console.log("Selected Date: " + selectedDate);
+
+                if (selectedDate) {
+                    var parts = selectedDate.split('-'); // แยกวันที่จากรูปแบบ YYYY-MM-DD
+                    if (parts.length === 3) {
+                        var selectedYear = parseInt(parts[0]); // ปี
+                        var selectedMonth = parseInt(parts[1]); // เดือน
+                        var selectedDay = parseInt(parts[2]); // วันที่
+
+                        // แสดงค่าที่ดึงออกมา
+                        console.log("Year: " + selectedYear);
+                        console.log("Month: " + selectedMonth);
+                        console.log("Day: " + selectedDay);
+
+                        // ส่งข้อมูลไปยังเซิร์ฟเวอร์
                         $.ajax({
-                            url: 'get_leave_balance.php', // ชื่อไฟล์ PHP ที่จะคำนวณข้อมูล
+                            url: 'u_ajax_get_leave_balance.php',
                             type: 'POST',
                             data: {
-                                leaveType: leaveType, // ส่งประเภทการลา
-                                userCode: userCode, // ส่งรหัสผู้ใช้
-                                selectedYear: selectedYear // ส่งปี
+                                leaveType: leaveType,
+                                userCode: userCode,
+                                selectedYear: selectedYear
                             },
                             dataType: 'json',
                             success: function(response) {
-                                // ตรวจสอบผลลัพธ์ที่ได้รับจาก PHP
                                 if (response.error) {
                                     alert(response.error);
                                 } else {
-                                    // อัปเดตค่าการแสดงผลในหน้าเว็บ
+                                    // แสดงข้อมูลที่ได้รับจากเซิร์ฟเวอร์
                                     $('#remaining-days').text(response.remaining_days);
                                     $('#remaining-hours').text(response.remaining_hours);
                                     $('#remaining-minutes').text(response
-                                        .remaining_minutes);
+                                    .remaining_minutes);
                                 }
                             },
                             error: function() {
@@ -1720,7 +1956,7 @@ echo '</div>';
                             }
                         });
                     } else {
-                        alert('กรุณาเลือกวันที่และประเภทการลา');
+                        console.error("Invalid date format: " + selectedDate);
                     }
                 } else {
                     alert('กรุณาเลือกวันที่');
