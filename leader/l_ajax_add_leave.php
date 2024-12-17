@@ -483,7 +483,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
             $stmt->bindParam(':workplace', $workplace);
             $stmt->bindParam(':depart', $depart);
-
         } else if ($level == 'leader') {
             if ($depart == 'Office') {
                 // แจ้งเตือนไปที่พี่ตุ๊ก
@@ -495,7 +494,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else if ($depart == 'CAD2') {
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department2 = 'CAD2'");
                 $stmt->bindParam(':workplace', $workplace);
-
             } else if ($depart == 'CAM') {
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department3 = 'CAM'");
                 $stmt->bindParam(':workplace', $workplace);
