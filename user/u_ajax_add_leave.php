@@ -194,147 +194,147 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $leaveTimeEnd = '08:30';
         $remark = '08:10:00';
     }
-// 08:15
+    // 08:15
     else if ($leaveTimeEnd == '08:15') {
         $leaveTimeEndLine = '08:15';
         $leaveTimeEnd = '08:30';
         $remark = '08:15:00';
     }
-// 08:45
+    // 08:45
     else if ($leaveTimeEnd == '08:45') {
         $leaveTimeEndLine = '08:45';
         $leaveTimeEnd = '09:00';
         $remark = '08:45:00';
     }
-// 09:10
+    // 09:10
     else if ($leaveTimeEnd == '09:10') {
         $leaveTimeEndLine = '09:10';
         $leaveTimeEnd = '09:30';
         $remark = '09:10:00';
     }
-// 09:15
+    // 09:15
     else if ($leaveTimeEnd == '09:15') {
         $leaveTimeEndLine = '09:15';
         $leaveTimeEnd = '09:30';
         $remark = '09:15:00';
     }
-// 09:45
+    // 09:45
     else if ($leaveTimeEnd == '09:45') {
         $leaveTimeEndLine = '09:45';
         $leaveTimeEnd = '10:00';
         $remark = '09:45:00';
     }
-// 10:10
+    // 10:10
     else if ($leaveTimeEnd == '10:10') {
         $leaveTimeEndLine = '10:10';
         $leaveTimeEnd = '10:30';
         $remark = '10:10:00';
     }
-// 10:15
+    // 10:15
     else if ($leaveTimeEnd == '10:15') {
         $leaveTimeEndLine = '10:15';
         $leaveTimeEnd = '10:30';
         $remark = '10:15:00';
     }
-// 10:45
+    // 10:45
     else if ($leaveTimeEnd == '10:45') {
         $leaveTimeEndLine = '10:45';
         $leaveTimeEnd = '11:00';
         $remark = '10:45:00';
     }
-// 11:45
+    // 11:45
     else if ($leaveTimeEnd == '12:00') {
         $leaveTimeEndLine = '11:45';
     }
-// 12:45
+    // 12:45
     else if ($leaveTimeEnd == '13:00') {
         $leaveTimeEndLine = '12:45';
     }
-// 13:10
+    // 13:10
     else if ($leaveTimeEnd == '13:10') {
         $leaveTimeEndLine = '13:10';
         $leaveTimeEnd = '13:30';
         $remark = '13:10:00';
     }
-// 13:15
+    // 13:15
     else if ($leaveTimeEnd == '13:15') {
         $leaveTimeEndLine = '13:15';
         $leaveTimeEnd = '13:30';
         $remark = '13:15:00';
     }
-// 13:40
+    // 13:40
     else if ($leaveTimeEnd == '13:40') {
         $leaveTimeEndLine = '13:40';
         $leaveTimeEnd = '14:00';
         $remark = '13:40:00';
     }
-// 13:45
+    // 13:45
     else if ($leaveTimeEnd == '13:45') {
         $leaveTimeEndLine = '13:45';
         $leaveTimeEnd = '14:00';
         $remark = '13:45:00';
     }
-// 14:10
+    // 14:10
     else if ($leaveTimeEnd == '14:10') {
         $leaveTimeEndLine = '14:10';
         $leaveTimeEnd = '14:30';
         $remark = '14:10:00';
     }
-// 14:15
+    // 14:15
     else if ($leaveTimeEnd == '14:15') {
         $leaveTimeEndLine = '14:15';
         $leaveTimeEnd = '14:30';
         $remark = '14:15:00';
     }
-// 14:40
+    // 14:40
     else if ($leaveTimeEnd == '14:40') {
         $leaveTimeEndLine = '14:40';
         $leaveTimeEnd = '15:00';
         $remark = '14:40:00';
     }
-// 14:45
+    // 14:45
     else if ($leaveTimeEnd == '14:45') {
         $leaveTimeEndLine = '14:45';
         $leaveTimeEnd = '15:00';
         $remark = '14:45:00';
     }
-// 15:10
+    // 15:10
     else if ($leaveTimeEnd == '15:10') {
         $leaveTimeEndLine = '15:10';
         $leaveTimeEnd = '15:30';
         $remark = '15:10:00';
     }
-// 15:15
+    // 15:15
     else if ($leaveTimeEnd == '15:15') {
         $leaveTimeEndLine = '15:15';
         $leaveTimeEnd = '15:30';
         $remark = '15:15:00';
     }
-// 15:40
+    // 15:40
     else if ($leaveTimeEnd == '15:40') {
         $leaveTimeEndLine = '15:40';
         $leaveTimeEnd = '16:00';
         $remark = '15:40:00';
     }
-// 15:45
+    // 15:45
     else if ($leaveTimeEnd == '15:45') {
         $leaveTimeEndLine = '15:45';
         $leaveTimeEnd = '16:00';
         $remark = '15:45:00';
     }
-// 16:10
+    // 16:10
     else if ($leaveTimeEnd == '16:10') {
         $leaveTimeEndLine = '16:10';
         $leaveTimeEnd = '16:30';
         $remark = '16:10:00';
     }
-// 16:15
+    // 16:15
     else if ($leaveTimeEnd == '16:15') {
         $leaveTimeEndLine = '16:15';
         $leaveTimeEnd = '16:30';
         $remark = '16:15:00';
     }
-// 16:40
+    // 16:40
     else if ($leaveTimeEnd == '17:00') {
         $leaveTimeEndLine = '16:40';
     } else {
