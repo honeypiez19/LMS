@@ -639,7 +639,7 @@ echo '</div>'; // Close the row div
                                         <span style="color: red;">*</span>
                                         <select class="form-select" id="leaveType" required>
                                             <option selected>เลือกประเภทการลา</option>
-                                            <option value=" 1">ลากิจได้รับค่าจ้าง</option>
+                                            <option value="1">ลากิจได้รับค่าจ้าง</option>
                                             <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
                                             <option value="3">ลาป่วย</option>
                                             <option value="4">ลาป่วยจากงาน</option>
@@ -1563,11 +1563,14 @@ if ($result->rowCount() > 0) {
         // 20
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
         $dateNow = date('Y-m-d');
-
         $disabledCancalCheck = (
-            $row['l_approve_status'] != 0
-            && $row['l_approve_status2'] != 1
-            && $row['l_leave_end_date'] < $dateNow
+            ($row['l_approve_status'] != 0
+                && $row['l_approve_status2'] != 1
+                && $row['l_leave_end_date'] < $dateNow)
+            ||
+            ($row['l_leave_end_date'] < $dateNow
+                && $row['l_approve_status'] == 0
+                && $row['l_approve_status2'] == 1)
         ) ? 'disabled' : '';
 
         $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';

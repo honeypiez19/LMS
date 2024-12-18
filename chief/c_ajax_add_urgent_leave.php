@@ -33,17 +33,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentEndDate = date('Y-m-d', strtotime($_POST['urgentEndDate']));
     $urgentEndTime = $_POST['urgentEndTime'];
 
+    // 08:10
+    if ($urgentStartTime == '08:10') {
+        $urgentStartTimeLine = '08:10';
+        $urgentStartTime = '08:30';
+        $remark = '08:10:00';
+    }
+    // 08:15
+    else if ($urgentStartTime == '08:15') {
+        $urgentStartTimeLine = '08:15';
+        $urgentStartTime = '08:30';
+        $remark = '08:15:00';
+    }
     // 08:45
-    if ($urgentStartTime == '08:45') {
+    else if ($urgentStartTime == '08:45') {
         $urgentStartTimeLine = '08:45';
         $urgentStartTime = '09:00';
         $remark = '08:45:00';
+    }
+    // 09:10
+    else if ($urgentStartTime == '09:10') {
+        $urgentStartTimeLine = '09:10';
+        $urgentStartTime = '09:30';
+        $remark = '09:10:00';
+    }
+    // 09:15
+    else if ($urgentStartTime == '09:15') {
+        $urgentStartTimeLine = '09:15';
+        $urgentStartTime = '09:30';
+        $remark = '09:15:00';
     }
     // 09:45
     else if ($urgentStartTime == '09:45') {
         $urgentStartTimeLine = '09:45';
         $urgentStartTime = '10:00';
         $remark = '09:45:00';
+    }
+    // 10:10
+    else if ($urgentStartTime == '10:10') {
+        $urgentStartTimeLine = '10:10';
+        $urgentStartTime = '10:30';
+        $remark = '10:10:00';
+    }
+    // 10:15
+    else if ($urgentStartTime == '10:15') {
+        $urgentStartTimeLine = '10:15';
+        $urgentStartTime = '10:30';
+        $remark = '10:15:00';
     }
     // 10:45
     else if ($urgentStartTime == '10:45') {
@@ -59,47 +95,89 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     else if ($urgentStartTime == '13:00') {
         $urgentStartTimeLine = '12:45';
     }
+    // 13:10
+    else if ($urgentStartTime == '13:10') {
+        $urgentStartTimeLine = '13:10';
+        $urgentStartTime = '13:30';
+        $remark = '13:10:00';
+    }
     // 13:15
-    else if ($urgentStartTime == '13:30') {
+    else if ($urgentStartTime == '13:15') {
         $urgentStartTimeLine = '13:15';
         $urgentStartTime = '13:30';
         $remark = '13:15:00';
     }
+    // 13:40
+    else if ($urgentStartTime == '13:40') {
+        $urgentStartTimeLine = '13:40';
+        $urgentStartTime = '14:00';
+        $remark = '13:40:00';
+    }
     // 13:45
-    else if ($urgentStartTime == '14:00') {
+    else if ($urgentStartTime == '13:45') {
         $urgentStartTimeLine = '13:45';
         $urgentStartTime = '14:00';
         $remark = '13:45:00';
     }
+    // 14:10
+    else if ($urgentStartTime == '14:10') {
+        $urgentStartTimeLine = '14:10';
+        $urgentStartTime = '14:30';
+        $remark = '14:10:00';
+    }
     // 14:15
-    else if ($urgentStartTime == '14:30') {
+    else if ($urgentStartTime == '14:15') {
         $urgentStartTimeLine = '14:15';
         $urgentStartTime = '14:30';
         $remark = '14:15:00';
     }
+    // 14:40
+    else if ($urgentStartTime == '14:40') {
+        $urgentStartTimeLine = '14:40';
+        $urgentStartTime = '15:00';
+        $remark = '14:40:00';
+    }
     // 14:45
-    else if ($urgentStartTime == '15:00') {
+    else if ($urgentStartTime == '14:45') {
         $urgentStartTimeLine = '14:45';
         $urgentStartTime = '15:00';
         $remark = '14:45:00';
     }
+    // 15:10
+    else if ($urgentStartTime == '15:10') {
+        $urgentStartTimeLine = '15:10';
+        $urgentStartTime = '15:30';
+        $remark = '15:10:00';
+    }
     // 15:15
-    else if ($urgentStartTime == '15:30') {
+    else if ($urgentStartTime == '15:15') {
         $urgentStartTimeLine = '15:15';
         $urgentStartTime = '15:30';
         $remark = '15:15:00';
     }
+    // 15:40
+    else if ($urgentStartTime == '15:40') {
+        $urgentStartTimeLine = '15:40';
+        $urgentStartTime = '16:00';
+        $remark = '15:40:00';
+    }
     // 15:45
-    else if ($urgentStartTime == '16:00') {
+    else if ($urgentStartTime == '15:45') {
         $urgentStartTimeLine = '15:45';
         $urgentStartTime = '16:00';
         $remark = '15:45:00';
     }
-    // 16:15
-    else if ($urgentStartTime == '16:30') {
+    // 16:10
+    else if ($urgentStartTime == '16:10') {
         $urgentStartTimeLine = '16:10';
         $urgentStartTime = '16:30';
         $remark = '16:10:00';
+    }
+    // 16:15
+    else if ($urgentStartTime == '16:15') {
+        $urgentStartTimeLine = '16:15';
+        $urgentStartTime = '16:30';
+        $remark = '16:15:00';
     }
     // 16:40
     else if ($urgentStartTime == '17:00') {
@@ -108,17 +186,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $urgentStartTimeLine = $urgentStartTime;
     }
 
+    // 08:10
+    if ($urgentEndTime == '08:10') {
+        $urgentEndTimeLine = '08:10';
+        $urgentEndTime = '08:30';
+        $remark = '08:10:00';
+    }
+    // 08:15
+    else if ($urgentEndTime == '08:15') {
+        $urgentEndTimeLine = '08:15';
+        $urgentEndTime = '08:30';
+        $remark = '08:15:00';
+    }
     // 08:45
-    if ($urgentEndTime == '08:45') {
+    else if ($urgentEndTime == '08:45') {
         $urgentEndTimeLine = '08:45';
         $urgentEndTime = '09:00';
         $remark = '08:45:00';
     }
+    // 09:10
+    else if ($urgentEndTime == '09:10') {
+        $urgentEndTimeLine = '09:10';
+        $urgentEndTime = '09:30';
+        $remark = '09:10:00';
+    }
+    // 09:15
+    else if ($urgentEndTime == '09:15') {
+        $urgentEndTimeLine = '09:15';
+        $urgentEndTime = '09:30';
+        $remark = '09:15:00';
+    }
     // 09:45
-    else if ($leaveTimeEnd == '09:45') {
+    else if ($urgentEndTime == '09:45') {
         $urgentEndTimeLine = '09:45';
         $urgentEndTime = '10:00';
         $remark = '09:45:00';
+    }
+    // 10:10
+    else if ($urgentEndTime == '10:10') {
+        $urgentEndTimeLine = '10:10';
+        $urgentEndTime = '10:30';
+        $remark = '10:10:00';
+    }
+    // 10:15
+    else if ($urgentEndTime == '10:15') {
+        $urgentEndTimeLine = '10:15';
+        $urgentEndTime = '10:30';
+        $remark = '10:15:00';
     }
     // 10:45
     else if ($urgentEndTime == '10:45') {
@@ -134,44 +248,86 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     else if ($urgentEndTime == '13:00') {
         $urgentEndTimeLine = '12:45';
     }
+    // 13:10
+    else if ($urgentEndTime == '13:10') {
+        $urgentEndTimeLine = '13:10';
+        $urgentEndTime = '13:30';
+        $remark = '13:10:00';
+    }
     // 13:15
-    else if ($urgentEndTime == '13:30') {
+    else if ($urgentEndTime == '13:15') {
         $urgentEndTimeLine = '13:15';
         $urgentEndTime = '13:30';
         $remark = '13:15:00';
     }
+    // 13:40
+    else if ($urgentEndTime == '13:40') {
+        $urgentEndTimeLine = '13:40';
+        $urgentEndTime = '14:00';
+        $remark = '13:40:00';
+    }
     // 13:45
-    else if ($urgentEndTime == '14:00') {
+    else if ($urgentEndTime == '13:45') {
         $urgentEndTimeLine = '13:45';
         $urgentEndTime = '14:00';
         $remark = '13:45:00';
     }
+    // 14:10
+    else if ($urgentEndTime == '14:10') {
+        $urgentEndTimeLine = '14:10';
+        $urgentEndTime = '14:30';
+        $remark = '14:10:00';
+    }
     // 14:15
-    else if ($urgentEndTime == '14:30') {
+    else if ($urgentEndTime == '14:15') {
         $urgentEndTimeLine = '14:15';
         $urgentEndTime = '14:30';
         $remark = '14:15:00';
     }
+    // 14:40
+    else if ($urgentEndTime == '14:40') {
+        $urgentEndTimeLine = '14:40';
+        $urgentEndTime = '15:00';
+        $remark = '14:40:00';
+    }
     // 14:45
-    else if ($urgentEndTime == '15:00') {
+    else if ($urgentEndTime == '14:45') {
         $urgentEndTimeLine = '14:45';
         $urgentEndTime = '15:00';
         $remark = '14:45:00';
     }
+    // 15:10
+    else if ($urgentEndTime == '15:10') {
+        $urgentEndTimeLine = '15:10';
+        $urgentEndTime = '15:30';
+        $remark = '15:10:00';
+    }
     // 15:15
-    else if ($urgentEndTime == '15:30') {
+    else if ($urgentEndTime == '15:15') {
         $urgentEndTimeLine = '15:15';
         $urgentEndTime = '15:30';
         $remark = '15:15:00';
     }
+    // 15:40
+    else if ($urgentEndTime == '15:40') {
+        $urgentEndTimeLine = '15:40';
+        $urgentEndTime = '16:00';
+        $remark = '15:40:00';
+    }
     // 15:45
-    else if ($urgentEndTime == '16:00') {
+    else if ($urgentEndTime == '15:45') {
         $urgentEndTimeLine = '15:45';
         $urgentEndTime = '16:00';
         $remark = '15:45:00';
     }
+    // 16:10
+    else if ($urgentEndTime == '16:10') {
+        $urgentEndTimeLine = '16:10';
+        $urgentEndTime = '16:30';
+        $remark = '16:10:00';
+    }
     // 16:15
-    else if ($urgentEndTime == '16:30') {
+    else if ($urgentEndTime == '16:15') {
         $urgentEndTimeLine = '16:15';
         $urgentEndTime = '16:30';
         $remark = '16:15:00';
