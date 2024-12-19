@@ -1680,7 +1680,6 @@ echo '</div>';
                                             placeholder="กรุณาระบุเหตุผล"></textarea>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 row">
                                     <div class="col-6">
                                         <label for="editLeaveStartDate" class="form-label">วันที่เริ่มต้น</label>
@@ -2007,7 +2006,6 @@ echo '</div>';
                     alert('กรุณาเลือกวันที่');
                 }
             });
-
 
             $('.filter-card').click(function() {
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
@@ -2523,6 +2521,7 @@ echo '</div>';
                     }
                 });
             });
+
             $('.confirm-late-btn').click(function() {
                 var rowData = $(this).closest('tr').children('td');
                 var createDatetime = $(this).data('createdatetime');
@@ -2583,6 +2582,7 @@ echo '</div>';
                     }
                 });
             });
+
             $('.edit-btn').click(function() {
                 var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime
                 var userCode = $(this).data('usercode');
@@ -2770,132 +2770,132 @@ echo '</div>';
                             // 08:10
                             if (response.l_leave_end_time === "08:30:00" && response
                                 .l_remark === "08:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 08:15
                             else if (response.l_leave_end_time === "08:30:00" && response
                                 .l_remark === "08:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 08:45
                             else if (response.l_leave_end_time === "09:00:00" && response
                                 .l_remark === "08:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 09:10
                             else if (response.l_leave_end_time === "09:30:00" && response
                                 .l_remark === "09:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 09:15
                             else if (response.l_leave_end_time === "09:30:00" && response
                                 .l_remark === "09:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 09:45
                             else if (response.l_leave_end_time === "10:00:00" && response
                                 .l_remark === "09:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 10:10
                             else if (response.l_leave_end_time === "10:30:00" && response
                                 .l_remark === "10:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 10:15
                             else if (response.l_leave_end_time === "10:30:00" && response
                                 .l_remark === "10:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 10:45
                             else if (response.l_leave_end_time === "11:00:00" && response
                                 .l_remark === "10:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 11:45
                             else if (response.l_leave_end_time === "12:00:00" && response
                                 .l_remark === "11:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 12:45
                             else if (response.l_leave_end_time === "13:00:00") {
-                                $('#editLeaveStartTime2').val('12:45:00'); // กำหนดค่าใหม่
+                                $('#editLeaveEndTime2').val('12:45:00'); // กำหนดค่าใหม่
                             }
                             // 13:10
                             else if (response.l_leave_end_time === "13:30:00" && response
                                 .l_remark === "13:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 13:15
                             else if (response.l_leave_end_time === "13:30:00" && response
                                 .l_remark === "13:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 13:40
                             else if (response.l_leave_end_time === "14:00:00" && response
                                 .l_remark === "13:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 13:45
                             else if (response.l_leave_end_time === "14:00:00" && response
                                 .l_remark === "13:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 14:10
                             else if (response.l_leave_end_time === "14:30:00" && response
                                 .l_remark === "14:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 14:15
                             else if (response.l_leave_end_time === "14:30:00" && response
                                 .l_remark === "14:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 14:40
                             else if (response.l_leave_end_time === "15:00:00" && response
                                 .l_remark === "14:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 14:45
                             else if (response.l_leave_end_time === "15:00:00" && response
                                 .l_remark === "14:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 15:10
                             else if (response.l_leave_end_time === "15:30:00" && response
                                 .l_remark === "15:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 15:15
                             else if (response.l_leave_end_time === "15:30:00" && response
                                 .l_remark === "15:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 15:40
                             else if (response.l_leave_end_time === "16:00:00" && response
                                 .l_remark === "15:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 15:45
                             else if (response.l_leave_end_time === "16:00:00" && response
                                 .l_remark === "15:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 16:10
                             else if (response.l_leave_end_time === "16:30:00" && response
                                 .l_remark === "16:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 16:15
                             else if (response.l_leave_end_time === "16:30:00" && response
                                 .l_remark === "16:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                $('#editLeaveEndTime2').val(response.l_remark);
                             }
                             // 16:40
                             else if (response.l_leave_end_time === "17:00:00") {
-                                $('#editLeaveStartTime2').val('16:40:00');
+                                $('#editLeaveEndTime2').val('16:40:00');
                             } else {
-                                $('#editLeaveStartTime2').val(response
+                                $('#editLeaveEndTime2').val(response
                                     .l_leave_end_time);
                             }
                         }

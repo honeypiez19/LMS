@@ -403,7 +403,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'admin'");
         if ($depart == 'RD') {
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
-
         } else {
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
         }

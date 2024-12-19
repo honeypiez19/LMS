@@ -770,7 +770,7 @@ if ($result->rowCount() > 0) {
         echo '<td hidden>' . $row['l_workplace'] . '</td>';
 
         // 29
-        echo '<td><button class="btn btn-primary edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $row['l_usercode'] . '">แก้ไข</button></td>';
+        echo '<td><button type="button" class="btn btn-primary edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $row['l_usercode'] . '">แก้ไข</button></td>';
 
         // 30
         if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
@@ -844,19 +844,19 @@ echo '</div>';
         </div>
 
         <!-- Modal แก้ไข-->
-        <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog  modal-xl" role="document">
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editLeaveModalLabel">แก้ไขการลา</h5>
+                        <h5 class="modal-title" id="editModalLabel">แก้ไขข้อมูล</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <!-- Form to edit data -->
                         <form id="editForm">
                             <div class="row">
                                 <div class="col-12">
-                                    <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                    <label for="editLeaveType" class="form-label">ประเภทการลา</label>
                                     <span style="color: red;">*</span>
                                     <select class="form-select editLeaveType" required>
                                         <option selected>เลือกประเภทการลา</option>
@@ -869,116 +869,22 @@ echo '</div>';
                                     </select>
                                 </div>
                             </div>
-                            <div class="mt-3 row">
-                                <div class="col-12">
-                                    <label for="leaveReason" class="form-label">เหตุผลการลา</label>
-                                    <span style="color: red;">*</span>
-                                    <textarea class="form-control mt-2" id="editLeaveReason" rows="3"
-                                        placeholder="กรุณาระบุเหตุผล"></textarea>
-                                </div>
+                            <div class="mb-3">
+                                <label for="createDateTime" class="form-label">วันที่สร้าง</label>
+                                <input type="text" class="form-control" id="editCreateDateTime" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="userCode" class="form-label">รหัสผู้ใช้</label>
+                                <input type="text" class="form-control" id="editUserCode">
                             </div>
 
-                            <div class="mt-3 row">
-                                <div class="col-6">
-                                    <label for="editLeaveStartDate" class="form-label">วันที่เริ่มต้น</label>
-                                    <span style="color: red;">*</span>
-                                    <input type="text" class="form-control" id="editLeaveStartDate" required>
-                                </div>
-                                <div class=" col-6">
-                                    <label for="editLeaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
-                                    <span style="color: red;">* (<input class="form-label" id="editLeaveStartTime2"
-                                            value="" style="border: none; width: 70px;  color: red;">เวลาเดิม)
-                                    </span>
-                                    <select class="form-select" id="editLeaveStartTime" name="editLeaveStartTime"
-                                        required>
-                                        <option value="08:00" selected>08:00</option>
-                                        <option value="08:30">08:30</option>
-                                        <option value="08:45">08:45</option>
-                                        <option value="09:00">09:00</option>
-                                        <option value="09:30">09:30</option>
-                                        <option value="09:45">09:45</option>
-                                        <option value="10:00">10:00</option>
-                                        <option value="10:30">10:30</option>
-                                        <option value="10:45">10:45</option>
-                                        <option value="11:00">11:00</option>
-                                        <option value="12:00">11:45</option>
-                                        <option value="13:00">12:45</option>
-                                        <option value="13:30">13:15</option>
-                                        <option value="14:00">13:45</option>
-                                        <option value="14:30">14:15</option>
-                                        <option value="15:00">14:45</option>
-                                        <option value="15:30">15:15</option>
-                                        <option value="16:00">15:45</option>
-                                        <option value="16:30">16:15</option>
-                                        <option value="17:00">16:40</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <div class="col-6">
-                                    <label for="editleaveEndDate" class="form-label">วันที่สิ้นสุด</label>
-                                    <span style="color: red;">*</span>
-                                    <input type="text" class="form-control" id="editLeaveEndDate" required>
-                                </div>
-                                <div class="col-6">
-                                    <label for="editleaveEndTime" class="form-label">เวลาที่สิ้นสุด</label>
-                                    <span style="color: red;">* (<input class="form-label" id="editLeaveEndTime2"
-                                            value="" style="border: none; width: 70px; color: red;">เวลาเดิม)
-                                    </span><select class="form-select" id="editLeaveEndTime" name="editLeaveEndTime"
-                                        required>
-                                        <option value="08:00">08:00</option>
-                                        <option value="08:30">08:30</option>
-                                        <option value="08:45">08:45</option>
-                                        <option value="09:00">09:00</option>
-                                        <option value="09:30">09:30</option>
-                                        <option value="09:45">09:45</option>
-                                        <option value="10:00">10:00</option>
-                                        <option value="10:30">10:30</option>
-                                        <option value="10:45">10:45</option>
-                                        <option value="11:00">11:00</option>
-                                        <option value="12:00">11:45</option>
-                                        <option value="13:00">12:45</option>
-                                        <option value="13:30">13:15</option>
-                                        <option value="14:00">13:45</option>
-                                        <option value="14:30">14:15</option>
-                                        <option value="15:00">14:45</option>
-                                        <option value="15:30">15:15</option>
-                                        <option value="16:00">15:45</option>
-                                        <option value="16:30">16:15</option>
-                                        <option value="17:00" selected>16:40</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <div class="col-12">
-                                    <label for="editTelPhone" class="form-label">เบอร์โทร</label>
-                                    <input type="text" class="form-control" id="editTelPhone">
-                                </div>
-                            </div>
-                            <div class=" mt-3 row">
-                                <div class="col-12">
-                                    <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
-                                    <input class="form-control" type="file" id="editFile" name="editFile" />
-                                    <!-- แสดงชื่อไฟล์เดิม -->
-                                    <small id="currentFile" class="form-text text-muted">
-                                        <!-- ชื่อไฟล์เดิมจะแสดงที่นี่ -->
-                                    </small>
-                                    <!-- Preview รูป -->
-                                    <div class="mt-3"
-                                        style="display: flex; justify-content: center; align-items: center;">
-                                        <img id="imagePreview" src="#" alt="Preview Image"
-                                            style="max-width: 100%; display: none; width: 200px; height: 200px;" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-3 d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
-                            </div>
+                            <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
     <script>
     $(document).ready(function() {
@@ -1918,123 +1824,68 @@ echo '</div>';
         });
 
         $('.edit-btn').click(function() {
-            var createDate = $(this).data('createdatetime');
+            // Get data attributes from the button
+            var createDateTime = $(this).data('createdatetime');
             var userCode = $(this).data('usercode');
 
+            // Send AJAX request to fetch data from the server
             $.ajax({
-                url: 'a_ajax_get_leave.php', // ไฟล์ PHP ที่จะดึงข้อมูล
+                url: 'a_ajax_get_leave.php', // Replace with your PHP file to fetch data
                 method: 'POST',
                 data: {
-                    createDate: createDate,
-                    userCode: userCode
+                    createDateTime: createDateTime,
+                    userCode: userCode,
                 },
+                dataType: 'json', // Expect JSON response
                 success: function(response) {
-                    try {
-                        // ตรวจสอบว่าข้อมูลที่ได้รับเป็น JSON ที่ถูกต้อง
-                        if (response && response.error) {
-                            alert(response.error); // หากมีข้อผิดพลาดจาก PHP
-                        } else {
-                            // ถ้าไม่มีข้อผิดพลาด แสดงข้อมูลใน Modal
-                            $('.editLeaveType').val(response.l_leave_id);
-                            $('#editLeaveReason').val(response.l_leave_reason);
-                            $('#editLeaveStartDate').val(response.l_leave_start_date);
-                            $('#editLeaveEndDate').val(response.l_leave_end_date);
-                            $('#editTelPhone').val(response.l_phone);
-                            $('#editModal').modal('show');
-                        }
-                    } catch (e) {
-                        // จับข้อผิดพลาดในการแปลง JSON
-                        alert('เกิดข้อผิดพลาดในการแปลงข้อมูล: ' + e.message);
+                    if (response.status === 'success') {
+                        // Populate modal fields with the fetched data
+                        $('.editLeaveType').val(response.l_leave_id);
+                        $('#editCreateDateTime').val(response.l_create_datetime);
+                        $('#editUserCode').val(response.l_usercode);
+
+                        // Show the modal
+                        $('#editModal').modal('show');
+                    } else {
+                        // Show error message from response
+                        alert(response.message || 'ไม่พบข้อมูล');
                     }
                 },
                 error: function() {
                     alert('เกิดข้อผิดพลาดในการดึงข้อมูล');
+                },
+            });
+        });
+
+
+        $('#editForm').submit(function(e) {
+            e.preventDefault();
+
+            var editCreateDateTime = $('#editCreateDateTime').val();
+            var editUserCode = $('#editUserCode').val();
+            var editLeaveType = $('#editLeaveType').val();
+
+            alert(editLeaveType)
+            $.ajax({
+                url: 'a_upd_leave.php',
+                method: 'POST',
+                data: {
+                    editCreateDateTime: editCreateDateTime,
+                    editUserCode: editUserCode,
+                    editLeaveType: editLeaveType
+                },
+                success: function(response) {
+                    // Handle the response, e.g., show success message
+                    alert('ข้อมูลถูกบันทึกแล้ว');
+                    // Hide the modal
+
+                    $('#editModal').modal('hide');
+                },
+                error: function() {
+                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
                 }
             });
         });
-
-        $('#editForm').on('submit', function(e) {
-            e.preventDefault();
-
-            var formData = new FormData();
-            var row = $(this).closest("tr"); // ดึงแถวที่ปุ่มอยู่
-            var rowData = row.find("td"); // ดึง `<td>` ทั้งหมดในแถว
-
-            var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
-            var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
-
-            var depart = $(rowData[2])?.text().trim(); // ใช้ลำดับ 2
-            var userCode = $(this).data('usercode');
-            var workplace = $(rowData[28])?.text().trim(); // ใช้ลำดับ 28
-
-            console.log('Department:', depart, 'User Code:', userCode, 'Workplace:', workplace);
-
-            if (editFile) {
-                formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
-            } else if (currentFile) {
-                formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
-            }
-
-            // เพิ่มค่าฟอร์มอื่นๆ
-            formData.append('depart', depart);
-            formData.append('userCode', userCode);
-            formData.append('workplace', workplace);
-            formData.append('createDatetime', $(this).data('createdatetime'));
-            formData.append('editLeaveType', $('.editLeaveType').val());
-            formData.append('editLeaveReason', $('#editLeaveReason').val());
-            formData.append('editLeaveStartDate', $('#editLeaveStartDate').val());
-            formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
-            formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
-            formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
-            formData.append('editTelPhone', $('#editTelPhone').val());
-
-            // ส่งข้อมูลผ่าน AJAX
-            $.ajax({
-                url: 'a_upd_leave.php',
-                type: 'POST',
-                data: formData,
-                contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
-                processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
-                success: function(response) {
-                    try {
-                        var res = JSON.parse(response);
-                        if (res.status === 'success') {
-                            Swal.fire({
-                                title: 'สำเร็จ!',
-                                text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
-                                icon: 'success',
-                                confirmButtonText: 'ตกลง',
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'เกิดข้อผิดพลาด',
-                                text: res.message || 'ไม่สามารถแก้ไขข้อมูลได้',
-                                icon: 'error',
-                                confirmButtonText: 'ตกลง',
-                            });
-                        }
-                    } catch (error) {
-                        Swal.fire({
-                            title: 'ข้อผิดพลาดในการประมวลผล',
-                            text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
-                            icon: 'error',
-                            confirmButtonText: 'ตกลง',
-                        });
-                    }
-                },
-                error: function() {
-                    Swal.fire({
-                        title: 'เกิดข้อผิดพลาด',
-                        text: 'ไม่สามารถแก้ไขข้อมูลได้',
-                        icon: 'error',
-                        confirmButtonText: 'ตกลง',
-                    });
-                },
-            });
-        });
-
     });
 
     function changePage(page, selectedMonth, searchCode) {

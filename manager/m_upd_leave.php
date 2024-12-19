@@ -322,65 +322,64 @@ else if ($editLeaveEndTime == '16:15') {
 else if ($editLeaveEndTime == '17:00') {
     $editLeaveEndTimeLine = '16:40';
 } else {
-   
 
 // จัดการอัปโหลดไฟล์
-$filename = null;
-if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-    // ถ้ามีการอัปโหลดไฟล์ใหม่
-    $tempName = $_FILES['file']['tmp_name'];
-    $extension = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+    $filename = null;
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+        // ถ้ามีการอัปโหลดไฟล์ใหม่
+        $tempName = $_FILES['file']['tmp_name'];
+        $extension = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
 
-    $validExtensions = ["jpg", "jpeg", "png"];
-    if (in_array($extension, $validExtensions)) {
-        $filename = uniqid() . '.' . $extension;
-        $uploadPath = "../upload/" . $filename;
+        $validExtensions = ["jpg", "jpeg", "png"];
+        if (in_array($extension, $validExtensions)) {
+            $filename = uniqid() . '.' . $extension;
+            $uploadPath = "../upload/" . $filename;
 
-        if (!move_uploaded_file($tempName, $uploadPath)) {
-            echo json_encode(['status' => 'error', 'message' => 'อัปโหลดไฟล์ไม่สำเร็จ']);
+            if (!move_uploaded_file($tempName, $uploadPath)) {
+                echo json_encode(['status' => 'error', 'message' => 'อัปโหลดไฟล์ไม่สำเร็จ']);
+                exit;
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'ชนิดไฟล์ไม่รองรับ']);
             exit;
         }
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'ชนิดไฟล์ไม่รองรับ']);
-        exit;
+        // ถ้าไม่มีการอัปโหลดไฟล์ใหม่ ใช้ไฟล์เดิม
+        $filename = isset($_POST['currentFile']) ? $_POST['currentFile'] : null;
     }
-} else {
-    // ถ้าไม่มีการอัปโหลดไฟล์ใหม่ ใช้ไฟล์เดิม
-    $filename = isset($_POST['currentFile']) ? $_POST['currentFile'] : null;
-}
 
-if ($editTelPhone) {
-    // อัปเดตเบอร์โทรศัพท์ในตาราง employees
-    $updateEmployeeSql = "UPDATE employees SET e_phone = :editTelPhone WHERE e_usercode = :userCode";
+    if ($editTelPhone) {
+        // อัปเดตเบอร์โทรศัพท์ในตาราง employees
+        $updateEmployeeSql = "UPDATE employees SET e_phone = :editTelPhone WHERE e_usercode = :userCode";
 
-    $updateEmployeeStmt = $conn->prepare($updateEmployeeSql);
-    $updateEmployeeStmt->bindParam(':editTelPhone', $editTelPhone);
-    $updateEmployeeStmt->bindParam(':userCode', $userCode);
+        $updateEmployeeStmt = $conn->prepare($updateEmployeeSql);
+        $updateEmployeeStmt->bindParam(':editTelPhone', $editTelPhone);
+        $updateEmployeeStmt->bindParam(':userCode', $userCode);
 
-    // Execute the update
-    if (!$updateEmployeeStmt->execute()) {
-        echo json_encode(['status' => 'error', 'message' => 'ไม่สามารถอัปเดตเบอร์โทรศัพท์ในตาราง employees']);
-        exit;
+        // Execute the update
+        if (!$updateEmployeeStmt->execute()) {
+            echo json_encode(['status' => 'error', 'message' => 'ไม่สามารถอัปเดตเบอร์โทรศัพท์ในตาราง employees']);
+            exit;
+        }
     }
-}
 
-if ($subDepart == '') {
-    $proveStatus = 6;
-    $proveStatus2 = 1;
-    $proveStatus3 = 6;
-}
+    if ($subDepart == '') {
+        $proveStatus = 6;
+        $proveStatus2 = 1;
+        $proveStatus3 = 6;
+    }
 
 // if ($subDepart == 'RD') {
-//     $proveStatus = 0;
-//     $proveStatus2 = 1;
-//     $proveStatus3 = 6;
-else {
-    $proveStatus = 2;
-    $proveStatus2 = 1;
-    $proveStatus3 = 7;
-}
+    //     $proveStatus = 0;
+    //     $proveStatus2 = 1;
+    //     $proveStatus3 = 6;
+    else {
+        $proveStatus = 2;
+        $proveStatus2 = 1;
+        $proveStatus3 = 7;
+    }
 
-$sql = "UPDATE leave_list
+    $sql = "UPDATE leave_list
         SET l_leave_id = :editLeaveType,
             l_leave_reason = :editLeaveReason,
             l_leave_start_date = :editLeaveStartDate,
@@ -393,74 +392,75 @@ $sql = "UPDATE leave_list
             l_remark = :remark";
 
 // ตรวจสอบว่า $filename มีค่า (หมายความว่าไฟล์ใหม่ถูกอัปโหลด) แล้วอัปเดตข้อมูลไฟล์
-if ($filename) {
-    $sql .= ", l_file = :filename";
-}
+    if ($filename) {
+        $sql .= ", l_file = :filename";
+    }
 
-$sql .= " WHERE l_create_datetime = :createDatetime";
+    $sql .= " WHERE l_create_datetime = :createDatetime";
 
-$stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare($sql);
 
-$stmt->bindParam(':editLeaveType', $editLeaveType);
-$stmt->bindParam(':editLeaveReason', $editLeaveReason);
-$stmt->bindParam(':editLeaveStartDate', $editLeaveStartDate);
-$stmt->bindParam(':editLeaveStartTime', $editLeaveStartTime);
-$stmt->bindParam(':editLeaveEndDate', $editLeaveEndDate);
-$stmt->bindParam(':editLeaveEndTime', $editLeaveEndTime);
-$stmt->bindParam(':remark', $remark);
-$stmt->bindParam(':editTelPhone', $editTelPhone);
+    $stmt->bindParam(':editLeaveType', $editLeaveType);
+    $stmt->bindParam(':editLeaveReason', $editLeaveReason);
+    $stmt->bindParam(':editLeaveStartDate', $editLeaveStartDate);
+    $stmt->bindParam(':editLeaveStartTime', $editLeaveStartTime);
+    $stmt->bindParam(':editLeaveEndDate', $editLeaveEndDate);
+    $stmt->bindParam(':editLeaveEndTime', $editLeaveEndTime);
+    $stmt->bindParam(':remark', $remark);
+    $stmt->bindParam(':editTelPhone', $editTelPhone);
 // $stmt->bindParam(':proveStatus', $proveStatus);
-$stmt->bindParam(':createDatetime', $createDatetime);
+    $stmt->bindParam(':createDatetime', $createDatetime);
 
 // ตรวจสอบว่าไฟล์ถูกอัปโหลดก่อนที่จะ bind ค่า $filename
-if ($filename) {
-    $stmt->bindParam(':filename', $filename);
-}
+    if ($filename) {
+        $stmt->bindParam(':filename', $filename);
+    }
 
-$stmt->bindParam(':createDatetime', $createDatetime);
+    $stmt->bindParam(':createDatetime', $createDatetime);
 
 // Execute the query
-if ($stmt->execute()) {
-    // ส่งการแจ้งเตือน LINE
-    $URL = 'https://lms.system-samt.com/';
-    $message = "มีการแก้ไขใบลา $name\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $URL";
+    if ($stmt->execute()) {
+        // ส่งการแจ้งเตือน LINE
+        $URL = 'https://lms.system-samt.com/';
+        $message = "มีการแก้ไขใบลา $name\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $URL";
 
-    if ($depart == 'RD') {
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+        if ($depart == 'RD') {
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+        } else {
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+        }
+
+        // Bind และ Execute
+        $stmt->bindParam(':workplace', $workplace);
+        $stmt->execute();
+
+        // ตรวจสอบผลลัพธ์
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            $token = $result['e_token'];
+
+            // การส่ง LINE Notify
+            $url = "https://notify-api.line.me/api/notify";
+            $data = ['message' => $message];
+            $headers = ['Authorization: Bearer ' . $token];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            // ส่งคำขอ
+            $notifyResult = curl_exec($ch);
+            curl_close($ch);
+
+            // ส่งผลลัพธ์การอัปเดตข้อมูล
+            echo json_encode(['status' => 'success', 'message' => 'อัปเดตข้อมูลสำเร็จ']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'ไม่พบผู้รับการแจ้งเตือน']);
+        }
     } else {
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+        echo json_encode(['status' => 'error', 'message' => 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล']);
     }
-
-    // Bind และ Execute
-    $stmt->bindParam(':workplace', $workplace);
-    $stmt->execute();
-
-    // ตรวจสอบผลลัพธ์
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($result) {
-        $token = $result['e_token'];
-
-        // การส่ง LINE Notify
-        $url = "https://notify-api.line.me/api/notify";
-        $data = ['message' => $message];
-        $headers = ['Authorization: Bearer ' . $token];
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // ส่งคำขอ
-        $notifyResult = curl_exec($ch);
-        curl_close($ch);
-
-        // ส่งผลลัพธ์การอัปเดตข้อมูล
-        echo json_encode(['status' => 'success', 'message' => 'อัปเดตข้อมูลสำเร็จ']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'ไม่พบผู้รับการแจ้งเตือน']);
-    }
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล']);
 }

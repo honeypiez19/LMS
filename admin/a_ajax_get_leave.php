@@ -1,29 +1,43 @@
 <?php
 // เชื่อมต่อฐานข้อมูล
-include '../connect.php';
+include '../connect.php'; // เชื่อมต่อไฟล์ฐานข้อมูล
 
 header('Content-Type: application/json; charset=UTF-8'); // ระบุว่าเราส่ง JSON
 
-if (isset($_POST['createDate']) && isset($_POST['userCode'])) {
-    $createDate = $_POST['createDate'];
+// ตรวจสอบค่าที่ถูกส่งมาจาก AJAX
+if (isset($_POST['createDateTime']) && isset($_POST['userCode'])) {
+    // รับค่าจาก AJAX
+    $createDateTime = $_POST['createDateTime'];
     $userCode = $_POST['userCode'];
 
-    // ดึงข้อมูลจากฐานข้อมูล
-    $sql = "SELECT * FROM leave_list WHERE l_create_datetime = :createDate AND l_usercode = :userCode";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':createDate', $createDate);
-    $stmt->bindParam(':userCode', $userCode);
-    $stmt->execute();
+    try {
+        // Query to fetch data
+        $sql = "SELECT * FROM leave_list WHERE l_create_datetime = :createDateTime AND l_usercode = :userCode";
+        $stmt = $conn->prepare($sql);
 
-    // ดึงผลลัพธ์
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Bind parameters
+        $stmt->bindParam(':createDateTime', $createDateTime);
+        $stmt->bindParam(':userCode', $userCode);
 
-    if ($result) {
-        // ส่งข้อมูลกลับเป็น JSON
-        echo json_encode($result);
-    } else {
-        echo json_encode(array('error' => 'ไม่พบข้อมูล'));
+        // Execute the query
+        $stmt->execute();
+
+        // Check if any row is returned
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // เพิ่มสถานะ success
+            $row['status'] = 'success';
+            echo json_encode($row); // ส่งข้อมูล JSON กลับไป
+        } else {
+            // If no data found
+            echo json_encode(['status' => 'error', 'message' => 'ไม่พบข้อมูล']);
+        }
+    } catch (PDOException $e) {
+        // Handle PDO errors
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
     }
 } else {
-    echo json_encode(array('error' => 'ข้อมูลไม่ครบถ้วน'));
+    // Handle case when parameters are missing
+    echo json_encode(['status' => 'error', 'message' => 'Missing parameters']);
 }
