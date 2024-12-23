@@ -645,7 +645,7 @@ echo '</div>'; // Close the row div
                                 <div class="mt-3 row">
                                     <div class="col-6">
                                         <label for="leaveDuration" class="form-label">ระยะเวลาการลา</label>
-                                        <span id="leaveDuration" class="form-control" readonly></span>
+                                        <span id="leaveDuration"></span>
                                     </div>
                                 </div>
 
@@ -2794,76 +2794,71 @@ echo '</div>';
             });
         });
 
+        function formatDate(date) {
+            const parts = date.split('-'); // แยกวันที่เป็นส่วน ๆ เช่น ['23', '12', '2024']
+            const day = parts[0];
+            const month = parts[1];
+
+            return `${year}-${month}-${day}`; // เปลี่ยนเป็นรูปแบบ yyyy-mm-dd
+        }
+
         function calculateLeaveDuration() {
-            const startDate = document.getElementById('startDate').value; // รับค่าจาก input
-            const startTime = document.getElementById('startTime').value; // รับค่าจาก input
-            const endDate = document.getElementById('endDate').value; // รับค่าจาก input
-            const endTime = document.getElementById('endTime').value; // รับค่าจาก input
+            const startDate = document.getElementById('startDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endDate = document.getElementById('endDate').value;
+            const endTime = document.getElementById('endTime').value;
 
-            console.log("startDate : " + startDate);
-            console.log("startTime : " + startTime);
-            console.log("endDate : " + endDate);
-            console.log("endTime : " + endTime);
+            // แปลงวันที่ให้อยู่ในรูปแบบ yyyy-mm-dd
+            const formattedStartDate = formatDate(startDate);
+            const formattedEndDate = formatDate(endDate);
 
-            // ตรวจสอบค่าที่ได้จากฟอร์มก่อน
-            if (!startDate || !startTime || !endDate || !endTime) {
-                console.log("กรุณากรอกข้อมูลให้ครบถ้วน");
-                return;
+            // สร้าง Date object สำหรับวันและเวลาเริ่มต้นและสิ้นสุด
+            const startDateTime = new Date(`${formattedStartDate}T${startTime}:00`);
+            const endDateTime = new Date(`${formattedEndDate}T${endTime}:00`);
+
+            // เวลาพักเที่ยง
+            const lunchBreakStart = new Date(`${formattedStartDate}T12:00:00`);
+            const lunchBreakEnd = new Date(`${formattedStartDate}T13:00:00`);
+
+            // คำนวณเวลาทั้งหมดในมิลลิวินาที
+            let leaveDuration = endDateTime - startDateTime;
+
+            // ตรวจสอบว่าช่วงเวลาที่ลาครอบคลุมช่วงพักเที่ยงหรือไม่
+            if (
+                startDateTime < lunchBreakEnd && // เริ่มต้นก่อนพักเที่ยงสิ้นสุด
+                endDateTime > lunchBreakStart // สิ้นสุดหลังพักเที่ยงเริ่มต้น
+            ) {
+                // หักเวลาพักเที่ยงออก 1 ชั่วโมง (เฉพาะกรณีที่ครอบคลุมพักเที่ยง)
+                leaveDuration -= 1 * 60 * 60 * 1000;
             }
 
-            $.ajax({
-                url: 'getHolidayCount.php', // ไฟล์ PHP ที่จะส่งข้อมูล holidayCount
-                method: 'POST',
-                data: {
-                    start_date: startDate,
-                    end_date: endDate
-                },
-                success: function(response) {
-                    // ค่าที่ได้รับจาก PHP (holidayCount)
-                    const holidayCount = parseInt(response);
+            // เวลาทำงาน 1 วัน = 8 ชั่วโมง
+            const workDayMilliseconds = 8 * 60 * 60 * 1000;
 
-                    // คำนวณระยะเวลาการลา
-                    const startDateTime = new Date(startDate + ' ' + startTime);
-                    const endDateTime = new Date(endDate + ' ' + endTime);
+            // คำนวณวัน
+            const leaveDays = Math.floor(leaveDuration / workDayMilliseconds);
+            leaveDuration -= leaveDays * workDayMilliseconds;
 
-                    const diffMilliseconds = endDateTime - startDateTime;
-                    const diffDays = Math.floor(diffMilliseconds / (1000 * 60 * 60 * 24)); // จำนวนวัน
-                    const diffHours = Math.floor((diffMilliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 *
-                        60)); // ชั่วโมง
-                    const diffMinutes = Math.floor((diffMilliseconds % (1000 * 60 * 60)) / (1000 *
-                        60)); // นาที
+            // คำนวณชั่วโมง
+            let leaveHours = Math.floor(leaveDuration / (60 * 60 * 1000));
+            leaveDuration -= leaveHours * 60 * 60 * 1000;
 
-                    // คำนวณจำนวนวันลาโดยหักวันหยุด
-                    let leaveDays = diffDays - holidayCount;
-                    let leaveHours = diffHours;
-                    let leaveMinutes = diffMinutes;
+            // คำนวณนาที
+            let leaveMinutes = Math.floor(leaveDuration / (60 * 1000));
 
-                    const startHour = startDateTime.getHours();
-                    const endHour = endDateTime.getHours();
+            // ปัดนาทีตามเงื่อนไข
+            if (leaveMinutes >= 10 && leaveMinutes < 30) {
+                leaveMinutes = 30; // ปัดเป็น 30 นาที
+            } else if (leaveMinutes >= 40) {
+                leaveMinutes = 0; // ปัดเป็น 0 นาที
+                leaveHours += 1; // เพิ่มชั่วโมง
+            }
 
-                    // ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
-                    if (!((startHour >= 8 && startHour < 12 && endHour <= 12) || (startHour >= 13 &&
-                            startHour < 17 && endHour <= 17))) {
-                        leaveHours -= 1;
-                    }
-
-                    // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
-                    if (leaveHours >= 8) {
-                        leaveDays += Math.floor(leaveHours / 8);
-                        leaveHours = leaveHours % 8;
-                    }
-
-                    // ตรวจสอบการนาที
-                    if (leaveMinutes >= 30) {
-                        leaveMinutes = 30;
-                    }
-
-                    // แสดงผลลัพธ์
-                    const leaveDuration = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
-                    document.getElementById("leaveDuration").textContent = leaveDuration;
-                }
-            });
+            // แสดงผลลัพธ์
+            const result = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+            document.getElementById('leaveDuration').textContent = result;
         }
+
 
         function checkOther(select) {
             var otherReasonInput = document.getElementById('otherReason');
