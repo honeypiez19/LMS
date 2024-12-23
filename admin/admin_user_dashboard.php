@@ -2798,6 +2798,7 @@ echo '</div>';
             const parts = date.split('-'); // แยกวันที่เป็นส่วน ๆ เช่น ['23', '12', '2024']
             const day = parts[0];
             const month = parts[1];
+            const year = parts[2];
 
             return `${year}-${month}-${day}`; // เปลี่ยนเป็นรูปแบบ yyyy-mm-dd
         }
