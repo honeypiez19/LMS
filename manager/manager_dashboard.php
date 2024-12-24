@@ -927,16 +927,16 @@ echo '</div>'; // Close the row div
                                 </div>
                                 <div class="mt-3 row">
                                     <div class="col-6">
-                                        <label for="startDate" class="form-label"><?php echo $strStartDate; ?></label>
+                                        <label for="startDate" class="form-label">วันที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
                                         <input type="text" class="form-control" id="startDate" required
-                                            onchange="checkDays(document.getElementById('leaveType').value)">
+                                            onchange="calculateLeaveDuration()">
                                     </div>
-                                    <div class="col-6">
-                                        <label for="startTime" class="form-label"><?php echo $strStartTime; ?></label>
+                                    <div class=" col-6">
+                                        <label for="startTime" class="form-label">เวลาที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
                                         <select class="form-select" id="startTime" name="startTime" required
-                                            onchange="checkDays(document.getElementById('leaveType').value)">
+                                            onchange="calculateLeaveDuration()">
                                             <option value="08:00" selected>08:00</option>
                                             <option value="08:10">08:10</option>
                                             <option value="08:15">08:15</option>
@@ -978,15 +978,17 @@ echo '</div>'; // Close the row div
                                 </div>
                                 <div class="mt-3 row">
                                     <div class="col-6">
-                                        <label for="endDate" class="form-label"><?php echo $strEndtDate; ?></label>
+                                        <label for="endDate" class="form-label">วันที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
                                         <input type="text" class="form-control" id="endDate" required
-                                            onchange="checkDays(document.getElementById('leaveType').value)">
+                                            onchange="calculateLeaveDuration()">
                                     </div>
                                     <div class="col-6">
-                                        <label for="endTime" class="form-label"><?php echo $strEndTime; ?></label>
+                                        <label for="endTime" class="form-label">เวลาที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="endTime" name="endTime" required>
+                                        <select class="form-select" id="endTime" name="endTime" required
+                                            onchange="calculateLeaveDuration()">
+                                            <option value="08:00">08:00</option>
                                             <option value="08:10">08:10</option>
                                             <option value="08:15">08:15</option>
                                             <option value="08:30">08:30</option>
@@ -1026,6 +1028,13 @@ echo '</div>'; // Close the row div
                                     </div>
                                 </div>
                                 <div class="mt-3 row">
+                                    <div class="col-6">
+                                        <label for="leaveDuration" class="form-label text-primary">** ระยะเวลาการลา :
+                                        </label>
+                                        <span id="leaveDuration" class="form-label text-primary"></span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 row">
                                     <div class="col-12">
                                         <label for="telPhone" class="form-label"><?php echo $strPhone; ?></label>
                                         <?php
@@ -3195,6 +3204,109 @@ echo '</div>';
             });
         });
 
+        function formatDate(date) {
+            const parts = date.split('-'); // แยกวันที่เป็นส่วน ๆ เช่น ['23', '12', '2024']
+            const day = parts[0];
+            const month = parts[1];
+            const year = parts[2];
+
+            return `${year}-${month}-${day}`; // เปลี่ยนเป็นรูปแบบ yyyy-mm-dd
+        }
+        window.onload = function() {
+            calculateLeaveDuration();
+        };
+
+        function calculateLeaveDuration() {
+            const startDate = document.getElementById('startDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endDate = document.getElementById('endDate').value;
+            const endTime = document.getElementById('endTime').value;
+
+            if (startDate === endDate && startTime === "08:00" && endTime === "17:00") {
+                document.getElementById('leaveDuration').textContent = '1 วัน 0 ชั่วโมง 0 นาที';
+                return;
+            }
+
+            const formattedStartDate = formatDate(startDate); // ฟังก์ชัน formatDate จะทำการแปลงวันที่ในรูปแบบที่เหมาะสม
+            const formattedEndDate = formatDate(endDate);
+
+            // สร้าง Date object สำหรับเวลาเริ่มต้นและสิ้นสุด
+            let startDateTime = new Date(`${formattedStartDate}T${startTime}:00`);
+            let endDateTime = new Date(`${formattedEndDate}T${endTime}:00`);
+
+            // เวลาทำงานเริ่มต้นและสิ้นสุด (สมมติว่าเวลาทำงานคือ 08:00 - 17:00)
+            const workStart = 8; // 08:00
+            const workEnd = 17; // 17:00
+            const lunchStart = 12; // พักเที่ยงเริ่ม 12:00
+            const lunchEnd = 13; // พักเที่ยงสิ้นสุด 13:00
+
+            let totalMilliseconds = 0;
+
+            // คำนวณระยะเวลาในแต่ละวัน
+            while (startDateTime < endDateTime) {
+                // ถ้าเวลาเริ่มต้นก่อนเวลาเริ่มทำงาน
+                if (startDateTime.getHours() < workStart) {
+                    startDateTime.setHours(workStart, 0, 0, 0); // ปรับเวลาเริ่มต้นให้ตรงกับเวลาทำงาน
+                }
+
+                // ถ้าเวลาเริ่มต้นเกินเวลาเลิกงาน
+                if (startDateTime.getHours() >= workEnd) {
+                    startDateTime.setDate(startDateTime.getDate() + 1); // ไปยังวันถัดไป
+                    startDateTime.setHours(workStart, 0, 0, 0); // ตั้งเวลาเริ่มทำงานใหม่ในวันถัดไป
+                }
+
+                // ถ้าเวลาสิ้นสุดหลังจากเวลาหมดเวลาทำงาน (17:00)
+                if (endDateTime.getHours() >= workEnd) {
+                    endDateTime.setHours(workEnd, 0, 0, 0);
+                }
+
+                // คำนวณระยะเวลาการลาในวันนั้น
+                const currentWorkEnd = new Date(startDateTime);
+                currentWorkEnd.setHours(workEnd, 0, 0, 0); // เวลาหมดงานในวันนั้น
+
+                let dailyLeaveDuration = currentWorkEnd - startDateTime; // ระยะเวลาของวันนั้น
+
+                if (endDateTime < currentWorkEnd) {
+                    dailyLeaveDuration = endDateTime - startDateTime; // ถ้าสิ้นสุดก่อนเวลาหมดงาน
+                }
+
+                // หักเวลาพักเที่ยง (ถ้ามี)
+                const lunchStartTime = new Date(startDateTime);
+                lunchStartTime.setHours(lunchStart, 0, 0, 0);
+                const lunchEndTime = new Date(startDateTime);
+                lunchEndTime.setHours(lunchEnd, 0, 0, 0);
+
+                if (startDateTime < lunchEndTime && endDateTime > lunchStartTime) {
+                    dailyLeaveDuration -= 1 * 60 * 60 * 1000; // หัก 1 ชั่วโมงสำหรับพักเที่ยง
+                }
+
+                totalMilliseconds += dailyLeaveDuration; // เพิ่มระยะเวลาในแต่ละวัน
+
+                // ไปยังวันถัดไป
+                startDateTime.setDate(startDateTime.getDate() + 1);
+                startDateTime.setHours(workStart, 0, 0, 0);
+            }
+
+            // คำนวณจำนวนวัน ชั่วโมง นาที จาก totalMilliseconds
+            const leaveDays = Math.floor(totalMilliseconds / (8 * 60 * 60 * 1000)); // จำนวนวัน
+            totalMilliseconds -= leaveDays * (8 * 60 * 60 * 1000); // หักเวลาเป็นวัน
+
+            let leaveHours = Math.floor(totalMilliseconds / (60 * 60 * 1000)); // ชั่วโมง
+            totalMilliseconds -= leaveHours * (60 * 60 * 1000); // หักเวลาเป็นชั่วโมง
+
+            let leaveMinutes = Math.floor(totalMilliseconds / (60 * 1000)); // นาที
+
+            // ปัดจำนวนชั่วโมงและนาที
+            if (leaveMinutes > 0 && leaveMinutes <= 15) {
+                leaveMinutes = 30; // ถ้านาทีระหว่าง 0-15 นาที ปัดเป็น 30 นาที
+            } else if (leaveMinutes >= 40 && leaveMinutes <= 45) {
+                leaveHours += 1; // ถ้านาทีระหว่าง 40-45 นาที ปัดเป็น 1 ชั่วโมง
+                leaveMinutes = 0; // ปรับนาทีเป็น 0
+            }
+            // แสดงผลลัพธ์
+            const result = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+            document.getElementById('leaveDuration').textContent = result;
+        }
 
         function checkOther(select) {
             var otherReasonInput = document.getElementById('otherReason');
@@ -3206,52 +3318,7 @@ echo '</div>';
             }
         }
 
-        /* function updateLeaveReasonField() {
-            var leaveType = document.getElementById('leaveType').value;
 
-            var leaveReasonField = document.getElementById('leaveReason');
-            var otherReasonField = document.getElementById('otherReason');
-
-            // อัปเดตเหตุผลการลา
-            if (leaveType === '1') { // ลากิจได้รับค่าจ้าง
-                leaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '2') { // ลากิจไม่ได้รับค่าจ้าง
-                leaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '3') { // ลาป่วย
-                leaveReasonField.innerHTML = '<option value="ป่วย">ป่วย</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '4') { // ลาป่วยจากงาน
-                leaveReasonField.innerHTML = '<option value="ป่วย">ป่วย</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '5') { // ลาพักร้อน
-                leaveReasonField.innerHTML = '<option value="พักร้อน">พักร้อน</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else if (leaveType === '8') { // อื่น ๆ
-                leaveReasonField.innerHTML = '<option value="ลาเพื่อทำหมัน">ลาเพื่อทำหมัน</option>' +
-                    '<option value="ลาคลอด">ลาคลอด</option>' +
-                    '<option value="ลาอุปสมบท">ลาอุปสมบท</option>' +
-                    '<option value="ลาเพื่อรับราชการทหาร">ลาเพื่อรับราชการทหาร</option>' +
-                    '<option value="ลาเพื่อจัดการงานศพ">ลาเพื่อจัดการงานศพ</option>' +
-                    '<option value="ลาเพื่อพัฒนาและเรียนรู้">ลาเพื่อพัฒนาและเรียนรู้</option>' +
-                    '<option value="ลาเพื่อการสมรส">ลาเพื่อการสมรส</option>' +
-                    '<option value="อื่น ๆ">อื่น ๆ</option>';
-            } else {
-                leaveReasonField.innerHTML = '<option selected disabled>เลือกเหตุผลการลา</option>';
-            }
-
-            // การจัดการการแสดง/ซ่อนฟิลด์เหตุผล "อื่น ๆ"
-            if (leaveType === '5' || leaveType === '8') { // หากเป็นลาพักร้อนหรือประเภทอื่น ๆ
-                if (leaveReasonField.value === 'อื่น ๆ') {
-                    otherReasonField.classList.remove('d-none');
-                } else {
-                    otherReasonField.classList.add('d-none');
-                }
-            } else {
-                otherReasonField.classList.add('d-none');
-            }
-        } */
 
         // ลาฉุกเฉิน
         function checkUrgentOther(select) {
@@ -3264,26 +3331,6 @@ echo '</div>';
                 urgentOtherReasonInput.classList.add('d-none');
             }
         }
-
-        /*  function updateUrgentLeaveReasonField() {
-             var urgentLeaveType = document.getElementById('urgentLeaveType').value;
-             var urgentLeaveReasonField = document.getElementById('urgentLeaveReason');
-             var urgentOtherReasonField = document.getElementById('urgentOtherReason');
-
-             // อัปเดตเหตุผลการลา
-             if (urgentLeaveType === '1' || urgentLeaveType === '2') { // ลากิจได้รับ/ไม่ได้รับค่าจ้าง
-                 urgentLeaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
-                     '<option value="อื่น ๆ">อื่น ๆ</option>';
-             } else if (urgentLeaveType === '5') { // ลาพักร้อน
-                 urgentLeaveReasonField.innerHTML = '<option value="พักร้อน">พักร้อน</option>' +
-                     '<option value="อื่น ๆ">อื่น ๆ</option>';
-             } else {
-                 urgentLeaveReasonField.innerHTML = '<option value="" selected disabled>เลือกเหตุผลการลา</option>';
-             }
-
-             // รีเซ็ตการแสดง textarea
-             urgentOtherReasonField.classList.add('d-none');
-         } */
         </script>
         <script src="../js/popper.min.js"></script>
         <script src="../js/bootstrap.min.js"></script>
