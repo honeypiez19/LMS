@@ -193,7 +193,7 @@ if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0)
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="admin_holiday.php"
-                            style="color: white;">วันหยุดบริษัท</a>
+                            style="color: white;">ปฏิทินบริษัท</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="admin_employee_attendance.php"
@@ -232,7 +232,7 @@ if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0)
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="admin_holiday.php"
-                            style="color: white;">วันหยุดบริษัท</a>
+                            style="color: white;">ปฏิทินบริษัท</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="admin_employee_attendance.php"
