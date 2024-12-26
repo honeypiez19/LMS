@@ -505,16 +505,16 @@
     // }
 
     // ฟังก์ชันในการแปลงวันเป็นรูปแบบ YYYY-MM-DD
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มต้นที่ 0
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
+    // function formatDate(date) {
+    //     const year = date.getFullYear();
+    //     const month = String(date.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มต้นที่ 0
+    //     const day = String(date.getDate()).padStart(2, '0');
+    //     return `${year}-${month}-${day}`;
+    // }
 
-    // เพิ่มวันหยุดสำหรับปีปัจจุบัน
-    const year = new Date().getFullYear();
-    addHolidays(year);
+    // // เพิ่มวันหยุดสำหรับปีปัจจุบัน
+    // const year = new Date().getFullYear();
+    // addHolidays(year);
     </script>
 </body>
 

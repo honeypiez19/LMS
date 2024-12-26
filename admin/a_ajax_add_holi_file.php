@@ -83,36 +83,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['excelFile']) && $_FI
     } else {
         echo '<h3>วันที่ในไฟล์ Excel (ไม่ซ้ำกัน):</h3>';
         foreach ($result as $row) {
-            // การ insert ข้อมูลลงในฐานข้อมูล
-            $holidayName = "วันหยุด"; // กำหนดชื่อวันหยุด
-            $holidayStatus = "วันหยุด"; // กำหนดสถานะวันหยุด
-            $status = 0; // ค่าเริ่มต้นของสถานะเป็น 0
-            $addName = 'Admin';
-            $createDate = date('Y-m-d H:i:s');
+            // การตรวจสอบวันหยุดในฐานข้อมูลก่อน
+            $stmt = $conn->prepare("SELECT COUNT(*) FROM holiday WHERE h_start_date = :h_start_date");
+            $stmt->execute([':h_start_date' => $row['date']]);
+            $dateExists = $stmt->fetchColumn() > 0;
 
-            // สร้างคำสั่ง SQL สำหรับ insert ข้อมูล
-            $query = "INSERT INTO holiday (h_name, h_start_date, h_end_date, h_holiday_status, h_status, h_hr_name, h_hr_datetime)
-              VALUES (:h_name, :h_start_date, :h_end_date, :h_holiday_status, :h_status, :addName, :createDate)";
+            if (!$dateExists) {
+                // การ insert ข้อมูลลงในฐานข้อมูล
+                $holidayName = "วันหยุด"; // กำหนดชื่อวันหยุด
+                $holidayStatus = "วันหยุด"; // กำหนดสถานะวันหยุด
+                $status = 0; // ค่าเริ่มต้นของสถานะเป็น 0
+                $addName = 'Admin';
+                $createDate = date('Y-m-d H:i:s');
 
-            // เตรียมคำสั่ง SQL
-            $stmt = $conn->prepare($query);
+                // สร้างคำสั่ง SQL สำหรับ insert ข้อมูล
+                $query = "INSERT INTO holiday (h_name, h_start_date, h_end_date, h_holiday_status, h_status, h_hr_name, h_hr_datetime)
+                          VALUES (:h_name, :h_start_date, :h_end_date, :h_holiday_status, :h_status, :addName, :createDate)";
 
-            // bind parameters
-            $stmt->bindParam(':h_name', $holidayName);
-            $stmt->bindParam(':h_start_date', $row['date']);
-            $stmt->bindParam(':h_end_date', $row['date']);
-            $stmt->bindParam(':h_holiday_status', $holidayStatus);
-            $stmt->bindParam(':h_status', $status, PDO::PARAM_INT);
-            $stmt->bindParam(':addName', $addName);
-            $stmt->bindParam(':createDate', $createDate);
+                // เตรียมคำสั่ง SQL
+                $stmt = $conn->prepare($query);
 
-            // execute statement
-            if ($stmt->execute()) {
-                echo "วันที่: {$row['date']} ถูกเพิ่มลงในฐานข้อมูล<br>";
+                // bind parameters
+                $stmt->bindParam(':h_name', $holidayName);
+                $stmt->bindParam(':h_start_date', $row['date']);
+                $stmt->bindParam(':h_end_date', $row['date']);
+                $stmt->bindParam(':h_holiday_status', $holidayStatus);
+                $stmt->bindParam(':h_status', $status, PDO::PARAM_INT);
+                $stmt->bindParam(':addName', $addName);
+                $stmt->bindParam(':createDate', $createDate);
+
+                // execute statement
+                if ($stmt->execute()) {
+                    echo "วันที่: {$row['date']} ถูกเพิ่มลงในฐานข้อมูล<br>";
+                } else {
+                    echo "เกิดข้อผิดพลาดในการเพิ่มข้อมูล<br>";
+                }
             } else {
-                echo "เกิดข้อผิดพลาดในการเพิ่มข้อมูล<br>";
+                echo "วันที่: {$row['date']} มีอยู่แล้วในฐานข้อมูล<br>";
             }
-
         }
     }
 } else {
