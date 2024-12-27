@@ -20,10 +20,10 @@ if ($status == 'all') {
             WHERE li.l_approve_status IN (0, 1, 2, 3, 6)
               AND li.l_level IN ('user')
               AND li.l_leave_id NOT IN (6, 7)
-              AND YEAR(li.l_leave_end_date) = :year";
+              AND YEAR(li.l_create_datetime) = :year";
 
     if ($month != "All") {
-        $sql .= " AND Month(li.l_leave_end_date) = :month";
+        $sql .= " AND Month(li.l_create_datetime) = :month";
     }
 
     $sql .= " AND (
@@ -41,10 +41,10 @@ if ($status == 'all') {
             WHERE li.l_approve_status = :status
               AND li.l_level IN ('user')
               AND li.l_leave_id NOT IN (6, 7)
-              AND YEAR(li.l_leave_end_date) = :year";
+              AND YEAR(li.l_create_datetime) = :year";
 
     if ($month != "All") {
-        $sql .= " AND Month(li.l_leave_end_date) = :month";
+        $sql .= " AND Month(li.l_create_datetime) = :month";
     }
 
     $sql .= " AND (

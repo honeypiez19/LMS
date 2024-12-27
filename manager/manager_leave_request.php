@@ -677,7 +677,7 @@ WHERE
     AND YEAR(li.l_create_datetime) = :selectedYear";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    $sql .= " AND Month(li.l_create_datetime) = :selectedMonth ";
 }
 
 if ($checkSubDepart === "Office" || $checkSubDepart2 === "Management") {

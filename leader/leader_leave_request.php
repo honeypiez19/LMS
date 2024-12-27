@@ -133,14 +133,6 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-// em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-// AND Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth'
-// AND l_level = 'user'
-// AND l_leave_id <> 6
-// AND l_leave_id <> 7";
 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
 em.*,
@@ -161,9 +153,9 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    AND YEAR(li.l_create_datetime) = :selectedYear";
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+    $sql .= " AND Month(li.l_create_datetime) = :selectedMonth ";
 }
 $sql .= " AND (
         (em.e_sub_department = :subDepart AND li.l_department = :depart)
@@ -236,9 +228,9 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    AND YEAR(li.l_create_datetime) = :selectedYear";
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth";
+    $sql .= " AND Month(li.l_create_datetime) = :selectedMonth";
 }
 $stmt = $conn->prepare($sql);
 
@@ -302,9 +294,9 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    AND YEAR(li.l_create_datetime) = :selectedYear";
 if ($selectedMonth != "All") {
-    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+    $sql .= " AND MONTH(li.l_create_datetime) = :selectedMonth";
 }
 $stmt = $conn->prepare($sql);
 
@@ -365,9 +357,9 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_leave_end_date) = :selectedYear";
+    AND YEAR(li.l_create_datetime) = :selectedYear";
 if ($selectedMonth != "All") {
-    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+    $sql .= " AND MONTH(li.l_create_datetime) = :selectedMonth";
 }
 $stmt = $conn->prepare($sql);
 
@@ -460,16 +452,6 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-
-// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-// FROM leave_list li
-// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-// AND Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth'
-// AND l_level = 'user'
-// AND l_leave_id <> 6
-// AND l_leave_id <> 7
-// ORDER BY l_create_datetime DESC";
 
 $sql = "SELECT
     li.*,
