@@ -133,24 +133,60 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode
-AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'";
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_level IN ('user')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
-$sql .= " AND l_level = 'user'
-AND l_leave_id NOT IN (6,7)";
+$sql .= " AND (
+        (em.e_sub_department = :subDepart)
+        OR (em.e_sub_department2 = :subDepart2)
+        OR (em.e_sub_department3 = :subDepart3)
+        OR (em.e_sub_department4 = :subDepart4)
+        OR (em.e_sub_department5 = :subDepart5)
+    )";
+$stmt = $conn->prepare($sql);
 
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute and check for errors
+if ($stmt->execute()) {
+    $totalLeaveItems = $stmt->fetchColumn();
+} else {
+    // Output error information
+    $errorInfo = $stmt->errorInfo();
+    echo "SQL Error: " . $errorInfo[2];
+    $totalLeaveItems = 0;
+}
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
-                                <!-- <i class="mt-4 fas fa-file-alt ml-2 fa-2xl"></i> -->
                                 <i class="mt-4 fa-regular fa-folder-open fa-2xl"></i>
                             </div>
                         </h5>
@@ -167,25 +203,58 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
-// AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode
-AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'";
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_approve_status = 1
+    AND li.l_level IN ('user')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
-$sql .= " AND l_level = 'user'
-AND l_leave_id NOT IN (6,7)
-AND l_approve_status = 0";
+$sql .= " AND (
+        (em.e_sub_department = :subDepart)
+        OR (em.e_sub_department2 = :subDepart2)
+        OR (em.e_sub_department3 = :subDepart3)
+        OR (em.e_sub_department4 = :subDepart4)
+        OR (em.e_sub_department5 = :subDepart5)
+    )";
+$stmt = $conn->prepare($sql);
 
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
-
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute and check for errors
+if ($stmt->execute()) {
+    $totalLeaveItems = $stmt->fetchColumn();
+} else {
+    // Output error information
+    $errorInfo = $stmt->errorInfo();
+    echo "SQL Error: " . $errorInfo[2];
+    $totalLeaveItems = 0;
+}
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -205,21 +274,58 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode
-AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'";
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_approve_status = 2
+    AND li.l_level IN ('user')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
-$sql .= " AND l_level = 'user'
-AND l_leave_id NOT IN (6,7)
-AND l_approve_status = 2";
+$sql .= " AND (
+        (em.e_sub_department = :subDepart)
+        OR (em.e_sub_department2 = :subDepart2)
+        OR (em.e_sub_department3 = :subDepart3)
+        OR (em.e_sub_department4 = :subDepart4)
+        OR (em.e_sub_department5 = :subDepart5)
+    )";
+$stmt = $conn->prepare($sql);
 
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute and check for errors
+if ($stmt->execute()) {
+    $totalLeaveItems = $stmt->fetchColumn();
+} else {
+    // Output error information
+    $errorInfo = $stmt->errorInfo();
+    echo "SQL Error: " . $errorInfo[2];
+    $totalLeaveItems = 0;
+}
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -239,22 +345,58 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+$sql = "SELECT
+COUNT(li.l_list_id) AS totalLeaveItems,
+em.*,
+li.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode
-AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'";
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_approve_status = 3
+    AND li.l_level IN ('user')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
-$sql .= " AND l_level = 'user'
-AND l_leave_id NOT IN (6,7)
-AND l_approve_status = 3";
+$sql .= " AND (
+        (em.e_sub_department = :subDepart)
+        OR (em.e_sub_department2 = :subDepart2)
+        OR (em.e_sub_department3 = :subDepart3)
+        OR (em.e_sub_department4 = :subDepart4)
+        OR (em.e_sub_department5 = :subDepart5)
+    )";
+$stmt = $conn->prepare($sql);
 
-$totalLeaveItems = $conn->query($sql)->fetchColumn();
-
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute and check for errors
+if ($stmt->execute()) {
+    $totalLeaveItems = $stmt->fetchColumn();
+} else {
+    // Output error information
+    $errorInfo = $stmt->errorInfo();
+    echo "SQL Error: " . $errorInfo[2];
+    $totalLeaveItems = 0;
+}
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -324,41 +466,93 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+
+$sql = "SELECT
+    li.*,
+    em.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-AND Year(l_leave_end_date) = '$selectedYear'";
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+WHERE
+    li.l_approve_status IN (0, 1, 2, 3, 6)
+    AND li.l_level IN ('user')
+    AND li.l_leave_id NOT IN (6, 7)
+    AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
-$sql .= " AND l_level = 'user'
-AND l_leave_id <> 6
-AND l_leave_id <> 7
-ORDER BY l_create_datetime DESC";
+$sql .= " AND (
+        (em.e_sub_department = :subDepart)
+        OR (em.e_sub_department2 = :subDepart2)
+        OR (em.e_sub_department3 = :subDepart3)
+        OR (em.e_sub_department4 = :subDepart4)
+        OR (em.e_sub_department5 = :subDepart5)
+    )
+ORDER BY li.l_create_datetime DESC";
 
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
+// Prepare the statement
+$stmt = $conn->prepare($sql);
 
-// คำนวณหน้าทั้งหมด
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute the query to get the total number of rows
+$stmt->execute();
+$totalRows = $stmt->rowCount();
+
+// Calculate total pages
 $totalPages = ceil($totalRows / $itemsPerPage);
 
-// คำนวณ offset สำหรับ pagination
+// Calculate offset for pagination
 $offset = ($currentPage - 1) * $itemsPerPage;
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
+// Add LIMIT and OFFSET to the SQL statement for pagination
+$sql .= " LIMIT :limit OFFSET :offset";
 
-// ประมวลผลคำสั่ง SQL
-$result = $conn->query($sql);
+// Prepare the final query with pagination
+$stmt = $conn->prepare($sql);
 
-// แสดงผลลำดับของแถว
-$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+// Bind the limit and offset parameters
+$stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+// Bind the parameters again for the final query
+$stmt->bindParam(':depart', $depart); // Make sure this is bound correctly
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute the paginated query
+$stmt->execute();
+
+// Display row number starting from the correct count
+$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
 // แสดงข้อมูลในตาราง
-if ($result->rowCount() > 0) {
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+if ($stmt->rowCount() > 0) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         echo '<tr class="align-middle">';
 
         // 0
@@ -1094,13 +1288,17 @@ echo '</div>';
 
         // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
         $(this).find(".card").addClass("active");
+
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
+        var subDepart2 = "<?php echo $subDepart2 ?>";
+        var subDepart3 = "<?php echo $subDepart3 ?>";
+        var subDepart4 = "<?php echo $subDepart4 ?>";
+        var subDepart5 = "<?php echo $subDepart5 ?>";
 
-        // alert(subDepart)
         $.ajax({
             url: 'c_ajax_get_leave_data.php',
             method: 'GET',
@@ -1109,7 +1307,11 @@ echo '</div>';
                 month: selectedMonth,
                 year: selectedYear,
                 depart: depart,
-                subDepart: subDepart
+                subDepart: subDepart,
+                subDepart2: subDepart2,
+                subDepart3: subDepart3,
+                subDepart4: subDepart4,
+                subDepart5: subDepart5
             },
             dataType: 'json',
             success: function(data) {
@@ -1588,7 +1790,7 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาเริ่มต้น
                                 var leaveEndDate = $(rowData[10])
                                     .text(); // วันเวลาที่ลาสิ้นสุด
-                                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+                                var leaveStatus = $(rowData[13]).text(); // สถานะใบลา
 
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
@@ -1596,7 +1798,7 @@ echo '</div>';
                                 var level = '<?php echo $level; ?>';
 
                                 $.ajax({
-                                    url: 'c_ajax_upd_status.php',
+                                    url: 'l_ajax_upd_status.php',
                                     method: 'POST',
                                     data: {
                                         createDate: createDate,
@@ -1684,7 +1886,6 @@ echo '</div>';
                                 }
                             });
 
-
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -1694,7 +1895,7 @@ echo '</div>';
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
                             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
-                            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+                            var leaveStatus = $(rowData[13]).text(); // สถานะใบลา
 
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
@@ -1704,7 +1905,7 @@ echo '</div>';
                             var reason = reasonNoProve;
 
                             $.ajax({
-                                url: 'c_ajax_upd_status.php',
+                                url: 'l_ajax_upd_status.php',
                                 method: 'POST',
                                 data: {
                                     createDate: createDate,
@@ -1747,7 +1948,7 @@ echo '</div>';
                             'usercode'); // ดึงรหัสพนักงานจาก data attribute
 
                         $.ajax({
-                            url: 'c_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+                            url: 'l_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
                             type: 'POST',
                             data: {
                                 userCode: userCode

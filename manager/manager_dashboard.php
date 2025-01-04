@@ -1291,10 +1291,10 @@ if (!isset($_GET['page'])) {
 $sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+    $sql .= " AND Month(l_leave_end_date) = '$selectedMonth'";
 }
 
-$sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
+$sql .= " AND Year(l_leave_end_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
 
 // หาจำนวนรายการทั้งหมด
 $result = $conn->query($sql);

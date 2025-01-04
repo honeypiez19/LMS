@@ -12,29 +12,31 @@ $subDepart3 = $_GET['subDepart3'];
 $subDepart4 = $_GET['subDepart4'];
 $subDepart5 = $_GET['subDepart5'];
 
-// Prepare a SQL query to select leave data based on the status
 $sql = "SELECT
     li.*,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+    em.*
 FROM leave_list li
-INNER JOIN employees em ON li.l_usercode = em.e_usercode
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_level IN ('user', 'chief', 'leader', 'admin')
+    li.l_approve_status IN (2,3,6)
+    AND li.l_level IN ('user', 'chief', 'leader','admin')
     AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_leave_end_date) = :selectedYear";
+ AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
-// Conditionally add month filter if selected
 if ($selectedMonth != "All") {
-    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
 if ($subDepart === "Office" || $subDepart2 === "Management") {
     $sql .= " AND (
-        em.e_department = :subDepart
+        em.e_department = :subDepart AND li.l_department = :subDepart
         OR li.l_department = :subDepart
         OR li.l_department = :subDepart2
         AND em.e_sub_department = 'AC'

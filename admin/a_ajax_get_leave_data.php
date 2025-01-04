@@ -6,67 +6,50 @@ $status = $_GET['status'];
 $month = $_GET['month'];
 $year = $_GET['year'];
 
-// Prepare a SQL query to select leave data based on the status
-if ($status == 'all') {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_leave_id <> 7 ORDER BY l_create_datetime DESC ";
+// Initialize the SQL query
+$sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)";
 
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7) ";
-
-    if ($month != "All") {
-        $sql .= " AND Month(l_leave_start_date) = '$month'";
-    }
-
-    $sql .= " AND Year(l_leave_start_date) = '$year' ORDER BY l_create_datetime DESC";
-
-} else if ($status == 0) {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_hr_status = 0 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
-    AND l_hr_status = 0";
-    if ($month != "All") {
-        $sql .= " AND Month(l_leave_start_date) = '$month'";
-    }
-    $sql .= " AND Year(l_leave_start_date) = '$year'
-    ORDER BY l_create_datetime DESC";
-
-} else if ($status == 1) {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_hr_status = 1 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
-    AND l_hr_status = 1";
-    if ($month != "All") {
-        $sql .= " AND Month(l_leave_start_date) = '$month'";
-    }
-    $sql .= " AND Year(l_leave_start_date) = '$year'
-    ORDER BY l_create_datetime DESC";
-} else if ($status == 2) {
-    // $sql = "SELECT * FROM leave_list WHERE Month(l_leave_end_date) = '$month' AND l_hr_status = 2 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
-    AND l_hr_status = 2";
-    if ($month != "All") {
-        $sql .= " AND Month(l_leave_start_date) = '$month'";
-    }
-    $sql .= " AND Year(l_leave_start_date) = '$year'
-    ORDER BY l_create_datetime DESC";
-} else {
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
-    AND l_leave_status = 1";
-    if ($month != "All") {
-        $sql .= " AND Month(l_leave_start_date) = '$month'";
-    }
-    $sql .= " AND Year(l_leave_start_date) = '$year'
-    ORDER BY l_create_datetime DESC";
-
+// Add conditions based on the status
+if ($status != 'all') {
+    $sql .= " AND l_hr_status = :status";
 }
 
+// Add conditions for month and year
+if ($month != "All") {
+    $sql .= " AND (
+        MONTH(l_create_datetime) = :month
+        OR MONTH(l_leave_end_date) = :month
+    )";
+}
+
+$sql .= " AND (
+    YEAR(l_create_datetime) = :year
+    OR YEAR(l_leave_end_date) = :year
+)
+
+ORDER BY l_create_datetime DESC";
+
+// Prepare the SQL statement
 $stmt = $conn->prepare($sql);
-if ($status != 0) {
+
+// Bind parameters
+if ($status != 'all') {
     $stmt->bindParam(':status', $status, PDO::PARAM_INT);
 }
+if ($month != "All") {
+    $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+}
+$stmt->bindParam(':year', $year, PDO::PARAM_INT);
+
+// Execute the query
 $stmt->execute();
 
-// Fetch the results as an associative array
+// Fetch the results
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Calculate leave details for each record
 foreach ($results as &$row) {
-    $holiday_query = "SELECT COUNT(*) as holiday_count
+    $holiday_query = "SELECT COUNT(*) AS holiday_count
                       FROM holiday
                       WHERE h_start_date BETWEEN :start_date AND :end_date
                         AND h_holiday_status = 'วันหยุด'
@@ -89,7 +72,7 @@ foreach ($results as &$row) {
     $leave_hours = $interval->h;
     $leave_minutes = $interval->i;
 
-    // Adjust hours for out-of-range times
+    // Adjust hours for working hours
     $start_hour = (int) $start_date->format('H');
     $end_hour = (int) $end_date->format('H');
 
@@ -113,5 +96,6 @@ foreach ($results as &$row) {
         'minutes' => $leave_minutes,
     ];
 }
+
 // Send the results as JSON
 echo json_encode($results);

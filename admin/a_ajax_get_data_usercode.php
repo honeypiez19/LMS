@@ -19,10 +19,18 @@ $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
 AND l_usercode LIKE '%" . $searchCode . "%'";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+    $sql .= " AND (
+        MONTH(l_create_datetime) = $selectedMonth
+        OR MONTH(l_leave_end_date) = $selectedMonth
+    )";
 }
 
-$sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC";
+$sql .= " AND (
+    YEAR(l_create_datetime) = $selectedYear
+    OR YEAR(l_leave_end_date) = $selectedYear
+)
+
+ORDER BY l_create_datetime DESC";
 
 // คำนวณผลลัพธ์ที่จะแสดง
 $result = $conn->query($sql);
@@ -465,10 +473,17 @@ if ($result->rowCount() > 0) {
         echo '<td>' . $row['l_remark2'] . '</td>';
 
         // 28
+        echo '<td hidden>' . $row['l_workplace'] . '</td>';
+
+        // 29
+        echo '<td><button type="button" class="btn btn-warning  edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $row['l_usercode'] . '">
+        <i class="fa-solid fa-pen-to-square"></i>แก้ไข</button></td>';
+
+        // 30
         if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         }
 
         echo '</tr>';

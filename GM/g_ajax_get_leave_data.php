@@ -13,11 +13,12 @@ FROM
     leave_list li
 WHERE
     li.l_department <> 'RD'
-    AND li.l_leave_status = 0
     AND li.l_leave_id NOT IN (6, 7)
     AND li.l_level IN ('user', 'chief', 'leader', 'admin')
-    AND Year(li.l_leave_end_date) = :year";
-
+ AND (
+        YEAR(li.l_create_datetime) = :year
+        OR YEAR(li.l_leave_end_date) = :year
+    )";
 if ($status == 'all') {
     // No additional filters for 'all' status
 } else if ($status == 1) {
@@ -32,7 +33,10 @@ if ($status == 'all') {
 }
 
 if ($month != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = :month";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :month
+        OR Month(li.l_leave_end_date) = :month
+    ) ";
 }
 
 $sql .= " ORDER BY li.l_create_datetime DESC";

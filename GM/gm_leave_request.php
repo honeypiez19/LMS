@@ -138,13 +138,17 @@ FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
-AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin')
-AND Year(li.l_leave_end_date) = '$selectedYear'";
-
+    AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
@@ -186,14 +190,18 @@ FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
-AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin')
 AND li.l_approve_status2 = 1
-AND Year(li.l_leave_end_date) = '$selectedYear'";
-
+ AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
 // เตรียมและรัน query
@@ -234,14 +242,19 @@ FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
-AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin')
 AND li.l_approve_status2 = 4
-AND Year(li.l_leave_end_date) = '$selectedYear'";
+ AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
 // เตรียมและรัน query
@@ -282,14 +295,19 @@ FROM
 leave_list li
 WHERE
 li.l_department <> 'RD'
-AND li.l_leave_status = 0
 AND li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin')
 AND li.l_approve_status2 = 5
-AND Year(li.l_leave_end_date) = '$selectedYear'";
+ AND (
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
+    )";
 
 if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
+    $sql .= " AND (
+        Month(li.l_create_datetime) = :selectedMonth
+        OR Month(li.l_leave_end_date) = :selectedMonth
+    ) ";
 }
 
 // เตรียมและรัน query
@@ -361,58 +379,78 @@ $totalLeaveItems = $stmt->fetchColumn();
                 </thead>
                 <tbody class="text-center">
                     <?php
-
+// กำหนดจำนวนรายการต่อหน้า
 $itemsPerPage = 10;
 
-// คำนวณหน้าปัจจุบัน
-if (!isset($_GET['page'])) {
-    $currentPage = 1;
-} else {
-    $currentPage = $_GET['page'];
-}
+// ตรวจสอบหน้าปัจจุบัน
+$currentPage = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
-// $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
-// AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-
-$sql = "SELECT
-li.*
-FROM
-leave_list li
-WHERE
-li.l_department <> 'RD'
-AND li.l_leave_status = 0
-AND li.l_leave_id NOT IN (6, 7)
--- AND li.l_approve_status2 = 4
-AND li.l_level IN ('user', 'chief', 'leader','admin')
-AND Year(li.l_leave_end_date) = '$selectedYear'";
-
-if ($selectedMonth != "All") {
-    $sql .= " AND Month(li.l_leave_end_date) = '$selectedMonth'";
-}
-$sql .= "ORDER BY li.l_create_datetime DESC";
-
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
-
-// คำนวณหน้าทั้งหมด
-$totalPages = ceil($totalRows / $itemsPerPage);
-
-// คำนวณ offset สำหรับ pagination
+// คำนวณค่า offset สำหรับ pagination
 $offset = ($currentPage - 1) * $itemsPerPage;
 
+// สร้างคำสั่ง SQL
+$sql = "SELECT
+            li.*
+        FROM
+            leave_list li
+        WHERE
+            li.l_department <> 'RD'
+            AND li.l_leave_id NOT IN (6, 7)
+            AND li.l_level IN ('user', 'chief', 'leader', 'admin')
+            AND (
+                YEAR(li.l_create_datetime) = :selectedYear
+                OR YEAR(li.l_leave_end_date) = :selectedYear
+            )";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND (
+                Month(li.l_create_datetime) = :selectedMonth
+                OR Month(li.l_leave_end_date) = :selectedMonth
+             )";
+}
+
+$sql .= " ORDER BY li.l_create_datetime DESC";
+
+// ประมวลผลคำสั่ง SQL เพื่อหาจำนวนแถวทั้งหมด
+$stmt = $conn->prepare($sql);
+
+// ผูกค่า (bind parameters)
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+
+$stmt->execute();
+
+// นับจำนวนแถวทั้งหมด
+$totalRows = $stmt->rowCount();
+
+// คำนวณจำนวนหน้าทั้งหมด
+$totalPages = ceil($totalRows / $itemsPerPage);
+
 // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
+$sql .= " LIMIT :itemsPerPage OFFSET :offset";
 
-// ประมวลผลคำสั่ง SQL
-$result = $conn->query($sql);
+// เตรียมคำสั่ง SQL ใหม่สำหรับดึงข้อมูลรายการในหน้าที่กำหนด
+$stmt = $conn->prepare($sql);
 
-// แสดงผลลำดับของแถว
-$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+// ผูกค่า (bind parameters) ใหม่
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+
+$stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+$stmt->execute();
 
 // แสดงข้อมูลในตาราง
-if ($result->rowCount() > 0) {
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+$rowNumber = $totalRows - $offset; // กำหนดลำดับของแถวเริ่มต้น
+if ($stmt->rowCount() > 0) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         echo '<tr class="align-middle">';
 
 // 0
@@ -1189,7 +1227,7 @@ echo '</div>';
 
                 if (data.length === 0) {
                     $("tbody").append(
-                        '<tr><td colspan="20" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
+                        '<tr><td colspan="26" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
                     );
                 } else {
                     var totalItems = data.length; // Store total count
@@ -1562,7 +1600,8 @@ echo '</div>';
 
                             //28
                             '<td>';
-                        if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
+                        if (row['l_approve_status3'] == 8 || row['l_approve_status3'] ==
+                            9) {
                             newRow +=
                                 '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?=$btnCheck?></button>';
                         } else {
