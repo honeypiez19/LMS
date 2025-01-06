@@ -752,6 +752,92 @@ echo '</div>'; // Close the row div
                                     </div>
                                 </div>
                                 <div class="mt-2 row">
+                                    <div class="col-6">
+                                        <?php
+// กำหนดตัวแปรสำหรับผู้ใช้งานพิเศษ
+$specialUsers = ['Pornsuk'];
+if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
+    $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
+}
+
+// SQL query
+$sql = "SELECT *
+        FROM employees
+        WHERE (
+            e_sub_department = :subDepart
+            OR e_sub_department2 = :subDepart2
+            OR e_sub_department3 = :subDepart3
+            OR e_sub_department4 = :subDepart4
+            OR e_sub_department5 = :subDepart5
+            OR e_username IN (:specialUser1, :specialUser2)
+        )
+        AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
+        ORDER BY e_username ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+
+// ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
+$specialUser1 = $specialUsers[0] ?? null;
+$specialUser2 = $specialUsers[1] ?? null;
+$stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
+$stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
+
+$stmt->execute();
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
+$specialOptions = [];
+$filteredResults = [];
+foreach ($results as $row) {
+    if (in_array($row['e_username'], $specialUsers)) {
+        $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
+    } else {
+        $filteredResults[] = $row; // เก็บรายการทั่วไป
+    }
+}
+// รวมผู้ใช้งานพิเศษไว้ท้ายสุด
+$filteredResults = array_merge($filteredResults, $specialOptions);
+
+// ตั้งค่า default approver
+$defaultApprover = '';
+if ($subDepart === 'RD') {
+    foreach ($filteredResults as $row) {
+        if ($row['e_level'] == 'leader' || $row['e_level'] == 'manager' || $row['e_level'] == 'GM') {
+            $defaultApprover = $row['e_username'];
+            break;
+        }
+    }
+} else {
+    foreach ($filteredResults as $row) {
+        if (in_array($row['e_level'], ['leader', 'chief', 'manager', 'assisManager', 'GM'])) {
+            $defaultApprover = $row['e_username'];
+            break;
+        }
+    }
+}
+
+?>
+
+                                        <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
+                                        <select class="form-select" id="approver" name="approver">
+                                            <option value="">เลือกผู้อนุมัติ</option>
+                                            <?php foreach ($filteredResults as $row): ?>
+                                            <option value="<?=htmlspecialchars($row['e_username'])?>"
+                                                <?=$defaultApprover === $row['e_username'] ? 'selected' : ''?>>
+                                                <?=htmlspecialchars($row['e_username'])?>
+                                            </option>
+                                            <?php endforeach;?>
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="telPhone" class="form-label">เบอร์โทร</label>
                                         <?php
@@ -784,7 +870,6 @@ if ($result2->rowCount() > 0) {
                     </div>
                 </div>
             </div>
-
 
             <!-- Modal ลาฉุกเฉิน -->
             <div class="modal fade" id="urgentLeaveModal" tabindex="-1" aria-labelledby="urgentLeaveModalLabel"
@@ -954,7 +1039,6 @@ if ($result2->rowCount() > 0) {
                                         <input class="form-control" type="file" id="urgentFile" name="urgentFile" />
                                     </div>
                                 </div>
-
 
                                 <!-- Submit Button -->
                                 <div class="mt-3 d-flex justify-content-end">
@@ -1437,17 +1521,17 @@ if ($result->rowCount() > 0) {
         }
         // ไม่มีสถานะ
         else {
-            echo 'ไม่มีสถานะ';
-        }
-        echo '</td>';
+                echo 'ไม่มีสถานะ';
+            }
+            echo '</td>';
 
-        // 16
-        echo '<td>';
-        // รอหัวหน้าอนุมัติ
-        if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
-        }
-        // รอผจกอนุมัติ
+            // 16
+            echo '<td>';
+            // รอหัวหน้าอนุมัติ
+            if ($row['l_approve_status2'] == 0) {
+                echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            }
+            // รอผจกอนุมัติ
         elseif ($row['l_approve_status2'] == 1) {
             echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
         }
@@ -1471,17 +1555,17 @@ if ($result->rowCount() > 0) {
         }
         // ไม่มีสถานะ
         else {
-            echo 'ไม่มีสถานะ';
-        }
-        echo '</td>';
+                echo 'ไม่มีสถานะ';
+            }
+            echo '</td>';
 
-        // 17
-        echo '<td>';
-        // รอหัวหน้าอนุมัติ
-        if ($row['l_approve_status3'] == 0) {
-            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
-        }
-        // รอผจกอนุมัติ
+            // 17
+            echo '<td>';
+            // รอหัวหน้าอนุมัติ
+            if ($row['l_approve_status3'] == 0) {
+                echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+            }
+            // รอผจกอนุมัติ
         elseif ($row['l_approve_status3'] == 1) {
             echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
         }
@@ -1519,15 +1603,15 @@ if ($result->rowCount() > 0) {
         }
         // ไม่มีสถานะ
         else {
-            echo 'ไม่พบสถานะ';
-        }
-        echo '</td>';
+                echo 'ไม่พบสถานะ';
+            }
+            echo '</td>';
 
-        // 18
-        echo '<td>';
-        if ($row['l_hr_status'] == 0) {
-            echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
-        } elseif ($row['l_hr_status'] == 1) {
+            // 18
+            echo '<td>';
+            if ($row['l_hr_status'] == 0) {
+                echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
+            } elseif ($row['l_hr_status'] == 1) {
             echo '<span class="text-success"><b>ผ่าน</b></span>';
         } else {
             echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
@@ -1576,7 +1660,7 @@ if ($result->rowCount() > 0) {
         // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
     }
 } else {
-    echo "<tr><td colspan='12' style='color: red;'>ไม่พบข้อมูล</td></tr>";
+    echo "<tr><td colspan='16' style='color: red;'>ไม่พบข้อมูล</td></tr>";
 }
 // ปิดการเชื่อมต่อ
 // $conn = null;
@@ -2080,6 +2164,9 @@ echo '</div>';
                 var endDate = $('#endDate').val();
                 var endTime = $('#endTime').val();
                 var files = $('#file')[0].files;
+                var approver = $('#approver').val();
+
+                // alert(approver)
 
                 // เพิ่มข้อมูลจากฟอร์มลงใน FormData object
                 fd.append('leaveType', leaveType);
@@ -2088,6 +2175,7 @@ echo '</div>';
                     startDate);
                 fd.append('startTime', startTime);
                 fd.append('endDate', endDate);
+                fd.append('approver', approver);
                 fd.append(
                     'endTime', endTime);
                 if (files.length > 0) {
