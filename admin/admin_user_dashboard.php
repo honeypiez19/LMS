@@ -2331,41 +2331,87 @@ echo '</div>';
                         });
                         return false;
                     } else {
-                        // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
-                        $('#btnSubmitForm1').prop('disabled', true).html(
-                            '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
-                        );
+                        // ดึงค่าจาก input
+                        var startDate = $('#startDate').val();
+                        var endDate = $('#endDate').val();
 
-                        // ส่งข้อมูลแบบ AJAX
-                        $.ajax({
-                            url: 'a_u_ajax_add_leave.php',
-                            type: 'POST',
-                            data: fd,
-                            contentType: false,
-                            processData: false,
-                            success: function(response) {
-                                Swal.fire({
-                                    title: "บันทึกสำเร็จ",
-                                    text: "บันทึกคำขอลาสำเร็จ",
-                                    icon: "success"
-                                }).then(() => {
-                                    location.reload();
+                        // แยกส่วนวันที่
+                        var startParts = startDate.split('-');
+                        var endParts = endDate.split('-');
+
+                        // dd-mm-yyyy
+                        var formattedStartDate = startParts[2] + '-' + startParts[1] + '-' + startParts[
+                            0];
+                        var formattedEndDate = endParts[2] + '-' + endParts[1] + '-' + endParts[
+                            0];
+
+                        // console.log("Formatted Start Date: " + formattedStartDate);
+                        // console.log("Formatted End Date: " + formattedEndDate);
+
+                        // สร้างข้อความรายละเอียดการลา
+                        let details = `
+                            ประเภทการลา: ${$('#leaveType option:selected').text()}<br>
+                            เหตุผลการลา: ${leaveReason}<br>
+                            วันที่เริ่มต้น: ${startDate} เวลา ${startTime}<br>
+                            วันที่สิ้นสุด: ${endDate} เวลา ${endTime}<br>
+                            ผู้อนุมัติ: ${$('#approver option:selected').text()}
+                        `;
+
+                        Swal.fire({
+                            title: "ยืนยันการยื่นใบลา",
+                            html: details, // ใช้ HTML ในการแสดงข้อความ
+                            icon: "question",
+                            showCancelButton: true,
+                            confirmButtonText: "ยืนยัน",
+                            cancelButtonText: "ยกเลิก"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
+                                $('#btnSubmitForm1').prop('disabled', true).html(
+                                    '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
+                                );
+
+                                // ส่งข้อมูลแบบ AJAX
+                                $.ajax({
+                                    url: 'a_u_ajax_add_leave.php',
+                                    type: 'POST',
+                                    data: fd,
+                                    contentType: false,
+                                    processData: false,
+                                    success: function(response) {
+                                        Swal.fire({
+                                            title: "บันทึกสำเร็จ",
+                                            text: "บันทึกคำขอลาสำเร็จ",
+                                            icon: "success"
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    },
+                                    error: function() {
+                                        Swal.fire({
+                                            title: "เกิดข้อผิดพลาด",
+                                            text: "ไม่สามารถบันทึกคำขอลาได้",
+                                            icon: "error"
+                                        });
+                                    },
+                                    complete: function() {
+                                        // เปิดการใช้งานปุ่มอีกครั้ง
+                                        $('#btnSubmitForm1').prop('disabled', false)
+                                            .html(
+                                                'ยื่นใบลา'
+                                            );
+                                    }
                                 });
-                            },
-                            error: function() {
+                            } else {
                                 Swal.fire({
-                                    title: "เกิดข้อผิดพลาด",
-                                    text: "ไม่สามารถบันทึกคำขอลาได้",
-                                    icon: "error"
+                                    title: "ยกเลิก",
+                                    text: "คุณได้ยกเลิกการยื่นใบลา",
+                                    icon: "info"
                                 });
-                            },
-                            complete: function() {
-                                // เปิดการใช้งานปุ่มอีกครั้ง
-                                $('#btnSubmitForm1').prop('disabled', false).html(
-                                    'ยื่นใบลา');
                             }
                         });
                     }
+
                 }
             });
 

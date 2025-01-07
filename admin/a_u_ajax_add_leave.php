@@ -407,53 +407,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
         $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
-        // $sMessage = "Store";
+
+        // กำหนดค่า SQL เบื้องต้น
+        $sql = "SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver";
+
         // RD
         if ($depart == 'RD') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
+            $stmt = $conn->prepare($sql);
         }
         // Office
         else if ($depart == 'Office') {
-            // บัญชี
-            if ($subDepart == 'AC') {
-                // แจ้งเตือนพี่แวว
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
-            }
-            // เซลล์
-            else if ($subDepart == 'Sales') {
-                // แจ้งเตือนพี่เจี๊ยบหรือพี่อ้อม
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
-            }
-            // Store
-            else if ($subDepart == 'Store') {
-                // แจ้งเตือนพี่เก๋
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
-            }
-            // HR
-            else if ($subDepart == 'All') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
-            }
-            // พี่เต๋ / พี่น้อย / พี่ไว
-            else if ($subDepart == '') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
+            if ($subDepart == 'AC' || $subDepart == 'Sales' || $subDepart == 'Store' || $subDepart == 'Office' || $subDepart == '') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql); // ค่า Default
             }
         }
         // CAD1 / CAD2 / CAM
         else if ($depart == 'CAD1' || $depart == 'CAD2' || $depart == 'CAM') {
-            // Modeling
-            if ($subDepart == 'Modeling') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
+            if ($subDepart == 'Modeling' || $subDepart == 'Design') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql); // ค่า Default
             }
-            // Design
-            else if ($subDepart == 'Design') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
-            }
-            // CAD1
-            else {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver");
-            }
+        } else {
+            $stmt = $conn->prepare($sql); // ค่า Default สำหรับทุกกรณี
         }
 
+        // Binding Parameters
         $stmt->bindParam(':approver', $approver);
         $stmt->bindParam(':workplace', $workplace);
 
@@ -462,7 +443,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         if ($tokens) {
-            // ถ้ามี tokens ให้ส่งข้อความไปยัง LINE
             foreach ($tokens as $sToken) {
                 $chOne = curl_init();
                 curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
@@ -481,7 +461,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (curl_error($chOne)) {
                     echo 'Error:' . curl_error($chOne);
                 } else {
-                    // ตรวจสอบการตอบกลับจาก LINE API
                     $result_ = json_decode($result, true);
                     if ($result_['status'] == 200) {
                         echo "status : " . $result_['status'];
@@ -490,7 +469,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         echo "Error: " . $result_['message'];
                     }
                 }
-
                 curl_close($chOne);
             }
         } else {
