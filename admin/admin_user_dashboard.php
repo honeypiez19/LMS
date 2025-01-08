@@ -824,6 +824,7 @@ if ($subDepart === 'RD') {
 ?>
 
                                         <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
+                                        <span style="color: red;">* </span>
                                         <select class="form-select" id="approver" name="approver">
                                             <option value="">เลือกผู้อนุมัติ</option>
                                             <?php foreach ($filteredResults as $row): ?>
@@ -1854,6 +1855,91 @@ echo '</div>';
                                         </select>
                                     </div>
                                 </div>
+                                <div class="mt-2 row" hidden>
+                                    <div class="col-6">
+                                        <?php
+// กำหนดตัวแปรสำหรับผู้ใช้งานพิเศษ
+$specialUsers = ['Pornsuk'];
+if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
+    $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
+}
+
+// SQL query
+$sql = "SELECT *
+        FROM employees
+        WHERE (
+            e_sub_department = :subDepart
+            OR e_sub_department2 = :subDepart2
+            OR e_sub_department3 = :subDepart3
+            OR e_sub_department4 = :subDepart4
+            OR e_sub_department5 = :subDepart5
+            OR e_username IN (:specialUser1, :specialUser2)
+        )
+        AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
+        ORDER BY e_username ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+
+// ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
+$specialUser1 = $specialUsers[0] ?? null;
+$specialUser2 = $specialUsers[1] ?? null;
+$stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
+$stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
+
+$stmt->execute();
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
+$specialOptions = [];
+$filteredResults = [];
+foreach ($results as $row) {
+    if (in_array($row['e_username'], $specialUsers)) {
+        $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
+    } else {
+        $filteredResults[] = $row; // เก็บรายการทั่วไป
+    }
+}
+// รวมผู้ใช้งานพิเศษไว้ท้ายสุด
+$filteredResults = array_merge($filteredResults, $specialOptions);
+
+// ตั้งค่า default approver
+$defaultApprover = '';
+if ($subDepart === 'RD') {
+    foreach ($filteredResults as $row) {
+        if ($row['e_level'] == 'leader' || $row['e_level'] == 'manager' || $row['e_level'] == 'GM') {
+            $defaultApprover = $row['e_username'];
+            break;
+        }
+    }
+} else {
+    foreach ($filteredResults as $row) {
+        if (in_array($row['e_level'], ['leader', 'chief', 'manager', 'assisManager', 'GM'])) {
+            $defaultApprover = $row['e_username'];
+            break;
+        }
+    }
+}
+
+?>
+
+                                        <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
+                                        <span style="color: red;">* </span>
+                                        <select class="form-select" id="editApprover" name="editApprover">
+                                            <option value="">เลือกผู้อนุมัติ</option>
+                                            <?php foreach ($filteredResults as $row): ?>
+                                            <option value="<?=htmlspecialchars($row['e_username'])?>"
+                                                <?=$defaultApprover === $row['e_username'] ? 'selected' : ''?>>
+                                                <?=htmlspecialchars($row['e_username'])?>
+                                            </option>
+                                            <?php endforeach;?>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="editTelPhone" class="form-label">เบอร์โทร</label>
@@ -2053,6 +2139,7 @@ echo '</div>';
                     alert('กรุณาเลือกวันที่');
                 }
             });
+
             $('.filter-card').click(function() {
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
                 var userCode = '<?php echo $userCode; ?>';
@@ -2096,7 +2183,6 @@ echo '</div>';
                     }
                 });
             });
-
 
             $.ajax({
                 url: 'a_u_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
@@ -2318,7 +2404,6 @@ echo '</div>';
                     var endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[
                         0]); // ปี, เดือน (0-based), วัน
 
-                    // แสดงข้อมูลวันที่ที่ถูกแปลงแล้ว (ตรวจสอบได้)
                     // alert("Start Date:" + startDate);
                     // alert("End Date:" + endDate);
 
@@ -2345,8 +2430,17 @@ echo '</div>';
                         var formattedEndDate = endParts[2] + '-' + endParts[1] + '-' + endParts[
                             0];
 
-                        // console.log("Formatted Start Date: " + formattedStartDate);
-                        // console.log("Formatted End Date: " + formattedEndDate);
+                        if (startTime === '12:00') {
+                            startTime = '11:45';
+                        } else if (startTime === '13:00') {
+                            startTime = '12:45';
+                        } else if (endTime === '12:00') {
+                            endTime = '11:45';
+                        } else if (endTime === '13:00') {
+                            endTime = '12:45';
+                        } else if (endTime === '17:00') {
+                            endTime = '16:40';
+                        }
 
                         // สร้างข้อความรายละเอียดการลา
                         let details = `
@@ -2411,7 +2505,6 @@ echo '</div>';
                             }
                         });
                     }
-
                 }
             });
 
@@ -2593,6 +2686,7 @@ echo '</div>';
                     }
                 });
             });
+
             $('.confirm-late-btn').click(function() {
                 var rowData = $(this).closest('tr').children('td');
                 var createDatetime = $(this).data('createdatetime');

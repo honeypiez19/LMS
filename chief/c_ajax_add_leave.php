@@ -33,6 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // เหตุผลการลา
     $leaveReason = $_POST['leaveReason'];
+    $approver = $_POST['approver'];
 
     // วันเวลาที่ลา (เริ่มต้น)
     $leaveDateStart = $_POST['startDate'];
@@ -503,53 +504,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':remark', $remark);
 
     if ($stmt->execute()) {
-
         $sURL = 'https://lms.system-samt.com/';
         $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
-        // $sMessage = $level;
 
-        // แจ้งเตือนไลน์ ผจก ในแผนก
-        // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_department = :depart AND e_level = 'manager'");
+        // กำหนดค่า SQL เบื้องต้น
+        $sql = "SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver";
+
+        // RD
         if ($depart == 'RD') {
-            // แจ้งไลน์โฮซัง
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
-            // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
-            // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
-            $stmt->bindParam(':workplace', $workplace);
-            // $stmt->bindParam(':depart', $depart);
-
-        } else if ($level == 'leader') {
-            if ($depart == 'Office') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-                $stmt->bindParam(':workplace', $workplace);
-            } else if ($depart == 'CAD1') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD1'");
-                $stmt->bindParam(':workplace', $workplace);
-            } else if ($depart == 'CAD2') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAD2'");
-                $stmt->bindParam(':workplace', $workplace);
-
-            } else if ($depart == 'CAM') {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'assisManager' AND e_sub_department = 'CAM'");
-                $stmt->bindParam(':workplace', $workplace);
-
+            $stmt = $conn->prepare($sql);
+        }
+        // Office / Management
+        else if ($depart == 'Office' || $depart == 'Management') {
+            if ($subDepart == 'AC' || $subDepart == 'Sales' || $subDepart == 'Store' || $subDepart == 'Office' || $subDepart == '') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql); // ค่า Default
             }
-        } else if ($level == 'chief') {
-            if ($depart == 'Management') {
-                if ($subDepart == 'Sales') {
-                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'GM'");
-                    $stmt->bindParam(':workplace', $workplace);
-                } else {
-                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-                    $stmt->bindParam(':workplace', $workplace);
-                }
+        }
+        // CAD1 / CAD2 / CAM
+        else if ($depart == 'CAD1' || $depart == 'CAD2' || $depart == 'CAM') {
+            if ($subDepart == 'Modeling' || $subDepart == 'Design') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql); // ค่า Default
             }
         } else {
-            echo "ไม่พบเงื่อนไข";
-            // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level IN ('chief', 'manager')");
-            // $stmt->bindParam(':depart', $depart);
-            // $stmt->bindParam(':workplace', $workplace);
+            $stmt = $conn->prepare($sql); // ค่า Default สำหรับทุกกรณี
         }
+
+        // Binding Parameters
+        $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':workplace', $workplace);
 
         $stmt->execute();
         $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);

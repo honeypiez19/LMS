@@ -415,8 +415,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($depart == 'RD') {
             $stmt = $conn->prepare($sql);
         }
-        // Office
-        else if ($depart == 'Office') {
+        // Office / Management
+        else if ($depart == 'Office' || $depart == 'Management') {
             if ($subDepart == 'AC' || $subDepart == 'Sales' || $subDepart == 'Store' || $subDepart == 'Office' || $subDepart == '') {
                 $stmt = $conn->prepare($sql);
             } else {

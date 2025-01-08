@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $level = $_POST['level'];
     $telPhone = $_POST['telPhone'];
     $workplace = $_POST['workplace'];
+    $approver = $_POST['approver'];
 
     // ประเภทการลา
     $leaveType = $_POST['leaveType'];
@@ -470,24 +471,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveDate2', $proveDate2);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':remark', $remark);
-
     if ($stmt->execute()) {
-        // แจ้งเตือนไลน์ HR
-        // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'admin'");
+        $sURL = 'https://lms.system-samt.com/';
+        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
 
+        // กำหนดค่า SQL เบื้องต้น
+        $sql = "SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver";
+
+        // RD
         if ($depart == 'RD') {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+            $stmt = $conn->prepare($sql);
+        }
+        // Office / Management
+        else if ($depart == 'Office' || $depart == 'Management') {
+            if ($subDepart == 'AC' || $subDepart == 'Sales' || $subDepart == 'Store' || $subDepart == 'Office' || $subDepart == '') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql); // ค่า Default
+            }
+        }
+        // CAD1 / CAD2 / CAM
+        else if ($depart == 'CAD1' || $depart == 'CAD2' || $depart == 'CAM') {
+            if ($subDepart == 'Modeling' || $subDepart == 'Design') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql); // ค่า Default
+            }
         } else {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
+            $stmt = $conn->prepare($sql); // ค่า Default สำหรับทุกกรณี
         }
 
-        // $stmt->bindParam(':depart', $depart);
+        // Binding Parameters
+        $stmt->bindParam(':approver', $approver);
         $stmt->bindParam(':workplace', $workplace);
+
         $stmt->execute();
         $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $sURL = 'https://lms.system-samt.com/';
-        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
         foreach ($admins as $admin) {
             $sToken = $admin['e_token'];
