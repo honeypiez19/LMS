@@ -2952,53 +2952,83 @@ echo '</div>';
 
                         $('#leaveModal .modal-body').html(modalContent);
 
-                        $('.modal-footer .btn-success').off('click').on(
-                            'click',
+                        $('.modal-footer .btn-success').off('click').on('click',
                             function() {
                                 var modalData = {
-                                    createDate: $(rowData[7])
-                                        .text(),
-                                    userCode: $(rowData[5])
-                                        .text(),
+                                    createDate: $(rowData[7]).text(),
+                                    userCode: $(rowData[5]).text(),
                                     userName: '<?php echo $userName; ?>',
-                                    leaveType: $(rowData[0])
-                                        .text(),
-                                    leaveReason: $(rowData[3])
-                                        .text(),
-                                    leaveStartDate: $(rowData[
-                                            9])
-                                        .text(),
-                                    leaveEndDate: $(rowData[10])
-                                        .text(),
-                                    depart: $(rowData[2])
-                                        .text(),
+                                    leaveType: $(rowData[0]).text(),
+                                    leaveReason: $(rowData[3]).text(),
+                                    leaveStartDate: $(rowData[9]).text(),
+                                    leaveEndDate: $(rowData[10]).text(),
+                                    depart: $(rowData[2]).text(),
                                     checkFirm: '1', // ผ่าน
-                                    empName: $(rowData[1])
-                                        .text(),
-                                    leaveStatus: $(rowData[12])
-                                        .text()
+                                    empName: $(rowData[1]).text(),
+                                    leaveStatus: $(rowData[12]).text()
                                 };
 
                                 $.ajax({
                                     url: 'a_ajax_upd_status.php',
                                     method: 'POST',
                                     data: modalData,
-                                    success: function(
-                                        response) {
-                                        $('#leaveModal')
-                                            .modal(
-                                                'hide');
-                                        location
-                                            .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
+                                    success: function(response) {
+                                        $('#leaveModal').modal(
+                                            'hide'); // ซ่อน Modal
+                                        $('.modal-backdrop')
+                                            .remove(); // ลบ Backdrop ที่ค้างอยู่
+                                        $('body').removeClass(
+                                            'modal-open'
+                                        ); // เอา class modal-open ออกจาก body
+                                        $('body').css(
+                                            'padding-right', ''
+                                        ); // ลบ padding-right หากเกิดจาก scroll bar
+
+                                        // ใช้ AJAX เพื่อโหลดข้อมูลหน้าปัจจุบันอีกครั้ง
+                                        var codeSearch = $(
+                                                "#codeSearch").val()
+                                            .toLowerCase();
+                                        var page =
+                                            "<?php echo $currentPage; ?>";
+                                        var selectedMonth =
+                                            "<?php echo $selectedMonth; ?>";
+                                        var selectedYear =
+                                            "<?php echo $selectedYear; ?>";
+
+                                        $.ajax({
+                                            url: "a_ajax_get_data_usercode.php",
+                                            type: "GET",
+                                            data: {
+                                                page: page,
+                                                month: selectedMonth,
+                                                year: selectedYear,
+                                                codeSearch: codeSearch
+                                            },
+                                            success: function(
+                                                response
+                                            ) {
+
+                                            },
+                                            error: function(
+                                                xhr,
+                                                status,
+                                                error) {
+                                                console
+                                                    .error(
+                                                        "Error:",
+                                                        error
+                                                    );
+                                            }
+                                        });
                                     },
-                                    error: function(xhr,
-                                        status,
+                                    error: function(xhr, status,
                                         error) {
-                                        console.error(
+                                        console.error("Error:",
                                             error);
                                     }
                                 });
                             });
+
 
                         // ปรับปรุงปุ่มใน modal สำหรับ "ไม่ผ่าน"
                         $('.modal-footer .btn-danger').off('click').on(

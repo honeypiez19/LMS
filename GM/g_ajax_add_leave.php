@@ -384,9 +384,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // $proveName = $userName;
 
     // รอ ผจก อนุมัติ
-    $proveStatus2 = 4;
-    $proveName2 = $userName;
-    $proveDate2 = date('Y-m-d H:i:s');
+    $proveStatus2 = 6;
+
+    // GM
+    $proveStatus3 = 8;
+    $proveName3 = $userName;
+    $proveDate3 = date('Y-m-d H:i:s');
 
     // รอตรวจสอบ
     $comfirmStatus = 0;
@@ -417,8 +420,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     l_approve_status,
     -- l_approve_name,
     l_approve_status2,
-    l_approve_name2,
-    l_approve_datetime2,
+    l_approve_status3,
+    l_approve_name3,
+    l_approve_datetime3,
     l_remark,
     l_hr_status)
 
@@ -442,8 +446,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     :proveStatus,
     -- :proveName,
     :proveStatus2,
-    :proveName2,
-    :proveDate2,
+    :proveStatus3,
+    :proveName3,
+    :proveDate3,
     :remark,
     :comfirmStatus
 )");
@@ -467,8 +472,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus', $proveStatus);
     // $stmt->bindParam(':proveName', $proveName);
     $stmt->bindParam(':proveStatus2', $proveStatus2);
-    $stmt->bindParam(':proveName2', $proveName2);
-    $stmt->bindParam(':proveDate2', $proveDate2);
+    $stmt->bindParam(':proveStatus3', $proveStatus3);
+    $stmt->bindParam(':proveName3', $proveName3);
+    $stmt->bindParam(':proveDate3', $proveDate3);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':remark', $remark);
     if ($stmt->execute()) {

@@ -1097,7 +1097,7 @@ if ($subDepart === 'RD') {
                                                 <?=$defaultApprover === $row['e_username'] ? 'selected' : ''?>>
                                                 <?=htmlspecialchars($row['e_username'])?>
                                             </option>
-                                            <?php endforeach;?>
+                                            <?php endforeach; ?>
                                         </select>
 
                                     </div>
@@ -2485,24 +2485,15 @@ echo '</div>';
                     },
                     success: function(response) {
                         console.log(response);
-                        if (response == 'double') {
+                        if (response === 'double') {
                             Swal.fire({
                                 title: "ไม่สามารถลาได้",
                                 text: "พบรายการลาซ้ำในช่วงวันเวลาที่เลือก กรุณาตรวจสอบ",
                                 icon: "warning",
                                 confirmButtonText: "ตกลง",
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // ให้สามารถแก้ไขข้อมูลและกดยื่นลาใหม่
-                                    $('#leaveForm').trigger('reset');
-                                    // แสดงข้อมูลที่ผู้ใช้แก้ไขแล้ว
-                                    $('#startDate').val(startDate);
-                                    $('#startTime').val(startTime);
-                                    $('#endDate').val(endDate);
-                                    $('#endTime').val(endTime);
-                                }
+                            }).then(() => {
+                                return false;
                             });
-                            return false;
                         } else {
                             // หากไม่มีการลาซ้ำ ก็ทำการส่งฟอร์มตามปกติ
                             // submitLeaveForm(fd);
