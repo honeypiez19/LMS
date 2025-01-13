@@ -1976,21 +1976,6 @@ echo '</div>';
                 }
             });
 
-            $('#startDate').on('change', function() {
-                var selectedDate = $(this).val();
-                if (selectedDate) {
-                    var dateObject = new Date(selectedDate);
-                    var selectedYear = dateObject.getFullYear();
-
-                    // รีเซ็ต leaveType และแสดงข้อความให้เลือกใหม่
-                    $('#leaveType').val("เลือกประเภทการลา").trigger('change'); // รีเซ็ต dropdown
-                    $('#remaining-days').text('-'); // รีเซ็ตจำนวนคงเหลือ
-                    $('#remaining-hours').text('-');
-                    $('#remaining-minutes').text('-');
-                    // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
-                }
-            });
-
             $('#urgentStartDate').on('change', function() {
                 var selectedDate = $(this).val();
                 if (selectedDate) {
@@ -2005,6 +1990,22 @@ echo '</div>';
                     // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
                 }
             });
+
+            $('#startDate').on('change', function() {
+                var selectedDate = $(this).val();
+                if (selectedDate) {
+                    var dateObject = new Date(selectedDate);
+                    var selectedYear = dateObject.getFullYear();
+
+                    // ลบหรือคอมเมนต์บรรทัดนี้ออกเพื่อไม่ให้เปลี่ยนค่า leaveType
+                    $('#leaveType').val("เลือกประเภทการลา").trigger('change');
+
+                    $('#remaining-days').text('-');
+                    $('#remaining-hours').text('-');
+                    $('#remaining-minutes').text('-');
+                }
+            });
+
 
             $('#leaveType').on('change', function() {
                 var leaveType = $(this).val();
@@ -2461,12 +2462,12 @@ echo '</div>';
                                     }
 
                                     let details = `
-                            ประเภทการลา: ${$('#leaveType option:selected').text()}<br>
-                            เหตุผลการลา: ${leaveReason}<br>
-                            วันที่เริ่มต้น: ${startDate} เวลา ${startTime}<br>
-                            วันที่สิ้นสุด: ${endDate} เวลา ${endTime}<br>
-                            ผู้อนุมัติ: ${$('#approver option:selected').text()}
-                        `;
+                                        ประเภทการลา: ${$('#leaveType option:selected').text()}<br>
+                                        เหตุผลการลา: ${leaveReason}<br>
+                                        วันที่เริ่มต้น: ${startDate} เวลา ${startTime}<br>
+                                        วันที่สิ้นสุด: ${endDate} เวลา ${endTime}<br>
+                                        ผู้อนุมัติ: ${$('#approver option:selected').text()}
+                                    `;
 
                                     Swal.fire({
                                         title: "ยืนยันการยื่นใบลา",

@@ -480,11 +480,12 @@ if ($result->rowCount() > 0) {
         <i class="fa-solid fa-pen-to-square"></i>แก้ไข</button></td>';
 
         // 30
-        if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
-        } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
-        }
+        // if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
+        //     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
+        // } else {
+        //     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
+        // }
+        echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
 
         echo '</tr>';
         $rowNumber--;

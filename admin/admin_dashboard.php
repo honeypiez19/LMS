@@ -374,7 +374,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                     <?php $searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
 ?>
                     <th><input type="text" class="form-control" id="codeSearch"
-                            value="<?php echo htmlspecialchars($searchCode); ?>"></th>
+                            value="<?php echo htmlspecialchars($searchCode); ?>" style="width: 100px;"></th>
                     <th><input type="text" class="form-control" id="nameSearch"></th>
                     <th><input type="text" class="form-control" id="leaveSearch"></th>
                     <!-- <th><input type="text" class="form-control" id="leaveSearch"></th> -->
@@ -977,11 +977,12 @@ if ($stmt->rowCount() > 0) {
         <i class="fa-solid fa-pen-to-square"></i>แก้ไข</button></td>';
 
         // 30
-        if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
-        } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
-        }
+        // if ($row['l_hr_status'] == 2 || $row['l_hr_status'] == 3) {
+        //     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
+        // } else {
+        //     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
+        // }
+        echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
 
         echo '</tr>';
         $rowNumber--;
@@ -1878,15 +1879,10 @@ echo '</div>';
                                 '</button>' +
                                 '</td>' +
                                 '<td>';
-                            if (row['l_hr_status'] == 2 || row[
-                                    'l_hr_status'] ==
-                                3) {
-                                newRow +=
-                                    '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
-                            } else {
-                                newRow +=
-                                    '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
-                            }
+
+                            newRow +=
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+
                             newRow += '</td></tr>';
 
                             $("tbody").append(newRow);
@@ -2973,16 +2969,28 @@ echo '</div>';
                                     method: 'POST',
                                     data: modalData,
                                     success: function(response) {
-                                        $('#leaveModal').modal(
-                                            'hide'); // ซ่อน Modal
-                                        $('.modal-backdrop')
-                                            .remove(); // ลบ Backdrop ที่ค้างอยู่
-                                        $('body').removeClass(
-                                            'modal-open'
-                                        ); // เอา class modal-open ออกจาก body
-                                        $('body').css(
-                                            'padding-right', ''
-                                        ); // ลบ padding-right หากเกิดจาก scroll bar
+                                        // แสดง SweetAlert
+                                        Swal.fire({
+                                            title: 'สำเร็จ!',
+                                            text: 'ตรวจสอบผ่านสำเร็จ',
+                                            icon: "success"
+                                        }).then(() => {
+                                            // Callback ที่จะทำงานหลังจาก SweetAlert ปิด
+                                            $('#leaveModal')
+                                                .modal(
+                                                    'hide'
+                                                ); // ซ่อน Modal
+                                            $('.modal-backdrop')
+                                                .remove(); // ลบ Backdrop ที่ค้างอยู่
+                                            $('body')
+                                                .removeClass(
+                                                    'modal-open'
+                                                ); // เอา class modal-open ออกจาก body
+                                            $('body').css(
+                                                'padding-right',
+                                                ''
+                                            ); // ลบ padding-right หากเกิดจาก scroll bar
+                                        });
 
                                         // ใช้ AJAX เพื่อโหลดข้อมูลหน้าปัจจุบันอีกครั้ง
                                         var codeSearch = $(
