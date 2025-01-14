@@ -23,7 +23,7 @@ $subDepart3 = $_POST['subDepart3'];
 $subDepart4 = $_POST['subDepart4'];
 $subDepart5 = $_POST['subDepart5'];
 
-if($subDepart == ''){
+if ($subDepart == '') {
     $proveStatus = 6;
     $proveStatus2 = 1;
 } else {

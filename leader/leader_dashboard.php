@@ -3457,92 +3457,98 @@ echo '</div>';
             const endDate = document.getElementById('endDate').value;
             const endTime = document.getElementById('endTime').value;
 
-            if (startDate === endDate && startTime === "08:00" && endTime === "17:00") {
-                document.getElementById('leaveDuration').textContent = '1 วัน 0 ชั่วโมง 0 นาที';
-                return;
-            }
-
-            const formattedStartDate = formatDate(startDate); // ฟังก์ชัน formatDate จะทำการแปลงวันที่ในรูปแบบที่เหมาะสม
+            const formattedStartDate = formatDate(startDate);
             const formattedEndDate = formatDate(endDate);
 
             // สร้าง Date object สำหรับเวลาเริ่มต้นและสิ้นสุด
             let startDateTime = new Date(`${formattedStartDate}T${startTime}:00`);
             let endDateTime = new Date(`${formattedEndDate}T${endTime}:00`);
 
-            // เวลาทำงานเริ่มต้นและสิ้นสุด (สมมติว่าเวลาทำงานคือ 08:00 - 17:00)
-            const workStart = 8; // 08:00
-            const workEnd = 17; // 17:00
-            const lunchStart = 12; // พักเที่ยงเริ่ม 12:00
-            const lunchEnd = 13; // พักเที่ยงสิ้นสุด 13:00
+            // ปัดเวลาเริ่มต้นให้เป็นครึ่งชั่วโมงถัดไป
+            const startMinutes = startDateTime.getMinutes();
+            if (startMinutes > 0 && startMinutes <= 15) {
+                startDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (startMinutes > 15 && startMinutes < 30) {
+                startDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (startMinutes > 30 && startMinutes <= 45) {
+                startDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                startDateTime.setHours(startDateTime.getHours() + 1);
+            } else if (startMinutes > 45) {
+                startDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                startDateTime.setHours(startDateTime.getHours() + 1);
+            }
 
+            // ปัดเวลาเสร็จสิ้นให้เป็นครึ่งชั่วโมงถัดไป
+            const endMinutes = endDateTime.getMinutes();
+            if (endMinutes > 0 && endMinutes <= 15) {
+                endDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (endMinutes > 15 && endMinutes < 30) {
+                endDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (endMinutes > 30 && endMinutes <= 45) {
+                endDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                endDateTime.setHours(endDateTime.getHours() + 1);
+            } else if (endMinutes > 45) {
+                endDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                endDateTime.setHours(endDateTime.getHours() + 1);
+            }
+
+            // คำนวณระยะเวลาเหมือนเดิม
             let totalMilliseconds = 0;
 
-            // คำนวณระยะเวลาในแต่ละวัน
+            const workStart = 8; // 08:00
+            const workEnd = 17; // 17:00
+            const lunchStart = 12;
+            const lunchEnd = 13;
+
             while (startDateTime < endDateTime) {
-                // ถ้าเวลาเริ่มต้นก่อนเวลาเริ่มทำงาน
                 if (startDateTime.getHours() < workStart) {
-                    startDateTime.setHours(workStart, 0, 0, 0); // ปรับเวลาเริ่มต้นให้ตรงกับเวลาทำงาน
+                    startDateTime.setHours(workStart, 0, 0, 0);
                 }
 
-                // ถ้าเวลาเริ่มต้นเกินเวลาเลิกงาน
                 if (startDateTime.getHours() >= workEnd) {
-                    startDateTime.setDate(startDateTime.getDate() + 1); // ไปยังวันถัดไป
-                    startDateTime.setHours(workStart, 0, 0, 0); // ตั้งเวลาเริ่มทำงานใหม่ในวันถัดไป
+                    startDateTime.setDate(startDateTime.getDate() + 1);
+                    startDateTime.setHours(workStart, 0, 0, 0);
                 }
 
-                // ถ้าเวลาสิ้นสุดหลังจากเวลาหมดเวลาทำงาน (17:00)
                 if (endDateTime.getHours() >= workEnd) {
                     endDateTime.setHours(workEnd, 0, 0, 0);
                 }
 
-                // คำนวณระยะเวลาการลาในวันนั้น
                 const currentWorkEnd = new Date(startDateTime);
-                currentWorkEnd.setHours(workEnd, 0, 0, 0); // เวลาหมดงานในวันนั้น
+                currentWorkEnd.setHours(workEnd, 0, 0, 0);
 
-                let dailyLeaveDuration = currentWorkEnd - startDateTime; // ระยะเวลาของวันนั้น
+                let dailyLeaveDuration = currentWorkEnd - startDateTime;
 
                 if (endDateTime < currentWorkEnd) {
-                    dailyLeaveDuration = endDateTime - startDateTime; // ถ้าสิ้นสุดก่อนเวลาหมดงาน
+                    dailyLeaveDuration = endDateTime - startDateTime;
                 }
 
-                // หักเวลาพักเที่ยง (ถ้ามี)
                 const lunchStartTime = new Date(startDateTime);
                 lunchStartTime.setHours(lunchStart, 0, 0, 0);
                 const lunchEndTime = new Date(startDateTime);
                 lunchEndTime.setHours(lunchEnd, 0, 0, 0);
 
                 if (startDateTime < lunchEndTime && endDateTime > lunchStartTime) {
-                    dailyLeaveDuration -= 1 * 60 * 60 * 1000; // หัก 1 ชั่วโมงสำหรับพักเที่ยง
+                    dailyLeaveDuration -= 1 * 60 * 60 * 1000;
                 }
 
-                totalMilliseconds += dailyLeaveDuration; // เพิ่มระยะเวลาในแต่ละวัน
+                totalMilliseconds += dailyLeaveDuration;
 
-                // ไปยังวันถัดไป
                 startDateTime.setDate(startDateTime.getDate() + 1);
                 startDateTime.setHours(workStart, 0, 0, 0);
             }
 
-            // คำนวณจำนวนวัน ชั่วโมง นาที จาก totalMilliseconds
-            const leaveDays = Math.floor(totalMilliseconds / (8 * 60 * 60 * 1000)); // จำนวนวัน
-            totalMilliseconds -= leaveDays * (8 * 60 * 60 * 1000); // หักเวลาเป็นวัน
+            const leaveDays = Math.floor(totalMilliseconds / (8 * 60 * 60 * 1000));
+            totalMilliseconds -= leaveDays * (8 * 60 * 60 * 1000);
 
-            let leaveHours = Math.floor(totalMilliseconds / (60 * 60 * 1000)); // ชั่วโมง
-            totalMilliseconds -= leaveHours * (60 * 60 * 1000); // หักเวลาเป็นชั่วโมง
+            let leaveHours = Math.floor(totalMilliseconds / (60 * 60 * 1000));
+            totalMilliseconds -= leaveHours * (60 * 60 * 1000);
 
-            let leaveMinutes = Math.floor(totalMilliseconds / (60 * 1000)); // นาที
+            let leaveMinutes = Math.floor(totalMilliseconds / (60 * 1000));
 
-            // ปัดจำนวนชั่วโมงและนาที
-            if (leaveMinutes > 0 && leaveMinutes <= 15) {
-                leaveMinutes = 30; // ถ้านาทีระหว่าง 0-15 นาที ปัดเป็น 30 นาที
-            } else if (leaveMinutes >= 40 && leaveMinutes <= 45) {
-                leaveHours += 1; // ถ้านาทีระหว่าง 40-45 นาที ปัดเป็น 1 ชั่วโมง
-                leaveMinutes = 0; // ปรับนาทีเป็น 0
-            }
-            // แสดงผลลัพธ์
             const result = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
             document.getElementById('leaveDuration').textContent = result;
         }
-
 
         function checkOther(select) {
             var otherReasonInput = document.getElementById('otherReason');

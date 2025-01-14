@@ -982,6 +982,10 @@ if ($stmt->rowCount() > 0) {
         // } else {
         //     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         // }
+
+        echo '<td><button type="button" class="btn btn-danger cancel-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $row['l_usercode'] . '">
+        <i class="fa-solid fa-ban"></i> ยกเลิก</button></td>';
+
         echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
 
         echo '</tr>';
@@ -2975,21 +2979,33 @@ echo '</div>';
                                             text: 'ตรวจสอบผ่านสำเร็จ',
                                             icon: "success"
                                         }).then(() => {
-                                            // Callback ที่จะทำงานหลังจาก SweetAlert ปิด
                                             $('#leaveModal')
                                                 .modal(
                                                     'hide'
                                                 ); // ซ่อน Modal
+
+                                            // ล้าง Backdrop และรีเซ็ตคลาส
                                             $('.modal-backdrop')
-                                                .remove(); // ลบ Backdrop ที่ค้างอยู่
+                                                .remove();
                                             $('body')
                                                 .removeClass(
                                                     'modal-open'
-                                                ); // เอา class modal-open ออกจาก body
-                                            $('body').css(
-                                                'padding-right',
-                                                ''
-                                            ); // ลบ padding-right หากเกิดจาก scroll bar
+                                                ).css(
+                                                    'padding-right',
+                                                    '');
+
+                                            // รีเซ็ต Modal หลังจากปิด
+                                            $('#leaveModal')
+                                                .on('hidden.bs.modal',
+                                                    function() {
+                                                        $(this)
+                                                            .find(
+                                                                'form'
+                                                            )[
+                                                                0
+                                                            ]
+                                                            .reset(); // รีเซ็ตฟอร์ม (ถ้ามี)
+                                                    });
                                         });
 
                                         // ใช้ AJAX เพื่อโหลดข้อมูลหน้าปัจจุบันอีกครั้ง
@@ -3015,7 +3031,10 @@ echo '</div>';
                                             success: function(
                                                 response
                                             ) {
-
+                                                $('#leaveTable tbody')
+                                                    .html(
+                                                        response
+                                                    );
                                             },
                                             error: function(
                                                 xhr,
@@ -3037,8 +3056,6 @@ echo '</div>';
                                 });
                             });
 
-
-                        // ปรับปรุงปุ่มใน modal สำหรับ "ไม่ผ่าน"
                         $('.modal-footer .btn-danger').off('click').on(
                             'click',
                             function() {
@@ -3070,18 +3087,84 @@ echo '</div>';
                                     url: 'a_ajax_upd_status.php',
                                     method: 'POST',
                                     data: modalData,
-                                    success: function(
-                                        response) {
-                                        $('#leaveModal')
-                                            .modal(
-                                                'hide');
-                                        location
-                                            .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
+                                    success: function(response) {
+                                        Swal.fire({
+                                            title: 'สำเร็จ!',
+                                            text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                                            icon: "success"
+                                        }).then(() => {
+                                            $('#leaveModal')
+                                                .modal(
+                                                    'hide'
+                                                ); // ซ่อน Modal
+
+                                            // ล้าง Backdrop และรีเซ็ตคลาส
+                                            $('.modal-backdrop')
+                                                .remove();
+                                            $('body')
+                                                .removeClass(
+                                                    'modal-open'
+                                                ).css(
+                                                    'padding-right',
+                                                    '');
+
+                                            // รีเซ็ต Modal หลังจากปิด
+                                            $('#leaveModal')
+                                                .on('hidden.bs.modal',
+                                                    function() {
+                                                        $(this)
+                                                            .find(
+                                                                'form'
+                                                            )[
+                                                                0
+                                                            ]
+                                                            .reset(); // รีเซ็ตฟอร์ม (ถ้ามี)
+                                                    });
+                                        });
+
+                                        // ใช้ AJAX เพื่อโหลดข้อมูลหน้าปัจจุบันอีกครั้ง
+                                        var codeSearch = $(
+                                                "#codeSearch").val()
+                                            .toLowerCase();
+                                        var page =
+                                            "<?php echo $currentPage; ?>";
+                                        var selectedMonth =
+                                            "<?php echo $selectedMonth; ?>";
+                                        var selectedYear =
+                                            "<?php echo $selectedYear; ?>";
+
+                                        $.ajax({
+                                            url: "a_ajax_get_data_usercode.php",
+                                            type: "GET",
+                                            data: {
+                                                page: page,
+                                                month: selectedMonth,
+                                                year: selectedYear,
+                                                codeSearch: codeSearch
+                                            },
+                                            success: function(
+                                                response
+                                            ) {
+                                                $('#leaveTable tbody')
+                                                    .html(
+                                                        response
+                                                    );
+                                            },
+                                            error: function(
+                                                xhr,
+                                                status,
+                                                error) {
+                                                console
+                                                    .error(
+                                                        "Error:",
+                                                        error
+                                                    );
+                                            }
+                                        });
                                     },
-                                    error: function(xhr,
-                                        status,
+                                    error: function(xhr, status,
                                         error) {
-                                        console.error(
+                                        console.error("Error:",
                                             error);
                                     }
                                 });
@@ -4311,6 +4394,62 @@ echo '</div>';
                 });
             }
         });
+
+        $('.cancel-btn').click(function() {
+            var createDateTime = $(this).data('createdatetime'); // ดึงค่า createDateTime
+            var userCode = $(this).data('usercode'); // ดึงค่า userCode
+            var nameCan = "<?php echo $userName; ?>";
+
+            alert(nameCan)
+            Swal.fire({
+                title: 'ยืนยันการยกเลิก?',
+                text: "คุณต้องการยกเลิกรายการนี้หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่, ยกเลิกเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'a_ajax_delete_leave.php', // ไฟล์ PHP
+                        type: 'POST',
+                        data: {
+                            createDateTime: createDateTime,
+                            userCode: userCode,
+                            nameCan: nameCan
+                        },
+                        success: function(response) {
+                            if (response === 'success') {
+                                Swal.fire(
+                                    'สำเร็จ!',
+                                    'ยกเลิกรายการเรียบร้อยแล้ว',
+                                    'success'
+                                ).then(() => {
+                                    location
+                                        .reload(); // Reload หน้าเว็บหลังจากกดปิด SweetAlert
+                                });
+                            } else {
+                                Swal.fire(
+                                    'ผิดพลาด!',
+                                    'ไม่สามารถยกเลิกรายการได้',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'ผิดพลาด!',
+                                'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
     });
 
     function changePage(page, selectedMonth, searchCode) {
@@ -4319,6 +4458,7 @@ echo '</div>';
             "&codeSearch=" + encodeURIComponent(searchCode);
         window.location.href = newUrl; // รีเฟรชหน้าโดยการโหลด URL ใหม่
     }
+
     document.getElementById('page-input').addEventListener('input', function() {
         const page = this.value;
         const month = '<?php echo urlencode($selectedMonth); ?>';
