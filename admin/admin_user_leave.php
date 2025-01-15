@@ -49,37 +49,40 @@ $userCode = $_SESSION['s_usercode'];
         </div>
     </nav>
     <div class="container">
-        <form class="mt-3 mb-3 row" method="post">
-            <label for="" class="mt-2 col-auto">เลือกปี</label>
+        <form class="mt-3 mb-3 row" method="post" id="dateForm">
+            <label for="startDate" class="mt-2 col-auto">เลือกช่วงเวลา</label>
             <div class="col-auto">
                 <?php
-$selectedYear = date('Y'); // ปีปัจจุบัน
-if (isset($_POST['year'])) {
-    $selectedYear = $_POST['year'];
-    // กำหนดวันที่เริ่มต้นและสิ้นสุดสำหรับช่วง 12/2023 - 11/2024
-    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
-    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
+// กำหนดค่า default สำหรับวันที่เริ่มต้นและสิ้นสุด
+$startDate = date("Y-m-d", strtotime((date('Y') - 1) . "-12-01")); // 1 ธันวาคม ปีที่แล้ว
+$endDate = date("Y-m-d", strtotime(date('Y') . "-11-30")); // 30 พฤศจิกายน ปีปัจจุบัน
+
+// หากมีการส่งข้อมูลจากฟอร์ม
+if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
+    $startDate = $_POST['start_date'];
+    $endDate = $_POST['end_date'];
 }
-echo "<select class='form-select' name='year' id='selectYear'>";
-for ($i = -1; $i <= 2; $i++) {
-    $year = date('Y', strtotime("last day of -$i year"));
-    echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
-}
-echo "</select>";
 ?>
+                <input type="text" name="start_date" class="form-control" id="startDate" value="<?=$startDate;?>">
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-primary button-shadow">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
+                <input type="text" name="end_date" class="form-control" id="endDate" value="<?=$endDate;?>">
             </div>
         </form>
-        <span id="textNotice" class="text-danger"> *สถิติการลา ตั้งแต่เดือนธันวาคม <?php echo $selectedYear - 1 ?> -
+
+        <!-- แสดงช่วงวันที่ที่เลือก -->
+        <div>
+            <p>ช่วงวันที่: <strong id="startDateText"><?=$startDate;?></strong> ถึง <strong
+                    id="endDateText"><?=$endDate;?></strong></p>
+        </div>
+
+        <!-- <span id="textNotice" class="text-danger"> *สถิติการลา ตั้งแต่เดือนธันวาคม <?php echo $selectedYear - 1 ?> -
             พฤศจิกายน
             <?php echo $selectedYear ?> <br>
             **สถิติการลาพักร้อน ตั้งแต่เดือนมกราคม - ธันวาคม <?php echo $selectedYear ?><br>
             *** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว
-        </span>
+        </span> -->
+
         <table class="mt-3 table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
             id="leaveTable">
             <thead>
@@ -1439,6 +1442,25 @@ AND l_approve_status2 = 4";
             </tbody>
         </table>
     </div>
+    <script>
+    flatpickr("#startDate", {
+        dateFormat: "Y-m-d", // กำหนดรูปแบบวันที่
+        defaultDate: "<?=$startDate;?>", // ค่าที่เลือกเริ่มต้น
+        onChange: function(selectedDates, dateStr, instance) {
+            // เมื่อเลือกวันที่แล้วจะอัปเดตข้อความใน <p>
+            document.getElementById("startDateText").textContent = dateStr;
+        }
+    });
+
+    flatpickr("#endDate", {
+        dateFormat: "Y-m-d", // กำหนดรูปแบบวันที่
+        defaultDate: "<?=$endDate;?>", // ค่าที่เลือกเริ่มต้น
+        onChange: function(selectedDates, dateStr, instance) {
+            // เมื่อเลือกวันที่แล้วจะอัปเดตข้อความใน <p>
+            document.getElementById("endDateText").textContent = dateStr;
+        }
+    });
+    </script>
     <script src="../js/popper.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <script src="../js/bootstrap.bundle.js"></script>
