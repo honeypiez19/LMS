@@ -4,45 +4,44 @@ date_default_timezone_set('Asia/Bangkok');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $userCode = $_POST['userCode'];
-        $userName = $_POST['userName'];
-        $name = $_POST['name'];
+        $userCode   = $_POST['userCode'];
+        $userName   = $_POST['userName'];
+        $name       = $_POST['name'];
         $department = $_POST['department'];
-        $level = $_POST['level'];
-        $telPhone = $_POST['telPhone'];
-        $reason = $_POST['reason'];
-        $startTime = $_POST['startTime'];
-        $endTime = $_POST['endTime'];
-        $addName = $_POST['addName'];
-        $addDate = date('Y-m-d H:i:s');
-        $workplace = $_POST['workplace'];
-        $subDepart = $_POST['subDepart'];
+        $level      = $_POST['level'];
+        $telPhone   = $_POST['telPhone'];
+        $reason     = $_POST['reason'];
+        $startTime  = $_POST['startTime'];
+        $endTime    = $_POST['endTime'];
+        $addName    = $_POST['addName'];
+        $addDate    = date('Y-m-d H:i:s');
+        $workplace  = $_POST['workplace'];
+        $subDepart  = $_POST['subDepart'];
 
-        $startDate = date('Y-m-d', strtotime($_POST['startDate']));
-        $endDate = date('Y-m-d', strtotime($_POST['endDate']));
+        $startDate      = date('Y-m-d', strtotime($_POST['startDate']));
+        $endDate        = date('Y-m-d', strtotime($_POST['endDate']));
         $createDatetime = date('Y-m-d H:i:s');
 
         $lateDatetime = date('Y-m-d H:i:s');
 
-        $leaveType = 7;
-        $leaveStatus = 0;
-        $proveStatus = 0;
+        $leaveType    = 7;
+        $leaveStatus  = 0;
+        $proveStatus  = 0;
         $proveStatus2 = 1;
 
-        // Check late count for user
         $stmt = $conn->prepare("SELECT COUNT(*) FROM leave_list WHERE l_usercode = :userCode AND l_leave_id = :leaveType");
         $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
         $stmt->bindParam(':leaveType', $leaveType, PDO::PARAM_INT);
         $stmt->execute();
         $lateCount = $stmt->fetchColumn();
 
-        // Increment late count
+        // เพิ่มการนับจำนวนการมาสาย
         $lateCount++;
 
-        // Add remark for supervisor
+        // เพิ่มข้อความสำหรับหัวหน้างาน
         $remark = "มาสายครั้งที่ $lateCount";
 
-        // Insert late record
+        // เพิ่มบันทึกการมาสาย
         $leaveSql = "INSERT INTO leave_list (
             l_usercode, l_username, l_name, l_department, l_level, l_phone, l_leave_id,
             l_leave_reason, l_leave_start_date, l_leave_start_time, l_leave_end_date,
@@ -51,9 +50,10 @@ try {
         ) VALUES (
             :userCode, :userName, :name, :department, :level, :telPhone, :leaveType,
             :reason, :startDate, :startTime, :endDate, :endTime, :leaveStatus,
-             :remark, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime,1
+            :remark, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime, 1
         )";
 
+        // เตรียมคำสั่ง SQL สำหรับการ insert การมาสาย
         $stmt = $conn->prepare($leaveSql);
         $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
         $stmt->bindParam(':userName', $userName, PDO::PARAM_STR);
@@ -77,18 +77,19 @@ try {
         $stmt->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
-            // Additional action on 3rd late occurrence
+            // เพิ่มการตรวจสอบเมื่อมาสายครบ 3 ครั้ง
             if ($lateCount % 3 == 0) {
-                $remarkStopWork = "มาสายรวม $lateCount ครั้ง";
+                $remarkStopWork   = "มาสายรวม $lateCount ครั้ง";
+                $reasonStopWork   = "ขาดงาน";
                 $leaveSqlStopWork = "INSERT INTO leave_list (
-                    l_usercode, l_username, l_name, l_department, l_level, l_phone,
-                    l_leave_id, l_leave_reason, l_leave_start_date, l_leave_start_time,
-                    l_leave_end_date, l_leave_end_time, l_leave_status,
-                    l_remark, l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime,  l_workplace , l_create_datetime
+                l_usercode, l_username, l_name, l_department, l_level, l_phone,
+                l_leave_id, l_leave_reason, l_leave_status,
+                l_remark, l_approve_status, l_approve_status2, l_hr_create_name, l_hr_create_datetime,
+                l_workplace , l_create_datetime, l_hr_status
                 ) VALUES (
                     :userCode, :userName, :name, :department, :level, :telPhone, 6,
-                    :reason, :startDate, :startTime, :endDate, :endTime, :leaveStatus,
-                     :remarkStopWork, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime
+                    :reasonStopWork, :leaveStatus,
+                    :remarkStopWork, :proveStatus, :proveStatus2, :addName, :addDate, :workplace, :createDatetime, 1
                 )";
 
                 $stmtStopWork = $conn->prepare($leaveSqlStopWork);
@@ -98,11 +99,11 @@ try {
                 $stmtStopWork->bindParam(':department', $department);
                 $stmtStopWork->bindParam(':level', $level);
                 $stmtStopWork->bindParam(':telPhone', $telPhone);
-                $stmtStopWork->bindParam(':reason', $reason);
-                $stmtStopWork->bindParam(':startDate', $startDate);
-                $stmtStopWork->bindParam(':startTime', $startTime);
-                $stmtStopWork->bindParam(':endDate', $endDate);
-                $stmtStopWork->bindParam(':endTime', $endTime);
+                $stmtStopWork->bindParam(':reasonStopWork', $reasonStopWork);
+                // $stmtStopWork->bindParam(':startDate', $startDate);
+                // $stmtStopWork->bindParam(':startTime', $startTime);
+                // $stmtStopWork->bindParam(':endDate', $endDate);
+                // $stmtStopWork->bindParam(':endTime', $endTime);
                 $stmtStopWork->bindParam(':leaveStatus', $leaveStatus);
                 $stmtStopWork->bindParam(':remarkStopWork', $remarkStopWork);
                 $stmtStopWork->bindParam(':proveStatus', $proveStatus);
@@ -110,13 +111,13 @@ try {
                 $stmtStopWork->bindParam(':addName', $addName);
                 $stmtStopWork->bindParam(':addDate', $addDate);
                 $stmtStopWork->bindParam(':workplace', $workplace);
-                $stmt->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
+                $stmtStopWork->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
 
                 $stmtStopWork->execute();
             }
 
             // Prepare LINE Notify message
-            $supervisorURL = 'https://lms.system-samt.com/';
+            $supervisorURL     = 'https://lms.system-samt.com/';
             $supervisorMessage = "$name มาสาย\nวันที่มาสาย : $startDate\nเวลาที่มาสาย : $startTime ถึง $endTime\nสถานะรายการ : ปกติ\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $supervisorURL";
 
             if ($department == 'RD') {

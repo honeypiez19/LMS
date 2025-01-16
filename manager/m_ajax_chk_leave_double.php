@@ -8,13 +8,13 @@ $userCode = $_POST['userCode'];
 $startDate = $_POST['startDate'];
 
 $startTime = $_POST['startTime'];
-$endDate = $_POST['endDate'];
-$endTime = $_POST['endTime'];
+$endDate   = $_POST['endDate'];
+$endTime   = $_POST['endTime'];
 $leaveType = $_POST['leaveType'];
 
 // แปลงวันที่เป็นรูปแบบ yyyy-mm-dd
 $startDate = DateTime::createFromFormat('d-m-Y', $startDate)->format('Y-m-d');
-$endDate = DateTime::createFromFormat('d-m-Y', $endDate)->format('Y-m-d');
+$endDate   = DateTime::createFromFormat('d-m-Y', $endDate)->format('Y-m-d');
 
 // คิวรีตรวจสอบการลาซ้ำ
 $query = "SELECT * FROM leave_list
@@ -24,7 +24,8 @@ $query = "SELECT * FROM leave_list
               (l_leave_start_date = :startDate AND l_leave_end_date = :endDate AND l_leave_end_time = :endTime)
               OR
               (l_leave_start_date = :startDate AND l_leave_end_date = :endDate AND l_leave_start_time = :startTime)
-          )";
+          )
+                    AND l_leave_status = 0";
 
 $stmt = $conn->prepare($query);
 $stmt->bindParam(':userCode', $userCode);

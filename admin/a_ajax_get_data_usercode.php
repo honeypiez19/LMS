@@ -488,6 +488,7 @@ if ($result->rowCount() > 0) {
         echo '<td><button type="button" class="btn btn-danger cancel-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $row['l_usercode'] . '">
         <i class="fa-solid fa-ban"></i> ยกเลิก</button></td>';
 
+        // 31
         echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
 
         echo '</tr>';
