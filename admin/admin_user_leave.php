@@ -123,6 +123,10 @@
                     $total_hours   = 0;
                     $total_minutes = 0;
 
+                    $all_total_days    = 0;
+                    $all_total_hours   = 0;
+                    $all_total_minutes = 0;
+
                     foreach ($leave_types as $leave_id => $leave_name) {
                         $sql_leave = "SELECT
                         SUM(
@@ -208,7 +212,6 @@
                                                                                                    // คำนวณจำนวนวันที่ใช้ลาในนาที
                                 $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes; // แปลงทั้งหมดเป็นนาที
 
-                                                                           // คำนวณจำนวนวันลาในนาที
                                 $total_minutes = $total_personal * 8 * 60; // จำนวนวันทั้งหมดในนาที
 
                                 // คำนวณนาทีที่เหลือ
@@ -232,7 +235,8 @@
                                 // สะสมผลรวมวัน, ชั่วโมง, นาที
                                 $total_days += $days;
                                 $total_hours += $hours;
-                                $total_minutes += $minutes;
+                                $total_minutes = $minutes;
+
                             } else if ($leave_id == 2) {
                                                                                                    // คำนวณจำนวนวันที่ใช้ลาในนาที
                                 $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes; // แปลงทั้งหมดเป็นนาที
@@ -259,7 +263,7 @@
 
                                 $total_days += $days;
                                 $total_hours += $hours;
-                                $total_minutes += $minutes;
+                                $total_minutes = $minutes;
 
                             } else if ($leave_id == 3) {
                                                                                                    // คำนวณจำนวนวันที่ใช้ลาในนาที
@@ -287,7 +291,7 @@
 
                                 $total_days += $days;
                                 $total_hours += $hours;
-                                $total_minutes += $minutes;
+                                $total_minutes = $minutes;
 
                             } else if ($leave_id == 4) {
                                                                                                    // คำนวณจำนวนวันที่ใช้ลาในนาที
@@ -315,7 +319,7 @@
 
                                 $total_days += $days;
                                 $total_hours += $hours;
-                                $total_minutes += $minutes;
+                                $total_minutes = $minutes;
 
                             } else if ($leave_id == 5) {
                                                                                                    // คำนวณจำนวนวันที่ใช้ลาในนาที
@@ -380,14 +384,18 @@
 
                                 $total_days += $days;
                                 $total_hours += $hours;
-                                $total_minutes += $minutes;
+                                $total_minutes = $minutes;
 
                             }
                         }
+
                     }
+                    $all_total_days = $total_days;
+                    $all_total_minutes = $total_minutes;
+
                     echo '<tr class="text-center align-middle">';
                     echo '<td style="font-weight: bold;">' . 'รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน / อื่น ๆ)' . '</td>';
-                    echo '<td colspan="6" style="font-weight: bold;">' . $total_days . ' วัน ' . $total_hours . ' ชั่วโมง ' . $total_minutes . ' นาที' . '</td>';
+                    echo '<td colspan="6" style="font-weight: bold;">' . $all_total_days . ' วัน ' . $total_hours . ' ชั่วโมง ' . $all_total_minutes . ' นาที' . '</td>';
                     echo '</tr>';
                 ?>
             </tbody>
