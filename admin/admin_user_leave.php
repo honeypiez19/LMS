@@ -3,13 +3,13 @@
     date_default_timezone_set('Asia/Bangkok');
 
     include '../connect.php';
+
     if (! isset($_SESSION['s_usercode'])) {
         header('Location: ../login.php');
         exit();
     }
 
     $userCode = $_SESSION['s_usercode'];
-    // echo $userCode;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,26 +56,25 @@
                     $startDate = date("Y-m-d", strtotime((date('Y') - 1) . "-12-01")); // 1 ธันวาคม ปีที่แล้ว
                     $endDate   = date("Y-m-d", strtotime(date('Y') . "-11-30"));       // 30 พฤศจิกายน ปีปัจจุบัน
 
-                    // หากมีการส่งข้อมูลจากฟอร์ม
                     if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
                         $startDate = $_POST['start_date'];
                         $endDate   = $_POST['end_date'];
                     }
                 ?>
                 <input type="text" name="start_date" class="form-control" id="startDate"
-                    value="<?php echo date("d-m-Y", strtotime($startDate)); ?>"> <!-- แสดง d-m-Y -->
+                    value="<?php echo date("d-m-Y", strtotime($startDate)); ?>">
                 <!-- <input type="text" name="start_date" class="form-control" id="startDate"
                     value="<?php echo $startDate; ?>"> -->
             </div>
             <div class="col-auto">
                 <input type="text" name="end_date" class="form-control" id="endDate"
-                    value="<?php echo date("d-m-Y", strtotime($endDate)); ?>"> <!-- แสดง d-m-Y -->
+                    value="<?php echo date("d-m-Y", strtotime($endDate)); ?>">
             </div>
         </form>
 
         <!-- แสดงช่วงวันที่ที่เลือก -->
         <div>
-            <p>ช่วงวันที่: <strong id="startDateText">
+            <p>ช่วงวันที่ : <strong id="startDateText">
                     <?php
                         $startDateObj = DateTime::createFromFormat('Y-m-d', $startDate);
                         echo $startDateObj->format('d-m-Y'); // แสดงวันที่ในรูปแบบ dd-mm-yyyy
@@ -119,9 +118,9 @@
                         8 => 'อื่น ๆ',
                     ];
 
-                    $total_days    = 0;
-                    $total_hours   = 0;
-                    $total_minutes = 0;
+                    $all_total_days    = 0;
+                    $all_total_hours   = 0;
+                    $all_total_minutes = 0;
 
                     foreach ($leave_types as $leave_id => $leave_name) {
                         $sql_leave = "SELECT
@@ -177,7 +176,6 @@
                             $hours   = $result_leave['total_leave_hours'] ?? 0;
                             $minutes = $result_leave['total_leave_minutes'] ?? 0;
 
-                            // Employee leave balances
                             $total_personal    = $result_leave['total_personal'] ?? 0;
                             $total_personal_no = $result_leave['total_personal_no'] ?? 0;
                             $total_sick        = $result_leave['total_sick'] ?? 0;
@@ -187,11 +185,9 @@
                             $total_late        = $result_leave['late_count'] ?? 0;
                             $total_stop_work   = $result_leave['stop_work_count'] ?? 0;
 
-                            // Convert hours to days if applicable
                             $days += floor($hours / 8);
                             $hours = $hours % 8;
 
-                            // Adjust minutes if necessary
                             if ($minutes >= 60) {
                                 $hours += floor($minutes / 60);
                                 $minutes = $minutes % 60;
@@ -204,85 +200,118 @@
                                 $hours += 1;
                             }
 
-                            // คำนวณยอดการลาที่เหลือ
-                            $remaining_personal    = $total_personal - $days;
-                            $remaining_personal_no = $total_personal_no - $hours;
-                            $remaining_sick        = $total_sick - $minutes;
-                            $remaining_sick_work   = $total_sick_work - $days;
-                            $remaining_annual      = $total_annual - $hours;
-                            $remaining_other       = $total_other - $minutes;
-                            $remaining_late        = $total_late - $days;
-                            $remaining_stop_work   = $total_stop_work - $hours;
+                            if ($leave_id == 1) {
+                                $total_minutes_used      = ($days * 8 * 60) + ($hours * 60) + $minutes;
+                                $total_minutes           = $total_personal * 8 * 60;
+                                $total_remaining_minutes = $total_minutes - $total_minutes_used;
+                                $remaining_days          = floor($total_remaining_minutes / (8 * 60));
+                                $remaining_hours         = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                $remaining_minutes       = $total_remaining_minutes % 60;
 
-                            // จัดการกรณีที่คำนวณแล้วเหลือลบ
-                            // ตรวจสอบยอดที่เหลือไม่ให้ติดลบ
-                            if ($remaining_personal < 0) {
-                                $remaining_personal = 0;
-                            }
-                            if ($remaining_personal_no < 0) {
-                                $remaining_personal_no = 0;
-                            }
-                            if ($remaining_sick < 0) {
-                                $remaining_sick = 0;
-                            }
-                            if ($remaining_sick_work < 0) {
-                                $remaining_sick_work = 0;
-                            }
-                            if ($remaining_annual < 0) {
-                                $remaining_annual = 0;
-                            }
-                            if ($remaining_other < 0) {
-                                $remaining_other = 0;
-                            }
-                            if ($remaining_late < 0) {
-                                $remaining_late = 0;
-                            }
-                            if ($remaining_stop_work < 0) {
-                                $remaining_stop_work = 0;
+                            } elseif ($leave_id == 2) {
+                                $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                $total_minutes = $total_personal_no * 8 * 60;
+
+                                $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                $remaining_minutes = $total_remaining_minutes % 60;
+                            } else if ($leave_id == 3) {
+
+                                $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                $total_minutes = $total_sick * 8 * 60;
+
+                                $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                $remaining_minutes = $total_remaining_minutes % 60;
+                            } else if ($leave_id == 4) {
+
+                                $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                $total_minutes = $total_sick_work * 8 * 60;
+
+                                // คำนวณนาทีที่เหลือ
+                                $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                $remaining_minutes = $total_remaining_minutes % 60;
+                            } else if ($leave_id == 5) {
+
+                                $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                $total_minutes = $total_annual * 8 * 60;
+
+                                // คำนวณนาทีที่เหลือ
+                                $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                $remaining_minutes = $total_remaining_minutes % 60;
+
+                            } else if ($leave_id == 6) {
+
+                                $days = $total_stop_work;
+
+                            } else if ($leave_id == 7) {
+
+                                $days = $total_late;
+
+                            } else if ($leave_id == 8) {
+                                $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes; // แปลงทั้งหมดเป็นนาที
+                                                                                                   // คำนวณจำนวนวันลาในนาที
+                                $total_minutes = $total_other * 8 * 60;                            // จำนวนวันทั้งหมดในนาที
+
+                                // คำนวณนาทีที่เหลือ
+                                $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                $remaining_days    = floor($total_remaining_minutes / (8 * 60));        // วัน
+                                $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60); // ชั่วโมง
+                                $remaining_minutes = $total_remaining_minutes % 60;
+                            } else {
+                                $remaining_days = '-';
                             }
 
-                            // แสดงข้อมูล
+                            if ($leave_id != 5 && $leave_id != 7) {
+                                $all_total_days += $days;
+                                $all_total_hours += $hours;
+                                $all_total_minutes += $minutes;
+                            }
+
                             echo '<tr class="text-center align-middle">';
                             echo '<td style="font-weight: bold;">' . $leave_name . '</td>';
-                            echo '<td>' . $days . '</td>';
-                            echo '<td>' . $hours . '</td>';
-                            echo '<td>' . $minutes . '</td>';
-                            echo '<td>' . $remaining_personal . '</td>';    // วันที่เหลือ (personal)
-                            echo '<td>' . $remaining_personal_no . '</td>'; // ชั่วโมงที่เหลือ (personal_no)
-                            echo '<td>' . $remaining_sick . '</td>';        // นาทีที่เหลือ (sick)
-                            echo '<td>' . $remaining_sick_work . '</td>';   // วันที่เหลือ (sick_work)
-                            echo '<td>' . $remaining_annual . '</td>';      // ชั่วโมงที่เหลือ (annual)
-                            echo '<td>' . $remaining_other . '</td>';       // นาทีที่เหลือ (other)
-                            echo '<td>' . $remaining_late . '</td>';        // วันที่เหลือ (late)
-                            echo '<td>' . $remaining_stop_work . '</td>';   // ชั่วโมงที่เหลือ (stop_work)
-                            echo '</tr>';
 
-                            echo '</tr>';
+                            if ($leave_id == 6) {
+                                echo '<td colspan="3">' . $days . ' วัน' . '</td>';
+                                echo '<td colspan="3">-</td>';
 
-                            // Check if the leave_id is not 5 before accumulating totals
-                            if ($leave_id != 5) {
-                                // Accumulate totals
-                                $total_days += $days;
-                                $total_hours += $hours;
-                                $total_minutes += $minutes;
+                            } else if ($leave_id == 7) {
+                                echo '<td colspan="3">' . $days . ' ครั้ง' . '</td>';
+                                echo '<td colspan="3">-</td>';
+
+                            } else {
+                                echo '<td>' . $days . '</td>';
+                                echo '<td>' . $hours . '</td>';
+                                echo '<td>' . $minutes . '</td>';
+                                echo '<td>' . $remaining_days . '</td>';
+                                echo '<td>' . $remaining_hours . '</td>';
+                                echo '<td>' . $remaining_minutes . '</td>';
+
                             }
 
+                            echo '</tr>';
                         }
 
                     }
-                    if ($total_minutes >= 60) {
-                        $total_hours += floor($total_minutes / 60);
-                        $total_minutes = $total_minutes % 60;
-                    }
-                    if ($total_hours >= 8) {
-                        $total_days += floor($total_hours / 8); // assuming 8-hour workdays
-                        $total_hours = $total_hours % 8;
-                    }
-
                     // Final totals
                     echo '<tr class="text-center align-middle">';
                     echo '<td style="font-weight: bold;">รวมจำนวนวันลาทั้งหมด</td>';
-                    echo '<td colspan="6" style="font-weight: bold;">' . $total_days . ' วัน ' . $total_hours . ' ชั่วโมง ' . $total_minutes . ' นาที' . '</td>';
+                    echo '<td colspan="6" style="font-weight: bold;">' . $all_total_days . ' วัน ' . $all_total_hours . ' ชั่วโมง ' . $all_total_minutes . ' นาที' . '</td>';
                     echo '</tr>';
 
                 ?>
@@ -291,11 +320,10 @@
     </div>
     <script>
     flatpickr("#startDate", {
-        dateFormat: "Y-m-d", // ใช้เก็บในรูปแบบ yyyy-mm-dd
-        altFormat: "d-m-Y", // แสดงในรูปแบบ dd-mm-yyyy
+        dateFormat: "Y-m-d",
+        altFormat: "d-m-Y",
         defaultDate: "<?php echo $startDate; ?>",
         onChange: function(selectedDates, dateStr, instance) {
-            // แสดงวันที่ในรูปแบบ dd-mm-yyyy พร้อมเดือนเป็นตัวเลขสองหลัก
             document.getElementById("startDateText").textContent = instance.formatDate(selectedDates[0],
                 "d-m-Y");
             document.getElementById("dateForm").submit();
@@ -303,11 +331,10 @@
     });
 
     flatpickr("#endDate", {
-        dateFormat: "Y-m-d", // ใช้เก็บในรูปแบบ yyyy-mm-dd
-        altFormat: "d-m-Y", // แสดงในรูปแบบ dd-mm-yyyy
+        dateFormat: "Y-m-d",
+        altFormat: "d-m-Y",
         defaultDate: "<?php echo $endDate; ?>",
         onChange: function(selectedDates, dateStr, instance) {
-            // แสดงวันที่ในรูปแบบ dd-mm-yyyy พร้อมเดือนเป็นตัวเลขสองหลัก
             document.getElementById("endDateText").textContent = instance.formatDate(selectedDates[0],
                 "d-m-Y");
             document.getElementById("dateForm").submit();
