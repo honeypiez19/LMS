@@ -2664,6 +2664,7 @@ AND l_leave_status = 1";
                                             allowOutsideClick: false, // ห้ามคลิกที่บริเวณอื่น
                                             confirmButtonText: 'ตกลง', // ปรับข้อความปุ่ม
                                         }).then(() => {
+                                            // ซ่อน Modal และล้าง Backdrop
                                             $('#leaveModal')
                                                 .modal(
                                                     'hide');
@@ -2676,6 +2677,10 @@ AND l_leave_status = 1";
                                                     'padding-right',
                                                     '');
 
+                                            loadNextRowData
+                                                ();
+
+                                            // รีเซ็ต Modal
                                             $('#leaveModal')
                                                 .on('hidden.bs.modal',
                                                     function() {
@@ -2689,6 +2694,7 @@ AND l_leave_status = 1";
                                                         // ลบ event listener เท่านั้นเมื่อแน่ใจว่าไม่จำเป็น
                                                         // $(this).off('hidden.bs.modal'); // ลบการลบ Event Listener นี้ออก
                                                     });
+
 
                                             // รีเซ็ตสถานะการประมวลผล
                                             isProcessing =
@@ -2824,6 +2830,9 @@ AND l_leave_status = 1";
                                                     'padding-right',
                                                     '');
 
+                                            loadNextRowData
+                                                ();
+
                                             // รีเซ็ต Modal
                                             $('#leaveModal')
                                                 .on('hidden.bs.modal',
@@ -2835,11 +2844,10 @@ AND l_leave_status = 1";
                                                                 0
                                                             ]
                                                             .reset(); // รีเซ็ตฟอร์ม
-                                                        $(this)
-                                                            .off(
-                                                                'hidden.bs.modal'
-                                                            ); // ลบ Event Listener เพื่อป้องกันซ้ำซ้อน
+                                                        // ลบ event listener เท่านั้นเมื่อแน่ใจว่าไม่จำเป็น
+                                                        // $(this).off('hidden.bs.modal'); // ลบการลบ Event Listener นี้ออก
                                                     });
+
 
                                             // รีเซ็ตสถานะการประมวลผล
                                             isProcessing =
@@ -4047,10 +4055,40 @@ AND l_leave_status = 1";
         window.location.href = newUrl; // รีเฟรชหน้าโดยการโหลด URL ใหม่
     }
 
+    function loadNextRowData() {
+        // ค้นหาแถวถัดไป (ตัวอย่างนี้หาจาก rowData เดิม)
+        var nextRow = $(".leaveChk").closest("tr").next("tr");
+        if (nextRow.length > 0) {
+            var rowData = nextRow.find("td");
+            var modalContent =
+                '<table class="table table-bordered">' +
+                '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[5]).text() + '</td></tr>' +
+                '<tr><th>ชื่อ - นามสกุล</th><td>' + $(rowData[1]).text() + '</td></tr>' +
+                '<tr><th>แผนก</th><td>' + $(rowData[2]).text() + '</td></tr>' +
+                '<tr><th>วันที่ยื่นใบลา</th><td>' + $(rowData[7]).text() + '</td></tr>' +
+                '<tr><th>ประเภทการลา</th><td>' + $(rowData[0]).text() + '</td></tr>' +
+                '<tr><th>เหตุผลการลา</th><td>' + $(rowData[3]).text() + '</td></tr>' +
+                '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10]).text() +
+                '</td></tr>' +
+                '<tr><th>สถานะใบลา</th><td>' + $(rowData[12]).html() + '</td></tr>' +
+                '</table>';
+
+            $('#leaveModal .modal-body').html(modalContent);
+            $('#leaveModal').modal('show'); // เปิด modal อีกรอบ
+        } else {
+            Swal.fire({
+                title: 'ไม่มีรายการถัดไป!',
+                text: 'คุณได้ตรวจสอบรายการทั้งหมดแล้ว',
+                icon: 'info',
+                confirmButtonText: 'ตกลง',
+            });
+        }
+    }
+
     document.getElementById('page-input').addEventListener('input', function() {
         const page = this.value;
         const month = '<?php echo urlencode($selectedMonth); ?>';
-        if (page >= 1 && page <=                                 <?php echo $totalPages; ?>) {
+        if (page >= 1 && page <= <?php echo $totalPages; ?>) {
             window.location.href = `?page=${page}&month=${month}`;
         }
     });

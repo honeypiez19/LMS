@@ -75,7 +75,10 @@
                     value="<?php echo $endDateFormatted; ?>">
             </div>
             <div class="col-auto">
-                <button type="button" class="btn btn-secondary" id="resetButton">รีเซ็ต</button>
+                <button type="button" class="btn btn-secondary" id="resetButton" data-bs-toggle="tooltip"
+                    title="01-12-ปีที่แล้ว ถึง 30-11-ปีปัจจุบัน">
+                    ค่าเริ่มต้น
+                </button>
             </div>
         </form>
 
@@ -327,7 +330,7 @@
 
                         }
                         echo '<tr class="text-center align-middle">';
-                        echo '<td style="font-weight: bold;">รวมจำนวนวันลาทั้งหมด</td>';
+                        echo '<td style="font-weight: bold;">รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน)</td>';
                         echo '<td colspan="6" style="font-weight: bold;">' . $all_total_days . ' วัน ' . $all_total_hours . ' ชั่วโมง ' . $all_total_minutes . ' นาที' . '</td>';
                         echo '</tr>';
 
@@ -373,6 +376,14 @@
             document.getElementById('endDate').value = defaultEndDate;
 
             document.getElementById("dateForm").submit();
+        });
+
+        // เปิดใช้งาน Tooltip เมื่อหน้าเว็บโหลดเสร็จ
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
         </script>
         <script src="../js/popper.min.js"></script>

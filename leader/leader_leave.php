@@ -75,7 +75,10 @@
                     value="<?php echo $endDateFormatted; ?>">
             </div>
             <div class="col-auto">
-                <button type="button" class="btn btn-secondary" id="resetButton">ค่าเริ่มต้น</button>
+                <button type="button" class="btn btn-secondary" id="resetButton" data-bs-toggle="tooltip"
+                    title="01-12-ปีที่แล้ว ถึง 30-11-ปีปัจจุบัน">
+                    ค่าเริ่มต้น
+                </button>
             </div>
         </form>
 
@@ -165,7 +168,8 @@
                     AND l_usercode = :userCode
                     AND l_leave_status = 0
                     AND l_approve_status IN (2, 6)
-                    AND l_approve_status2 = 4
+                    AND l_approve_status2 IN (4, 6)
+                    AND l_approve_status3 IN (8, 6)
                     AND (l_leave_end_date BETWEEN :startDate AND :endDate)";
 
                             $stmt_leave = $conn->prepare($sql_leave);
@@ -327,7 +331,7 @@
 
                         }
                         echo '<tr class="text-center align-middle">';
-                        echo '<td style="font-weight: bold;">รวมจำนวนวันลาทั้งหมด</td>';
+                        echo '<td style="font-weight: bold;">รวมจำนวนวันลาทั้งหมด (ยกเว้นลาพักร้อน)</td>';
                         echo '<td colspan="6" style="font-weight: bold;">' . $all_total_days . ' วัน ' . $all_total_hours . ' ชั่วโมง ' . $all_total_minutes . ' นาที' . '</td>';
                         echo '</tr>';
 
@@ -366,13 +370,21 @@
 
         // ปุ่ม reset ค่าเริ่มต้น 12-01-ปีที่แล้ว ถึง 11-30-ปีปัจจุบัน
         document.getElementById('resetButton').addEventListener('click', function() {
-            const defaultStartDate = document.getElementById('startDate').defaultValue;
-            const defaultEndDate = document.getElementById('endDate').defaultValue;
+            const defaultStartDate = "<?php echo date('d-m-Y', strtotime((date('Y') - 1) . '-12-01')); ?>";
+            const defaultEndDate = "<?php echo date('d-m-Y', strtotime(date('Y') . '-11-30')); ?>";
 
             document.getElementById('startDate').value = defaultStartDate;
             document.getElementById('endDate').value = defaultEndDate;
 
             document.getElementById("dateForm").submit();
+        });
+
+        // เปิดใช้งาน Tooltip เมื่อหน้าเว็บโหลดเสร็จ
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
         </script>
         <script src="../js/popper.min.js"></script>
