@@ -80,10 +80,30 @@
                 <input type="text" class="form-control" id="codeSearch" list="codeList">
                 <datalist id="codeList">
                     <?php
-                        $sql    = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> '1' AND e_sub_department = '$subDepart' AND e_usercode <> '$userCode'";
-                        $result = $conn->query($sql);
-                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                            echo '<option value="' . $row['e_usercode'] . '">';
+                        $sql = "SELECT * FROM employees
+                WHERE e_status <> '1'
+                AND (
+                    (e_sub_department = :subDepart)
+                    OR (e_sub_department2 = :subDepart2)
+                    OR (e_sub_department3 = :subDepart3)
+                    OR (e_sub_department4 = :subDepart4)
+                    OR (e_sub_department5 = :subDepart5)
+                )
+                AND e_usercode <> :userCode";
+
+                        $stmt = $conn->prepare($sql);
+
+                        $stmt->bindParam(':subDepart', $subDepart);
+                        $stmt->bindParam(':subDepart2', $subDepart2);
+                        $stmt->bindParam(':subDepart3', $subDepart3);
+                        $stmt->bindParam(':subDepart4', $subDepart4);
+                        $stmt->bindParam(':subDepart5', $subDepart5);
+                        $stmt->bindParam(':userCode', $userCode);
+
+                        $stmt->execute();
+
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<option value="' . htmlspecialchars($row['e_usercode'], ENT_QUOTES, 'UTF-8') . '">';
                         }
                     ?>
                 </datalist>
@@ -93,10 +113,30 @@
                 <input type="text" class="form-control" id="nameSearch" list="nameList">
                 <datalist id="nameList">
                     <?php
-                        $sql    = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> '1' AND e_sub_department = '$subDepart' AND e_usercode <> '$userCode'";
-                        $result = $conn->query($sql);
-                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                            echo '<option value="' . $row['e_name'] . '">';
+                        $sql = "SELECT * FROM employees
+                WHERE e_status <> '1'
+                AND (
+                    (e_sub_department = :subDepart)
+                    OR (e_sub_department2 = :subDepart2)
+                    OR (e_sub_department3 = :subDepart3)
+                    OR (e_sub_department4 = :subDepart4)
+                    OR (e_sub_department5 = :subDepart5)
+                )
+                AND e_usercode <> :userCode";
+
+                        $stmt = $conn->prepare($sql);
+
+                        $stmt->bindParam(':subDepart', $subDepart);
+                        $stmt->bindParam(':subDepart2', $subDepart2);
+                        $stmt->bindParam(':subDepart3', $subDepart3);
+                        $stmt->bindParam(':subDepart4', $subDepart4);
+                        $stmt->bindParam(':subDepart5', $subDepart5);
+                        $stmt->bindParam(':userCode', $userCode);
+
+                        $stmt->execute();
+
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<option value="' . htmlspecialchars($row['e_name'], ENT_QUOTES, 'UTF-8') . '">';
                         }
                     ?>
                 </datalist>
@@ -106,10 +146,30 @@
                 <input type="text" class="form-control" id="depSearch" list="depList">
                 <datalist id="depList">
                     <?php
-                        $sql    = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> '1' AND e_sub_department = '$subDepart' AND e_usercode <> '$userCode'";
-                        $result = $conn->query($sql);
-                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                            echo '<option value="' . $row['e_sub_department'] . '">';
+                        $sql = "SELECT * FROM employees
+                WHERE e_status <> '1'
+                AND (
+                    (e_sub_department = :subDepart)
+                    OR (e_sub_department2 = :subDepart2)
+                    OR (e_sub_department3 = :subDepart3)
+                    OR (e_sub_department4 = :subDepart4)
+                    OR (e_sub_department5 = :subDepart5)
+                )
+                AND e_usercode <> :userCode";
+
+                        $stmt = $conn->prepare($sql);
+
+                        $stmt->bindParam(':subDepart', $subDepart);
+                        $stmt->bindParam(':subDepart2', $subDepart2);
+                        $stmt->bindParam(':subDepart3', $subDepart3);
+                        $stmt->bindParam(':subDepart4', $subDepart4);
+                        $stmt->bindParam(':subDepart5', $subDepart5);
+                        $stmt->bindParam(':userCode', $userCode);
+
+                        $stmt->execute();
+
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<option value="' . htmlspecialchars($row['e_department'], ENT_QUOTES, 'UTF-8') . '">';
                         }
                     ?>
                 </datalist>
@@ -122,7 +182,54 @@
         </div>
     </div>
     <div class="container-fluid">
-        <form class="mt-3 mb-3 row" method="post" id="yearForm">
+        <form class="mt-4 mb-3 row" method="post" id="dateForm">
+            <label for="startDate" class="mt-2 col-auto">เลือกช่วงเวลา :</label>
+            <div class="col-auto">
+                <?php
+                    $startDate          = date('Y', strtotime('-1 year')) . "-12-01"; // 1 ธันวาคม ปีที่แล้ว
+                    $startDateFormatted = date('d-m-Y', strtotime($startDate));
+
+                    $endDate          = date('Y' . "-11-30"); // 30 พฤศจิกายน ปีปัจจุบัน
+                    $endDateFormatted = date('d-m-Y', strtotime($endDate));
+
+                    if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
+                        $startDate          = DateTime::createFromFormat('d-m-Y', $_POST['start_date'])->format('Y-m-d');
+                        $startDateFormatted = $_POST['start_date'];
+
+                        $endDate          = DateTime::createFromFormat('d-m-Y', $_POST['end_date'])->format('Y-m-d');
+                        $endDateFormatted = $_POST['end_date'];
+                    }
+                ?>
+                <input type="text" name="start_date" class="form-control" id="startDate"
+                    value="<?php echo $startDateFormatted; ?>">
+            </div>
+            <div class="col-auto">
+                <input type="text" name="end_date" class="form-control" id="endDate"
+                    value="<?php echo $endDateFormatted; ?>">
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-secondary" id="resetButton" data-bs-toggle="tooltip"
+                    title="01-12-ปีที่แล้ว ถึง 30-11-ปีปัจจุบัน">
+                    ค่าเริ่มต้น
+                </button>
+            </div>
+        </form>
+
+        <!-- แสดงช่วงวันที่ที่เลือก -->
+        <div>
+            <p>ช่วงวันที่ : <strong id="startDateText">
+                    <?php
+                        echo $startDateFormatted;
+                    ?>
+                </strong> ถึง <strong id="endDateText">
+                    <?php
+                        echo $endDateFormatted;
+                    ?>
+                </strong>
+            </p>
+        </div>
+        <!-- เลือกปี -->
+        <!-- <form class="mt-3 mb-3 row" method="post" id="yearForm">
             <label for="" class="mt-2 col-auto">เลือกปี</label>
             <div class="col-auto">
                 <?php
@@ -144,7 +251,7 @@
                     echo "</select>";
                 ?>
             </div>
-        </form>
+        </form> -->
     </div>
 
     <!-- ตารางข้อมูลพนักงาน -->
@@ -164,12 +271,14 @@
                 </tr>
                 <tr class="text-center align-middle">
                     <th colspan="3">ลากิจได้รับค่าจ้าง</th>
-                    <th colspan="3">ลากิจไม่ได้รับค่าจ้าง</th>
+                    <th colspan="3">
+                        ลากิจไม่ได้รับค่าจ้าง</th>
                     <th colspan="3">ลาป่วย</th>
                     <th colspan="3">ลาป่วยจากงาน</th>
                     <th colspan="3">ลาพักร้อน</th>
-                    <th colspan="3">อื่น ๆ (ระบุ)</th>
-                    <th colspan="1" rowspan="3">หยุดงาน</th>
+                    <th colspan="3">อื่น ๆ</th>
+                    <th colspan="1" rowspan="3">มาสาย</th>
+                    <!-- <th colspan="1" rowspan="3">ขาดงาน</th> -->
                 </tr>
                 <tr class="text-center align-middle">
                     <th>จำนวนวันที่ได้</th>
@@ -192,7 +301,6 @@
                     <th>คงเหลือ</th>
                 </tr>
             </thead>
-            <!-- เนื้อหาของตาราง -->
             <tbody class="text-center my-table">
                 <?php
                     $sql = "SELECT * FROM employees
@@ -226,7 +334,7 @@
                         4 => 'ลาป่วยจากงาน',
                         5 => 'ลาพักร้อน',
                         7 => 'มาสาย',
-                        6 => 'หยุดงาน',
+                        6 => 'ขาดงาน',
                         8 => 'อื่น ๆ',
                     ];
 
@@ -273,8 +381,8 @@
                         (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_sick_work,
                         (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual,
                         (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other,
-                        (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 7 AND l_usercode = :userCode) AS late_count,
-                        (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 6 AND l_usercode = :userCode) AS stop_work_count
+                        (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 7 AND l_usercode = :userCode) AS late_count
+                        -- (SELECT l_list_id, l_username FROM leave_list WHERE l_leave_id = 6 AND l_usercode = :userCode) AS stop_work_count
                         FROM leave_list
                         JOIN employees ON employees.e_usercode = leave_list.l_usercode
                         WHERE l_leave_id = :leave_id
@@ -306,7 +414,7 @@
                                 $total_annual      = $result_leave['total_annual'] ?? 0;
                                 $total_other       = $result_leave['total_other'] ?? 0;
                                 $total_late        = $result_leave['late_count'] ?? 0;
-                                $total_stop_work   = $result_leave['stop_work_count'] ?? 0;
+                                // $total_stop_work   = $result_leave['stop_work_count'] ?? 0;
 
                                 $days += floor($hours / 8);
                                 $hours = $hours % 8;
@@ -473,22 +581,23 @@
                                 }
 
                                 // ไม่รวมพักร้อนกับมาสาย
-                                if ($leave_id != 5 && $leave_id != 7) {
+                                if ($leave_id != 5 && $leave_id != 7 && $leave_id != 6) {
                                     $all_total_days += $days;
                                     $all_total_hours += $hours;
                                     $all_total_minutes += $minutes;
                                 }
-
-                            } else {
-                                echo '<td>-</td>';
                             }
                         }
-                        $days = $total_stop_work;
-                        echo '<td>' . $days . '</td>';
-                        echo '<td style="font-weight: bold;">' . $all_total_days . '(' . $all_total_hours . '.' . $all_total_minutes . ')' . '</td>';
 
+                        echo '<td>' . $total_late . ' ครั้ง' . '</td>';
+                        // echo '<td>' . $days . ' วัน' . '</td>';
+
+                        // Display the total leave used, excluding annual leave
+                        echo '<td >' . $all_total_days . '(' . $all_total_hours . '.' . $all_total_minutes . ')' . '</td>';
                         echo '</tr>';
+
                         $rowNumber++;
+
                     }
                 ?>
             </tbody>
@@ -571,6 +680,52 @@
         document.getElementById('nameSearch').value = '';
         document.getElementById('depSearch').value = '';
     }
+
+    // วันที่เริ่มต้น
+    flatpickr("#startDate", {
+        dateFormat: "d-m-Y",
+        defaultDate: "<?php echo $startDateFormatted; ?>",
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                document.getElementById("startDateText").textContent = instance.formatDate(
+                    selectedDates[0],
+                    "d-m-Y");
+                document.getElementById("dateForm").submit();
+            }
+        }
+    });
+
+    // วันที่สิ้นสุด
+    flatpickr("#endDate", {
+        dateFormat: "d-m-Y",
+        defaultDate: "<?php echo $endDateFormatted; ?>",
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                document.getElementById("endDateText").textContent = instance.formatDate(selectedDates[
+                        0],
+                    "d-m-Y");
+                document.getElementById("dateForm").submit();
+            }
+        }
+    });
+
+    // ปุ่ม reset ค่าเริ่มต้น 12-01-ปีที่แล้ว ถึง 11-30-ปีปัจจุบัน
+    document.getElementById('resetButton').addEventListener('click', function() {
+        const defaultStartDate = "<?php echo date('d-m-Y', strtotime((date('Y') - 1) . '-12-01')); ?>";
+        const defaultEndDate = "<?php echo date('d-m-Y', strtotime(date('Y') . '-11-30')); ?>";
+
+        document.getElementById('startDate').value = defaultStartDate;
+        document.getElementById('endDate').value = defaultEndDate;
+
+        document.getElementById("dateForm").submit();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
     </script>
     <script src="../js/popper.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>

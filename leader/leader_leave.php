@@ -95,6 +95,7 @@
                 </strong>
             </p>
         </div>
+
         <div class="table-responsive">
             <table class="table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);"
                 id="leaveTable">
