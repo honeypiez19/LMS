@@ -1,142 +1,142 @@
 <?php
 
-date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
+    date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
 
-include '../connect.php';
-include '../session_lang.php';
+    include '../connect.php';
+    include '../session_lang.php';
 
-if (isset($_SESSION['s_usercode'])) {
-    $userCode = $_SESSION['s_usercode'];
-    $sql = "SELECT * FROM session
+    if (isset($_SESSION['s_usercode'])) {
+        $userCode = $_SESSION['s_usercode'];
+        $sql      = "SELECT * FROM session
             JOIN employees ON session.s_usercode = employees.e_usercode
             WHERE session.s_usercode = :userCode";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-    $stmt->execute();
-    $userName = "";
-    if ($stmt->rowCount() > 0) {
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $userName = $row['e_username'];
-        $name = $row['e_name'];
-        $telPhone = $row['e_phone'];
-        $depart = $row['e_department'];
-        $workDate = $row['e_work_start_date'];
-        $level = $row['e_level'];
-        $workplace = $row['e_workplace'];
-        $subDepart = $row['e_sub_department'];
-        $subDepart2 = $row['e_sub_department2'];
-        $subDepart3 = $row['e_sub_department3'];
-        $subDepart4 = $row['e_sub_department4'];
-        $subDepart5 = $row['e_sub_department5'];
-        $yearExp = $row['e_yearexp'];
-        $imageUser = !empty($row['e_image']) ? $row['e_image'] : "default_img.png";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+        $stmt->execute();
+        $userName = "";
+        if ($stmt->rowCount() > 0) {
+            $row        = $stmt->fetch(PDO::FETCH_ASSOC);
+            $userName   = $row['e_username'];
+            $name       = $row['e_name'];
+            $telPhone   = $row['e_phone'];
+            $depart     = $row['e_department'];
+            $workDate   = $row['e_work_start_date'];
+            $level      = $row['e_level'];
+            $workplace  = $row['e_workplace'];
+            $subDepart  = $row['e_sub_department'];
+            $subDepart2 = $row['e_sub_department2'];
+            $subDepart3 = $row['e_sub_department3'];
+            $subDepart4 = $row['e_sub_department4'];
+            $subDepart5 = $row['e_sub_department5'];
+            $yearExp    = $row['e_yearexp'];
+            $imageUser  = ! empty($row['e_image']) ? $row['e_image'] : "default_img.png";
+        }
+    } else {
+        $userName   = "";
+        $name       = "";
+        $telPhone   = "";
+        $depart     = "";
+        $level      = "";
+        $workplace  = "";
+        $subDepart  = "";
+        $subDepart2 = "";
+        $subDepart3 = "";
+        $subDepart4 = "";
+        $subDepart5 = "";
     }
-} else {
-    $userName = "";
-    $name = "";
-    $telPhone = "";
-    $depart = "";
-    $level = "";
-    $workplace = "";
-    $subDepart = "";
-    $subDepart2 = "";
-    $subDepart3 = "";
-    $subDepart4 = "";
-    $subDepart5 = "";
-}
 
-// เมื่อมีการกดปุ่ม "ออกจากระบบ"
-if (isset($_POST['logoutButton'])) {
-    $userCode = $_SESSION['s_usercode'];
-    $logoutTime = date('Y-m-d H:i:s');
-    $statusLog = 0; // กำหนดสถานะของ log
-    $sql = "UPDATE session SET s_logout_datetime = :logoutTime, s_log_status = :statusLog WHERE s_usercode = :userCode";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':logoutTime', $logoutTime, PDO::PARAM_STR);
-    $stmt->bindParam(':statusLog', $statusLog, PDO::PARAM_INT);
-    $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-    $stmt->execute();
+    // เมื่อมีการกดปุ่ม "ออกจากระบบ"
+    if (isset($_POST['logoutButton'])) {
+        $userCode   = $_SESSION['s_usercode'];
+        $logoutTime = date('Y-m-d H:i:s');
+        $statusLog  = 0; // กำหนดสถานะของ log
+        $sql        = "UPDATE session SET s_logout_datetime = :logoutTime, s_log_status = :statusLog WHERE s_usercode = :userCode";
+        $stmt       = $conn->prepare($sql);
+        $stmt->bindParam(':logoutTime', $logoutTime, PDO::PARAM_STR);
+        $stmt->bindParam(':statusLog', $statusLog, PDO::PARAM_INT);
+        $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+        $stmt->execute();
 
-    session_unset();
-    session_destroy();
+        session_unset();
+        session_destroy();
 
-    header("Location: ../login.php");
-    exit;
-}
-
-/* อัปโหลดรูปโปรไฟล์ */
-if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0) {
-    // กำหนด path ที่จะบันทึกไฟล์
-    $uploadDir = '../img-profile/';
-    $userCode = $_SESSION['s_usercode']; // ค่า userCode ที่ใช้เป็นชื่อไฟล์
-    $fileName = $userCode . '.png'; // ตั้งชื่อไฟล์เป็น userCode.png
-    $filePath = $uploadDir . $fileName;
-
-    // ตรวจสอบว่าไฟล์เป็นรูปภาพ
-    $fileType = mime_content_type($_FILES['profilePicture']['tmp_name']);
-    if (strpos($fileType, 'image') === false) {
-        echo "โปรดเลือกไฟล์รูปภาพเท่านั้น.";
+        header("Location: ../login.php");
         exit;
     }
 
-    // ใช้ GD เพื่อปรับขนาดภาพ
-    $maxWidth = 300; // กำหนดความกว้างสูงสุด
-    $maxHeight = 300; // กำหนดความสูงสูงสุด
+    /* อัปโหลดรูปโปรไฟล์ */
+    if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0) {
+        // กำหนด path ที่จะบันทึกไฟล์
+        $uploadDir = '../img-profile/';
+        $userCode  = $_SESSION['s_usercode']; // ค่า userCode ที่ใช้เป็นชื่อไฟล์
+        $fileName  = $userCode . '.png';      // ตั้งชื่อไฟล์เป็น userCode.png
+        $filePath  = $uploadDir . $fileName;
 
-    // สร้าง resource ของภาพจากไฟล์ที่อัปโหลด
-    $image = null;
-    if ($fileType == 'image/jpeg' || $fileType == 'image/jpg') {
-        $image = imagecreatefromjpeg($_FILES['profilePicture']['tmp_name']);
-    } elseif ($fileType == 'image/png') {
-        $image = imagecreatefrompng($_FILES['profilePicture']['tmp_name']);
-    } elseif ($fileType == 'image/gif') {
-        $image = imagecreatefromgif($_FILES['profilePicture']['tmp_name']);
-    }
+        // ตรวจสอบว่าไฟล์เป็นรูปภาพ
+        $fileType = mime_content_type($_FILES['profilePicture']['tmp_name']);
+        if (strpos($fileType, 'image') === false) {
+            echo "โปรดเลือกไฟล์รูปภาพเท่านั้น.";
+            exit;
+        }
 
-    if ($image) {
-        // หาขนาดเดิมของภาพ
-        $originalWidth = imagesx($image);
-        $originalHeight = imagesy($image);
+                          // ใช้ GD เพื่อปรับขนาดภาพ
+        $maxWidth  = 300; // กำหนดความกว้างสูงสุด
+        $maxHeight = 300; // กำหนดความสูงสูงสุด
 
-        // คำนวณอัตราส่วนของภาพ
-        $ratio = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
-        $newWidth = floor($originalWidth * $ratio);
-        $newHeight = floor($originalHeight * $ratio);
+        // สร้าง resource ของภาพจากไฟล์ที่อัปโหลด
+        $image = null;
+        if ($fileType == 'image/jpeg' || $fileType == 'image/jpg') {
+            $image = imagecreatefromjpeg($_FILES['profilePicture']['tmp_name']);
+        } elseif ($fileType == 'image/png') {
+            $image = imagecreatefrompng($_FILES['profilePicture']['tmp_name']);
+        } elseif ($fileType == 'image/gif') {
+            $image = imagecreatefromgif($_FILES['profilePicture']['tmp_name']);
+        }
 
-        // สร้างภาพใหม่ที่มีขนาดเล็กลง
-        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+        if ($image) {
+            // หาขนาดเดิมของภาพ
+            $originalWidth  = imagesx($image);
+            $originalHeight = imagesy($image);
 
-        // คัดลอกภาพต้นฉบับไปยังภาพใหม่ที่ขนาดเล็กลง
-        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
+            // คำนวณอัตราส่วนของภาพ
+            $ratio     = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
+            $newWidth  = floor($originalWidth * $ratio);
+            $newHeight = floor($originalHeight * $ratio);
 
-        // บันทึกไฟล์ภาพที่ลดขนาดแล้วลงในเซิร์ฟเวอร์
-        // บันทึกเป็นไฟล์ PNG
-        imagepng($newImage, $filePath, 7); // 7 คือค่าความคมชัดของ PNG (ค่าตั้งต้น: 0, สูงสุด: 9)
+            // สร้างภาพใหม่ที่มีขนาดเล็กลง
+            $newImage = imagecreatetruecolor($newWidth, $newHeight);
 
-        // ทำความสะอาด resource ของภาพ
-        imagedestroy($image);
-        imagedestroy($newImage);
+            // คัดลอกภาพต้นฉบับไปยังภาพใหม่ที่ขนาดเล็กลง
+            imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
 
-        // ต่อไปเป็นการอัพเดตชื่อไฟล์ในฐานข้อมูล
-        $sql = "UPDATE employees SET e_image = :fileName WHERE e_usercode = :userCode";
+                                               // บันทึกไฟล์ภาพที่ลดขนาดแล้วลงในเซิร์ฟเวอร์
+                                               // บันทึกเป็นไฟล์ PNG
+            imagepng($newImage, $filePath, 7); // 7 คือค่าความคมชัดของ PNG (ค่าตั้งต้น: 0, สูงสุด: 9)
 
-        if ($stmt = $conn->prepare($sql)) {
-            $stmt->bindValue(':fileName', $fileName, PDO::PARAM_STR);
-            $stmt->bindValue(':userCode', $userCode, PDO::PARAM_INT);
+            // ทำความสะอาด resource ของภาพ
+            imagedestroy($image);
+            imagedestroy($newImage);
 
-            if ($stmt->execute()) {
-                echo "<script>
+            // ต่อไปเป็นการอัพเดตชื่อไฟล์ในฐานข้อมูล
+            $sql = "UPDATE employees SET e_image = :fileName WHERE e_usercode = :userCode";
+
+            if ($stmt = $conn->prepare($sql)) {
+                $stmt->bindValue(':fileName', $fileName, PDO::PARAM_STR);
+                $stmt->bindValue(':userCode', $userCode, PDO::PARAM_INT);
+
+                if ($stmt->execute()) {
+                    echo "<script>
                     alert('อัพโหลดรูปภาพสำเร็จ.');
                     location.href = 'manager_dashboard.php';
                 </script>";
-            } else {
-                //echo "เกิดข้อผิดพลาดในการบันทึกข้อมูลในฐานข้อมูล.";
+                } else {
+                    //echo "เกิดข้อผิดพลาดในการบันทึกข้อมูลในฐานข้อมูล.";
+                }
             }
+        } else {
+            //echo "ไม่สามารถเปิดไฟล์ภาพได้.";
         }
-    } else {
-        //echo "ไม่สามารถเปิดไฟล์ภาพได้.";
     }
-}
 ?>
 
 <style>
@@ -166,7 +166,7 @@ if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0)
             </button>
             <form method="post">
                 <ul class="nav d-lg-none d-xl-none d-xxl-none">
-                    <?php if (!empty($userName)): ?>
+                    <?php if (! empty($userName)): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -182,7 +182,7 @@ if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0)
                                     data-bs-target="#changePicModal">อัปโหลดรูปโปรไฟล์</a></li>
                         </ul>
                     </li>
-                    <?php endif;?>
+                    <?php endif; ?>
                 </ul>
             </form>
             <!-- edit by pim -->
@@ -259,7 +259,7 @@ if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0)
                 </ul>
                 <form method="post" class="d-flex">
                     <ul class="navbar-nav ms-auto">
-                        <?php if (!empty($userName)): ?>
+                        <?php if (! empty($userName)): ?>
                         <li class="nav-item dropdown d-none d-lg-flex d-xl-flex d-xxl-flex">
                             <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
@@ -285,23 +285,23 @@ if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0)
                                 <span>
                                     <strong>
                                         <?php
-$dateNow = date("Y-m-d"); // วันที่ปัจจุบัน
+                                            $dateNow = date("Y-m-d"); // วันที่ปัจจุบัน
 
-// สร้าง DateTime objects
-$now = new DateTime($dateNow);
-$work = new DateTime($workDate);
+                                            // สร้าง DateTime objects
+                                            $now  = new DateTime($dateNow);
+                                            $work = new DateTime($workDate);
 
-// คำนวณความแตกต่าง
-$interval = $work->diff($now);
+                                            // คำนวณความแตกต่าง
+                                            $interval = $work->diff($now);
 
-// แสดงผลลัพธ์
-echo $interval->y . "Y " . $interval->m . "M";
-?>
+                                            // แสดงผลลัพธ์
+                                            echo $interval->y . "Y " . $interval->m . "M";
+                                        ?>
                                     </strong>
                                 </span>
                             </a>
                         </li>
-                        <?php endif;?>
+                        <?php endif; ?>
                     </ul>
                     <!-- /* edit by pim */ -->
                     <ul class="nav">

@@ -1,15 +1,15 @@
 <?php
-session_start();
-date_default_timezone_set('Asia/Bangkok');
+    session_start();
+    date_default_timezone_set('Asia/Bangkok');
 
-include '../connect.php';
-if (!isset($_SESSION['s_usercode'])) {
-    header('Location: ../login.php');
-    exit();
-}
+    include '../connect.php';
+    if (! isset($_SESSION['s_usercode'])) {
+        header('Location: ../login.php');
+        exit();
+    }
 
-$userCode = $_SESSION['s_usercode'];
-// echo $userCode;
+    $userCode = $_SESSION['s_usercode'];
+    // echo $userCode;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,12 +58,12 @@ $userCode = $_SESSION['s_usercode'];
                 <input type="text" class="form-control" id="codeSearch" list="codeList">
                 <datalist id="codeList">
                     <?php
-$sql = "SELECT e_usercode FROM employees";
-$result = $conn->query($sql);
-while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-    echo '<option value="' . $row['e_usercode'] . '">';
-}
-?>
+                        $sql    = "SELECT e_usercode FROM employees";
+                        $result = $conn->query($sql);
+                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<option value="' . $row['e_usercode'] . '">';
+                        }
+                    ?>
                 </datalist>
             </div>
             <div class="col-4">
@@ -71,12 +71,12 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 <input type="text" class="form-control" id="nameSearch" list="nameList">
                 <datalist id="nameList">
                     <?php
-$sql = "SELECT e_name FROM employees";
-$result = $conn->query($sql);
-while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-    echo '<option value="' . $row['e_name'] . '">';
-}
-?>
+                        $sql    = "SELECT e_name FROM employees";
+                        $result = $conn->query($sql);
+                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<option value="' . $row['e_name'] . '">';
+                        }
+                    ?>
                 </datalist>
             </div>
             <div class="col-4">
@@ -84,18 +84,17 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 <input type="text" class="form-control" id="depSearch" list="depList">
                 <datalist id="depList">
                     <?php
-$sql = "SELECT e_department FROM employees";
-$result = $conn->query($sql);
-while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-    echo '<option value="' . $row['e_department'] . '">';
-}
-?>
+                        $sql    = "SELECT e_department FROM employees";
+                        $result = $conn->query($sql);
+                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<option value="' . $row['e_department'] . '">';
+                        }
+                    ?>
                 </datalist>
             </div>
         </div>
     </div>
 
-    <!-- ตารางแสดงข้อมูล -->
     <div class="container-fluid mt-5">
         <table class="table table-hover table-bordered" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="empTable">
             <thead>
@@ -106,7 +105,8 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     <th rowspan="2">แผนก</th>
                     <th rowspan="2">อายุงาน</th>
                     <th rowspan="2">ระดับ</th>
-                    <th rowspan="2" style="width: 10%;">อีเมล</th>
+                    <th rowspan="2">สถานที่ทำงาน</th>
+                    <!-- <th rowspan="2" style="width: 10%;">อีเมล</th> -->
                     <th rowspan="2">เบอร์โทรศัพท์</th>
                     <th rowspan="1" colspan="6" class="table-secondary">ประเภทการลาและจำนวนวันที่ได้รับ</th>
                     <th rowspan="2">ชื่อผู้ใช้</th>
@@ -124,90 +124,91 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
             </thead>
             <tbody>
                 <?php
-$itemsPerPage = 10;
+                    $itemsPerPage = 10;
 
-// คำนวณหน้าปัจจุบัน
-$currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+                    // คำนวณหน้าปัจจุบัน
+                    $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
 
-$sql = "SELECT * FROM employees WHERE e_status <> 1 AND e_usercode <> '999999' ORDER BY e_add_datetime DESC";
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
+                    $sql       = "SELECT * FROM employees WHERE e_status <> 1 AND e_usercode <> '999999' ORDER BY e_add_datetime DESC";
+                    $result    = $conn->query($sql);
+                    $totalRows = $result->rowCount();
 
-// คำนวณหน้าทั้งหมด
-$totalPages = ceil($totalRows / $itemsPerPage);
+                    // คำนวณหน้าทั้งหมด
+                    $totalPages = ceil($totalRows / $itemsPerPage);
 
-// คำนวณ offset สำหรับ pagination
-$offset = ($currentPage - 1) * $itemsPerPage;
+                    // คำนวณ offset สำหรับ pagination
+                    $offset = ($currentPage - 1) * $itemsPerPage;
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
+                    // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
+                    $sql .= " LIMIT $itemsPerPage OFFSET $offset";
 
-// ประมวลผลคำสั่ง SQL
-$result = $conn->query($sql);
+                    // ประมวลผลคำสั่ง SQL
+                    $result = $conn->query($sql);
 
-// แสดงผลลำดับของแถว
-$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
+                    // แสดงผลลำดับของแถว
+                    $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
-// แสดงข้อมูลในตาราง
-if ($result->rowCount() > 0) {
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        echo '<tr class="text-center align-middle">';
-        echo '<td>' . $rowNumber . '</td>';
-        echo '<td>' . $row['e_usercode'] . '</td>';
-        echo '<td>' . $row['e_name'] . '</td>';
-        echo '<td>' . $row['e_department'] . '</td>';
-        echo '<td>' . $row['e_yearexp'] . '</td>';
-        echo '<td>' . $row['e_level'] . '</td>';
-        echo '<td>' . $row['e_email'] . '</td>';
-        echo '<td>' . $row['e_phone'] . '</td>';
-        echo '<td>' . $row['e_leave_personal'] . '</td>';
-        echo '<td>' . $row['e_leave_personal_no'] . '</td>';
-        echo '<td>' . $row['e_leave_sick'] . '</td>';
-        echo '<td>' . $row['e_leave_sick_work'] . '</td>';
-        echo '<td>' . $row['e_leave_annual'] . '</td>';
-        echo '<td>' . $row['e_other'] . '</td>';
-        echo '<td>' . $row['e_username'] . '</td>';
-        echo '<td>' . $row['e_password'] . '</td>';
-        echo '<td>';
-        echo '<button type="button" class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#empModal" data-usercode="' . $row['e_usercode'] . '">แก้ไข</button>';
-        echo '<button type="button" class="mx-2 btn btn-danger delete-btn" data-usercode="' . $row['e_usercode'] . '"><i class="fa-solid fa-trash"> ลบ</i></button>';
-        echo '</td>';
-        echo '</tr>';
-        $rowNumber--;
-    }
-}
-?>
+                    // แสดงข้อมูลในตาราง
+                    if ($result->rowCount() > 0) {
+                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<tr class="text-center align-middle">';
+                            echo '<td>' . $rowNumber . '</td>';
+                            echo '<td>' . $row['e_usercode'] . '</td>';
+                            echo '<td>' . $row['e_name'] . '</td>';
+                            echo '<td>' . $row['e_department'] . '</td>';
+                            echo '<td>' . $row['e_yearexp'] . '</td>';
+                            echo '<td>' . $row['e_level'] . '</td>';
+                            echo '<td>' . $row['e_workplace'] . '</td>';
+                            // echo '<td>' . $row['e_email'] . '</td>';
+                            echo '<td>' . $row['e_phone'] . '</td>';
+                            echo '<td>' . $row['e_leave_personal'] . '</td>';
+                            echo '<td>' . $row['e_leave_personal_no'] . '</td>';
+                            echo '<td>' . $row['e_leave_sick'] . '</td>';
+                            echo '<td>' . $row['e_leave_sick_work'] . '</td>';
+                            echo '<td>' . $row['e_leave_annual'] . '</td>';
+                            echo '<td>' . $row['e_other'] . '</td>';
+                            echo '<td>' . $row['e_username'] . '</td>';
+                            echo '<td>' . $row['e_password'] . '</td>';
+                            echo '<td>';
+                            echo '<button type="button" class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#empModal" data-usercode="' . $row['e_usercode'] . '">แก้ไข</button>';
+                            echo '<button type="button" class="mx-2 btn btn-danger delete-btn" data-usercode="' . $row['e_usercode'] . '"><i class="fa-solid fa-trash"> ลบ</i></button>';
+                            echo '</td>';
+                            echo '</tr>';
+                            $rowNumber--;
+                        }
+                    }
+                ?>
             </tbody>
         </table>
         <?php
-echo '<div class="pagination">';
-echo '<ul class="pagination">';
+            echo '<div class="pagination">';
+            echo '<ul class="pagination">';
 
-// สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
-if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
-}
+            // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
+            if ($currentPage > 1) {
+                echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+            }
 
-// สร้างลิงก์สำหรับแต่ละหน้า
-for ($i = 1; $i <= $totalPages; $i++) {
-    if ($i == $currentPage) {
-        echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-    } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
-    }
-}
+            // สร้างลิงก์สำหรับแต่ละหน้า
+            for ($i = 1; $i <= $totalPages; $i++) {
+                if ($i == $currentPage) {
+                    echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+                } else {
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+                }
+            }
 
-// สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
-if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
-}
+            // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
+            if ($currentPage < $totalPages) {
+                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+            }
 
-echo '</ul>';
-echo '</div>';
+            echo '</ul>';
+            echo '</div>';
 
-?>
+        ?>
         <!-- Modal แก้ไข -->
         <div class="modal fade" id="empModal" tabindex="-1" aria-labelledby="empModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -278,52 +279,11 @@ echo '</div>';
                             </div>
                             <div class="mt-3 row">
                                 <h5>ข้อมูลพนักงาน</h5>
-                                <div class="col-3">
+                                <div class="col-6">
                                     <label for="nameLabel">ชื่อ - นามสกุล</label>
                                     <span style="color: red;"> *</span>
                                     <input class="form-control" type="text" id="add_name" name="add_name" required
                                         oninvalid="this.setCustomValidity('กรุณากรอกชื่อ - นามสกุล')"
-                                        oninput="this.setCustomValidity('')">
-                                </div>
-                                <div class="col-3">
-                                    <label for="levelLabel">แผนก</label>
-                                    <span style="color: red;"> *</span>
-                                    <!-- <input class="form-control" list="departmentList" id="add_department"
-                                        name="add_department" type="text"> -->
-                                    <!-- <datalist id="departmentList">
-                                        <?php
-// สร้างคำสั่ง SQL เพื่อดึงข้อมูล
-$sql = "SELECT * FROM department";
-$stmt = $conn->prepare($sql);
-$stmt->execute();
-
-// ดึงผลลัพธ์และแสดงใน datalist
-echo '<datalist id="departmentList">';
-while ($row = $stmt->fetch()) {
-    echo '<option value="' . $row['d_department'] . '">';
-}
-?>
-                                    </datalist> -->
-                                    <select class="form-control" id="add_department" style="border-radius: 20px;">
-                                        <option value="select" selected>กรุณาเลือกแผนก</option>
-                                        <?php
-$department_sql = "SELECT * FROM department";
-$department_result = $conn->query($department_sql);
-if ($department_result->rowCount() > 0) {
-    while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
-        echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
-    }
-}
-?>
-                                    </select>
-                                </div>
-                                <div class="col-3">
-                                    <label for="yearexpLabel">อายุงาน</label>
-                                    <span style="color: red;"> *</span>
-                                    <!-- <input class="form-control" type="text" id="add_yearexp" name="add_yearexp"> -->
-                                    <input class="form-control" type="text" id="add_yearexp" name="add_yearexp"
-                                        onchange="calculateLeaveDays()" required
-                                        oninvalid="this.setCustomValidity('กรุณากรอกอายุงาน')"
                                         oninput="this.setCustomValidity('')">
                                 </div>
                                 <div class="col-3">
@@ -332,58 +292,229 @@ if ($department_result->rowCount() > 0) {
                                     <select class="form-control" id="add_level" style="border-radius: 20px;">
                                         <option value="select" selected>กรุณาเลือกระดับ</option>
                                         <?php
-$level_sql = "SELECT * FROM level";
-$level_result = $conn->query($level_sql);
-if ($level_result->rowCount() > 0) {
-    while ($level_row = $level_result->fetch()) {
-        echo '<option value="' . $level_row['l_id'] . '">' . $level_row['l_level'] . '</option>';
-    }
-}
-?>
+                                            $level_sql    = "SELECT * FROM level";
+                                            $level_result = $conn->query($level_sql);
+                                            if ($level_result->rowCount() > 0) {
+                                                while ($level_row = $level_result->fetch()) {
+                                                    echo '<option value="' . $level_row['l_id'] . '">' . $level_row['l_level'] . '</option>';
+                                                }
+                                            }
+                                        ?>
                                     </select>
+                                </div>
+                                <div class="col-3">
+                                    <label for="departLabel">แผนก</label>
+                                    <span style="color: red;"> *</span>
+                                    <!-- <input class="form-control" list="departmentList" id="add_department"
+                                        name="add_department" type="text"> -->
+                                    <!-- <datalist id="departmentList">
+                                       <?php
+                                           // สร้างคำสั่ง SQL เพื่อดึงข้อมูล
+                                           $sql  = "SELECT * FROM department WHERE d_department NOT IN ('Modeling', 'Design')";
+                                           $stmt = $conn->prepare($sql);
+                                           $stmt->execute();
 
+                                           // ดึงผลลัพธ์และแสดงใน datalist
+                                           echo '<datalist id="departmentList">';
+                                           while ($row = $stmt->fetch()) {
+                                               echo '<option value="' . htmlspecialchars($row['d_department'], ENT_QUOTES, 'UTF-8') . '">';
+                                           }
+                                           echo '</datalist>';
+                                       ?>
+                                    </datalist> -->
+                                    <select class="form-control" id="add_department" style="border-radius: 20px;">
+                                        <option value="select" selected>กรุณาเลือกแผนก</option>
+                                        <?php
+                                            $department_sql    = "SELECT * FROM department";
+                                            $department_result = $conn->query($department_sql);
+                                            if ($department_result->rowCount() > 0) {
+                                                while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
+                                                    echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
+                                                }
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
+                                <!-- <div class="col-3">
+                                    <label for="yearexpLabel">อายุงาน</label>
+                                    <span style="color: red;"> *</span>
+                                    <input class="form-control" type="text" id="add_yearexp" name="add_yearexp"
+                                        onchange="calculateLeaveDays()" required
+                                        oninvalid="this.setCustomValidity('กรุณากรอกอายุงาน')"
+                                        oninput="this.setCustomValidity('')">
+                                </div> -->
+
+                            </div>
+                            <div class="mt-3 row">
+                                <div class="col-3">
+                                    <label for="subDepartLabel">แผนกย่อย_1</label>
+                                    <span style="color: red;">*</span>
+                                    <?php
+                                        $sql  = "SELECT * FROM department";
+                                        $stmt = $conn->prepare($sql);
+                                        $stmt->execute();
+
+                                        echo '<datalist id="subDepartList">';
+                                        while ($row = $stmt->fetch()) {
+                                            echo '<option value="' . $row['d_department'] . '">';
+                                        }
+                                        echo '</datalist>';
+                                    ?>
+                                    <select class="form-control" id="add_subdepart" style="border-radius: 20px;">
+                                        <option value="select" selected>กรุณาเลือกแผนกย่อย</option>
+                                        <?php
+                                            $department_sql    = "SELECT * FROM department";
+                                            $department_result = $conn->query($department_sql);
+                                            if ($department_result->rowCount() > 0) {
+                                                while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
+                                                    echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
+                                                }
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <label for="subDepart2Label">แผนกย่อย_2</label>
+                                    <?php
+                                        $sql  = "SELECT * FROM department";
+                                        $stmt = $conn->prepare($sql);
+                                        $stmt->execute();
+
+                                        echo '<datalist id="subDepart2List">';
+                                        while ($row = $stmt->fetch()) {
+                                            echo '<option value="' . $row['d_department'] . '">';
+                                        }
+                                        echo '</datalist>';
+                                    ?>
+                                    <select class="form-control" id="add_subdepart2" style="border-radius: 20px;">
+                                        <option value="select" selected>กรุณาเลือกแผนกย่อย 2</option>
+                                        <?php
+                                            $department_sql    = "SELECT * FROM department";
+                                            $department_result = $conn->query($department_sql);
+                                            if ($department_result->rowCount() > 0) {
+                                                while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
+                                                    echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
+                                                }
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <label for="subDepart3Label">แผนกย่อย_3</label>
+                                    <?php
+                                        $sql  = "SELECT * FROM department";
+                                        $stmt = $conn->prepare($sql);
+                                        $stmt->execute();
+
+                                        echo '<datalist id="subDepart3List">';
+                                        while ($row = $stmt->fetch()) {
+                                            echo '<option value="' . $row['d_department'] . '">';
+                                        }
+                                        echo '</datalist>';
+                                    ?>
+                                    <select class="form-control" id="add_subdepart3" style="border-radius: 20px;">
+                                        <option value="select" selected>กรุณาเลือกแผนกย่อย 3</option>
+                                        <?php
+                                            $department_sql    = "SELECT * FROM department";
+                                            $department_result = $conn->query($department_sql);
+                                            if ($department_result->rowCount() > 0) {
+                                                while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
+                                                    echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
+                                                }
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <label for="subDepart4Label">แผนกย่อย_4</label>
+                                    <?php
+                                        $sql  = "SELECT * FROM department";
+                                        $stmt = $conn->prepare($sql);
+                                        $stmt->execute();
+
+                                        echo '<datalist id="subDepart4List">';
+                                        while ($row = $stmt->fetch()) {
+                                            echo '<option value="' . $row['d_department'] . '">';
+                                        }
+                                        echo '</datalist>';
+                                    ?>
+                                    <select class="form-control" id="add_subdepart4" style="border-radius: 20px;">
+                                        <option value="select" selected>กรุณาเลือกแผนกย่อย 4</option>
+                                        <?php
+                                            $department_sql    = "SELECT * FROM department";
+                                            $department_result = $conn->query($department_sql);
+                                            if ($department_result->rowCount() > 0) {
+                                                while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
+                                                    echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
+                                                }
+                                            }
+                                        ?>
+                                    </select>
                                 </div>
                             </div>
                             <div class="mt-3 row">
+                                <div class="col-3">
+                                    <label for="subDepart5Label">แผนกย่อย_5</label>
+                                    <?php
+                                        $sql  = "SELECT * FROM department";
+                                        $stmt = $conn->prepare($sql);
+                                        $stmt->execute();
+
+                                        echo '<datalist id="subDepart3List">';
+                                        while ($row = $stmt->fetch()) {
+                                            echo '<option value="' . $row['d_department'] . '">';
+                                        }
+                                        echo '</datalist>';
+                                    ?>
+                                    <select class="form-control" id="add_subdepart5" style="border-radius: 20px;">
+                                        <option value="select" selected>กรุณาเลือกแผนกย่อย 5</option>
+                                        <?php
+                                            $department_sql    = "SELECT * FROM department";
+                                            $department_result = $conn->query($department_sql);
+                                            if ($department_result->rowCount() > 0) {
+                                                while ($department_row = $department_result->fetch(PDO::FETCH_ASSOC)) {
+                                                    echo '<option value="' . $department_row['d_id'] . '">' . $department_row['d_department'] . '</option>';
+                                                }
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
                                 <div class="col-3">
                                     <label for="workplaceLabel">สถานที่ทำงาน</label>
                                     <span style="color: red;"> *</span>
                                     <select class="form-control" id="add_workplace" style="border-radius: 20px;">
                                         <option value="select" selected>กรุณาเลือกสถานที่ทำงาน</option>
                                         <?php
-$workplace_sql = "SELECT * FROM workplace";
-$workplace_result = $conn->query($workplace_sql);
-if ($workplace_result->rowCount() > 0) {
-    while ($workplace_row = $workplace_result->fetch()) {
-        echo '<option value="' . $workplace_row['w_id'] . '">' . $workplace_row['w_name'] . '</option>';
-    }
-}
-?>
+                                            $workplace_sql    = "SELECT * FROM workplace";
+                                            $workplace_result = $conn->query($workplace_sql);
+                                            if ($workplace_result->rowCount() > 0) {
+                                                while ($workplace_row = $workplace_result->fetch()) {
+                                                    echo '<option value="' . $workplace_row['w_id'] . '">' . $workplace_row['w_name'] . '</option>';
+                                                }
+                                            }
+                                        ?>
                                     </select>
                                 </div>
                                 <div class="col-3">
                                     <label for="workStartDateLabel">วันที่เริ่มงาน</label>
+                                    <span style="color: red;"> *</span>
                                     <input class="form-control" type="text" id="add_work_start_date"
-                                        name="add_work_start_date">
+                                        name="add_work_start_date" onchange="calculateLeaveDays()">
                                 </div>
-                                <div class="col-3">
+                                <!-- <div class="col-3">
                                     <label for="emailLabel">อีเมล</label>
                                     <input class="form-control" type="text" id="add_email" name="add_email">
-                                </div>
-                                <!-- <div class="col-6">
-                                    <label for="depatLabel">ไลน์</label>
-                                    <input class="form-control" type="text" id="add_id_line" name="add_id_line">
                                 </div> -->
                                 <div class="col-3">
                                     <label for="phoneLabel">เบอร์โทรศัพท์</label>
                                     <input class="form-control" type="text" id="add_phone" name="add_phone">
                                 </div>
-
-
                             </div>
                             <div class="mt-3 row">
+
                                 <div class="col-6">
                                     <label for="tokenLabel">Line token</label>
+                                    <span style="color: red;">*</span>
                                     <input class="form-control" type="text" id="add_token" name="add_token">
                                 </div>
                             </div>
@@ -449,41 +580,45 @@ if ($workplace_result->rowCount() > 0) {
 
         $('#addEmpForm').on('submit', function(e) {
             e.preventDefault();
-            var add_department = $("#add_department").val();
-            var add_level = $("#add_level").val();
-            var add_annual = $("#add_annual").val();
-            var add_other = $("#add_other").val();
-            var add_token = $("#add_token").val();
-            var add_workplace = $("#add_workplace").val();
-            var add_work_start_date = $("#add_work_start_date").val();
 
-            alert(add_work_start_date)
+            var formData = {
+                add_usercode: $("#add_usercode").val(),
+                add_username: $("#add_username").val(),
+                add_password: $("#add_password").val(),
+                add_name: $("#add_name").val(),
+
+                add_department: $("#add_department").val(),
+                add_subdepart: $("#add_subdepart").val(),
+                add_subdepart2: $("#add_subdepart2").val(),
+                add_subdepart3: $("#add_subdepart3").val(),
+                add_subdepart4: $("#add_subdepart4").val(),
+                add_subdepart5: $("#add_subdepart5").val(),
+                add_level: $("#add_level").val(),
+                add_annual: $("#add_annual").val(),
+                add_other: $("#add_other").val(),
+                add_token: $("#add_token").val(),
+                add_workplace: $("#add_workplace").val(),
+                add_work_start_date: $("#add_work_start_date").val()
+            };
+
+            console.log(formData);
+
             $.ajax({
-                url: 'a_ajax_add_employee.php', // Path to your PHP script
+                url: 'a_ajax_add_employee.php',
                 type: 'POST',
-                data: $(this).serialize() +
-                    '&add_department=' + add_department +
-                    '&add_level=' + add_level +
-                    '&add_annual=' + add_annual +
-                    '&add_other=' + add_other +
-                    '&add_token=' + add_token +
-                    '&add_workplace=' + add_workplace +
-                    '&add_work_start_date=' + add_work_start_date,
+                data: formData,
                 success: function(response) {
-                    // Handle success response
                     Swal.fire({
                         icon: 'success',
                         title: 'บันทึกสำเร็จ',
                         text: response
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location
-                                .reload(); // Reload the page or redirect as needed
+                            location.reload();
                         }
                     });
                 },
                 error: function(xhr, status, error) {
-                    // Handle error response
                     Swal.fire({
                         icon: 'error',
                         title: 'เกิดข้อผิดพลาด',
@@ -492,11 +627,11 @@ if ($workplace_result->rowCount() > 0) {
                 }
             });
         });
+
         // ปุ่มแก้ไข
         $('.edit-btn').click(function() {
             var usercode = $(this).data('usercode');
 
-            // alert(usercode)
             $.ajax({
                 url: 'a_ajax_get_employee_data.php',
                 method: 'POST',
@@ -509,7 +644,6 @@ if ($workplace_result->rowCount() > 0) {
                 }
             });
         });
-        // บันทึกข้อมูลที่แก้ไข
         $("#saveChangesBtn").click(function() {
             var updUsername = '<?php echo $userName; ?>';
             var usercode = $("#edit_usercode").val();
@@ -574,7 +708,6 @@ if ($workplace_result->rowCount() > 0) {
                     });
                 }
             });
-            // alert(empUsername);
         });
         $('.delete-btn').click(function() {
             var usercode = $(this).data('usercode');
@@ -617,9 +750,9 @@ if ($workplace_result->rowCount() > 0) {
         locale: "th", // กำหนดเป็นภาษาไทย (ต้องโหลด locale ไทยเพิ่ม)
     });
 
-    // กรอกอายุงานให้จำนวนวันลาขึ้นเอง
+    // กรอกวันที่เริ่มงานให้จำนวนวันลาขึ้นเอง
     function calculateLeaveDays() {
-        var yearsOfExperience = parseInt(document.getElementById("add_yearexp").value);
+        var yearsOfExperience = parseInt(document.getElementById("add_work_start_date").value);
         var personal = document.getElementById("add_personal");
         var personalNo = document.getElementById("add_personal_no");
         var sick = document.getElementById("add_sick");
@@ -627,23 +760,13 @@ if ($workplace_result->rowCount() > 0) {
         var annual = document.getElementById("add_annual");
         var other = document.getElementById("add_other");
 
-        if (yearsOfExperience < 1) {
-            // ไม่ถึงปี
-            personal.value = "0"; // จำนวนวันลากิจได้รับค่าจ้าง
-            personalNo.value = "365"; // จำนวนวันลากิจไม่ได้รับค่าจ้าง
-            sick.value = "30"; // จำนวนวันลาป่วย
-            sickWork.value = "365"; // จำนวนวันลาป่วยจากงาน
-            annual.value = "0"; // จำนวนวันลาพักร้อน
-            other.value = "365"; // จำนวนวันลาพักร้อน
-        } else if (yearsOfExperience >= 1 && yearsOfExperience < 2) {
-            // ถ้าอายุงานอยู่ในช่วง 1-2 ปี
-            personal.value = "5"; // จำนวนวันลากิจได้รับค่าจ้าง
-            annual.value = "6"; // จำนวนวันลาพักร้อน
-        } else {
-            // ถ้าไม่อยู่ในช่วง 1-2 ปี ให้ล้างค่าทิ้ง
-            personal.value = "";
-            annual.value = "";
-        }
+        personal.value = "0";
+        personalNo.value = "365";
+        sick.value = "30";
+        sickWork.value = "365";
+        annual.value = "0";
+        other.value = "365";
+
     }
     </script>
     <script src="../js/popper.min.js"></script>
