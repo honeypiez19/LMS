@@ -605,7 +605,6 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 ];
 
                 foreach ($leave_types as $leave_id => $leave_name) {
-                    // SQL Query to get leave details and employee leave balances
                     $sql_leave_personal = "SELECT
     SUM(
         DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))

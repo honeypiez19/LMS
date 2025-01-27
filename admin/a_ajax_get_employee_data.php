@@ -1,25 +1,19 @@
 <?php
-// Start session
 session_start();
 
-require '../connect.php'; // Include database connection file
+require '../connect.php';
 
-// Check if usercode is set
 if (isset($_POST['usercode'])) {
     $usercode = $_POST['usercode'];
 
-    // Query to fetch employee data based on usercode
-    $sql = "SELECT * FROM employees WHERE e_usercode = :usercode";
+    $sql  = "SELECT * FROM employees WHERE e_usercode = :usercode";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':usercode', $usercode);
     $stmt->execute();
 
-    // Check if data is found
     if ($stmt->rowCount() > 0) {
-        // Fetch employee data
         $row = $stmt->fetch();
 
-        // Output HTML content for modal body with employee information
         echo '<input class="form-control" type="hidden" id="edit_usercode" value="' . $row['e_usercode'] . '">';
         echo '<div class="row">
         <h5>ข้อมูลการเข้าระบบ</h5>
@@ -40,82 +34,39 @@ if (isset($_POST['usercode'])) {
         </div>
         </div>';
 
+        // ข้อมูลพนักงาน ---------------------------------------------------------------------
         echo '<div class="mt-3 row">';
         echo '<h5>ข้อมูลพนักงาน</h5>';
-        echo ' <div class="col-3">
+        // ชื่อ - นามสกุล
+        echo ' <div class="col-6">
         <label for="nameLabel">ชื่อ - นามสกุล</label>
         <input  class="form-control" type="text" id="edit_name" value="' . $row['e_name'] . '">
         </div>';
 
-// Query เพื่อดึงข้อมูลแผนกของพนักงานที่เลือก
-        $employee_sql = "SELECT employees.e_department, department.d_department
-    FROM employees
-    INNER JOIN department ON employees.e_department = department.d_department
-    WHERE employees.e_usercode = :usercode";
-        $stmt_employee = $conn->prepare($employee_sql);
-        $stmt_employee->bindParam(':usercode', $usercode); // Bind ค่า usercode
-        $stmt_employee->execute();
-        $employee_data = $stmt_employee->fetch(); // ดึงข้อมูลแผนกของพนักงาน
-
-// Query เพื่อดึงข้อมูลแผนกทั้งหมด
-        $department_sql = "SELECT d_department FROM department";
-        $stmt_department = $conn->prepare($department_sql);
-        $stmt_department->execute();
-        $departments = $stmt_department->fetchAll(); // ดึงข้อมูลแผนกทั้งหมด
-
-// แสดงข้อมูลแผนก
-        echo '<div class="col-3">';
-        echo '<label for="levelLabel">แผนก</label>';
-        echo '<select class="form-control" id="edit_department" style="border-radius: 20px;">';
-
-// Loop ผ่านแผนกทั้งหมด
-        foreach ($departments as $department) {
-            echo '<option value="' . $department['d_department'] . '"';
-
-            // ตรวจสอบว่าแผนกของพนักงานตรงกับแผนกไหน
-            if ($employee_data['d_department'] == $department['d_department']) {
-                echo ' selected'; // เลือกแผนกที่ตรงกับข้อมูลพนักงาน
-            }
-
-            echo '>' . $department['d_department'] . '</option>';
-        }
-
-        echo '</select>';
-        echo '</div>';
-
-        echo '<div class="col-3">
-        <label for="yearexpLabel">อายุงาน</label>
-        <input  class="form-control" type="text" id="edit_yearexp" value="' . $row['e_yearexp'] . '">
-        </div>';
-
-        // Query เพื่อดึงข้อมูลระดับของพนักงาน
         $employee_sql = "SELECT employees.e_level, level.l_level
         FROM employees
         INNER JOIN level ON employees.e_level = level.l_level
         WHERE employees.e_usercode = :usercode";
         $stmt_employee = $conn->prepare($employee_sql);
-        $stmt_employee->bindParam(':usercode', $usercode); // Bind ค่า usercode
+        $stmt_employee->bindParam(':usercode', $usercode);
         $stmt_employee->execute();
-        $employee_data = $stmt_employee->fetch(); // ดึงข้อมูลระดับของพนักงาน
+        $employee_data = $stmt_employee->fetch();
 
-// Query เพื่อดึงข้อมูลระดับทั้งหมด
-        $level_sql = "SELECT l_id, l_level FROM level";
+        $level_sql  = "SELECT * FROM level";
         $stmt_level = $conn->prepare($level_sql);
         $stmt_level->execute();
-        $levels = $stmt_level->fetchAll(); // ดึงข้อมูลระดับทั้งหมด
+        $levels = $stmt_level->fetchAll();
 
-// แสดงข้อมูลระดับ
+        // ระดับ
         echo '<div class="col-3">';
         echo '<label for="levelLabel">ระดับ</label>';
         echo '<select class="form-control" id="edit_level" style="border-radius: 50px;">';
 
-// Loop ผ่านระดับทั้งหมด
         foreach ($levels as $level) {
             echo '<option value="' . $level['l_level'] . '"';
 
-// ตรวจสอบว่าระดับของพนักงานตรงกับระดับไหน
             if ($employee_data['e_level'] == $level['l_level']) {
-                echo ' selected'; // เลือกระดับที่ตรงกับข้อมูลพนักงาน
+                echo ' selected';
             }
 
             echo '>' . $level['l_level'] . '</option>';
@@ -124,45 +75,138 @@ if (isset($_POST['usercode'])) {
         echo '</select>';
         echo '</div>';
 
-        echo '<div class="mt-3 row">
-        <div class="col-3">
-        <label for="emailLabel">อีเมล</label>
-        <input  class="form-control" type="text" id="edit_email" value="' . $row['e_email'] . '">
-        </div>
+        $employee_sql = "SELECT
+            employees.e_department,
+            department.d_department,
+            employees.e_sub_department,
+            employees.e_sub_department2,
+            employees.e_sub_department3,
+            employees.e_sub_department4,
+            employees.e_sub_department5
+        FROM employees
+        INNER JOIN department ON employees.e_department = department.d_department
+        WHERE employees.e_usercode = :usercode";
 
-        <div class="col-3">
+        $stmt_employee = $conn->prepare($employee_sql);
+        $stmt_employee->bindParam(':usercode', $usercode);
+        $stmt_employee->execute();
+        $employee_data = $stmt_employee->fetch();
+
+        $department_sql  = "SELECT * FROM department WHERE d_department NOT IN ('Modeling', 'Design', 'AC', 'Sales', 'Store')";
+        $stmt_department = $conn->prepare($department_sql);
+        $stmt_department->execute();
+        $departments = $stmt_department->fetchAll();
+
+        // แผนกหลัก
+        echo '<div class="col-3">';
+        echo '<label for="edit_department">แผนกหลัก</label>';
+        echo '<select class="form-control" id="edit_department" style="border-radius: 20px;">';
+
+        foreach ($departments as $department) {
+            echo '<option value="' . $department['d_department'] . '"';
+
+            if ($employee_data['d_department'] == $department['d_department']) {
+                echo ' selected';
+            }
+
+            echo '>' . $department['d_department'] . '</option>';
+        }
+
+        echo '</select>';
+        echo '</div>';
+
+        $department_sql  = "SELECT * FROM department";
+        $stmt_department = $conn->prepare($department_sql);
+        $stmt_department->execute();
+        $departments = $stmt_department->fetchAll();
+
+        echo '<div class="mt-3 row">';
+        // แผนกย่อย_1
+        echo '<div class="col-3">';
+        echo '<label for="subdepartLabel">แผนกย่อย_1</label>';
+        echo '<select class="form-control" id="edit_subdepart" style="border-radius: 20px;" required>';
+
+        foreach ($departments as $department) {
+            echo '<option value="' . $department['d_department'] . '"';
+
+            if ($employee_data['d_department'] == $department['d_department']) {
+                echo ' selected';
+            }
+
+            echo '>' . $department['d_department'] . '</option>';
+        }
+
+        echo '</select>';
+        echo '</div>';
+
+        // แผนกย่อย_2
+        echo '<div class="col-3">';
+        echo '<label for="subdepart2Label">แผนกย่อย_2</label>';
+        echo '<select class="form-control" id="edit_subdepart2" style="border-radius: 20px;" required>';
+
+        foreach ($subdeparts as $subdepart2) {
+            echo '<option value="' . $subdepart2['d_department'] . '"';
+
+            if ($employee_data['d_department'] == $subdepart2['d_department']) {
+                echo ' selected';
+            }
+
+            echo '>' . $subdepart2['d_department'] . '</option>';
+
+        }
+
+        echo '</select>';
+        echo '</div>';
+
+        // แผนกย่อย_3
+        echo '<div class="col-3">';
+        echo '<label for="subdepart3Label">แผนกย่อย_3</label>';
+        echo '<select class="form-control" id="edit_subdepart3" style="border-radius: 20px;" required>';
+
+        foreach ($subdeparts as $subdepart3) {
+            echo '<option value="' . $subdepart3['d_department'] . '"';
+
+            if ($employee_data['d_department'] == $subdepart3['d_department']) {
+                echo ' selected';
+            }
+
+            echo '>' . $subdepart3['d_department'] . '</option>';
+
+        }
+
+        echo '</select>';
+        echo '</div>';
+
+        echo '<div class="col-3">
         <label for="phoneLabel">เบอร์โทรศัพท์</label>
         <input  class="form-control" type="text" id="edit_phone" value="' . $row['e_phone'] . '">
         </div>';
         // echo '<input  class="form-control" type="text" id="edit_workplace" value="' . $row['e_workplace'] . '">';
+        echo '</div>';
 
         $employee_sql = "SELECT employees.e_workplace, workplace.w_name
         FROM employees
         INNER JOIN workplace ON employees.e_workplace = workplace.w_name
         WHERE employees.e_usercode = :usercode";
         $stmt_employee = $conn->prepare($employee_sql);
-        $stmt_employee->bindParam(':usercode', $usercode); // Bind ค่า usercode
+        $stmt_employee->bindParam(':usercode', $usercode);
         $stmt_employee->execute();
-        $employee_data = $stmt_employee->fetch(); // ดึงข้อมูลสถานที่ทำงานของพนักงาน
+        $employee_data = $stmt_employee->fetch();
 
-        // Query เพื่อดึงข้อมูลสถานที่ทำงานทั้งหมด
-        $workplace_sql = "SELECT w_id, w_name FROM workplace";
+        $workplace_sql  = "SELECT w_id, w_name FROM workplace";
         $stmt_workplace = $conn->prepare($workplace_sql);
         $stmt_workplace->execute();
-        $workplaces = $stmt_workplace->fetchAll(); // ดึงข้อมูลสถานที่ทำงานทั้งหมด
+        $workplaces = $stmt_workplace->fetchAll();
 
-        // แสดงข้อมูลสถานที่ทำงาน
         echo '<div class="col-3">';
         echo '<label for="workplaceLabel">สถานที่ทำงาน</label>';
         echo '<select class="form-control" id="edit_workplace" style="border-radius: 50px;">';
 
-        // Loop ผ่านสถานที่ทำงานทั้งหมด
         foreach ($workplaces as $workplace) {
             echo '<option value="' . $workplace['w_name'] . '"';
 
-            // ตรวจสอบว่าสถานที่ทำงานของพนักงานตรงกับรายการไหน
             if ($employee_data['e_workplace'] == $workplace['w_name']) {
-                echo ' selected'; // เลือกรายการที่ตรงกับสถานที่ทำงานของพนักงาน
+                echo ' selected';
             }
 
             echo '>' . $workplace['w_name'] . '</option>';

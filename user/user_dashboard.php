@@ -773,25 +773,24 @@ WHERE l_leave_id = :leave_id
                                 <div class="mt-2 row">
                                     <div class="col-6">
                                         <?php
-                                            // กำหนดตัวแปรสำหรับผู้ใช้งานพิเศษ
                                             $specialUsers = ['Pornsuk'];
                                             if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
-                                                $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
+                                                $specialUsers[] = 'Chaikorn';
                                             }
 
                                             // SQL query
                                             $sql = "SELECT *
-        FROM employees
-        WHERE (
-            e_sub_department = :subDepart
-            OR e_sub_department2 = :subDepart2
-            OR e_sub_department3 = :subDepart3
-            OR e_sub_department4 = :subDepart4
-            OR e_sub_department5 = :subDepart5
-            OR e_username IN (:specialUser1, :specialUser2)
-        )
-        AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
-        ORDER BY e_username ASC";
+                                                FROM employees
+                                                WHERE (
+                                                    e_sub_department = :subDepart
+                                                    OR e_sub_department2 = :subDepart2
+                                                    OR e_sub_department3 = :subDepart3
+                                                    OR e_sub_department4 = :subDepart4
+                                                    OR e_sub_department5 = :subDepart5
+                                                    OR e_username IN (:specialUser1, :specialUser2)
+                                                )
+                                                AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
+                                                ORDER BY e_username ASC";
 
                                             $stmt = $conn->prepare($sql);
                                             $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
