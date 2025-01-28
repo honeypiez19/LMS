@@ -428,7 +428,7 @@
                                 <div class="col-3">
                                     <label for="workStartDateLabel">วันที่เริ่มงาน</label>
                                     <span style="color: red;"> *</span>
-                                    <input class="form-control" type="date" id="add_work_start_date"
+                                    <input class="form-control" type="text" id="add_work_start_date"
                                         name="add_work_start_date" onchange="calculateLeaveDays()" required
                                         oninvalid="this.setCustomValidity('กรุณากรอกวันที่เริ่มงาน')"
                                         oninput="this.setCustomValidity('')">
@@ -590,10 +590,9 @@
             var usercode = $("#edit_usercode").val();
             var name = $("#edit_name").val();
             var department = $("#edit_department").val();
-            var yearexp = $("#edit_yearexp").val();
             var level = $("#edit_level").val();
             var email = $("#edit_email").val();
-            var id_line = $("#edit_id_line").val();
+            var token = $("#edit_line").val();
             var phone = $("#edit_phone").val();
             var username = $("#edit_username").val();
             var password = $("#edit_password").val();
@@ -604,13 +603,12 @@
             var annual = $("#edit_annual").val();
             var other = $("#edit_other").val();
             var workplace = $("#edit_workplace").val();
-
-            var workplaceName = '';
-            if (workplace == 1) {
-                workplaceName = 'Korat';
-            } else {
-                workplaceName = 'Bang Phli';
-            }
+            var subDepart = $("#edit_subdepart").val();
+            var subDepart2 = $("#edit_subdepart2").val();
+            var subDepart3 = $("#edit_subdepart3").val();
+            var subDepart4 = $("#edit_subdepart4").val();
+            var subDepart5 = $("#edit_subdepart5").val();
+            var workStartDate = $("#edit_work_start_date").val();
 
             $.ajax({
                 url: "a_ajax_upd_employee.php",
@@ -619,10 +617,9 @@
                     usercode: usercode,
                     name: name,
                     department: department,
-                    yearexp: yearexp,
                     level: level,
                     email: email,
-                    id_line: id_line,
+                    token: token,
                     phone: phone,
                     username: username,
                     password: password,
@@ -633,7 +630,13 @@
                     sickWork: sickWork,
                     annual: annual,
                     other: other,
-                    workplaceName: workplaceName
+                    workplace: workplace,
+                    subDepart: subDepart,
+                    subDepart2: subDepart2,
+                    subDepart3: subDepart3,
+                    subDepart4: subDepart4,
+                    subDepart5: subDepart5,
+                    workStartDate: workStartDate
                 },
                 success: function(response) {
                     Swal.fire({
@@ -684,20 +687,26 @@
             $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
         });
     });
+    // แผนก
+    $("#depSearch").on("keyup", function() {
+        var value3 = $(this).val().toLowerCase();
+        $("#empTable tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
+        });
+    });
 
     var today = new Date();
     flatpickr("#add_work_start_date", {
         dateFormat: "d-m-Y",
-        defaultDate: today, // ตั้งค่า default เป็นวันที่ปัจจุบัน
+        defaultDate: today,
         onChange: function(selectedDates, dateStr, instance) {
-            calculateLeaveDays(); // เมื่อวันที่เปลี่ยนให้คำนวณจำนวนวันลาทันที
+            calculateLeaveDays();
         }
     });
 
     function calculateLeaveDays() {
-        var startDate = new Date(document.getElementById("add_work_start_date").value);
+        var workStartDate = new Date(document.getElementById("add_work_start_date").value);
 
-        // กำหนดจำนวนวันลาต่างๆ ตามเงื่อนไข
         var personal = document.getElementById("add_personal");
         var personalNo = document.getElementById("add_personal_no");
         var sick = document.getElementById("add_sick");
@@ -705,7 +714,6 @@
         var annual = document.getElementById("add_annual");
         var other = document.getElementById("add_other");
 
-        // ตั้งค่าจำนวนวันลาที่ต้องการ
         personal.value = "0";
         personalNo.value = "365";
         sick.value = "30";
@@ -713,25 +721,31 @@
         annual.value = "0";
         other.value = "365";
 
-        // คำนวณจำนวนวันจากวันที่เริ่มงานได้ที่นี่ถ้าต้องการ
-        // ตัวอย่าง: ถ้าคุณต้องการคำนวณจำนวนปีที่ทำงานจากวันที่เริ่มงาน
-        var currentDate = new Date();
-        var yearsOfExperience = currentDate.getFullYear() - startDate.getFullYear();
-        if (currentDate.getMonth() < startDate.getMonth() ||
-            (currentDate.getMonth() === startDate.getMonth() && currentDate.getDate() < startDate.getDate())) {
-            yearsOfExperience--;
+        var currentDate = new Date(); // วันที่ปัจจุบัน
+        console.log("Current Date:", currentDate); // แสดงค่าวันที่ปัจจุบัน
+
+        console.log("Work Start Date:", workStartDate); // แสดงวันที่เริ่มงาน
+
+        var yearsOfExperience = currentDate.getFullYear() - workStartDate.getFullYear();
+        console.log("Years of Experience:", yearsOfExperience); // แสดงจำนวนปีที่ทำงาน
+
+        if (yearsOfExperience >= 1 && yearsOfExperience < 2) {
+            annual.value = "6"; // ครบ 1 ปี แต่ไม่ถึง 2 ปี
+        } else if (yearsOfExperience >= 2 && yearsOfExperience < 3) {
+            annual.value = "7"; // ครบ 2 ปี แต่ไม่ถึง 3 ปี
+        } else if (yearsOfExperience >= 3 && yearsOfExperience < 4) {
+            annual.value = "8"; // ครบ 3 ปี แต่ไม่ถึง 4 ปี
+        } else if (yearsOfExperience >= 4 && yearsOfExperience < 5) {
+            annual.value = "9"; // ครบ 4 ปี แต่ไม่ถึง 5 ปี
+        } else if (yearsOfExperience >= 5) {
+            annual.value = "10"; // ครบ 5 ปีขึ้นไป
+        } else {
+            annual.value = "0";
         }
 
-        // อัพเดตข้อมูลตามจำนวนปี
-        // ตัวอย่าง: เพิ่มจำนวนวันลาปีใหม่ตามประสบการณ์
-        if (yearsOfExperience >= 1) {
-            annual.value = "10"; // สมมติว่าให้วันลาปีละ 10 วัน
-        } else {
-            annual.value = "0"; // ถ้ายังไม่มีประสบการณ์ 1 ปี
-        }
+
     }
 
-    // เรียกฟังก์ชันคำนวณวันลาทันทีเมื่อโหลดหน้า
     window.onload = function() {
         calculateLeaveDays();
     }
