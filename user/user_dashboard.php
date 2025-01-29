@@ -61,7 +61,7 @@
     <?php include 'user_navbar.php'?>
 
     <?php
-        // echo $depart;
+        echo $depart;
         // echo $subDepart;
         // มาสาย --------------------------------------------------------------------------------------------
         $sql_check_late = "SELECT l_leave_start_date, l_leave_start_time, l_leave_end_time
@@ -778,7 +778,6 @@ WHERE l_leave_id = :leave_id
                                                 $specialUsers[] = 'Chaikorn';
                                             }
 
-                                            // SQL query
                                             $sql = "SELECT *
                                                 FROM employees
                                                 WHERE (
@@ -790,6 +789,7 @@ WHERE l_leave_id = :leave_id
                                                     OR e_username IN (:specialUser1, :specialUser2)
                                                 )
                                                 AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
+                                                AND e_workplace = :workplace
                                                 ORDER BY e_username ASC";
 
                                             $stmt = $conn->prepare($sql);
@@ -798,8 +798,8 @@ WHERE l_leave_id = :leave_id
                                             $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
                                             $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
                                             $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
 
-                                            // ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
                                             $specialUser1 = $specialUsers[0] ?? null;
                                             $specialUser2 = $specialUsers[1] ?? null;
                                             $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
@@ -808,20 +808,17 @@ WHERE l_leave_id = :leave_id
                                             $stmt->execute();
                                             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                                            // แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
                                             $specialOptions  = [];
                                             $filteredResults = [];
                                             foreach ($results as $row) {
                                                 if (in_array($row['e_username'], $specialUsers)) {
-                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
+                                                    $specialOptions[] = $row;
                                                 } else {
-                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
+                                                    $filteredResults[] = $row;
                                                 }
                                             }
-                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
                                             $filteredResults = array_merge($filteredResults, $specialOptions);
 
-                                            // ตั้งค่า default approver
                                             $defaultApprover = '';
                                             if ($subDepart === 'RD') {
                                                 foreach ($filteredResults as $row) {

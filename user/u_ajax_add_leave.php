@@ -36,313 +36,76 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($_POST['endDate']));
     $leaveTimeEnd = $_POST['endTime'];
 
-    // 08:10
-    if ($leaveTimeStart == '08:10') {
-        $leaveTimeStartLine = '08:10';
-        $leaveTimeStart     = '08:30';
-        $remark             = '08:10:00';
-    }
-    // 08:15
-    else if ($leaveTimeStart == '08:15') {
-        $leaveTimeStartLine = '08:15';
-        $leaveTimeStart     = '08:30';
-        $remark             = '08:15:00';
-    }
-    // 08:45
-    else if ($leaveTimeStart == '08:45') {
-        $leaveTimeStartLine = '08:45';
-        $leaveTimeStart     = '09:00';
-        $remark             = '08:45:00';
-    }
-    // 09:10
-    else if ($leaveTimeStart == '09:10') {
-        $leaveTimeStartLine = '09:10';
-        $leaveTimeStart     = '09:30';
-        $remark             = '09:10:00';
-    }
-    // 09:15
-    else if ($leaveTimeStart == '09:15') {
-        $leaveTimeStartLine = '09:15';
-        $leaveTimeStart     = '09:30';
-        $remark             = '09:15:00';
-    }
-    // 09:45
-    else if ($leaveTimeStart == '09:45') {
-        $leaveTimeStartLine = '09:45';
-        $leaveTimeStart     = '10:00';
-        $remark             = '09:45:00';
-    }
-    // 10:10
-    else if ($leaveTimeStart == '10:10') {
-        $leaveTimeStartLine = '10:10';
-        $leaveTimeStart     = '10:30';
-        $remark             = '10:10:00';
-    }
-    // 10:15
-    else if ($leaveTimeStart == '10:15') {
-        $leaveTimeStartLine = '10:15';
-        $leaveTimeStart     = '10:30';
-        $remark             = '10:15:00';
-    }
-    // 10:45
-    else if ($leaveTimeStart == '10:45') {
-        $leaveTimeStartLine = '10:45';
-        $leaveTimeStart     = '11:00';
-        $remark             = '10:45:00';
-    }
-    // 11:45
-    else if ($leaveTimeStart == '12:00') {
-        $leaveTimeStartLine = '11:45';
-    }
-    // 12:45
-    else if ($leaveTimeStart == '13:00') {
-        $leaveTimeStartLine = '12:45';
-    }
-    // 13:10
-    else if ($leaveTimeStart == '13:10') {
-        $leaveTimeStartLine = '13:10';
-        $leaveTimeStart     = '13:30';
-        $remark             = '13:10:00';
-    }
-    // 13:15
-    else if ($leaveTimeStart == '13:15') {
-        $leaveTimeStartLine = '13:15';
-        $leaveTimeStart     = '13:30';
-        $remark             = '13:15:00';
-    }
-    // 13:40
-    else if ($leaveTimeStart == '13:40') {
-        $leaveTimeStartLine = '13:40';
-        $leaveTimeStart     = '14:00';
-        $remark             = '13:40:00';
-    }
-    // 13:45
-    else if ($leaveTimeStart == '13:45') {
-        $leaveTimeStartLine = '13:45';
-        $leaveTimeStart     = '14:00';
-        $remark             = '13:45:00';
-    }
-    // 14:10
-    else if ($leaveTimeStart == '14:10') {
-        $leaveTimeStartLine = '14:10';
-        $leaveTimeStart     = '14:30';
-        $remark             = '14:10:00';
-    }
-    // 14:15
-    else if ($leaveTimeStart == '14:15') {
-        $leaveTimeStartLine = '14:15';
-        $leaveTimeStart     = '14:30';
-        $remark             = '14:15:00';
-    }
-    // 14:40
-    else if ($leaveTimeStart == '14:40') {
-        $leaveTimeStartLine = '14:40';
-        $leaveTimeStart     = '15:00';
-        $remark             = '14:40:00';
-    }
-    // 14:45
-    else if ($leaveTimeStart == '14:45') {
-        $leaveTimeStartLine = '14:45';
-        $leaveTimeStart     = '15:00';
-        $remark             = '14:45:00';
-    }
-    // 15:10
-    else if ($leaveTimeStart == '15:10') {
-        $leaveTimeStartLine = '15:10';
-        $leaveTimeStart     = '15:30';
-        $remark             = '15:10:00';
-    }
-    // 15:15
-    else if ($leaveTimeStart == '15:15') {
-        $leaveTimeStartLine = '15:15';
-        $leaveTimeStart     = '15:30';
-        $remark             = '15:15:00';
-    }
-    // 15:40
-    else if ($leaveTimeStart == '15:40') {
-        $leaveTimeStartLine = '15:40';
-        $leaveTimeStart     = '16:00';
-        $remark             = '15:40:00';
-    }
-    // 15:45
-    else if ($leaveTimeStart == '15:45') {
-        $leaveTimeStartLine = '15:45';
-        $leaveTimeStart     = '16:00';
-        $remark             = '15:45:00';
-    }
-    // 16:10
-    else if ($leaveTimeStart == '16:10') {
-        $leaveTimeStartLine = '16:10';
-        $leaveTimeStart     = '16:30';
-        $remark             = '16:10:00';
-    }
-    // 16:15
-    else if ($leaveTimeStart == '16:15') {
-        $leaveTimeStartLine = '16:15';
-        $leaveTimeStart     = '16:30';
-        $remark             = '16:15:00';
-    }
-    // 16:40
-    else if ($leaveTimeStart == '17:00') {
-        $leaveTimeStartLine = '16:40';
+    $timeMapping = [
+        '08:10' => ['08:10', '08:30', '08:10:00'],
+        '08:15' => ['08:15', '08:30', '08:15:00'],
+        '08:45' => ['08:45', '09:00', '08:45:00'],
+        '09:10' => ['09:10', '09:30', '09:10:00'],
+        '09:15' => ['09:15', '09:30', '09:15:00'],
+        '09:45' => ['09:45', '10:00', '09:45:00'],
+        '10:10' => ['10:10', '10:30', '10:10:00'],
+        '10:15' => ['10:15', '10:30', '10:15:00'],
+        '10:45' => ['10:45', '11:00', '10:45:00'],
+        '12:00' => ['11:45', null, null],
+        '13:00' => ['12:45', null, null],
+        '13:10' => ['13:10', '13:30', '13:10:00'],
+        '13:15' => ['13:15', '13:30', '13:15:00'],
+        '13:40' => ['13:40', '14:00', '13:40:00'],
+        '13:45' => ['13:45', '14:00', '13:45:00'],
+        '14:10' => ['14:10', '14:30', '14:10:00'],
+        '14:15' => ['14:15', '14:30', '14:15:00'],
+        '14:40' => ['14:40', '15:00', '14:40:00'],
+        '14:45' => ['14:45', '15:00', '14:45:00'],
+        '15:10' => ['15:10', '15:30', '15:10:00'],
+        '15:15' => ['15:15', '15:30', '15:15:00'],
+        '15:40' => ['15:40', '16:00', '15:40:00'],
+        '15:45' => ['15:45', '16:00', '15:45:00'],
+        '16:10' => ['16:10', '16:30', '16:10:00'],
+        '16:15' => ['16:15', '16:30', '16:15:00'],
+        '17:00' => ['16:40', null, null],
+    ];
+
+    if (isset($timeMapping[$leaveTimeStart])) {
+        [$leaveTimeStartLine, $leaveTimeStart, $remark] = $timeMapping[$leaveTimeStart];
     } else {
         $leaveTimeStartLine = $leaveTimeStart;
     }
 
-    // 08:10
-    if ($leaveTimeEnd == '08:10') {
-        $leaveTimeEndLine = '08:10';
-        $leaveTimeEnd     = '08:30';
-        $remark           = '08:10:00';
-    }
-    // 08:15
-    else if ($leaveTimeEnd == '08:15') {
-        $leaveTimeEndLine = '08:15';
-        $leaveTimeEnd     = '08:30';
-        $remark           = '08:15:00';
-    }
-    // 08:45
-    else if ($leaveTimeEnd == '08:45') {
-        $leaveTimeEndLine = '08:45';
-        $leaveTimeEnd     = '09:00';
-        $remark           = '08:45:00';
-    }
-    // 09:10
-    else if ($leaveTimeEnd == '09:10') {
-        $leaveTimeEndLine = '09:10';
-        $leaveTimeEnd     = '09:30';
-        $remark           = '09:10:00';
-    }
-    // 09:15
-    else if ($leaveTimeEnd == '09:15') {
-        $leaveTimeEndLine = '09:15';
-        $leaveTimeEnd     = '09:30';
-        $remark           = '09:15:00';
-    }
-    // 09:45
-    else if ($leaveTimeEnd == '09:45') {
-        $leaveTimeEndLine = '09:45';
-        $leaveTimeEnd     = '10:00';
-        $remark           = '09:45:00';
-    }
-    // 10:10
-    else if ($leaveTimeEnd == '10:10') {
-        $leaveTimeEndLine = '10:10';
-        $leaveTimeEnd     = '10:30';
-        $remark           = '10:10:00';
-    }
-    // 10:15
-    else if ($leaveTimeEnd == '10:15') {
-        $leaveTimeEndLine = '10:15';
-        $leaveTimeEnd     = '10:30';
-        $remark           = '10:15:00';
-    }
-    // 10:45
-    else if ($leaveTimeEnd == '10:45') {
-        $leaveTimeEndLine = '10:45';
-        $leaveTimeEnd     = '11:00';
-        $remark           = '10:45:00';
-    }
-    // 11:45
-    else if ($leaveTimeEnd == '12:00') {
-        $leaveTimeEndLine = '11:45';
-    }
-    // 12:45
-    else if ($leaveTimeEnd == '13:00') {
-        $leaveTimeEndLine = '12:45';
-    }
-    // 13:10
-    else if ($leaveTimeEnd == '13:10') {
-        $leaveTimeEndLine = '13:10';
-        $leaveTimeEnd     = '13:30';
-        $remark           = '13:10:00';
-    }
-    // 13:15
-    else if ($leaveTimeEnd == '13:15') {
-        $leaveTimeEndLine = '13:15';
-        $leaveTimeEnd     = '13:30';
-        $remark           = '13:15:00';
-    }
-    // 13:40
-    else if ($leaveTimeEnd == '13:40') {
-        $leaveTimeEndLine = '13:40';
-        $leaveTimeEnd     = '14:00';
-        $remark           = '13:40:00';
-    }
-    // 13:45
-    else if ($leaveTimeEnd == '13:45') {
-        $leaveTimeEndLine = '13:45';
-        $leaveTimeEnd     = '14:00';
-        $remark           = '13:45:00';
-    }
-    // 14:10
-    else if ($leaveTimeEnd == '14:10') {
-        $leaveTimeEndLine = '14:10';
-        $leaveTimeEnd     = '14:30';
-        $remark           = '14:10:00';
-    }
-    // 14:15
-    else if ($leaveTimeEnd == '14:15') {
-        $leaveTimeEndLine = '14:15';
-        $leaveTimeEnd     = '14:30';
-        $remark           = '14:15:00';
-    }
-    // 14:40
-    else if ($leaveTimeEnd == '14:40') {
-        $leaveTimeEndLine = '14:40';
-        $leaveTimeEnd     = '15:00';
-        $remark           = '14:40:00';
-    }
-    // 14:45
-    else if ($leaveTimeEnd == '14:45') {
-        $leaveTimeEndLine = '14:45';
-        $leaveTimeEnd     = '15:00';
-        $remark           = '14:45:00';
-    }
-    // 15:10
-    else if ($leaveTimeEnd == '15:10') {
-        $leaveTimeEndLine = '15:10';
-        $leaveTimeEnd     = '15:30';
-        $remark           = '15:10:00';
-    }
-    // 15:15
-    else if ($leaveTimeEnd == '15:15') {
-        $leaveTimeEndLine = '15:15';
-        $leaveTimeEnd     = '15:30';
-        $remark           = '15:15:00';
-    }
-    // 15:40
-    else if ($leaveTimeEnd == '15:40') {
-        $leaveTimeEndLine = '15:40';
-        $leaveTimeEnd     = '16:00';
-        $remark           = '15:40:00';
-    }
-    // 15:45
-    else if ($leaveTimeEnd == '15:45') {
-        $leaveTimeEndLine = '15:45';
-        $leaveTimeEnd     = '16:00';
-        $remark           = '15:45:00';
-    }
-    // 16:10
-    else if ($leaveTimeEnd == '16:10') {
-        $leaveTimeEndLine = '16:10';
-        $leaveTimeEnd     = '16:30';
-        $remark           = '16:10:00';
-    }
-    // 16:15
-    else if ($leaveTimeEnd == '16:15') {
-        $leaveTimeEndLine = '16:15';
-        $leaveTimeEnd     = '16:30';
-        $remark           = '16:15:00';
-    }
-    // 16:40
-    else if ($leaveTimeEnd == '17:00') {
-        $leaveTimeEndLine = '16:40';
+    $timeMapping2 = [
+        '08:10' => ['08:10', '08:30', '08:10:00'],
+        '08:15' => ['08:15', '08:30', '08:15:00'],
+        '08:45' => ['08:45', '09:00', '08:45:00'],
+        '09:10' => ['09:10', '09:30', '09:10:00'],
+        '09:15' => ['09:15', '09:30', '09:15:00'],
+        '09:45' => ['09:45', '10:00', '09:45:00'],
+        '10:10' => ['10:10', '10:30', '10:10:00'],
+        '10:15' => ['10:15', '10:30', '10:15:00'],
+        '10:45' => ['10:45', '11:00', '10:45:00'],
+        '12:00' => ['11:45', null, null],
+        '13:00' => ['12:45', null, null],
+        '13:10' => ['13:10', '13:30', '13:10:00'],
+        '13:15' => ['13:15', '13:30', '13:15:00'],
+        '13:40' => ['13:40', '14:00', '13:40:00'],
+        '13:45' => ['13:45', '14:00', '13:45:00'],
+        '14:10' => ['14:10', '14:30', '14:10:00'],
+        '14:15' => ['14:15', '14:30', '14:15:00'],
+        '14:40' => ['14:40', '15:00', '14:40:00'],
+        '14:45' => ['14:45', '15:00', '14:45:00'],
+        '15:10' => ['15:10', '15:30', '15:10:00'],
+        '15:15' => ['15:15', '15:30', '15:15:00'],
+        '15:40' => ['15:40', '16:00', '15:40:00'],
+        '15:45' => ['15:45', '16:00', '15:45:00'],
+        '16:10' => ['16:10', '16:30', '16:10:00'],
+        '16:15' => ['16:15', '16:30', '16:15:00'],
+        '17:00' => ['16:40', null, null],
+    ];
+
+    if (isset($timeMapping2[$leaveTimeEnd])) {
+        [$leaveTimeEndLine, $leaveTimeEnd, $remark] = $timeMapping2[$leaveTimeEnd];
     } else {
         $leaveTimeEndLine = $leaveTimeEnd;
     }
 
-    // วันที่สร้างใบลา
     $formattedDate = $_POST['formattedDate'];
     // $formattedDate = date('Y-m-d', strtotime($_POST['formattedDate']));
 
@@ -372,20 +135,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    if ($subDepart == '') {
+    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_username = :approver";
+    $stmt        = $conn->prepare($chkApprover);
+    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $proveStatus  = null;
+    $proveStatus2 = null;
+    $proveStatus3 = null;
+
+    if ($result) {
+    $subDepartment = $result['e_sub_department'];
+    $levelApprover = $result['e_level'];
+
+    $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'MC', 'FN', 'PC', 'QC'];
+    $leaders     = ['leader', 'subLeader', 'chief'];
+    $managers    = ['manager', 'manager2', 'assisManager'];
+
+    if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+        $proveStatus  = 0;
+        $proveStatus2 = 1;
+        $proveStatus3 = 6;
+    } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
         $proveStatus  = 6;
         $proveStatus2 = 1;
         $proveStatus3 = 6;
-    }
-    if ($subDepart == 'RD') {
-        $proveStatus  = 0;
-        $proveStatus2 = 1;
+    } elseif ($levelApprover == 'GM') {
+        $proveStatus  = 6;
+        $proveStatus2 = 6;
+        $proveStatus3 = 7;
+    } elseif ($levelApprover == 'admin') {
+        $proveStatus  = 6;
+        $proveStatus2 = 6;
         $proveStatus3 = 6;
     } else {
-        $proveStatus  = 0;
-        $proveStatus2 = 1;
-        $proveStatus3 = 7;
+        echo "ไม่พบแผนก";
     }
+}
+
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
@@ -416,11 +204,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus3', $proveStatus3);
 
     if ($stmt->execute()) {
+
+        // ส่งแจ้งเตือนไปหาหัวหน้าที่เลือก
         $sURL     = 'https://lms.system-samt.com/';
         $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
-        // $sMessage = $depart;
-        $sql = "SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver";
+        $sql      = "SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver";
 
+        // Bang Phli / Korat
         // RD
         if ($depart == 'RD') {
             $stmt = $conn->prepare($sql);
@@ -430,7 +220,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($subDepart == 'AC' || $subDepart == 'Sales' || $subDepart == 'Store' || $subDepart == 'Office' || $subDepart == '') {
                 $stmt = $conn->prepare($sql);
             } else {
-                $stmt = $conn->prepare($sql); // ค่า Default
+                $stmt = $conn->prepare($sql);
             }
         }
         // CAD1 / CAD2 / CAM
@@ -438,17 +228,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($subDepart == 'Modeling' || $subDepart == 'Design') {
                 $stmt = $conn->prepare($sql);
             } else {
-                $stmt = $conn->prepare($sql); // ค่า Default
+                $stmt = $conn->prepare($sql);
             }
+        }
+        // MC / FN / PC / QC
+        else if ($depart == 'MC' || $depart == 'FN' || $depart == 'PC' || $depart == 'QC') {
+            if ($subDepart == 'MC' || $subDepart == 'FN' || $subDepart == 'PC' || $subDepart == 'QC') {
+                $stmt = $conn->prepare($sql);
+            } else {
+                $stmt = $conn->prepare($sql);
+            }
+        }
+        // Management
+        else if ($depart == 'Management') {
+            $stmt = $conn->prepare($sql);
         } else {
-            $stmt = $conn->prepare($sql); // ค่า Default สำหรับทุกกรณี
+            $stmt = $conn->prepare($sql);
         }
 
-        // Binding Parameters
         $stmt->bindParam(':approver', $approver);
         $stmt->bindParam(':workplace', $workplace);
 
-        // Execute query
         $stmt->execute();
         $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
