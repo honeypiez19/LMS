@@ -146,34 +146,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $proveStatus3 = null;
 
     if ($result) {
-    $subDepartment = $result['e_sub_department'];
-    $levelApprover = $result['e_level'];
+        $subDepartment = $result['e_sub_department'];
+        $levelApprover = $result['e_level'];
 
-    $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'MC', 'FN', 'PC', 'QC'];
-    $leaders     = ['leader', 'subLeader', 'chief'];
-    $managers    = ['manager', 'manager2', 'assisManager'];
+        $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'MC', 'FN', 'PC', 'QC'];
+        $leaders     = ['leader', 'subLeader', 'chief'];
+        $managers    = ['manager', 'manager2', 'assisManager'];
 
-    if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
-        $proveStatus  = 0;
-        $proveStatus2 = 1;
-        $proveStatus3 = 6;
-    } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
-        $proveStatus  = 6;
-        $proveStatus2 = 1;
-        $proveStatus3 = 6;
-    } elseif ($levelApprover == 'GM') {
-        $proveStatus  = 6;
-        $proveStatus2 = 6;
-        $proveStatus3 = 7;
-    } elseif ($levelApprover == 'admin') {
-        $proveStatus  = 6;
-        $proveStatus2 = 6;
-        $proveStatus3 = 6;
-    } else {
-        echo "ไม่พบแผนก";
+        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+            $proveStatus  = 0;
+            $proveStatus2 = 1;
+            $proveStatus3 = 6;
+        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
+            $proveStatus  = 6;
+            $proveStatus2 = 1;
+            $proveStatus3 = 6;
+        } elseif ($levelApprover == 'GM') {
+            $proveStatus  = 6;
+            $proveStatus2 = 6;
+            $proveStatus3 = 7;
+        } elseif ($levelApprover == 'admin') {
+            $proveStatus  = 6;
+            $proveStatus2 = 6;
+            $proveStatus3 = 6;
+        } else {
+            echo "ไม่พบแผนก";
+        }
     }
-}
-
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
@@ -204,55 +203,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus3', $proveStatus3);
 
     if ($stmt->execute()) {
-
-        // ส่งแจ้งเตือนไปหาหัวหน้าที่เลือก
-        $sURL     = 'https://lms.system-samt.com/';
-        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
-        $sql      = "SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_username = :approver";
-
-        // Bang Phli / Korat
-        // RD
-        if ($depart == 'RD') {
-            $stmt = $conn->prepare($sql);
-        }
-        // Office
-        else if ($depart == 'Office') {
-            if ($subDepart == 'AC' || $subDepart == 'Sales' || $subDepart == 'Store' || $subDepart == 'Office' || $subDepart == '') {
-                $stmt = $conn->prepare($sql);
-            } else {
-                $stmt = $conn->prepare($sql);
-            }
-        }
-        // CAD1 / CAD2 / CAM
-        else if ($depart == 'CAD1' || $depart == 'CAD2' || $depart == 'CAM') {
-            if ($subDepart == 'Modeling' || $subDepart == 'Design') {
-                $stmt = $conn->prepare($sql);
-            } else {
-                $stmt = $conn->prepare($sql);
-            }
-        }
-        // MC / FN / PC / QC
-        else if ($depart == 'MC' || $depart == 'FN' || $depart == 'PC' || $depart == 'QC') {
-            if ($subDepart == 'MC' || $subDepart == 'FN' || $subDepart == 'PC' || $subDepart == 'QC') {
-                $stmt = $conn->prepare($sql);
-            } else {
-                $stmt = $conn->prepare($sql);
-            }
-        }
-        // Management
-        else if ($depart == 'Management') {
-            $stmt = $conn->prepare($sql);
-        } else {
-            $stmt = $conn->prepare($sql);
-        }
-
+        $sql  = "SELECT e_token FROM employees WHERE e_username = :approver";
+        $stmt = $conn->prepare($sql);
         $stmt->bindParam(':approver', $approver);
-        $stmt->bindParam(':workplace', $workplace);
-
         $stmt->execute();
         $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         if ($tokens) {
+            $sURL     = 'https://lms.system-samt.com/';
+            $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\n" .
+                "วันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\n" .
+                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+
             foreach ($tokens as $sToken) {
                 $chOne = curl_init();
                 curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
@@ -267,19 +229,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
                 curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
                 $result = curl_exec($chOne);
-
-                if (curl_error($chOne)) {
-                    echo 'Error:' . curl_error($chOne);
-                } else {
-                    $result_ = json_decode($result, true);
-                    echo "status : " . $result_['status'];
-                    echo "message : " . $result_['message'];
-                }
-
                 curl_close($chOne);
             }
         } else {
-            echo "No tokens found for chief or manager";
+            echo "ไม่พบ Token ของหัวหน้าที่เลือก";
         }
 
         // แจ้งเตือนไลน์ HR
