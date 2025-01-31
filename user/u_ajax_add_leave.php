@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($_POST['endDate']));
     $leaveTimeEnd = $_POST['endTime'];
 
-    $timeMapping = [
+    $timeMappings = [
         '08:10' => ['08:10', '08:30', '08:10:00'],
         '08:15' => ['08:15', '08:30', '08:15:00'],
         '08:45' => ['08:45', '09:00', '08:45:00'],
@@ -46,8 +46,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:10' => ['10:10', '10:30', '10:10:00'],
         '10:15' => ['10:15', '10:30', '10:15:00'],
         '10:45' => ['10:45', '11:00', '10:45:00'],
-        '12:00' => ['11:45', null, null],
-        '13:00' => ['12:45', null, null],
+        '12:00' => ['11:45', '12:00', null],
+        '13:00' => ['12:45', '13:00', null],
         '13:10' => ['13:10', '13:30', '13:10:00'],
         '13:15' => ['13:15', '13:30', '13:15:00'],
         '13:40' => ['13:40', '14:00', '13:40:00'],
@@ -62,16 +62,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '15:45' => ['15:45', '16:00', '15:45:00'],
         '16:10' => ['16:10', '16:30', '16:10:00'],
         '16:15' => ['16:15', '16:30', '16:15:00'],
-        '17:00' => ['16:40', null, null],
+        '17:00' => ['16:40', '17:00', null],
     ];
 
-    if (isset($timeMapping[$leaveTimeStart])) {
-        [$leaveTimeStartLine, $leaveTimeStart, $remark] = $timeMapping[$leaveTimeStart];
+    if (isset($timeMappings[$leaveTimeStart])) {
+        [$leaveTimeStartLine, $leaveTimeStart, $timeRemark] = $timeMappings[$leaveTimeStart];
     } else {
         $leaveTimeStartLine = $leaveTimeStart;
     }
 
-    $timeMapping2 = [
+    $timeMappings2 = [
         '08:10' => ['08:10', '08:30', '08:10:00'],
         '08:15' => ['08:15', '08:30', '08:15:00'],
         '08:45' => ['08:45', '09:00', '08:45:00'],
@@ -81,8 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:10' => ['10:10', '10:30', '10:10:00'],
         '10:15' => ['10:15', '10:30', '10:15:00'],
         '10:45' => ['10:45', '11:00', '10:45:00'],
-        '12:00' => ['11:45', null, null],
-        '13:00' => ['12:45', null, null],
+        '12:00' => ['11:45', '12:00', null],
+        '13:00' => ['12:45', '13:00', null],
         '13:10' => ['13:10', '13:30', '13:10:00'],
         '13:15' => ['13:15', '13:30', '13:15:00'],
         '13:40' => ['13:40', '14:00', '13:40:00'],
@@ -97,11 +97,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '15:45' => ['15:45', '16:00', '15:45:00'],
         '16:10' => ['16:10', '16:30', '16:10:00'],
         '16:15' => ['16:15', '16:30', '16:15:00'],
-        '17:00' => ['16:40', null, null],
+        '17:00' => ['16:40', '17:00', null],
     ];
 
-    if (isset($timeMapping2[$leaveTimeEnd])) {
-        [$leaveTimeEndLine, $leaveTimeEnd, $remark] = $timeMapping2[$leaveTimeEnd];
+    if (isset($leaveTimeEnd, $timeMappings2)) {
+        list($leaveTimeEndLine, $leaveTimeEnd, $timeRemark2) = $timeMappings2[$leaveTimeEnd];
     } else {
         $leaveTimeEndLine = $leaveTimeEnd;
     }
@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_username = :approver";
+    $chkApprover = "SELECT * FROM employees WHERE e_username = :approver";
     $stmt        = $conn->prepare($chkApprover);
     $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
     $stmt->execute();
@@ -176,9 +176,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
-        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3)
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_time_remark, l_approve_status3, l_time_remark2)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
-        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3)");
+        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
+        :proveStatus, :level, :proveStatus2, :workplace, :timeRemark, :proveStatus3, :timeRemark2)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -199,7 +200,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus2', $proveStatus2);
     $stmt->bindParam(':level', $level);
     $stmt->bindParam(':workplace', $workplace);
-    $stmt->bindParam(':remark', $remark);
+    $stmt->bindParam(':timeRemark', $timeRemark);
+    $stmt->bindParam(':timeRemark2', $timeRemark2);
     $stmt->bindParam(':proveStatus3', $proveStatus3);
 
     if ($stmt->execute()) {

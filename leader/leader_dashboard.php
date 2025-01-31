@@ -389,6 +389,8 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
                                 $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
                                 $endDate   = date("Y-m-d", strtotime($selectedYear . "-11-30"));
+                                // echo $selectedYear;
+
                             } else {
                                 $selectedYear = $currentYear;
                             }
@@ -628,24 +630,24 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
     SUM(
         MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))
     ) AS total_leave_minutes,
+        COUNT(CASE WHEN l_leave_id = 7 THEN 1 END) AS total_late,
     (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal,
     (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no,
     (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick,
     (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_sick_work,
     (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual,
-    (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other,
-    (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 7 AND l_usercode = :userCode) AS late_count
-FROM leave_list
-JOIN employees ON employees.e_usercode = leave_list.l_usercode
-WHERE l_leave_id = :leave_id
-  AND l_usercode = :userCode
-  AND YEAR(l_leave_end_date) = :selectedYear
-  AND l_leave_status = 0
-  AND l_approve_status IN (2,6)
-  AND l_approve_status2 = 4";
+    (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
+    FROM leave_list
+    JOIN employees ON employees.e_usercode = leave_list.l_usercode
+    WHERE l_leave_id = :leave_id
+    AND l_usercode = :userCode
+    AND YEAR(l_leave_end_date) = :selectedYear
+    AND l_leave_status = 0
+    AND l_approve_status IN (2,6)
+    AND l_approve_status2 IN (4,6)";
 
                     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
-                    $stmt_leave_personal->bindParam(':leave_id', $leave_id, PDO::PARAM_INT); // Bind the leave_id
+                    $stmt_leave_personal->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
                     $stmt_leave_personal->bindParam(':userCode', $userCode);
                     $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
                     $stmt_leave_personal->execute();
@@ -656,20 +658,17 @@ WHERE l_leave_id = :leave_id
                         $hours   = $result_leave['total_leave_hours'] ?? 0;
                         $minutes = $result_leave['total_leave_minutes'] ?? 0;
 
-                        // Employee leave balances
                         $total_personal    = $result_leave['total_personal'] ?? 0;
                         $total_personal_no = $result_leave['total_personal_no'] ?? 0;
                         $total_sick        = $result_leave['total_sick'] ?? 0;
                         $total_sick_work   = $result_leave['total_sick_work'] ?? 0;
                         $total_annual      = $result_leave['total_annual'] ?? 0;
                         $total_other       = $result_leave['total_other'] ?? 0;
-                        $total_late        = $result_leave['late_count'] ?? 0;
+                        $total_late        = $result_leave['total_late'] ?? 0;
 
-                        // Convert hours to days if applicable
                         $days += floor($hours / 8);
                         $hours = $hours % 8;
 
-                        // Adjust minutes if necessary
                         if ($minutes >= 60) {
                             $hours += floor($minutes / 60);
                             $minutes = $minutes % 60;
@@ -687,10 +686,8 @@ WHERE l_leave_id = :leave_id
                         }
                     }
 
-                    // Output the leave data
                     echo '<div class="col-3 filter-card">';
 
-                    // Check the leave type and display the appropriate data
                     if ($leave_id == 1) {
                         echo '<div class="card text-light mb-3 filter-card" style="background-color: #031B80;" data-leave-id="1">';
                         echo '<div class="card-body">';
@@ -700,13 +697,13 @@ WHERE l_leave_id = :leave_id
                         echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_personal . '</h5>';
                         echo '<p class="card-text">' . $leave_name . '</p>';
                         echo '            </div>';
-                        echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
+                        echo '            <div class="d-flex justify-content-end">';
                         echo '                <i class="mx-2 mt-3 fa-solid fa-sack-dollar fa-2xl"></i>';
                         echo '            </div>';
                         echo '        </div>';
-                        echo '    </div>'; // Close card-title
-                        echo '</div>';     // Close card-body
-                        echo '</div>';     // Close card
+                        echo '    </div>';
+                        echo '</div>';
+                        echo '</div>';
                         echo '<input type="hidden" name="personal_days" value="' . $days . '">';
                         echo '<input type="hidden" name="personal_hours" value="' . $hours . '">';
                         echo '<input type="hidden" name="personal_minutes" value="' . $minutes . '">';
@@ -720,13 +717,13 @@ WHERE l_leave_id = :leave_id
                         echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_personal_no . '</h5>';
                         echo '<p class="card-text">' . $leave_name . '</p>';
                         echo '            </div>';
-                        echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
+                        echo '            <div class="d-flex justify-content-end">';
                         echo '<i class="mx-2 mt-3 fa-solid fa-sack-xmark fa-2xl"></i>';
                         echo '            </div>';
                         echo '        </div>';
-                        echo '    </div>'; // Close card-title
-                        echo '</div>';     // Close card-body
-                        echo '</div>';     // Close card
+                        echo '    </div>';
+                        echo '</div>';
+                        echo '</div>';
                         echo '<input type="hidden" name="personnel_no_days" value="' . $days . '">';
                         echo '<input type="hidden" name="personal_no_hours" value="' . $hours . '">';
                         echo '<input type="hidden" name="personal_no_minutes" value="' . $minutes . '">';
@@ -740,13 +737,13 @@ WHERE l_leave_id = :leave_id
                         echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_sick . '</h5>';
                         echo '<p class="card-text">' . $leave_name . '</p>';
                         echo '            </div>';
-                        echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
+                        echo '            <div class="d-flex justify-content-end">';
                         echo '<i class="mx-2 mt-3 fa-solid fa-syringe fa-2xl"></i>';
                         echo '            </div>';
                         echo '        </div>';
-                        echo '    </div>'; // Close card-title
-                        echo '</div>';     // Close card-body
-                        echo '</div>';     // Close card
+                        echo '    </div>';
+                        echo '</div>';
+                        echo '</div>';
                         echo '<input type="hidden" name="sick_days" value="' . $days . '">';
                         echo '<input type="hidden" name="sick_hours" value="' . $hours . '">';
                         echo '<input type="hidden" name="sick_minutes" value="' . $minutes . '">';
@@ -760,13 +757,13 @@ WHERE l_leave_id = :leave_id
                         echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_sick_work . '</h5>';
                         echo '<p class="card-text">' . $leave_name . '</p>';
                         echo '            </div>';
-                        echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
+                        echo '            <div class="d-flex justify-content-end">';
                         echo '<i class="mx-2 mt-3 fa-solid fa-user-injured fa-2xl"></i>';
                         echo '            </div>';
                         echo '        </div>';
-                        echo '    </div>'; // Close card-title
-                        echo '</div>';     // Close card-body
-                        echo '</div>';     // Close card
+                        echo '    </div>';
+                        echo '</div>';
+                        echo '</div>';
                         echo '<input type="hidden" name="sick_work_days" value="' . $days . '">';
                         echo '<input type="hidden" name="sick_work_hours" value="' . $hours . '">';
                         echo '<input type="hidden" name="sick_work_minutes" value="' . $minutes . '">';
@@ -780,13 +777,13 @@ WHERE l_leave_id = :leave_id
                         echo '<h5>' . $days . '(' . $hours . '.' . $minutes . ') / ' . $total_annual . '</h5>';
                         echo '<p class="card-text">' . $leave_name . '</p>';
                         echo '            </div>';
-                        echo '            <div class="d-flex justify-content-end">'; // Added this to align icon to the right
+                        echo '            <div class="d-flex justify-content-end">';
                         echo '<i class="mx-2 mt-3 fa-solid fa-business-time fa-2xl"></i>';
                         echo '            </div>';
                         echo '        </div>';
-                        echo '    </div>'; // Close card-title
-                        echo '</div>';     // Close card-body
-                        echo '</div>';     // Close card
+                        echo '    </div>';
+                        echo '</div>';
+                        echo '</div>';
                         echo '<input type="hidden" name="annual_days" value="' . $days . '">';
                         echo '<input type="hidden" name="annual_hours" value="' . $hours . '">';
                         echo '<input type="hidden" name="annual_minutes" value="' . $minutes . '">';

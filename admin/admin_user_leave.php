@@ -154,15 +154,15 @@
                         SUM(
                             MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))
                         ) AS total_leave_minutes,
+                        COUNT(CASE WHEN l_leave_id = 7 THEN 1 END) AS total_late,
+                        COUNT(CASE WHEN l_leave_id = 6 THEN 1 END) AS stop_work_count,
                         (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal,
                         (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no,
                         (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick,
                         (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_sick_work,
                         (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual,
-                        (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other,
-                        (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 7 AND l_usercode = :userCode) AS late_count,
-                        (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 6 AND l_usercode = :userCode) AS stop_work_count
-                    FROM leave_list
+                        (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
+                                       FROM leave_list
                     JOIN employees ON employees.e_usercode = leave_list.l_usercode
                     WHERE l_leave_id = :leave_id
                     AND l_usercode = :userCode
