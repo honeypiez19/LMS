@@ -629,22 +629,23 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
     ) AS total_leave_hours,
     SUM(
         MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))
-    ) AS total_leave_minutes,
-        COUNT(CASE WHEN l_leave_id = 7 THEN 1 END) AS total_late,
-    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal,
-    (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no,
-    (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick,
-    (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_sick_work,
-    (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual,
-    (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
-    FROM leave_list
-    JOIN employees ON employees.e_usercode = leave_list.l_usercode
-    WHERE l_leave_id = :leave_id
-    AND l_usercode = :userCode
-    AND YEAR(l_leave_end_date) = :selectedYear
-    AND l_leave_status = 0
-    AND l_approve_status IN (2,6)
-    AND l_approve_status2 IN (4,6)";
+        ) AS total_leave_minutes,
+            COUNT(CASE WHEN l_leave_id = 7 THEN 1 END) AS total_late,
+        (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal,
+        (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no,
+        (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick,
+        (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_sick_work,
+        (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual,
+        (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other
+        FROM leave_list
+        JOIN employees ON employees.e_usercode = leave_list.l_usercode
+        WHERE l_leave_id = :leave_id
+        AND l_usercode = :userCode
+        AND YEAR(l_leave_end_date) = :selectedYear
+        AND l_leave_status = 0
+        AND l_approve_status IN (2,6)
+        AND l_approve_status2 IN (4,6)
+        AND l_approve_status3 IN (8,6)";
 
                     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
                     $stmt_leave_personal->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
@@ -1047,17 +1048,18 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
                                             // SQL query
                                             $sql = "SELECT *
-        FROM employees
-        WHERE (
-            e_sub_department = :subDepart
-            OR e_sub_department2 = :subDepart2
-            OR e_sub_department3 = :subDepart3
-            OR e_sub_department4 = :subDepart4
-            OR e_sub_department5 = :subDepart5
-            OR e_username IN (:specialUser1, :specialUser2)
-        )
-        AND e_level IN ('manager', 'assisManager', 'GM')
-        ORDER BY e_username ASC";
+                                            FROM employees
+                                            WHERE (
+                                                e_sub_department = :subDepart
+                                                OR e_sub_department2 = :subDepart2
+                                                OR e_sub_department3 = :subDepart3
+                                                OR e_sub_department4 = :subDepart4
+                                                OR e_sub_department5 = :subDepart5
+                                                OR e_username IN (:specialUser1, :specialUser2)
+                                            )
+                                            AND e_level IN ('manager', 'assisManager', 'GM')
+                                            AND e_workplace = :workplace
+                                            ORDER BY e_username ASC";
 
                                             $stmt = $conn->prepare($sql);
                                             $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
@@ -1065,6 +1067,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                             $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
                                             $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
                                             $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
 
                                             // ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
                                             $specialUser1 = $specialUsers[0] ?? null;
@@ -1165,19 +1168,20 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="col-24 alert alert-danger d-none" role="alert" name="alertCheckDays">
-                                ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ครบกำหนดแล้ว
-                            </div>
-                            <form id="urgentLeaveForm" method="POST" enctype="multipart/form-data">
+                            <form id="urgentLeaveForm" method="POST" enctype="multipart/form-data"
+                                action="user_dashboard.php">
                                 <div class="row">
+                                    <div class="col-24 alert alert-danger d-none" role="alert" name="alertCheckDays">
+                                        ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ครบกำหนดแล้ว
+                                    </div>
                                     <div class="col-12">
                                         <label for="urgentLeaveType" class="form-label">ประเภทการลา</label>
-                                        <span style="color: red;">*</span>
                                         <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ
-                                            <span id="remaining-days2">0</span> วัน
-                                            <span id="remaining-hours2">0</span> ชั่วโมง
-                                            <span id="remaining-minutes2">0</span> นาที
+                                            <span id="remaining-days2">0 </span> วัน
+                                            <span id="remaining-hours2">0 </span> ชั่วโมง
+                                            <span id="remaining-minutes2">0 </span> นาที
                                         </span>
+                                        <span style="color: red;">*</span>
                                         <select class="form-select" id="urgentLeaveType" required>
                                             <option selected>เลือกประเภทการลา</option>
                                             <option value="1">ลากิจได้รับค่าจ้าง</option>
@@ -1185,16 +1189,16 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                             <option value="5">ลาพักร้อนฉุกเฉิน</option>
                                         </select>
                                     </div>
+                                    <!-- <div id="leave-balance">
+                                        <p>วันเหลือ: <span id="remaining-days">0</span></p>
+                                        <p>ชั่วโมงเหลือ: <span id="remaining-hours">0</span></p>
+                                        <p>นาทีเหลือ: <span id="remaining-minutes">0</span></p>
+                                    </div> -->
                                 </div>
-
                                 <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="urgentLeaveReason" class="form-label">เหตุผลการลา</label>
                                         <span style="color: red;">*</span>
-                                        <!-- <select class="form-select" id="urgentLeaveReason" required
-                                        onchange="checkUrgentOther(this)">
-                                        <option value="" selected disabled>เลือกเหตุผลการลา</option>
-                                    </select> -->
                                         <textarea class="form-control mt-2" id="urgentLeaveReason" rows="3"
                                             placeholder="กรุณาระบุเหตุผล"></textarea>
                                     </div>
@@ -1203,13 +1207,14 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                     <div class="col-6">
                                         <label for="urgentStartDate" class="form-label">วันที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
-                                        <input type="text" class="form-control" id="urgentStartDate" required>
+                                        <input type="text" class="form-control" id="urgentStartDate" required
+                                            onchange="calculateLeaveDuration()">
                                     </div>
-                                    <div class="col-6">
+                                    <div class=" col-6">
                                         <label for="urgentStartTime" class="form-label">เวลาที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="urgentStartTime" name="urgentStartTime"
-                                            required>
+                                        <select class="form-select" id="urgentStartTime" name="urgentStartTime" required
+                                            onchange="calculateLeaveDuration()">
                                             <option value="08:00" selected>08:00</option>
                                             <option value="08:10">08:10</option>
                                             <option value="08:15">08:15</option>
@@ -1249,17 +1254,18 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                         </select>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 row">
                                     <div class="col-6">
                                         <label for="urgentEndDate" class="form-label">วันที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
-                                        <input type="text" class="form-control" id="urgentEndDate" required>
+                                        <input type="text" class="form-control" id="urgentEndDate" required
+                                            onchange="calculateLeaveDuration()">
                                     </div>
                                     <div class="col-6">
                                         <label for="urgentEndTime" class="form-label">เวลาที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="urgentEndTime" name="urgentEndTime" required>
+                                        <select class="form-select" id="urgentEndTime" name="urgentEndTime" required
+                                            onchange="calculateLeaveDuration()">
                                             <option value="08:00">08:00</option>
                                             <option value="08:10">08:10</option>
                                             <option value="08:15">08:15</option>
@@ -1300,10 +1306,103 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                     </div>
                                 </div>
                                 <div class="mt-3 row">
+                                    <div class="col-6">
+                                        <label for="urgentLeaveDuration" class="form-label text-primary">**
+                                            ระยะเวลาการลา :</label>
+                                        <span id="urgentLeaveDuration" class="form-label text-primary"></span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 row">
+                                    <div class="col-6">
+                                        <?php
+                                            // กำหนดตัวแปรสำหรับผู้ใช้งานพิเศษ
+                                            $specialUsers = ['Pornsuk'];
+                                            if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
+                                                $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
+                                            } else if (in_array($subDepart, ['Office', 'Store', 'AC'])) {
+                                                $specialUsers[] = 'Anchana';
+                                            }
+
+                                            // SQL query
+                                            $sql = "SELECT *
+                                            FROM employees
+                                            WHERE (
+                                                e_sub_department = :subDepart
+                                                OR e_sub_department2 = :subDepart2
+                                                OR e_sub_department3 = :subDepart3
+                                                OR e_sub_department4 = :subDepart4
+                                                OR e_sub_department5 = :subDepart5
+                                                OR e_username IN (:specialUser1, :specialUser2)
+                                            )
+                                            AND e_level IN ('manager', 'assisManager', 'GM')
+                                            AND e_workplace = :workplace
+
+                                            ORDER BY e_username ASC";
+
+                                            $stmt = $conn->prepare($sql);
+                                            $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+                                            $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+                                            $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+                                            $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+                                            $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
+
+                                            $specialUser1 = $specialUsers[0] ?? null;
+                                            $specialUser2 = $specialUsers[1] ?? null;
+                                            $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
+                                            $stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
+
+                                            $stmt->execute();
+                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                            $specialOptions  = [];
+                                            $filteredResults = [];
+                                            foreach ($results as $row) {
+                                                if (in_array($row['e_username'], $specialUsers)) {
+                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
+                                                } else {
+                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
+                                                }
+                                            }
+                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
+                                            $filteredResults = array_merge($filteredResults, $specialOptions);
+
+                                            // ตั้งค่า default approver
+                                            $defaultApprover = '';
+                                            if ($subDepart === 'RD') {
+                                                foreach ($filteredResults as $row) {
+                                                    if ($row['e_level'] == 'leader' || $row['e_level'] == 'manager' || $row['e_level'] == 'GM') {
+                                                        $defaultApprover = $row['e_username'];
+                                                        break;
+                                                    }
+                                                }
+                                            } else {
+                                                foreach ($filteredResults as $row) {
+                                                    if (in_array($row['e_level'], ['manager', 'assisManager', 'GM'])) {
+                                                        $defaultApprover = $row['e_username'];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                        ?>
+                                        <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
+                                        <span style="color: red;">* </span>
+                                        <select class="form-select" id="urgentApprover" name="urgentApprover">
+                                            <option value="">เลือกผู้อนุมัติ</option>
+                                            <?php foreach ($filteredResults as $row): ?>
+                                            <option value="<?php echo htmlspecialchars($row['e_username']) ?>"
+                                                <?php echo $defaultApprover === $row['e_username'] ? 'selected' : '' ?>>
+                                                <?php echo htmlspecialchars($row['e_username']) ?>
+                                            </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="urgentTelPhone" class="form-label">เบอร์โทร</label>
                                         <?php
-                                            // ใช้รหัสเดียวกับฟอร์มลา
                                             $sql2    = "SELECT e_phone FROM employees WHERE e_usercode = '$userCode'";
                                             $result2 = $conn->query($sql2);
 
@@ -1319,16 +1418,14 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                 </div>
                                 <div class="mt-3 row">
                                     <div class="col-12">
-                                        <label for="urgentFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
+                                        <label for="urgentFile" class="form-label">ไฟล์แนบ (PNG , JPG, JPEG)</label>
                                         <input class="form-control" type="file" id="urgentFile" name="urgentFile" />
                                     </div>
                                 </div>
 
-
-                                <!-- Submit Button -->
                                 <div class="mt-3 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-success" name="submit" style="width: 100px;"
-                                        id="btnSubmitForm2">บันทึก</button>
+                                    <button type="submit" class="btn btn-success" id="btnSubmitForm2" name="submit"
+                                        style="white-space: nowrap;">บันทึก</button>
                                 </div>
                             </form>
                         </div>
@@ -1475,39 +1572,39 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
                                     // 9
                                     // 08:10
-                                    if ($row['l_leave_start_time'] == '08:30:00' && $row['l_remark'] == '08:10:00') {
+                                    if ($row['l_leave_start_time'] == '08:30:00' && $row['l_time_remark'] == '08:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 08:10:00</td>';
                                     }
                                     // 08:15
-                                    else if ($row['l_leave_start_time'] == '08:30:00' && $row['l_remark'] == '08:15:00') {
+                                    else if ($row['l_leave_start_time'] == '08:30:00' && $row['l_time_remark'] == '08:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 08:15:00</td>';
                                     }
                                     // 08:45
-                                    else if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+                                    else if ($row['l_leave_start_time'] == '09:00:00' && $row['l_time_remark'] == '08:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
                                     }
                                     // 09:10
-                                    else if ($row['l_leave_start_time'] == '09:30:00' && $row['l_remark'] == '09:10:00') {
+                                    else if ($row['l_leave_start_time'] == '09:30:00' && $row['l_time_remark'] == '09:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 09:10:00</td>';
                                     }
                                     // 09:15
-                                    else if ($row['l_leave_start_time'] == '09:30:00' && $row['l_remark'] == '09:15:00') {
+                                    else if ($row['l_leave_start_time'] == '09:30:00' && $row['l_time_remark'] == '09:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 09:15:00</td>';
                                     }
                                     // 09:45
-                                    else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+                                    else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_time_remark'] == '09:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
                                     }
                                     // 10:10
-                                    else if ($row['l_leave_start_time'] == '10:30:00' && $row['l_remark'] == '10:10:00') {
+                                    else if ($row['l_leave_start_time'] == '10:30:00' && $row['l_time_remark'] == '10:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 10:10:00</td>';
                                     }
                                     // 10:15
-                                    else if ($row['l_leave_start_time'] == '10:30:00' && $row['l_remark'] == '10:15:00') {
+                                    else if ($row['l_leave_start_time'] == '10:30:00' && $row['l_time_remark'] == '10:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 10:15:00</td>';
                                     }
                                     // 10:45
-                                    else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+                                    else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_time_remark'] == '10:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
                                     }
                                     // 11:45
@@ -1519,59 +1616,59 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
                                     }
                                     // 13:10
-                                    else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+                                    else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_time_remark'] == '13:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
                                     }
                                     // 13:15
-                                    else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+                                    else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_time_remark'] == '13:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 13:15:00</td>';
                                     }
                                     // 13:40
-                                    else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+                                    else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_time_remark'] == '13:40:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
                                     }
                                     // 13:45
-                                    else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+                                    else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_time_remark'] == '13:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
                                     }
                                     // 14:10
-                                    else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+                                    else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_time_remark'] == '14:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
                                     }
                                     // 14:15
-                                    else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+                                    else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_time_remark'] == '14:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 14:15:00</td>';
                                     }
                                     // 14:40
-                                    else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+                                    else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_time_remark'] == '14:40:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
                                     }
                                     // 14:45
-                                    else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+                                    else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_time_remark'] == '14:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
                                     }
                                     // 15:10
-                                    else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+                                    else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_time_remark'] == '15:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
                                     }
                                     // 15:15
-                                    else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+                                    else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_time_remark'] == '15:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 15:15:00</td>';
                                     }
                                     // 15:40
-                                    else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+                                    else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_time_remark'] == '15:40:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
                                     }
                                     // 15:45
-                                    else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+                                    else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_time_remark'] == '15:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
                                     }
                                     // 16:10
-                                    else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+                                    else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_time_remark'] == '16:10:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
                                     }
                                     // 16:15
-                                    else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+                                    else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_time_remark'] == '16:15:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 16:15:00</td>';
                                     }
                                     // 16:40
@@ -1584,39 +1681,39 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
                                     // 10
                                     // 08:10
-                                    if ($row['l_leave_end_time'] == '08:30:00' && $row['l_remark'] == '08:10:00') {
+                                    if ($row['l_leave_end_time'] == '08:30:00' && $row['l_time_remark2'] == '08:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 08:10:00</td>';
                                     }
                                     // 08:15
-                                    else if ($row['l_leave_end_time'] == '08:30:00' && $row['l_remark'] == '08:15:00') {
+                                    else if ($row['l_leave_end_time'] == '08:30:00' && $row['l_time_remark2'] == '08:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 08:15:00</td>';
                                     }
                                     // 08:45
-                                    else if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+                                    else if ($row['l_leave_end_time'] == '09:00:00' && $row['l_time_remark2'] == '08:45:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
                                     }
                                     // 09:10
-                                    else if ($row['l_leave_end_time'] == '09:30:00' && $row['l_remark'] == '09:10:00') {
+                                    else if ($row['l_leave_end_time'] == '09:30:00' && $row['l_time_remark2'] == '09:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 09:10:00</td>';
                                     }
                                     // 09:15
-                                    else if ($row['l_leave_end_time'] == '09:30:00' && $row['l_remark'] == '09:15:00') {
+                                    else if ($row['l_leave_end_time'] == '09:30:00' && $row['l_time_remark2'] == '09:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 09:15:00</td>';
                                     }
                                     // 09:45
-                                    else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+                                    else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_time_remark2'] == '09:45:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
                                     }
                                     // 10:10
-                                    else if ($row['l_leave_end_time'] == '10:30:00' && $row['l_remark'] == '10:10:00') {
+                                    else if ($row['l_leave_end_time'] == '10:30:00' && $row['l_time_remark2'] == '10:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 10:10:00</td>';
                                     }
                                     // 10:15
-                                    else if ($row['l_leave_end_time'] == '10:30:00' && $row['l_remark'] == '10:15:00') {
+                                    else if ($row['l_leave_end_time'] == '10:30:00' && $row['l_time_remark2'] == '10:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 10:15:00</td>';
                                     }
                                     // 10:45
-                                    else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+                                    else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_time_remark2'] == '10:45:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
                                     }
                                     // 11:45
@@ -1628,59 +1725,59 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
                                     }
                                     // 13:10
-                                    else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+                                    else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_time_remark2'] == '13:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
                                     }
                                     // 13:15
-                                    else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:15:00') {
+                                    else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_time_remark2'] == '13:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 13:15:00</td>';
                                     }
                                     // 13:40
-                                    else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+                                    else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_time_remark2'] == '13:40:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
                                     }
                                     // 13:45
-                                    else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+                                    else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_time_remark2'] == '13:45:00') {
                                         echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
                                     }
                                     // 14:10
-                                    else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+                                    else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_time_remark2'] == '14:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
                                     }
                                     // 14:15
-                                    else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:15:00') {
+                                    else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_time_remark2'] == '14:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 14:15:00</td>';
                                     }
                                     // 14:40
-                                    else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+                                    else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_time_remark2'] == '14:40:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
                                     }
                                     // 14:45
-                                    else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+                                    else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_time_remark2'] == '14:45:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
                                     }
                                     // 15:10
-                                    else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+                                    else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_time_remark2'] == '15:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
                                     }
                                     // 15:15
-                                    else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:15:00') {
+                                    else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_time_remark2'] == '15:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 15:15:00</td>';
                                     }
                                     // 15:40
-                                    else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+                                    else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_time_remark2'] == '15:40:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
                                     }
                                     // 15:45
-                                    else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+                                    else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_time_remark2'] == '15:45:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
                                     }
                                     // 16:10
-                                    else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+                                    else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_time_remark2'] == '16:10:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
                                     }
                                     // 16:15
-                                    else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:15:00') {
+                                    else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_time_remark2'] == '16:15:00') {
                                         echo '<td>' . $row['l_leave_end_date'] . '<br> 16:15:00</td>';
                                     }
                                     // 16:40
@@ -2800,7 +2897,6 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
                 var fd = new FormData(this);
 
-                // เพิ่มข้อมูลจาก PHP variables
                 fd.append('userCode', '<?php echo $userCode; ?>');
                 fd.append('userName', '<?php echo $userName; ?>');
                 fd.append('name', '<?php echo $name; ?>');
@@ -2814,7 +2910,6 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 fd.append('subDepart4', '<?php echo $subDepart4; ?>');
                 fd.append('subDepart5', '<?php echo $subDepart5; ?>');
 
-                // ดึงค่าจากฟอร์ม
                 var urgentLeaveType = $('#urgentLeaveType').val();
                 var urgentLeaveReason = $('#urgentLeaveReason').val();
                 var urgentStartDate = $('#urgentStartDate').val();
@@ -2822,85 +2917,285 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 var urgentEndDate = $('#urgentEndDate').val();
                 var urgentEndTime = $('#urgentEndTime').val();
                 var urgentFiles = $('#urgentFile')[0].files;
+                var approver = $('#urgentApprover').val();
 
-                // ตรวจสอบเหตุผลการลา "อื่น ๆ"
-                /* if (urgentLeaveReason === 'อื่น ๆ') {
-                    urgentLeaveReason = $('#urgentOtherReason').val();
-                } */
-
-                // เพิ่มข้อมูลจากฟอร์มลงใน FormData object
                 fd.append('urgentLeaveType', urgentLeaveType);
                 fd.append('urgentLeaveReason', urgentLeaveReason);
                 fd.append('urgentStartDate', urgentStartDate);
                 fd.append('urgentStartTime', urgentStartTime);
                 fd.append('urgentEndDate', urgentEndDate);
                 fd.append('urgentEndTime', urgentEndTime);
+                fd.append('urgentApprover', approver);
 
                 if (urgentFiles.length > 0) {
                     fd.append('urgentFile', urgentFiles[0]);
                 }
 
-                // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
-                if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
-                    Swal.fire({
-                        title: "ไม่สามารถลาได้",
-                        text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
-                        icon: "error"
-                    });
-                    console.log("Cannot submit form, alert is visible.");
-                    return false; // หยุดการส่งฟอร์ม
-                }
+                $.ajax({
+                    url: 'l_ajax_chk_urgent_leave_double.php',
+                    type: 'POST',
+                    data: {
+                        urgentStartDate: urgentStartDate,
+                        urgentStartTime: urgentStartTime,
+                        urgentEndDate: urgentEndDate,
+                        urgentEndTime: urgentEndTime,
+                        urgentLeaveType: urgentLeaveType,
+                        userCode: '<?php echo $userCode; ?>'
+                    },
+                    success: function(response) {
+                        if (response === 'double') {
+                            Swal.fire({
+                                title: "ไม่สามารถลาได้",
+                                text: "พบรายการลาซ้ำในช่วงวันเวลาที่เลือก กรุณาตรวจสอบ",
+                                icon: "warning",
+                                confirmButtonText: "ตกลง",
+                            });
+                            return;
+                        } else {
+                            var createDate = new Date();
+                            createDate.setHours(createDate.getHours() +
+                                7);
+                            var formattedDate = createDate.toISOString().slice(0, 19)
+                                .replace('T', ' ');
+                            fd.append('formattedDate', formattedDate);
 
-                // console.log(urgentLeaveType)
-                // ตรวจสอบประเภทการลา
-                if (urgentLeaveType == '0') {
-                    Swal.fire({
-                        title: "ไม่สามารถลาได้",
-                        text: "กรุณาเลือกประเภทการลา",
-                        icon: "error"
-                    });
-                    return false;
-                } else if (urgentLeaveReason == '') {
-                    Swal.fire({
-                        title: "ไม่สามารถลาได้",
-                        text: "กรุณาระบุเหตุผลการลา",
-                        icon: "error"
-                    });
-                    return false;
-                } else {
-                    if (urgentEndDate < urgentStartDate) {
-                        Swal.fire({
-                            title: "ไม่สามารถลาได้",
-                            text: "กรุณาเลือกวันที่เริ่มต้นลาใหม่",
-                            icon: "error"
-                        });
-                    } else {
-                        $.ajax({
-                            url: 'l_ajax_add_urgent_leave.php',
-                            type: 'POST',
-                            data: fd,
-                            contentType: false,
-                            processData: false,
-                            success: function(response) {
+                            if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
                                 Swal.fire({
-                                    title: 'สำเร็จ',
-                                    text: 'บันทึกคำขอลาเร่งด่วนสำเร็จ',
-                                    icon: 'success'
-                                }).then(() => {
-                                    $('#urgentLeaveModal').modal('hide');
-                                    location.reload();
+                                    title: "ไม่สามารถลาได้",
+                                    text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
+                                    icon: "error"
                                 });
-                            },
-                            error: function() {
-                                Swal.fire({
-                                    title: 'ผิดพลาด',
-                                    text: 'เกิดข้อผิดพลาดในการบันทึกคำขอลาเร่งด่วน',
-                                    icon: 'error'
-                                });
+                                return false; // หยุดการส่งฟอร์ม
                             }
-                        });
+
+                            if (urgentLeaveType == 'เลือกประเภทการลา') {
+                                Swal.fire({
+                                    title: "ไม่สามารถลาได้",
+                                    text: "กรุณาเลือกประเภทการลา",
+                                    icon: "error"
+                                });
+                                return false;
+                            } else if (urgentLeaveReason == '') {
+                                Swal.fire({
+                                    title: "ไม่สามารถลาได้",
+                                    text: "กรุณาระบุเหตุผลการลา",
+                                    icon: "error"
+                                });
+                                return false;
+                            } else {
+                                var startDate = $('#urgentStartDate').val().replace(/-/g,
+                                    '');
+                                var endDate = $('#urgentEndDate').val().replace(/-/g, '');
+                                var startTime = $('#urgentStartTime').val(); // เช่น "08:00"
+                                var endTime = $('#urgentEndTime').val(); // เช่น "17:00"
+
+                                if (!startDate || !endDate || !startTime || !endTime) {
+                                    Swal.fire({
+                                        title: "ข้อผิดพลาด",
+                                        text: "กรุณาเลือกวันที่เริ่มต้น, วันที่สิ้นสุด, เวลาเริ่มต้น และเวลาเสร็จสิ้น",
+                                        icon: "error"
+                                    });
+                                    return false;
+                                }
+
+                                var start = new Date(startDate.substring(0, 4), startDate
+                                    .substring(4, 6) - 1,
+                                    startDate
+                                    .substring(6, 8), startTime.split(':')[0], startTime
+                                    .split(':')[1]);
+                                var end = new Date(endDate.substring(0, 4), endDate
+                                    .substring(4, 6) - 1, endDate
+                                    .substring(6, 8), endTime.split(':')[0], endTime
+                                    .split(':')[1]);
+
+                                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                                    Swal.fire({
+                                        title: "ข้อผิดพลาด",
+                                        text: "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
+                                        icon: "error"
+                                    });
+                                    return false;
+                                }
+
+                                var timeDiff = end - start; // ความแตกต่างเป็นมิลลิวินาที
+                                var fullDays = Math.floor(timeDiff / (1000 * 3600 *
+                                    8)); // จำนวนวันเต็ม
+                                var remainingTimeInMs = timeDiff % (1000 * 3600 *
+                                    8); // มิลลิวินาทีที่เหลือจากวันเต็ม
+                                var hoursDiff = Math.floor(remainingTimeInMs / (1000 *
+                                    3600)); // จำนวนชั่วโมงที่เหลือ
+                                var minutesDiff = Math.floor((remainingTimeInMs % (1000 *
+                                    3600)) / (1000 *
+                                    60)); // คำนวณนาทีที่เหลือ
+
+                                var totalDaysWithHoursAndMinutes = fullDays + (hoursDiff /
+                                    8) + (minutesDiff /
+                                    480);
+
+                                if (urgentLeaveType == 3) {
+                                    if (totalDaysWithHoursAndMinutes >
+                                        219145.125) { // หากเวลาลามากกว่า 3 วัน
+                                        if (urgentFile.length === 0) {
+                                            Swal.fire({
+                                                title: "ไม่สามารถลาได้",
+                                                text: "กรุณาแนบไฟล์เมื่อลาเกิน 3 วัน",
+                                                icon: "error"
+                                            });
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                                // if (urgentLeaveType == 1 || urgentLeaveType == 5) {
+                                //     var startDate = $('#urgentStartDate').val();
+                                //     var parts = startDate.split('-');
+                                //     var formattedDate = parts[2] + '-' + parts[1] + '-' +
+                                //         parts[
+                                //             0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+
+                                //     // สร้าง Date object โดยไม่ต้องตั้งเวลา
+                                //     var leaveStartDate = new Date(formattedDate +
+                                //         'T00:00:00'); // ตั้งเวลาเป็น 00:00:00
+
+                                //     var currentDate = new Date();
+                                //     currentDate.setHours(0, 0, 0,
+                                //         0); // ตั้งเวลาเป็น 00:00:00
+
+                                //     console.log("leaveStartDate :" + leaveStartDate);
+                                //     console.log("currentDate: " + currentDate);
+
+                                //     // เช็คว่า startDate เก่ากว่าหรือไม่
+                                //     if (leaveStartDate <= currentDate) {
+                                //         Swal.fire({
+                                //             title: "ไม่สามารถลาได้",
+                                //             text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                                //             icon: "error"
+                                //         });
+                                //         return false;
+                                //     }
+                                // }
+
+                                var checkStartDate = $('#urgentStartDate').val();
+                                var checkEndDate = $('#urgentEndDate').val();
+
+                                var startDateParts = checkStartDate.split("-");
+                                var endDateParts = checkEndDate.split("-");
+
+                                var startDate = new Date(startDateParts[2], startDateParts[
+                                    1] - 1, startDateParts[
+                                    0]);
+                                var endDate = new Date(endDateParts[2], endDateParts[1] - 1,
+                                    endDateParts[
+                                        0]);
+
+                                // alert("Start Date:" + startDate);
+                                // alert("End Date:" + endDate);
+
+                                if (endDate < startDate) {
+                                    Swal.fire({
+                                        title: "ไม่สามารถลาได้",
+                                        text: "กรุณาเลือกวันที่เริ่มต้นลาใหม่",
+                                        icon: "error"
+                                    });
+                                    return false;
+                                } else {
+                                    var startDate = $('#urgentStartDate').val();
+                                    var endDate = $('#urgentEndDate').val();
+
+                                    // แยกส่วนวันที่
+                                    var startParts = startDate.split('-');
+                                    var endParts = endDate.split('-');
+
+                                    // dd-mm-yyyy
+                                    var formattedStartDate = startParts[2] + '-' +
+                                        startParts[1] + '-' + startParts[
+                                            0];
+                                    var formattedEndDate = endParts[2] + '-' + endParts[1] +
+                                        '-' + endParts[
+                                            0];
+
+                                    // console.log("Formatted Start Date: " + formattedStartDate);
+                                    // console.log("Formatted End Date: " + formattedEndDate);
+
+                                    if (startTime === '12:00') {
+                                        startTime = '11:45';
+                                    } else if (startTime === '13:00') {
+                                        startTime = '12:45';
+                                    } else if (endTime === '12:00') {
+                                        endTime = '11:45';
+                                    } else if (endTime === '13:00') {
+                                        endTime = '12:45';
+                                    } else if (endTime === '17:00') {
+                                        endTime = '16:40';
+                                    }
+
+                                    let details = `
+                                        ประเภทการลา: ${$('#urgentLeaveType option:selected').text()}<br>
+                                        เหตุผลการลา: ${urgentLeaveReason}<br>
+                                        วันที่เริ่มต้น: ${startDate} เวลา ${startTime}<br>
+                                        วันที่สิ้นสุด: ${endDate} เวลา ${endTime}<br>
+                                        ผู้อนุมัติ: ${$('#urgentApprover option:selected').text()}
+                                    `;
+                                    Swal.fire({
+                                        title: "ยืนยันการยื่นใบลาฉุกเฉิน",
+                                        html: details,
+                                        icon: "question",
+                                        showCancelButton: true,
+                                        confirmButtonText: "ยืนยัน",
+                                        cancelButtonText: "ยกเลิก"
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            $('#btnSubmitForm2').prop('disabled',
+                                                true).html(
+                                                '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
+                                            );
+                                            $.ajax({
+                                                url: 'l_ajax_add_urgent_leave.php',
+                                                type: 'POST',
+                                                data: fd,
+                                                contentType: false,
+                                                processData: false,
+                                                success: function(
+                                                    response) {
+                                                    Swal.fire({
+                                                        title: "บันทึกสำเร็จ",
+                                                        text: "บันทึกลาฉุกเฉินสำเร็จ",
+                                                        icon: "success"
+                                                    }).then(() => {
+                                                        location
+                                                            .reload();
+                                                    });
+                                                },
+                                                error: function() {
+                                                    Swal.fire({
+                                                        title: "เกิดข้อผิดพลาด",
+                                                        text: "ไม่สามารถบันทึกลาฉุกเฉินได้",
+                                                        icon: "error"
+                                                    });
+                                                },
+                                                complete: function() {
+                                                    $('#btnSubmitForm2')
+                                                        .prop(
+                                                            'disabled',
+                                                            false)
+                                                        .html(
+                                                            'ยื่นใบลา'
+                                                        );
+                                                }
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                title: "ยกเลิก",
+                                                text: "คุณได้ยกเลิกการยื่นใบลา",
+                                                icon: "info"
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        }
                     }
-                }
+                });
             });
 
             $('.cancel-leave-btn').click(function() {
@@ -3091,62 +3386,62 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                             // 08:10
                             if (response.l_leave_start_time === "08:30:00" &&
                                 response
-                                .l_remark === "08:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "08:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 08:15
                             else if (response.l_leave_start_time === "08:30:00" &&
                                 response
-                                .l_remark === "08:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "08:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 08:45
                             else if (response.l_leave_start_time === "09:00:00" &&
                                 response
-                                .l_remark === "08:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "08:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 09:10
                             else if (response.l_leave_start_time === "09:30:00" &&
                                 response
-                                .l_remark === "09:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "09:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 09:15
                             else if (response.l_leave_start_time === "09:30:00" &&
                                 response
-                                .l_remark === "09:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "09:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 09:45
                             else if (response.l_leave_start_time === "10:00:00" &&
                                 response
-                                .l_remark === "09:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "09:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 10:10
                             else if (response.l_leave_start_time === "10:30:00" &&
                                 response
-                                .l_remark === "10:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "10:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 10:15
                             else if (response.l_leave_start_time === "10:30:00" &&
                                 response
-                                .l_remark === "10:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "10:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 10:45
                             else if (response.l_leave_start_time === "11:00:00" &&
                                 response
-                                .l_remark === "10:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "10:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 11:45
                             else if (response.l_leave_start_time === "12:00:00" &&
                                 response
-                                .l_remark === "11:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "11:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 12:45
                             else if (response.l_leave_start_time === "13:00:00") {
@@ -3156,86 +3451,86 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                             // 13:10
                             else if (response.l_leave_start_time === "13:30:00" &&
                                 response
-                                .l_remark === "13:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "13:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 13:15
                             else if (response.l_leave_start_time === "13:30:00" &&
                                 response
-                                .l_remark === "13:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "13:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 13:40
                             else if (response.l_leave_start_time === "14:00:00" &&
                                 response
-                                .l_remark === "13:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "13:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 13:45
                             else if (response.l_leave_start_time === "14:00:00" &&
                                 response
-                                .l_remark === "13:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "13:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 14:10
                             else if (response.l_leave_start_time === "14:30:00" &&
                                 response
-                                .l_remark === "14:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "14:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 14:15
                             else if (response.l_leave_start_time === "14:30:00" &&
                                 response
-                                .l_remark === "14:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "14:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 14:40
                             else if (response.l_leave_start_time === "15:00:00" &&
                                 response
-                                .l_remark === "14:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "14:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 14:45
                             else if (response.l_leave_start_time === "15:00:00" &&
                                 response
-                                .l_remark === "14:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "14:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 15:10
                             else if (response.l_leave_start_time === "15:30:00" &&
                                 response
-                                .l_remark === "15:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "15:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 15:15
                             else if (response.l_leave_start_time === "15:30:00" &&
                                 response
-                                .l_remark === "15:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "15:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 15:40
                             else if (response.l_leave_start_time === "16:00:00" &&
                                 response
-                                .l_remark === "15:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "15:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 15:45
                             else if (response.l_leave_start_time === "16:00:00" &&
                                 response
-                                .l_remark === "15:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "15:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 16:10
                             else if (response.l_leave_start_time === "16:30:00" &&
                                 response
-                                .l_remark === "16:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "16:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 16:15
                             else if (response.l_leave_start_time === "16:30:00" &&
                                 response
-                                .l_remark === "16:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_remark);
+                                .l_time_remark === "16:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
                             }
                             // 16:40
                             else if (response.l_leave_start_time === "17:00:00") {
@@ -3248,62 +3543,62 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                             // เวลาที่สิ้นสุด
                             // 08:10
                             if (response.l_leave_end_time === "08:30:00" && response
-                                .l_remark === "08:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "08:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 08:15
                             else if (response.l_leave_end_time === "08:30:00" &&
                                 response
-                                .l_remark === "08:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "08:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 08:45
                             else if (response.l_leave_end_time === "09:00:00" &&
                                 response
-                                .l_remark === "08:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "08:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 09:10
                             else if (response.l_leave_end_time === "09:30:00" &&
                                 response
-                                .l_remark === "09:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "09:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 09:15
                             else if (response.l_leave_end_time === "09:30:00" &&
                                 response
-                                .l_remark === "09:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "09:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 09:45
                             else if (response.l_leave_end_time === "10:00:00" &&
                                 response
-                                .l_remark === "09:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "09:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 10:10
                             else if (response.l_leave_end_time === "10:30:00" &&
                                 response
-                                .l_remark === "10:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "10:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 10:15
                             else if (response.l_leave_end_time === "10:30:00" &&
                                 response
-                                .l_remark === "10:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "10:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 10:45
                             else if (response.l_leave_end_time === "11:00:00" &&
                                 response
-                                .l_remark === "10:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "10:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 11:45
                             else if (response.l_leave_end_time === "12:00:00" &&
                                 response
-                                .l_remark === "11:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "11:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 12:45
                             else if (response.l_leave_end_time === "13:00:00") {
@@ -3313,86 +3608,86 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                             // 13:10
                             else if (response.l_leave_end_time === "13:30:00" &&
                                 response
-                                .l_remark === "13:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "13:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 13:15
                             else if (response.l_leave_end_time === "13:30:00" &&
                                 response
-                                .l_remark === "13:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "13:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 13:40
                             else if (response.l_leave_end_time === "14:00:00" &&
                                 response
-                                .l_remark === "13:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "13:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 13:45
                             else if (response.l_leave_end_time === "14:00:00" &&
                                 response
-                                .l_remark === "13:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "13:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 14:10
                             else if (response.l_leave_end_time === "14:30:00" &&
                                 response
-                                .l_remark === "14:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "14:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 14:15
                             else if (response.l_leave_end_time === "14:30:00" &&
                                 response
-                                .l_remark === "14:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "14:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 14:40
                             else if (response.l_leave_end_time === "15:00:00" &&
                                 response
-                                .l_remark === "14:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "14:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 14:45
                             else if (response.l_leave_end_time === "15:00:00" &&
                                 response
-                                .l_remark === "14:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "14:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 15:10
                             else if (response.l_leave_end_time === "15:30:00" &&
                                 response
-                                .l_remark === "15:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "15:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 15:15
                             else if (response.l_leave_end_time === "15:30:00" &&
                                 response
-                                .l_remark === "15:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "15:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 15:40
                             else if (response.l_leave_end_time === "16:00:00" &&
                                 response
-                                .l_remark === "15:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "15:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 15:45
                             else if (response.l_leave_end_time === "16:00:00" &&
                                 response
-                                .l_remark === "15:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "15:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 16:10
                             else if (response.l_leave_end_time === "16:30:00" &&
                                 response
-                                .l_remark === "16:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "16:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 16:15
                             else if (response.l_leave_end_time === "16:30:00" &&
                                 response
-                                .l_remark === "16:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_remark);
+                                .l_time_remark2 === "16:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
                             }
                             // 16:40
                             else if (response.l_leave_end_time === "17:00:00") {
@@ -3491,32 +3786,60 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
             });
         });
 
+        // ฟังก์ชันสำหรับจัดรูปแบบวันที่
         function formatDate(date) {
-            const parts = date.split('-'); // แยกวันที่เป็นส่วน ๆ เช่น ['23', '12', '2024']
-            const day = parts[0];
-            const month = parts[1];
-            const year = parts[2];
-
-            return `${year}-${month}-${day}`; // เปลี่ยนเป็นรูปแบบ yyyy-mm-dd
+            const parts = date.split('-');
+            return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงเป็น yyyy-mm-dd
         }
-        window.onload = function() {
-            calculateLeaveDuration();
-        };
+
+        // ฟังก์ชันแสดง/ซ่อนข้อความแจ้งเตือน
+        function showDurationAlert(isUrgent, show, message) {
+            const alertId = isUrgent ? 'urgentLeaveDurationAlert' : 'leaveDurationAlert';
+            const alertElement = document.getElementById(alertId);
+
+            if (show) {
+                alertElement.textContent = message;
+                alertElement.classList.remove('d-none');
+            } else {
+                alertElement.classList.add('d-none');
+            }
+        }
 
         function calculateLeaveDuration() {
-            const startDate = document.getElementById('startDate').value;
-            const startTime = document.getElementById('startTime').value;
-            const endDate = document.getElementById('endDate').value;
-            const endTime = document.getElementById('endTime').value;
+            // ตรวจสอบว่ากำลังใช้ฟอร์มไหน (ปกติ หรือ ฉุกเฉิน)
+            const isUrgent = document.getElementById('urgentLeaveModal').classList.contains('show');
 
+            // เลือกข้อมูลจากฟอร์มที่กำลังใช้งาน
+            let startDate, startTime, endDate, endTime, targetElement;
+
+            if (isUrgent) {
+                startDate = document.getElementById('urgentStartDate').value;
+                startTime = document.getElementById('urgentStartTime').value;
+                endDate = document.getElementById('urgentEndDate').value;
+                endTime = document.getElementById('urgentEndTime').value;
+                targetElement = document.getElementById('urgentLeaveDuration');
+            } else {
+                startDate = document.getElementById('startDate').value;
+                startTime = document.getElementById('startTime').value;
+                endDate = document.getElementById('endDate').value;
+                endTime = document.getElementById('endTime').value;
+                targetElement = document.getElementById('leaveDuration');
+            }
+
+            // ตรวจสอบว่ามีการกรอกข้อมูลครบหรือไม่
+            if (!startDate || !startTime || !endDate || !endTime) {
+                targetElement.textContent = "1 วัน 0 ชั่วโมง 0 นาที"; // กำหนดค่าเริ่มต้นเป็น 1 วัน
+
+                showDurationAlert(isUrgent, false);
+                return;
+            }
+
+            // แปลงวันที่และเวลาเป็น Date object
             const formattedStartDate = formatDate(startDate);
             const formattedEndDate = formatDate(endDate);
-
-            // สร้าง Date object สำหรับเวลาเริ่มต้นและสิ้นสุด
             let startDateTime = new Date(`${formattedStartDate}T${startTime}:00`);
             let endDateTime = new Date(`${formattedEndDate}T${endTime}:00`);
 
-            // ปัดเวลาเริ่มต้นให้เป็นครึ่งชั่วโมงถัดไป
             const startMinutes = startDateTime.getMinutes();
             if (startMinutes > 0 && startMinutes <= 15) {
                 startDateTime.setMinutes(30); // ปัดเป็น 30 นาที
@@ -3530,7 +3853,6 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 startDateTime.setHours(startDateTime.getHours() + 1);
             }
 
-            // ปัดเวลาเสร็จสิ้นให้เป็นครึ่งชั่วโมงถัดไป
             const endMinutes = endDateTime.getMinutes();
             if (endMinutes > 0 && endMinutes <= 15) {
                 endDateTime.setMinutes(30); // ปัดเป็น 30 นาที
@@ -3544,63 +3866,101 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 endDateTime.setHours(endDateTime.getHours() + 1);
             }
 
-            // คำนวณระยะเวลาเหมือนเดิม
-            let totalMilliseconds = 0;
+            // ตรวจสอบความถูกต้องของวันที่และเวลา
+            if (endDateTime < startDateTime) {
+                targetElement.textContent = "";
+                //    showDurationAlert(isUrgent, true, "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง");
+                return;
+            }
 
-            const workStart = 8; // 08:00
-            const workEnd = 17; // 17:00
+            // ซ่อนข้อความแจ้งเตือนถ้าข้อมูลถูกต้อง
+            // showDurationAlert(isUrgent, false);
+
+            // การคำนวณเวลาทำงาน
+            const workStart = 8;
+            const workEnd = 17;
             const lunchStart = 12;
             const lunchEnd = 13;
 
+            let totalMilliseconds = 0;
+
+            // วนลูปคำนวณระยะเวลาในแต่ละวัน
             while (startDateTime < endDateTime) {
+                // ปรับเวลาเริ่มต้นให้อยู่ในช่วงเวลาทำงาน
                 if (startDateTime.getHours() < workStart) {
                     startDateTime.setHours(workStart, 0, 0, 0);
                 }
 
+                // ถ้าเลยเวลาทำงาน ให้เริ่มวันใหม่
                 if (startDateTime.getHours() >= workEnd) {
                     startDateTime.setDate(startDateTime.getDate() + 1);
                     startDateTime.setHours(workStart, 0, 0, 0);
+                    continue;
                 }
 
-                if (endDateTime.getHours() >= workEnd) {
-                    endDateTime.setHours(workEnd, 0, 0, 0);
-                }
-
+                // กำหนดเวลาสิ้นสุดของวันทำงาน
                 const currentWorkEnd = new Date(startDateTime);
                 currentWorkEnd.setHours(workEnd, 0, 0, 0);
 
-                let dailyLeaveDuration = currentWorkEnd - startDateTime;
+                // ใช้เวลาสิ้นสุดที่เร็วกว่าระหว่างเวลาสิ้นสุดของวันทำงานและเวลาสิ้นสุดการลา
+                const effectiveEndTime = endDateTime < currentWorkEnd ? endDateTime : currentWorkEnd;
 
-                if (endDateTime < currentWorkEnd) {
-                    dailyLeaveDuration = endDateTime - startDateTime;
-                }
+                // คำนวณระยะเวลาในวันนี้
+                let dailyDuration = effectiveEndTime - startDateTime;
 
+                // หักเวลาพักเที่ยงถ้าจำเป็น
                 const lunchStartTime = new Date(startDateTime);
                 lunchStartTime.setHours(lunchStart, 0, 0, 0);
                 const lunchEndTime = new Date(startDateTime);
                 lunchEndTime.setHours(lunchEnd, 0, 0, 0);
 
-                if (startDateTime < lunchEndTime && endDateTime > lunchStartTime) {
-                    dailyLeaveDuration -= 1 * 60 * 60 * 1000;
+                if (startDateTime < lunchEndTime && effectiveEndTime > lunchStartTime) {
+                    dailyDuration -= 60 * 60 * 1000; // หัก 1 ชั่วโมง
                 }
 
-                totalMilliseconds += dailyLeaveDuration;
+                totalMilliseconds += dailyDuration;
 
+                // เตรียมสำหรับวันถัดไป
                 startDateTime.setDate(startDateTime.getDate() + 1);
                 startDateTime.setHours(workStart, 0, 0, 0);
             }
 
-            const leaveDays = Math.floor(totalMilliseconds / (8 * 60 * 60 * 1000));
-            totalMilliseconds -= leaveDays * (8 * 60 * 60 * 1000);
+            // แปลงมิลลิวินาทีเป็นวัน ชั่วโมง นาที
+            const millisecondsPerDay = 8 * 60 * 60 * 1000;
+            const leaveDays = Math.floor(totalMilliseconds / millisecondsPerDay);
+            totalMilliseconds %= millisecondsPerDay;
 
-            let leaveHours = Math.floor(totalMilliseconds / (60 * 60 * 1000));
-            totalMilliseconds -= leaveHours * (60 * 60 * 1000);
+            const millisecondsPerHour = 60 * 60 * 1000;
+            const leaveHours = Math.floor(totalMilliseconds / millisecondsPerHour);
+            totalMilliseconds %= millisecondsPerHour;
 
-            let leaveMinutes = Math.floor(totalMilliseconds / (60 * 1000));
+            const millisecondsPerMinute = 60 * 1000;
+            let leaveMinutes = Math.floor(totalMilliseconds / millisecondsPerMinute);
 
-            const result = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
-            document.getElementById('leaveDuration').textContent = result;
+            // แสดงผลลัพธ์
+            targetElement.textContent = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const leaveForm = document.getElementById('leaveForm');
+            const urgentLeaveForm = document.getElementById('urgentLeaveForm');
+
+            if (leaveForm) {
+                leaveForm.addEventListener('change', calculateLeaveDuration);
+            }
+
+            if (urgentLeaveForm) {
+                urgentLeaveForm.addEventListener('change', calculateLeaveDuration);
+            }
+
+            // ตรวจสอบสถานะการเปิดของโมดัล
+            $('#urgentLeaveModal').on('shown.bs.modal', function() {
+                calculateLeaveDuration();
+            });
+
+            // คำนวณครั้งแรกเมื่อโหลดหน้า
+            calculateLeaveDuration();
+        });
 
         function checkOther(select) {
             var otherReasonInput = document.getElementById('otherReason');

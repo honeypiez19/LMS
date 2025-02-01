@@ -370,7 +370,8 @@ WHERE l_leave_id = :leave_id
   AND YEAR(l_leave_end_date) = :selectedYear
   AND l_leave_status = 0
   AND l_approve_status IN (2,6)
-  AND l_approve_status2 = 4";
+  AND l_approve_status2 IN (4,6)
+    AND l_approve_status3 IN (8,6)";
 
                     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
                     $stmt_leave_personal->bindParam(':leave_id', $leave_id, PDO::PARAM_INT); // Bind the leave_id
@@ -2785,34 +2786,34 @@ WHERE l_leave_id = :leave_id
                                     }
                                 }
 
-                                if (urgentLeaveType == 1 || urgentLeaveType == 5) {
-                                    var startDate = $('#urgentStartDate').val();
-                                    var parts = startDate.split('-');
-                                    var formattedDate = parts[2] + '-' + parts[1] + '-' +
-                                        parts[
-                                            0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+                                // if (urgentLeaveType == 1 || urgentLeaveType == 5) {
+                                //     var startDate = $('#urgentStartDate').val();
+                                //     var parts = startDate.split('-');
+                                //     var formattedDate = parts[2] + '-' + parts[1] + '-' +
+                                //         parts[
+                                //             0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
 
-                                    // สร้าง Date object โดยไม่ต้องตั้งเวลา
-                                    var leaveStartDate = new Date(formattedDate +
-                                        'T00:00:00'); // ตั้งเวลาเป็น 00:00:00
+                                //     // สร้าง Date object โดยไม่ต้องตั้งเวลา
+                                //     var leaveStartDate = new Date(formattedDate +
+                                //         'T00:00:00'); // ตั้งเวลาเป็น 00:00:00
 
-                                    var currentDate = new Date();
-                                    currentDate.setHours(0, 0, 0,
-                                        0); // ตั้งเวลาเป็น 00:00:00
+                                //     var currentDate = new Date();
+                                //     currentDate.setHours(0, 0, 0,
+                                //         0); // ตั้งเวลาเป็น 00:00:00
 
-                                    console.log("leaveStartDate :" + leaveStartDate);
-                                    console.log("currentDate: " + currentDate);
+                                //     console.log("leaveStartDate :" + leaveStartDate);
+                                //     console.log("currentDate: " + currentDate);
 
-                                    // เช็คว่า startDate เก่ากว่าหรือไม่
-                                    if (leaveStartDate <= currentDate) {
-                                        Swal.fire({
-                                            title: "ไม่สามารถลาได้",
-                                            text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
-                                            icon: "error"
-                                        });
-                                        return false;
-                                    }
-                                }
+                                //     // เช็คว่า startDate เก่ากว่าหรือไม่
+                                //     if (leaveStartDate <= currentDate) {
+                                //         Swal.fire({
+                                //             title: "ไม่สามารถลาได้",
+                                //             text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                                //             icon: "error"
+                                //         });
+                                //         return false;
+                                //     }
+                                // }
 
                                 var checkStartDate = $('#urgentStartDate').val();
                                 var checkEndDate = $('#urgentEndDate').val();
@@ -3609,12 +3610,12 @@ WHERE l_leave_id = :leave_id
             // ตรวจสอบความถูกต้องของวันที่และเวลา
             if (endDateTime < startDateTime) {
                 targetElement.textContent = "";
-                showDurationAlert(isUrgent, true, "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง");
+                //    showDurationAlert(isUrgent, true, "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง");
                 return;
             }
 
             // ซ่อนข้อความแจ้งเตือนถ้าข้อมูลถูกต้อง
-            showDurationAlert(isUrgent, false);
+            // showDurationAlert(isUrgent, false);
 
             // การคำนวณเวลาทำงาน
             const workStart = 8;
