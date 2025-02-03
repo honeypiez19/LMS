@@ -2,7 +2,8 @@
 session_start();
 date_default_timezone_set('Asia/Bangkok');
 
-require '../connect.php';
+include '../connect.php';
+include '../access_token_channel.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $userCode  = $_POST['userCode'];
@@ -18,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $approver = $_POST['urgentApprover'];
 
-    // ตรวจสอบประเภทการลา
+    // ประเภทการลา
     $leaveTypes = [
         1 => 'ลากิจได้รับค่าจ้าง',
         2 => 'ลากิจไม่ได้รับค่าจ้าง',
@@ -26,11 +27,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ];
     $leaveName = $leaveTypes[$urgentLeaveType] ?? 'ไม่พบประเภทการลา';
 
-// วันที่ + เวลาเริ่มต้น
+    // วันที่ + เวลาเริ่มต้น
     $urgentStartDate = date('Y-m-d', strtotime($_POST['urgentStartDate']));
     $urgentStartTime = $_POST['urgentStartTime'];
 
-// วันที่ + เวลาสิ้นสุด
+    // วันที่ + เวลาสิ้นสุด
     $urgentEndDate = date('Y-m-d', strtotime($_POST['urgentEndDate']));
     $urgentEndTime = $_POST['urgentEndTime'];
 
@@ -135,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_username = :approver";
+    $chkApprover = "SELECT * FROM employees WHERE e_username = :approver";
     $stmt        = $conn->prepare($chkApprover);
     $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
     $stmt->execute();
@@ -148,29 +149,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result) {
         $subDepartment = $result['e_sub_department'];
         $levelApprover = $result['e_level'];
+        $workplace     = $result['e_workplace'];
 
         $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'MC', 'FN', 'PC', 'QC'];
         $leaders     = ['leader', 'subLeader', 'chief'];
         $managers    = ['manager', 'manager2', 'assisManager'];
+        $workplaceAt = ['Bang Phli', 'Korat'];
 
-        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 0;
             $proveStatus2 = 1;
             $proveStatus3 = 6;
-        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
+        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 1;
             $proveStatus3 = 6;
-        } elseif ($levelApprover == 'GM') {
+        } elseif ($levelApprover == 'GM' && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 6;
             $proveStatus3 = 7;
-        } elseif ($levelApprover == 'admin') {
+        } elseif ($levelApprover == 'admin' && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 6;
             $proveStatus3 = 6;
         } else {
-            echo "ไม่พบแผนก";
+            echo "ไม่พบแผนกหรือสถานที่";
         }
     }
 
@@ -206,73 +209,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':timeRemark2', $timeRemark2);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_token FROM employees WHERE e_username = :approver";
+        $sql  = "SELECT e_user_id FROM employees WHERE e_username = :approver AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if ($tokens) {
+        if ($userIds) {
             $sURL     = 'https://lms.system-samt.com/';
             $sMessage = "มีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
                 "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
                 "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
 
-            foreach ($tokens as $sToken) {
-                $chOne = curl_init();
-                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-                curl_setopt($chOne, CURLOPT_POST, 1);
-                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
-                $headers = [
-                    'Content-type: application/x-www-form-urlencoded',
-                    'Authorization: Bearer ' . $sToken,
+            foreach ($userIds as $userId) {
+                $data = [
+                    'to'       => $userId,
+                    'messages' => [
+                        [
+                            'type' => 'text',
+                            'text' => $sMessage,
+                        ],
+                    ],
                 ];
-                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-                $result = curl_exec($chOne);
-                curl_close($chOne);
+
+                $ch = curl_init('https://api.line.me/v2/bot/message/push');
+                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $access_token,
+                ]);
+
+                $response = curl_exec($ch);
+                curl_close($ch);
+
+                if ($response === false) {
+                    echo "Error: " . curl_error($ch);
+                }
             }
         } else {
-            echo "ไม่พบ Token ของหัวหน้าที่เลือก";
+            echo "ไม่พบผู้รับข้อความ";
         }
 
-        // แจ้งเตือนไลน์ HR
-        // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-        // $stmt->execute();
-        // $admins = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        // $aMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStart ถึง $leaveDateEnd $leaveTimeEnd\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
-        // if ($admins) {
-        //     foreach ($admins as $sToken) {
-        //         $chOne = curl_init();
-        //         curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-        //         curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-        //         curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-        //         curl_setopt($chOne, CURLOPT_POST, 1);
-        //         curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $aMessage);
-        //         $headers = [
-        //             'Content-type: application/x-www-form-urlencoded',
-        //             'Authorization: Bearer ' . $sToken,
-        //         ];
-        //         curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-        //         curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-        //         $result = curl_exec($chOne);
-
-        //         if (curl_error($chOne)) {
-        //             echo 'Error:' . curl_error($chOne);
-        //         } else {
-        //             $result_ = json_decode($result, true);
-        //             echo "status : " . $result_['status'];
-        //             echo "message : " . $result_['message'];
-        //         }
-
-        //         curl_close($chOne);
-        //     }
-        // } else {
-        //     echo "No tokens found for admin";
-        // }
     } else {
         echo "Error: " . $stmt->errorInfo()[2] . "<br>";
     }

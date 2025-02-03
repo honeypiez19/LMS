@@ -1094,10 +1094,14 @@ WHERE l_leave_id = :leave_id
                                     <div class="col-6">
                                         <?php
                                             // SQL query
-                                            $sql = "SELECT * FROM employees WHERE e_level IN ('admin') 
+                                           $sql = "SELECT * FROM employees WHERE e_level IN ('admin')
+                                                    AND e_workplace = :workplace
+
                                             ORDER BY e_username ASC";
 
                                             $stmt = $conn->prepare($sql);
+                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
+
                                             $stmt->execute();
                                             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

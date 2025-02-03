@@ -2997,7 +2997,7 @@ WHERE l_leave_id = :leave_id
                                     icon: 'success'
                                 }).then(() => {
                                     location
-                                        .reload(); // โหลดหน้าใหม่หลังจากยกเลิกใบลา
+                                        .reload();
                                 });
                             },
                             error: function() {
