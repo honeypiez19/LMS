@@ -1516,10 +1516,10 @@ WHERE l_leave_id = :leave_id
                                     echo '<td>';
                                     // Query to check holidays in the leave period
                                     $holiday_query = "SELECT COUNT(*) as holiday_count
-                  FROM holiday
-                  WHERE h_start_date BETWEEN :start_date AND :end_date
-                  AND h_holiday_status = 'วันหยุด'
-                  AND h_status = 0";
+                                    FROM holiday
+                                    WHERE h_start_date BETWEEN :start_date AND :end_date
+                                    AND h_holiday_status = 'วันหยุด'
+                                    AND h_status = 0";
 
                                     // Prepare the query
                                     $holiday_stmt = $conn->prepare($holiday_query);
@@ -1724,37 +1724,22 @@ WHERE l_leave_id = :leave_id
                                     }
                                     echo '</td>';
 
-                                                                             // 19
-                                    $leaveDate   = $row['l_leave_end_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
-                                    $currentDate = date('Y-m-d');            // วันที่ปัจจุบัน
+                                    // 19
+                                    $leaveDate   = $row['l_leave_end_date'];
+                                    $currentDate = date('Y-m-d');
 
-                                    // echo "วันที่ลาสิ้นสุด :" . $leaveDate . " ";
-                                    // echo "วันที่ปัจจุบัน\n" . $currentDate;
+                                    $disabledEdit = ($leaveDate < $currentDate || $row['l_leave_status'] == 1) ? 'disabled' : '';
 
-                                    if ($leaveDate < $currentDate) {
-                                        // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
-                                        echo '<td>';
-                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-                                        echo '</td>';
-                                    } else {
-                                        // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
-                                        echo '<td>';
-                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-                                        echo '</td>';
-                                    }
+                                    echo '<td>';
+                                    echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal" ' . $disabledEdit . '>';
+                                    echo '<i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                    echo '</td>';
 
                                     // 20
-                                    $disabled            = $row['l_leave_status'] == 1 ? 'disabled' : '';
-                                    $dateNow             = date('Y-m-d');
-                                    $disabledCancalCheck = (
-                                        ($row['l_approve_status'] != 0
-                                            && $row['l_approve_status2'] != 1
-                                            && $row['l_leave_end_date'] < $dateNow)
-                                        ||
-                                        ($row['l_leave_end_date'] < $dateNow
-                                            && $row['l_approve_status'] == 0
-                                            && $row['l_approve_status2'] == 1)
-                                    ) ? 'disabled' : '';
+                                    $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
+                                    $dateNow  = date('Y-m-d');
+
+                                    $disabledCancelCheck = ($row['l_leave_end_date'] < $dateNow) ? 'disabled' : '';
 
                                     $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
 
@@ -1762,10 +1747,8 @@ WHERE l_leave_id = :leave_id
                                         echo '<td></td>';
                                     } else if ($row['l_leave_id'] == 7) {
                                         echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
-                                    } else if ($row['l_leave_id'] != 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     } else {
-                                        echo '<td></td>';
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancelCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     }
 
                                     echo '</tr>';
@@ -1775,8 +1758,7 @@ WHERE l_leave_id = :leave_id
                             } else {
                                 echo "<tr><td colspan='16' style='color: red;'>ไม่พบข้อมูล</td></tr>";
                             }
-                            // ปิดการเชื่อมต่อ
-                            // $conn = null;
+
                         ?>
 
                     </tbody>
@@ -2949,7 +2931,7 @@ WHERE l_leave_id = :leave_id
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                // var leaveStatus = 'ยกเลิก';
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -2968,7 +2950,6 @@ WHERE l_leave_id = :leave_id
                     cancelButtonText: 'ไม่'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // ยืนยันก่อนส่ง AJAX request
                         $.ajax({
                             url: 'u_ajax_delete_leave.php',
                             method: 'POST',
@@ -2982,7 +2963,7 @@ WHERE l_leave_id = :leave_id
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                leaveStatus: leaveStatus,
+                                // leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
@@ -3533,26 +3514,12 @@ WHERE l_leave_id = :leave_id
             return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงเป็น yyyy-mm-dd
         }
 
-        // ฟังก์ชันแสดง/ซ่อนข้อความแจ้งเตือน
-        function showDurationAlert(isUrgent, show, message) {
-            const alertId = isUrgent ? 'urgentLeaveDurationAlert' : 'leaveDurationAlert';
-            const alertElement = document.getElementById(alertId);
-
-            if (show) {
-                alertElement.textContent = message;
-                alertElement.classList.remove('d-none');
-            } else {
-                alertElement.classList.add('d-none');
-            }
-        }
-
         function calculateLeaveDuration() {
             // ตรวจสอบว่ากำลังใช้ฟอร์มไหน (ปกติ หรือ ฉุกเฉิน)
             const isUrgent = document.getElementById('urgentLeaveModal').classList.contains('show');
 
             // เลือกข้อมูลจากฟอร์มที่กำลังใช้งาน
             let startDate, startTime, endDate, endTime, targetElement;
-
             if (isUrgent) {
                 startDate = document.getElementById('urgentStartDate').value;
                 startTime = document.getElementById('urgentStartTime').value;
@@ -3570,8 +3537,6 @@ WHERE l_leave_id = :leave_id
             // ตรวจสอบว่ามีการกรอกข้อมูลครบหรือไม่
             if (!startDate || !startTime || !endDate || !endTime) {
                 targetElement.textContent = "1 วัน 0 ชั่วโมง 0 นาที"; // กำหนดค่าเริ่มต้นเป็น 1 วัน
-
-                showDurationAlert(isUrgent, false);
                 return;
             }
 
@@ -3607,21 +3572,46 @@ WHERE l_leave_id = :leave_id
                 endDateTime.setHours(endDateTime.getHours() + 1);
             }
 
+            // ดึงวันหยุดจากฐานข้อมูล
+            let holidays = [];
+            $.ajax({
+                url: 'u_ajax_get_holiday.php',
+                async: false,
+                success: function(response) {
+                    holidays = JSON.parse(response).holidays;
+                }
+            });
+
+            // ฟังก์ชันเช็คว่าเป็นวันหยุดหรือไม่
+            function isHoliday(date) {
+                let formattedDate = formatDateToHoliday(date);
+                return holidays.includes(formattedDate);
+            }
+
+            // ฟังก์ชันแปลงวันที่ให้ตรงกับรูปแบบวันหยุด
+            function formatDateToHoliday(date) {
+                // Ensure date is a string
+                if (typeof date !== 'string') {
+                    // Convert the Date object to a string if necessary
+                    date = date.toISOString().split('T')[0]; // Formats as "YYYY-MM-DD"
+                }
+
+                let [year, month, day] = date.split("-"); // Split the date string
+                return `${day}-${month}-${year}`; // Return in the "DD-MM-YYYY" format
+            }
+
+
             // ตรวจสอบความถูกต้องของวันที่และเวลา
             if (endDateTime < startDateTime) {
                 targetElement.textContent = "";
-                //    showDurationAlert(isUrgent, true, "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง");
                 return;
             }
 
-            // ซ่อนข้อความแจ้งเตือนถ้าข้อมูลถูกต้อง
-            // showDurationAlert(isUrgent, false);
-
             // การคำนวณเวลาทำงาน
-            const workStart = 8;
-            const workEnd = 17;
-            const lunchStart = 12;
-            const lunchEnd = 13;
+            const workStart = 8; // 8:00 AM
+            const workEnd = 17; // 5:00 PM
+            const lunchStart = 12; // 12:00 PM
+            const lunchEnd = 13; // 1:00 PM
 
             let totalMilliseconds = 0;
 
@@ -3659,6 +3649,11 @@ WHERE l_leave_id = :leave_id
                     dailyDuration -= 60 * 60 * 1000; // หัก 1 ชั่วโมง
                 }
 
+                // หักวันหยุด
+                if (isHoliday(startDateTime)) {
+                    dailyDuration = 0; // ถ้าเป็นวันหยุด ไม่ต้องนับวันนั้น
+                }
+
                 totalMilliseconds += dailyDuration;
 
                 // เตรียมสำหรับวันถัดไป
@@ -3682,7 +3677,6 @@ WHERE l_leave_id = :leave_id
             targetElement.textContent = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
         }
 
-
         document.addEventListener('DOMContentLoaded', function() {
             const leaveForm = document.getElementById('leaveForm');
             const urgentLeaveForm = document.getElementById('urgentLeaveForm');
@@ -3703,7 +3697,6 @@ WHERE l_leave_id = :leave_id
             // คำนวณครั้งแรกเมื่อโหลดหน้า
             calculateLeaveDuration();
         });
-
 
         function checkOther(select) {
             var otherReasonInput = document.getElementById('otherReason');

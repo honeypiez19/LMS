@@ -2,7 +2,7 @@
 session_start();
 date_default_timezone_set('Asia/Bangkok');
 
-require '../connect.php';
+include '../connect.php';
 include '../access_token_channel.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

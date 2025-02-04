@@ -3,7 +3,7 @@
 include '../connect.php';
 
 // ดึงวันหยุดจาก table holiday
-$query = $conn->query("SELECT h_start_date, h_end_date FROM holiday");
+$query    = $conn->query("SELECT h_start_date, h_end_date FROM holiday");
 $holidays = $query->fetchAll(PDO::FETCH_ASSOC);
 
 // แปลงวันที่เป็นรูปแบบ d-m-Y
