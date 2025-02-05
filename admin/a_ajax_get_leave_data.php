@@ -10,7 +10,7 @@ $year = $_GET['year'];
 $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)";
 
 if ($status == 3) {
-    $sql .= " AND l_leave_status = 1"; // เงื่อนไขเฉพาะเมื่อ status = 3
+    $sql .= " AND l_leave_status = 1"; 
 } elseif ($status != 'all') {
     $sql .= " AND l_hr_status = :status";
 }

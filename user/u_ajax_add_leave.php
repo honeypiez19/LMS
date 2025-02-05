@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveReason = $_POST['leaveReason'];
     $approver    = $_POST['approver'];
 
-    // ตรวจสอบประเภทการลา
+    // ประเภทการลา
     $leaveTypes = [
         1 => 'ลากิจได้รับค่าจ้าง',
         2 => 'ลากิจไม่ได้รับค่าจ้าง',
