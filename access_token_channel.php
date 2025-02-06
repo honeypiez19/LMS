@@ -1,0 +1,2 @@
+<?php
+// $access_token = 'LWYLeMFO1QdwImd0AYbrgVVsypakOfhpxITTyfYdScN5NFIy4HnCNpUCr38lOiuEiRb0xlyim3n7AXFm/u69ADxrqMEPFRfeIIrMxEkjM48LeMi9xz6kjDnxqNb0oe1fRHNzk45i+BiY7JHHMO0x9gdB04t89/1O/w1cDnyilFU=';

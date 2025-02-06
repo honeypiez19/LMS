@@ -7,9 +7,9 @@ header('Content-Type: application/json');
 $createDatetime     = $_POST['createDatetime'] ?? null;
 $editLeaveType      = $_POST['editLeaveType'] ?? null;
 $editLeaveReason    = $_POST['editLeaveReason'] ?? null;
-$editLeaveStartDate = $_POST['editLeaveStartDate'] ?? null;
+$editLeaveStartDate = $_POST['formattedDate'] ?? null;
 $editLeaveStartTime = $_POST['editLeaveStartTime'] ?? null;
-$editLeaveEndDate   = $_POST['editLeaveEndDate'] ?? null;
+$editLeaveEndDate   = $_POST['formattedEndDate'] ?? null;
 $editLeaveEndTime   = $_POST['editLeaveEndTime'] ?? null;
 // $editTelPhone       = $_POST['editTelPhone'] ?? null;
 

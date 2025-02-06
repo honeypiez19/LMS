@@ -1194,18 +1194,26 @@ WHERE l_leave_id = :leave_id
                                 $currentPage = $_GET['page'];
                             }
 
-                            // สร้างคำสั่ง SQL
-                            $sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
+                            $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode";
 
                             if ($selectedMonth != "All") {
-                                $sql .= " AND Month(l_leave_end_date) = '$selectedMonth'";
+                                $sql .= " AND (Month(l_leave_end_date) = :selectedMonth OR l_leave_end_date IS NULL)";
                             }
 
-                            $sql .= " AND Year(l_leave_end_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
+                            $sql .= " AND (Year(l_leave_end_date) = :selectedYear OR l_leave_end_date IS NULL)";
+                            $sql .= " ORDER BY l_create_datetime DESC";
 
-                            // หาจำนวนรายการทั้งหมด
-                            $result    = $conn->query($sql);
-                            $totalRows = $result->rowCount();
+                            $stmt = $conn->prepare($sql);
+
+                            $stmt->bindParam(':userCode', $userCode);
+                            if ($selectedMonth != "All") {
+                                $stmt->bindParam(':selectedMonth', $selectedMonth);
+                            }
+                            $stmt->bindParam(':selectedYear', $selectedYear);
+
+                            // ประมวลผลคำสั่ง SQL
+                            $stmt->execute();
+                            $totalRows = $stmt->rowCount();
 
                             // คำนวณหน้าทั้งหมด
                             $totalPages = ceil($totalRows / $itemsPerPage);
@@ -1214,17 +1222,29 @@ WHERE l_leave_id = :leave_id
                             $offset = ($currentPage - 1) * $itemsPerPage;
 
                             // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-                            $sql .= " LIMIT $itemsPerPage OFFSET $offset";
+                            $sql .= " LIMIT :itemsPerPage OFFSET :offset";
+
+                            // เตรียมคำสั่ง SQL
+                            $stmt = $conn->prepare($sql);
+
+                            // ผูกพารามิเตอร์
+                            $stmt->bindParam(':userCode', $userCode);
+                            if ($selectedMonth != "All") {
+                                $stmt->bindParam(':selectedMonth', $selectedMonth);
+                            }
+                            $stmt->bindParam(':selectedYear', $selectedYear);
+                            $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
                             // ประมวลผลคำสั่ง SQL
-                            $result = $conn->query($sql);
+                            $stmt->execute();
 
-                                                                                          // แสดงผลลำดับของแถว
-                            $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+                            // แสดงผลลำดับของแถว
+                            $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
                             // แสดงข้อมูลในตาราง
-                            if ($result->rowCount() > 0) {
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            if ($stmt->rowCount() > 0) {
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     echo '<tr class="text-center align-middle">';
 
                                     // 0
@@ -1725,10 +1745,13 @@ WHERE l_leave_id = :leave_id
                                     echo '</td>';
 
                                     // 19
-                                    $leaveDate   = $row['l_leave_end_date'];
+                                    $leaveEnd   = $row['l_leave_end_date'] ?? null;
+                                    $leaveStart = $row['l_leave_start_date'] ?? null;
+
                                     $currentDate = date('Y-m-d');
 
-                                    $disabledEdit = ($leaveDate < $currentDate || $row['l_leave_status'] == 1) ? 'disabled' : '';
+                                    // ปรับเงื่อนไขการตรวจสอบ
+                                    $disabledEdit = ((! is_null($leaveEnd) && $leaveEnd < $currentDate) || $row['l_leave_status'] == 1) ? 'disabled' : '';
 
                                     echo '<td>';
                                     echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal" ' . $disabledEdit . '>';
@@ -3070,12 +3093,27 @@ WHERE l_leave_id = :leave_id
                             alert(response.error); // แสดงข้อความข้อผิดพลาด
                         } else {
 
+                            let today = new Date();
+                            let formatDate = (date) => {
+                                let d = new Date(date);
+                                let day = String(d.getDate()).padStart(2,
+                                    '0'); // วันที่ 2 หลัก
+                                let month = String(d.getMonth() + 1).padStart(2,
+                                    '0'); // เดือน 2 หลัก
+                                let year = d.getFullYear(); // ปี ค.ศ.
+                                return `${day}-${month}-${year}`;
+                            };
+
+                            let startDate = response.l_leave_start_date ? formatDate(
+                                response.l_leave_start_date) : formatDate(today);
+                            let endDate = response.l_leave_end_date ? formatDate(response
+                                .l_leave_end_date) : formatDate(today);
+
                             // ใส่ข้อมูลในฟอร์ม Modal
                             $('.editLeaveType').val(response.l_leave_id);
                             $('#editLeaveReason').val(response.l_leave_reason);
-                            $('#editLeaveStartDate').val(response
-                                .l_leave_start_date);
-                            $('#editLeaveEndDate').val(response.l_leave_end_date);
+                            $('#editLeaveStartDate').val(startDate);
+                            $('#editLeaveEndDate').val(endDate);
                             $('#editTelPhone').val(response.l_phone);
 
                             var existingFile = response.l_file;
