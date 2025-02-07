@@ -8,10 +8,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $userCode = $_SESSION['s_usercode'];
     $newPhone = $_POST['newPhone'] ?? '';
 
-    $sql  = "UPDATE users SET phone = :phone WHERE user_id = :user_id";
+    $sql  = "UPDATE employees SET e_phone = :newPhone WHERE e_usercode = :userCode";
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':phone', $newPhone, PDO::PARAM_STR);
-    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':newPhone', $newPhone, PDO::PARAM_STR);
+    $stmt->bindParam(':userCode', $userCode, PDO::PARAM_INT);
 
     if ($stmt->execute()) {
         echo json_encode(["status" => "success", "message" => "เปลี่ยนเบอร์โทรศัพท์สำเร็จ"]);

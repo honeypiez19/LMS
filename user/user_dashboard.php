@@ -1201,6 +1201,7 @@ WHERE l_leave_id = :leave_id
                             }
 
                             $sql .= " AND (Year(l_leave_end_date) = :selectedYear OR l_leave_end_date IS NULL)";
+                            $sql .= " AND (l_create_datetime IS NULL OR l_create_datetime IS NOT NULL)";
                             $sql .= " ORDER BY l_create_datetime DESC";
 
                             $stmt = $conn->prepare($sql);
@@ -1971,12 +1972,12 @@ WHERE l_leave_id = :leave_id
                                         </select>
                                     </div>
                                 </div>
-                                <div class="mt-3 row">
+                                <!-- <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="editTelPhone" class="form-label">เบอร์โทร</label>
                                         <input type="text" class="form-control" id="editTelPhone">
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class=" mt-3 row">
                                     <div class="col-12">
                                         <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
@@ -3077,44 +3078,28 @@ WHERE l_leave_id = :leave_id
                 var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime
                 var userCode = $(this).data('usercode');
 
-                // ตั้งค่า createDatetime ให้กับฟอร์ม
                 $('#editLeaveForm').data('createdatetime', createDatetime);
 
                 $.ajax({
-                    url: 'u_ajax_get_leave.php', // ไฟล์ PHP ที่ดึงข้อมูล
+                    url: 'u_ajax_get_leave.php',
                     type: 'POST',
                     data: {
                         createDatetime: createDatetime,
                         userCode: userCode
                     },
-                    dataType: 'json', // แจ้งว่าเราคาดหวังผลลัพธ์เป็น JSON
+                    dataType: 'json',
                     success: function(response) {
                         if (response.error) {
-                            alert(response.error); // แสดงข้อความข้อผิดพลาด
+                            alert(response.error);
                         } else {
-
-                            let today = new Date();
-                            let formatDate = (date) => {
-                                let d = new Date(date);
-                                let day = String(d.getDate()).padStart(2,
-                                    '0'); // วันที่ 2 หลัก
-                                let month = String(d.getMonth() + 1).padStart(2,
-                                    '0'); // เดือน 2 หลัก
-                                let year = d.getFullYear(); // ปี ค.ศ.
-                                return `${day}-${month}-${year}`;
-                            };
-
-                            let startDate = response.l_leave_start_date ? formatDate(
-                                response.l_leave_start_date) : formatDate(today);
-                            let endDate = response.l_leave_end_date ? formatDate(response
-                                .l_leave_end_date) : formatDate(today);
 
                             // ใส่ข้อมูลในฟอร์ม Modal
                             $('.editLeaveType').val(response.l_leave_id);
                             $('#editLeaveReason').val(response.l_leave_reason);
-                            $('#editLeaveStartDate').val(startDate);
-                            $('#editLeaveEndDate').val(endDate);
-                            $('#editTelPhone').val(response.l_phone);
+                            $('#editLeaveStartDate').val(response
+                                .l_leave_start_date);
+                            $('#editLeaveEndDate').val(response.l_leave_end_date);
+                            // $('#editTelPhone').val(response.l_phone);
 
                             var existingFile = response.l_file;
 
@@ -3524,17 +3509,17 @@ WHERE l_leave_id = :leave_id
                             });
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',
                             text: 'ไม่สามารถแก้ไขข้อมูลได้',
                             icon: 'error',
                             confirmButtonText: 'ตกลง',
                         });
-                        console.log(response)
-
+                        console.log('Error:', error); // Log the actual error instead
                     },
                 });
+
             });
         });
 
