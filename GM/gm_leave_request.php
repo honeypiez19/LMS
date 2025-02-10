@@ -1,17 +1,17 @@
 <?php
-session_start();
-date_default_timezone_set('Asia/Bangkok');
+    session_start();
+    date_default_timezone_set('Asia/Bangkok');
 
-include '../connect.php';
-include '../session_lang.php';
+    include '../connect.php';
+    include '../session_lang.php';
 
-if (!isset($_SESSION['s_usercode'])) {
-    header('Location: ../login.php');
-    exit();
-}
+    if (! isset($_SESSION['s_usercode'])) {
+        header('Location: ../login.php');
+        exit();
+    }
 
-$userCode = $_SESSION['s_usercode'];
-// echo $userCode;
+    $userCode = $_SESSION['s_usercode'];
+    // echo $userCode;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,9 +40,9 @@ $userCode = $_SESSION['s_usercode'];
 <body>
     <?php include 'gm_navbar.php'?>
 
-    <!-- <?php echo $subDepart; ?>
-    <?php echo $subDepart2; ?>
-    <?php echo $userName; ?> -->
+    <!--         <?php echo $subDepart; ?>
+<?php echo $subDepart2; ?>
+<?php echo $userName; ?> -->
 
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
@@ -63,61 +63,61 @@ $userCode = $_SESSION['s_usercode'];
             <label for="" class="mt-2 col-auto">เลือกปี</label>
             <div class="col-auto">
                 <?php
-$currentYear = date('Y'); // ปีปัจจุบัน
+                    $currentYear = date('Y'); // ปีปัจจุบัน
 
-if (isset($_POST['year'])) {
-    $selectedYear = $_POST['year'];
-    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
-    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
-} else {
-    $selectedYear = $currentYear;
-}
+                    if (isset($_POST['year'])) {
+                        $selectedYear = $_POST['year'];
+                        $startDate    = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+                        $endDate      = date("Y-m-d", strtotime($selectedYear . "-11-30"));
+                    } else {
+                        $selectedYear = $currentYear;
+                    }
 
-echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+                    echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 
-// เพิ่มตัวเลือกของปีหน้า
-$nextYear = $currentYear + 1;
-echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+                    // เพิ่มตัวเลือกของปีหน้า
+                    $nextYear = $currentYear + 1;
+                    echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
 
-for ($i = 0; $i <= 4; $i++) {
-    $year = $currentYear - $i;
-    echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
-}
-echo "</select>";
-?>
+                    for ($i = 0; $i <= 4; $i++) {
+                        $year = $currentYear - $i;
+                        echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
+                    }
+                    echo "</select>";
+                ?>
             </div>
 
             <label for="" class="mt-2 col-auto">เลือกเดือน</label>
             <div class="col-auto">
                 <?php
-$months = [
-    'All' => 'ทั้งหมด',
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
-];
+                    $months = [
+                        'All' => 'ทั้งหมด',
+                        '01'  => 'มกราคม',
+                        '02'  => 'กุมภาพันธ์',
+                        '03'  => 'มีนาคม',
+                        '04'  => 'เมษายน',
+                        '05'  => 'พฤษภาคม',
+                        '06'  => 'มิถุนายน',
+                        '07'  => 'กรกฎาคม',
+                        '08'  => 'สิงหาคม',
+                        '09'  => 'กันยายน',
+                        '10'  => 'ตุลาคม',
+                        '11'  => 'พฤศจิกายน',
+                        '12'  => 'ธันวาคม',
+                    ];
 
-$selectedMonth = 'All';
+                    $selectedMonth = 'All';
 
-if (isset($_POST['month'])) {
-    $selectedMonth = $_POST['month'];
-}
+                    if (isset($_POST['month'])) {
+                        $selectedMonth = $_POST['month'];
+                    }
 
-echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
-foreach ($months as $key => $monthName) {
-    echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
-}
-echo "</select>";
-?>
+                    echo "<select class='form-select' name='month' id='selectedMonth' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
+                    foreach ($months as $key => $monthName) {
+                        echo "<option value='$key'" . ($key == $selectedMonth ? " selected" : "") . ">$monthName</option>";
+                    }
+                    echo "</select>";
+                ?>
             </div>
         </form>
     </div>
@@ -130,8 +130,8 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// เตรียมคำสั่ง SQL
-$sql = "SELECT
+                                // เตรียมคำสั่ง SQL
+                                $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
@@ -144,26 +144,26 @@ AND li.l_level IN ('user', 'chief', 'leader','admin')
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
-if ($selectedMonth != "All") {
-    $sql .= " AND (
+                                if ($selectedMonth != "All") {
+                                    $sql .= " AND (
         Month(li.l_create_datetime) = :selectedMonth
         OR Month(li.l_leave_end_date) = :selectedMonth
     ) ";
-}
-// เตรียมและรัน query
-$stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
-if ($selectedMonth != "All") {
-    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-}
-$stmt->bindParam(':selectedYear', $selectedYear);
+                                }
+                                // เตรียมและรัน query
+                                $stmt = $conn->prepare($sql);
+                                // $stmt->bindParam(':subDepart', $subDepart);
+                                if ($selectedMonth != "All") {
+                                    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                                }
+                                $stmt->bindParam(':selectedYear', $selectedYear);
 
-$stmt->execute();
+                                $stmt->execute();
 
-// ดึงผลลัพธ์
-$totalLeaveItems = $stmt->fetchColumn();
+                                // ดึงผลลัพธ์
+                                $totalLeaveItems = $stmt->fetchColumn();
 
-?>
+                            ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
                                 <!-- <i class="mt-4 fas fa-file-alt ml-2 fa-2xl"></i> -->
@@ -183,7 +183,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
+                                $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
@@ -197,26 +197,26 @@ AND li.l_approve_status2 = 1
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
-if ($selectedMonth != "All") {
-    $sql .= " AND (
+                                if ($selectedMonth != "All") {
+                                    $sql .= " AND (
         Month(li.l_create_datetime) = :selectedMonth
         OR Month(li.l_leave_end_date) = :selectedMonth
     ) ";
-}
+                                }
 
-// เตรียมและรัน query
-$stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
-if ($selectedMonth != "All") {
-    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-}
-$stmt->bindParam(':selectedYear', $selectedYear);
+                                // เตรียมและรัน query
+                                $stmt = $conn->prepare($sql);
+                                // $stmt->bindParam(':subDepart', $subDepart);
+                                if ($selectedMonth != "All") {
+                                    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                                }
+                                $stmt->bindParam(':selectedYear', $selectedYear);
 
-$stmt->execute();
+                                $stmt->execute();
 
-// ดึงผลลัพธ์
-$totalLeaveItems = $stmt->fetchColumn();
-?>
+                                // ดึงผลลัพธ์
+                                $totalLeaveItems = $stmt->fetchColumn();
+                            ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
                                 <!-- <i class="mt-4 fa-solid fa-clock-rotate-left fa-2xl" style="color: #ffffff;"></i> -->
@@ -235,7 +235,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
+                                $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
@@ -250,26 +250,26 @@ AND li.l_approve_status2 = 4
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
 
-if ($selectedMonth != "All") {
-    $sql .= " AND (
+                                if ($selectedMonth != "All") {
+                                    $sql .= " AND (
         Month(li.l_create_datetime) = :selectedMonth
         OR Month(li.l_leave_end_date) = :selectedMonth
     ) ";
-}
+                                }
 
-// เตรียมและรัน query
-$stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
-if ($selectedMonth != "All") {
-    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-}
+                                // เตรียมและรัน query
+                                $stmt = $conn->prepare($sql);
+                                // $stmt->bindParam(':subDepart', $subDepart);
+                                if ($selectedMonth != "All") {
+                                    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                                }
 
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->execute();
+                                $stmt->bindParam(':selectedYear', $selectedYear);
+                                $stmt->execute();
 
-// ดึงผลลัพธ์
-$totalLeaveItems = $stmt->fetchColumn();
-?>
+                                // ดึงผลลัพธ์
+                                $totalLeaveItems = $stmt->fetchColumn();
+                            ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
                                 <!-- <i class="mt-4 fa-solid fa-thumbs-up fa-2xl"></i> -->
@@ -288,7 +288,7 @@ $totalLeaveItems = $stmt->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
+                                $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
@@ -303,26 +303,26 @@ AND li.l_approve_status2 = 5
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
 
-if ($selectedMonth != "All") {
-    $sql .= " AND (
+                                if ($selectedMonth != "All") {
+                                    $sql .= " AND (
         Month(li.l_create_datetime) = :selectedMonth
         OR Month(li.l_leave_end_date) = :selectedMonth
     ) ";
-}
+                                }
 
-// เตรียมและรัน query
-$stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
-if ($selectedMonth != "All") {
-    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-}
+                                // เตรียมและรัน query
+                                $stmt = $conn->prepare($sql);
+                                // $stmt->bindParam(':subDepart', $subDepart);
+                                if ($selectedMonth != "All") {
+                                    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                                }
 
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->execute();
+                                $stmt->bindParam(':selectedYear', $selectedYear);
+                                $stmt->execute();
 
-// ดึงผลลัพธ์
-$totalLeaveItems = $stmt->fetchColumn();
-?>
+                                // ดึงผลลัพธ์
+                                $totalLeaveItems = $stmt->fetchColumn();
+                            ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
                                 <!-- <i class="mt-4 fa-solid fa-thumbs-down fa-2xl"></i> -->
@@ -379,17 +379,17 @@ $totalLeaveItems = $stmt->fetchColumn();
                 </thead>
                 <tbody class="text-center">
                     <?php
-// กำหนดจำนวนรายการต่อหน้า
-$itemsPerPage = 10;
+                        // กำหนดจำนวนรายการต่อหน้า
+                        $itemsPerPage = 10;
 
-// ตรวจสอบหน้าปัจจุบัน
-$currentPage = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+                        // ตรวจสอบหน้าปัจจุบัน
+                        $currentPage = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
-// คำนวณค่า offset สำหรับ pagination
-$offset = ($currentPage - 1) * $itemsPerPage;
+                        // คำนวณค่า offset สำหรับ pagination
+                        $offset = ($currentPage - 1) * $itemsPerPage;
 
-// สร้างคำสั่ง SQL
-$sql = "SELECT
+                        // สร้างคำสั่ง SQL
+                        $sql = "SELECT
             li.*
         FROM
             leave_list li
@@ -402,573 +402,573 @@ $sql = "SELECT
                 OR YEAR(li.l_leave_end_date) = :selectedYear
             )";
 
-if ($selectedMonth != "All") {
-    $sql .= " AND (
+                        if ($selectedMonth != "All") {
+                            $sql .= " AND (
                 Month(li.l_create_datetime) = :selectedMonth
                 OR Month(li.l_leave_end_date) = :selectedMonth
              )";
-}
+                        }
 
-$sql .= " ORDER BY li.l_create_datetime DESC";
+                        $sql .= " ORDER BY li.l_create_datetime DESC";
 
-// ประมวลผลคำสั่ง SQL เพื่อหาจำนวนแถวทั้งหมด
-$stmt = $conn->prepare($sql);
+                        // ประมวลผลคำสั่ง SQL เพื่อหาจำนวนแถวทั้งหมด
+                        $stmt = $conn->prepare($sql);
 
-// ผูกค่า (bind parameters)
-$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+                        // ผูกค่า (bind parameters)
+                        $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 
-if ($selectedMonth != "All") {
-    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-}
+                        if ($selectedMonth != "All") {
+                            $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                        }
 
-$stmt->execute();
+                        $stmt->execute();
 
-// นับจำนวนแถวทั้งหมด
-$totalRows = $stmt->rowCount();
+                        // นับจำนวนแถวทั้งหมด
+                        $totalRows = $stmt->rowCount();
 
-// คำนวณจำนวนหน้าทั้งหมด
-$totalPages = ceil($totalRows / $itemsPerPage);
+                        // คำนวณจำนวนหน้าทั้งหมด
+                        $totalPages = ceil($totalRows / $itemsPerPage);
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT :itemsPerPage OFFSET :offset";
+                        // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
+                        $sql .= " LIMIT :itemsPerPage OFFSET :offset";
 
-// เตรียมคำสั่ง SQL ใหม่สำหรับดึงข้อมูลรายการในหน้าที่กำหนด
-$stmt = $conn->prepare($sql);
+                        // เตรียมคำสั่ง SQL ใหม่สำหรับดึงข้อมูลรายการในหน้าที่กำหนด
+                        $stmt = $conn->prepare($sql);
 
-// ผูกค่า (bind parameters) ใหม่
-$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+                        // ผูกค่า (bind parameters) ใหม่
+                        $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 
-if ($selectedMonth != "All") {
-    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-}
+                        if ($selectedMonth != "All") {
+                            $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                        }
 
-$stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+                        $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
-$stmt->execute();
+                        $stmt->execute();
 
-// แสดงข้อมูลในตาราง
-$rowNumber = $totalRows - $offset; // กำหนดลำดับของแถวเริ่มต้น
-if ($stmt->rowCount() > 0) {
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo '<tr class="align-middle">';
+                        // แสดงข้อมูลในตาราง
+                        $rowNumber = $totalRows - $offset; // กำหนดลำดับของแถวเริ่มต้น
+                        if ($stmt->rowCount() > 0) {
+                            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                echo '<tr class="align-middle">';
 
-// 0
-        echo '<td hidden>';
-        if ($row['l_leave_id'] == 1) {
-            echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>';
-        } elseif ($row['l_leave_id'] == 2) {
-            echo '<span class="text-primary">' . 'ลากิจไม่ได้รับค่าจ้าง' . '</span>';
-        } elseif ($row['l_leave_id'] == 3) {
-            echo '<span class="text-primary">' . 'ลาป่วย' . '</span>';
-        } elseif ($row['l_leave_id'] == 4) {
-            echo '<span class="text-primary">' . 'ลาป่วยจากงาน' . '</span>';
-        } elseif ($row['l_leave_id'] == 5) {
-            echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>';
-        } elseif ($row['l_leave_id'] == 6) {
-            echo '<span class="text-primary">' . 'ขาดงาน' . '</span>';
-        } elseif ($row['l_leave_id'] == 7) {
-            echo '<span class="text-primary">' . 'มาสาย' . '</span>';
-        } elseif ($row['l_leave_id'] == 8) {
-            echo '<span class="text-primary">' . 'อื่น ๆ' . '</span>';
-        } else {
-            echo $row['l_leave_id'];
-        }
-        echo '</td>';
+                        // 0
+                                echo '<td hidden>';
+                                if ($row['l_leave_id'] == 1) {
+                                    echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>';
+                                } elseif ($row['l_leave_id'] == 2) {
+                                    echo '<span class="text-primary">' . 'ลากิจไม่ได้รับค่าจ้าง' . '</span>';
+                                } elseif ($row['l_leave_id'] == 3) {
+                                    echo '<span class="text-primary">' . 'ลาป่วย' . '</span>';
+                                } elseif ($row['l_leave_id'] == 4) {
+                                    echo '<span class="text-primary">' . 'ลาป่วยจากงาน' . '</span>';
+                                } elseif ($row['l_leave_id'] == 5) {
+                                    echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>';
+                                } elseif ($row['l_leave_id'] == 6) {
+                                    echo '<span class="text-primary">' . 'ขาดงาน' . '</span>';
+                                } elseif ($row['l_leave_id'] == 7) {
+                                    echo '<span class="text-primary">' . 'มาสาย' . '</span>';
+                                } elseif ($row['l_leave_id'] == 8) {
+                                    echo '<span class="text-primary">' . 'อื่น ๆ' . '</span>';
+                                } else {
+                                    echo $row['l_leave_id'];
+                                }
+                                echo '</td>';
 
-        // 1
-        echo '<td hidden>' . $row['l_name'] . '</td>';
+                                // 1
+                                echo '<td hidden>' . $row['l_name'] . '</td>';
 
-        // 2
-        echo '<td hidden>' . $row['l_department'] . '</td>';
+                                // 2
+                                echo '<td hidden>' . $row['l_department'] . '</td>';
 
-        // 3
-        echo '<td hidden>' . $row['l_leave_reason'] . '</td>';
+                                // 3
+                                echo '<td hidden>' . $row['l_leave_reason'] . '</td>';
 
-        // 4
-        echo '<td>' . $rowNumber . '</td>';
+                                // 4
+                                echo '<td>' . $rowNumber . '</td>';
 
-        // 5
-        echo '<td>' . $row['l_usercode'] . '</td>';
+                                // 5
+                                echo '<td>' . $row['l_usercode'] . '</td>';
 
-        // 6
-        echo '<td>' . '<span class="text-primary">' . $row['l_name'] . '</span>' . '<br>' . 'แผนก : ' . $row['l_department'] . '</td>'; // คอลัมน์ 2 ชื่อพนักงาน + แผนก
+                                                                                                                                                                        // 6
+                                echo '<td>' . '<span class="text-primary">' . $row['l_name'] . '</span>' . '<br>' . 'แผนก : ' . $row['l_department'] . '</td>'; // คอลัมน์ 2 ชื่อพนักงาน + แผนก
 
-        // 7
-        echo '<td>' . $row['l_create_datetime'] . '</td>';
+                                // 7
+                                echo '<td>' . $row['l_create_datetime'] . '</td>';
 
-        // 8
-        echo '<td>';
-        if ($row['l_leave_id'] == 1) {
-            echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 2) {
-            echo '<span class="text-primary">' . 'ลากิจไม่ได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 3) {
-            echo '<span class="text-primary">' . 'ลาป่วย' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 4) {
-            echo '<span class="text-primary">' . 'ลาป่วยจากงาน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 5) {
-            echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 6) {
-            echo '<span class="text-primary">' . 'ขาดงาน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 7) {
-            echo '<span class="text-primary">' . 'มาสาย' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } elseif ($row['l_leave_id'] == 8) {
-            echo '<span class="text-primary">' . 'อื่น ๆ' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
-        } else {
-            echo 'ไม่พบประเภทการลาและเหตุผลการลา';
-        }
-        echo '</td>';
+                                // 8
+                                echo '<td>';
+                                if ($row['l_leave_id'] == 1) {
+                                    echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 2) {
+                                    echo '<span class="text-primary">' . 'ลากิจไม่ได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 3) {
+                                    echo '<span class="text-primary">' . 'ลาป่วย' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 4) {
+                                    echo '<span class="text-primary">' . 'ลาป่วยจากงาน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 5) {
+                                    echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 6) {
+                                    echo '<span class="text-primary">' . 'ขาดงาน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 7) {
+                                    echo '<span class="text-primary">' . 'มาสาย' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } elseif ($row['l_leave_id'] == 8) {
+                                    echo '<span class="text-primary">' . 'อื่น ๆ' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                } else {
+                                    echo 'ไม่พบประเภทการลาและเหตุผลการลา';
+                                }
+                                echo '</td>';
 
-        // 9
-        // 08:45
-        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
-        }
-        // 09:45
-        else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
-        }
-        // 10:45
-        else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
-        }
-        // 11:45
-        else if ($row['l_leave_start_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
-        }
-        // 12:45
-        else if ($row['l_leave_start_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
-        }
-        // 13:10
-        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
-        }
-        // 13:45
-        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
-        }
-        // 14:10
-        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
-        }
-        // 14:45
-        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
-        }
-        // 15:10
-        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
-        }
-        // 15:45
-        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
-        }
-        // 16:10
-        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
-        }
-        // 16:40
-        else if ($row['l_leave_start_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
-        } else {
-            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-        }
+                                // 9
+                                // 08:45
+                                if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+                                }
+                                // 09:45
+                                else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+                                }
+                                // 10:45
+                                else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+                                }
+                                // 11:45
+                                else if ($row['l_leave_start_time'] == '12:00:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
+                                }
+                                // 12:45
+                                else if ($row['l_leave_start_time'] == '13:00:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
+                                }
+                                // 13:10
+                                else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+                                }
+                                // 13:40
+                                else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+                                }
+                                // 13:45
+                                else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 13:45:00</td>';
+                                }
+                                // 14:10
+                                else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+                                }
+                                // 14:40
+                                else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+                                }
+                                // 14:45
+                                else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 14:45:00</td>';
+                                }
+                                // 15:10
+                                else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+                                }
+                                // 15:40
+                                else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+                                }
+                                // 15:45
+                                else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 15:45:00</td>';
+                                }
+                                // 16:10
+                                else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+                                }
+                                // 16:40
+                                else if ($row['l_leave_start_time'] == '17:00:00') {
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
+                                } else {
+                                    // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
+                                    echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+                                }
 
-        // 10
-        // 08:45
-        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
-        }
-        // 09:45
-        else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
-        }
-        // 10:45
-        else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
-        }
-        // 11:45
-        else if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
-        }
-        // 12:45
-        else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
-        }
-        // 13:10
-        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
-        }
-        // 13:40
-        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
-        }
-        // 13:45
-        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
-        }
-        // 14:10
-        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
-        }
-        // 14:40
-        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
-        }
-        // 14:45
-        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
-        }
-        // 15:10
-        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
-        }
-        // 15:40
-        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
-        }
-        // 15:45
-        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
-        }
-        // 16:10
-        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
-        }
-        // 16:40
-        else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
-        } else {
-            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
-        }
+                                // 10
+                                // 08:45
+                                if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+                                }
+                                // 09:45
+                                else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+                                }
+                                // 10:45
+                                else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+                                }
+                                // 11:45
+                                else if ($row['l_leave_end_time'] == '12:00:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
+                                }
+                                // 12:45
+                                else if ($row['l_leave_end_time'] == '13:00:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
+                                }
+                                // 13:10
+                                else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+                                }
+                                // 13:40
+                                else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+                                }
+                                // 13:45
+                                else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:45:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 13:45:00</td>';
+                                }
+                                // 14:10
+                                else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
+                                }
+                                // 14:40
+                                else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+                                }
+                                // 14:45
+                                else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:45:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 14:45:00</td>';
+                                }
+                                // 15:10
+                                else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
+                                }
+                                // 15:40
+                                else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+                                }
+                                // 15:45
+                                else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:45:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 15:45:00</td>';
+                                }
+                                // 16:10
+                                else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+                                }
+                                // 16:40
+                                else if ($row['l_leave_end_time'] == '17:00:00') {
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
+                                } else {
+                                    // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
+                                    echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+                                }
 
-        // 11
-        echo '<td>';
-        // Query to check holidays in the leave period
-        $holiday_query = "SELECT COUNT(*) as holiday_count
+                                // 11
+                                echo '<td>';
+                                // Query to check holidays in the leave period
+                                $holiday_query = "SELECT COUNT(*) as holiday_count
                   FROM holiday
                   WHERE h_start_date BETWEEN :start_date AND :end_date
                   AND h_holiday_status = 'วันหยุด'
                   AND h_status = 0";
 
-        // Prepare the query
-        $holiday_stmt = $conn->prepare($holiday_query);
-        $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
-        $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
-        $holiday_stmt->execute();
+                                // Prepare the query
+                                $holiday_stmt = $conn->prepare($holiday_query);
+                                $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
+                                $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
+                                $holiday_stmt->execute();
 
-        // Fetch the holiday count
-        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
-        $holiday_count = $holiday_data['holiday_count'];
-        // คำนวณระยะเวลาการลา
-        $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-        $l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-        $interval = $l_leave_start_date->diff($l_leave_end_date);
+                                // Fetch the holiday count
+                                $holiday_data  = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+                                $holiday_count = $holiday_data['holiday_count'];
+                                // คำนวณระยะเวลาการลา
+                                $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
+                                $l_leave_end_date   = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+                                $interval           = $l_leave_start_date->diff($l_leave_end_date);
 
-        // คำนวณจำนวนวันลา
-        $leave_days = $interval->days - $holiday_count;
+                                // คำนวณจำนวนวันลา
+                                $leave_days = $interval->days - $holiday_count;
 
-        // คำนวณจำนวนชั่วโมงและนาทีลา
-        $leave_hours = $interval->h;
-        $leave_minutes = $interval->i;
+                                // คำนวณจำนวนชั่วโมงและนาทีลา
+                                $leave_hours   = $interval->h;
+                                $leave_minutes = $interval->i;
 
-        // ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
-        $start_hour = (int) $l_leave_start_date->format('H');
-        $end_hour = (int) $l_leave_end_date->format('H');
+                                // ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
+                                $start_hour = (int) $l_leave_start_date->format('H');
+                                $end_hour   = (int) $l_leave_end_date->format('H');
 
-        if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
-            (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
-            // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
-            $leave_hours -= 1;
-        }
+                                if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+                                    (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
+                                    // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
+                                    $leave_hours -= 1;
+                                }
 
-        // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
-        if ($leave_hours >= 8) {
-            $leave_days += floor($leave_hours / 8);
-            $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
-        }
+                                // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
+                                if ($leave_hours >= 8) {
+                                    $leave_days += floor($leave_hours / 8);
+                                    $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
+                                }
 
-        // ตรวจสอบการนาที
-        if ($leave_minutes >= 30) {
-            $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
-        }
+                                // ตรวจสอบการนาที
+                                if ($leave_minutes >= 30) {
+                                    $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
+                                }
 
-        if ($row['l_leave_id'] == 7) {
-            echo '';
-        } else {
-            echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
-        }
-        echo '</td>';
+                                if ($row['l_leave_id'] == 7) {
+                                    echo '';
+                                } else {
+                                    echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
+                                }
+                                echo '</td>';
 
-        // 12
-        echo '</td>';
-        if (!empty($row['l_file'])) {
-            echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
-        } else {
-            echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
-        }
-        echo '</td>';
+                                // 12
+                                echo '</td>';
+                                if (! empty($row['l_file'])) {
+                                    echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
+                                } else {
+                                    echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
+                                }
+                                echo '</td>';
 
-        // 13
-        echo '<td>';
-        if ($row['l_leave_status'] == 0) {
-            echo '<span class="text-success">' . $strStatusNormal . '</span>';
-        } else {
-            echo '<span class="text-danger">' . $strStatusCancel . '</span>';
-        }
-        echo '</td>';
+                                // 13
+                                echo '<td>';
+                                if ($row['l_leave_status'] == 0) {
+                                    echo '<span class="text-success">' . $strStatusNormal . '</span>';
+                                } else {
+                                    echo '<span class="text-danger">' . $strStatusCancel . '</span>';
+                                }
+                                echo '</td>';
 
-        // 14
-        echo '<td>' . $row['l_approve_name'] . '</td>';
+                                // 14
+                                echo '<td>' . $row['l_approve_name'] . '</td>';
 
-        // 15
-        echo '<td>';
-        // รอหัวหน้าอนุมัติ
-        if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
-        }
-        // รอผจกอนุมัติ
-        elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
-        }
-        // หัวหน้าอนุมัติ
-        elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
-        }
-        // หัวหน้าไม่อนุมัติ
-        elseif ($row['l_approve_status'] == 3) {
-            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
-        }
-        //  ผจก อนุมัติ
-        elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
-        }
-        //  ผจก ไม่อนุมัติ
-        elseif ($row['l_approve_status'] == 5) {
-            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
-        } elseif ($row['l_approve_status'] == 6) {
-            echo '';
-        }
-        // ไม่มีสถานะ
-        else {
-            echo 'ไม่พบสถานะ';
-        }
-        echo '</td>';
+                                // 15
+                                echo '<td>';
+                                // รอหัวหน้าอนุมัติ
+                                if ($row['l_approve_status'] == 0) {
+                                    echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+                                }
+                                // รอผจกอนุมัติ
+                                elseif ($row['l_approve_status'] == 1) {
+                                    echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+                                }
+                                // หัวหน้าอนุมัติ
+                                elseif ($row['l_approve_status'] == 2) {
+                                    echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+                                }
+                                // หัวหน้าไม่อนุมัติ
+                                elseif ($row['l_approve_status'] == 3) {
+                                    echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+                                }
+                                //  ผจก อนุมัติ
+                                elseif ($row['l_approve_status'] == 4) {
+                                    echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+                                }
+                                //  ผจก ไม่อนุมัติ
+                                elseif ($row['l_approve_status'] == 5) {
+                                    echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+                                } elseif ($row['l_approve_status'] == 6) {
+                                    echo '';
+                                }
+                                // ไม่มีสถานะ
+                                else {
+                                    echo 'ไม่พบสถานะ';
+                                }
+                                echo '</td>';
 
-        // 16
-        echo '<td>' . $row['l_approve_datetime'] . '</td>';
+                                // 16
+                                echo '<td>' . $row['l_approve_datetime'] . '</td>';
 
-        // 17
-        echo '<td>' . $row['l_reason'] . '</td>';
+                                // 17
+                                echo '<td>' . $row['l_reason'] . '</td>';
 
-        // 18
-        echo '<td>' . $row['l_approve_name2'] . '</td>';
+                                // 18
+                                echo '<td>' . $row['l_approve_name2'] . '</td>';
 
-        // 19
-        echo '<td>';
-        // รอหัวหน้าอนุมัติ
-        if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
-        }
-        // รอผจกอนุมัติ
-        elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
-        }
-        // หัวหน้าอนุมัติ
-        elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
-        }
-        // หัวหน้าไม่อนุมัติ
-        elseif ($row['l_approve_status2'] == 3) {
-            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
-        }
-        //  ผจก อนุมัติ
-        elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
-        }
-        //  ผจก ไม่อนุมัติ
-        elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
-        } elseif ($row['l_approve_status2'] == 6) {
-            echo '';
-        }
-        // ไม่มีสถานะ
-        else {
-            echo 'ไม่พบสถานะ';
-        }
-        echo '</td>';
+                                // 19
+                                echo '<td>';
+                                // รอหัวหน้าอนุมัติ
+                                if ($row['l_approve_status2'] == 0) {
+                                    echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+                                }
+                                // รอผจกอนุมัติ
+                                elseif ($row['l_approve_status2'] == 1) {
+                                    echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+                                }
+                                // หัวหน้าอนุมัติ
+                                elseif ($row['l_approve_status2'] == 2) {
+                                    echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+                                }
+                                // หัวหน้าไม่อนุมัติ
+                                elseif ($row['l_approve_status2'] == 3) {
+                                    echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+                                }
+                                //  ผจก อนุมัติ
+                                elseif ($row['l_approve_status2'] == 4) {
+                                    echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+                                }
+                                //  ผจก ไม่อนุมัติ
+                                elseif ($row['l_approve_status2'] == 5) {
+                                    echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+                                } elseif ($row['l_approve_status2'] == 6) {
+                                    echo '';
+                                }
+                                // ไม่มีสถานะ
+                                else {
+                                    echo 'ไม่พบสถานะ';
+                                }
+                                echo '</td>';
 
-        // 20
-        echo '<td>' . $row['l_approve_datetime2'] . '</td>';
+                                // 20
+                                echo '<td>' . $row['l_approve_datetime2'] . '</td>';
 
-        // 21
-        echo '<td>' . $row['l_reason2'] . '</td>';
+                                // 21
+                                echo '<td>' . $row['l_reason2'] . '</td>';
 
-        // 22
-        echo '<td>' . $row['l_approve_name3'] . '</td>';
+                                // 22
+                                echo '<td>' . $row['l_approve_name3'] . '</td>';
 
-        // 23
-        echo '<td>';
-        // รอหัวหน้าอนุมัติ
-        if ($row['l_approve_status3'] == 0) {
-            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
-        }
-        // รอผจกอนุมัติ
-        elseif ($row['l_approve_status3'] == 1) {
-            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
-        }
-        // หัวหน้าอนุมัติ
-        elseif ($row['l_approve_status3'] == 2) {
-            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
-        }
-        // หัวหน้าไม่อนุมัติ
-        elseif ($row['l_approve_status3'] == 3) {
-            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
-        }
-        //  ผจก อนุมัติ
-        elseif ($row['l_approve_status3'] == 4) {
-            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
-        }
-        //  ผจก ไม่อนุมัติ
-        elseif ($row['l_approve_status3'] == 5) {
-            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
-        }
-        // ช่องว่าง
-        elseif ($row['l_approve_status3'] == 6) {
-            echo '';
-        }
-        // รอ GM
-        elseif ($row['l_approve_status3'] == 7) {
-            echo '<div class="text-warning"><b>' . 'รอ GM อนุมัติ' . '</b></div>';
-        }
-        // GM อนุมัติ
-        elseif ($row['l_approve_status3'] == 8) {
-            echo '<div class="text-success"><b>' . 'GM อนุมัติ' . '</b></div>';
-        }
-        // GM ไม่อนุมัติ
-        elseif ($row['l_approve_status3'] == 9) {
-            echo '<div class="text-danger"><b>' . 'GM ไม่อนุมัติ' . '</b></div>';
-        }
-        // ไม่มีสถานะ
-        else {
-            echo 'ไม่พบสถานะ';
-        }
-        echo '</td>';
+                                // 23
+                                echo '<td>';
+                                // รอหัวหน้าอนุมัติ
+                                if ($row['l_approve_status3'] == 0) {
+                                    echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+                                }
+                                // รอผจกอนุมัติ
+                                elseif ($row['l_approve_status3'] == 1) {
+                                    echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+                                }
+                                // หัวหน้าอนุมัติ
+                                elseif ($row['l_approve_status3'] == 2) {
+                                    echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+                                }
+                                // หัวหน้าไม่อนุมัติ
+                                elseif ($row['l_approve_status3'] == 3) {
+                                    echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+                                }
+                                //  ผจก อนุมัติ
+                                elseif ($row['l_approve_status3'] == 4) {
+                                    echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+                                }
+                                //  ผจก ไม่อนุมัติ
+                                elseif ($row['l_approve_status3'] == 5) {
+                                    echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+                                }
+                                // ช่องว่าง
+                                elseif ($row['l_approve_status3'] == 6) {
+                                    echo '';
+                                }
+                                // รอ GM
+                                elseif ($row['l_approve_status3'] == 7) {
+                                    echo '<div class="text-warning"><b>' . 'รอ GM อนุมัติ' . '</b></div>';
+                                }
+                                // GM อนุมัติ
+                                elseif ($row['l_approve_status3'] == 8) {
+                                    echo '<div class="text-success"><b>' . 'GM อนุมัติ' . '</b></div>';
+                                }
+                                // GM ไม่อนุมัติ
+                                elseif ($row['l_approve_status3'] == 9) {
+                                    echo '<div class="text-danger"><b>' . 'GM ไม่อนุมัติ' . '</b></div>';
+                                }
+                                // ไม่มีสถานะ
+                                else {
+                                    echo 'ไม่พบสถานะ';
+                                }
+                                echo '</td>';
 
-        // 24
-        echo '<td>' . $row['l_approve_datetime3'] . '</td>';
+                                // 24
+                                echo '<td>' . $row['l_approve_datetime3'] . '</td>';
 
-        // 25
-        echo '<td>' . $row['l_reason3'] . '</td>';
+                                // 25
+                                echo '<td>' . $row['l_reason3'] . '</td>';
 
-        // 26
-        echo '<td >';
-        if ($row['l_hr_status'] == 0) {
-            echo '<span class="text-warning"><b>' . $strStatusHR0 . '</b></span>';
-        } elseif ($row['l_hr_status'] == 1) {
-            echo '<span class="text-success"><b>' . $strStatusHR1 . '</b></span>';
-        } elseif ($row['l_hr_status'] == 2) {
-            echo '<span class="text-danger"><b>' . $strStatusHR2 . '</b></span>';
-        } else {
-            echo $row['l_hr_status'];
-        }
-        echo '</td>';
+                                // 26
+                                echo '<td >';
+                                if ($row['l_hr_status'] == 0) {
+                                    echo '<span class="text-warning"><b>' . $strStatusHR0 . '</b></span>';
+                                } elseif ($row['l_hr_status'] == 1) {
+                                    echo '<span class="text-success"><b>' . $strStatusHR1 . '</b></span>';
+                                } elseif ($row['l_hr_status'] == 2) {
+                                    echo '<span class="text-danger"><b>' . $strStatusHR2 . '</b></span>';
+                                } else {
+                                    echo $row['l_hr_status'];
+                                }
+                                echo '</td>';
 
-        // 27
-        echo '<td>' . $row['l_remark2'] . '</td>';
+                                // 27
+                                echo '<td>' . $row['l_remark2'] . '</td>';
 
-        // 28
-        if ($row['l_approve_status3'] == 8 || $row['l_approve_status3'] == 9) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
-        } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
-        }
+                                // 28
+                                if ($row['l_approve_status3'] == 8 || $row['l_approve_status3'] == 9) {
+                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
+                                } else {
+                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
+                                }
 
-        // 29
-        echo '<td>
+                                // 29
+                                echo '<td>
         <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
 
-        echo '</tr>';
+                                echo '</tr>';
 
-        $rowNumber--;
-    }
+                                $rowNumber--;
+                            }
 
-} else {
-    echo '<tr><td colspan="19" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
-}
-?>
+                        } else {
+                            echo '<tr><td colspan="19" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
+                        }
+                    ?>
                 </tbody>
             </table>
         </div>
         <?php
-echo '<div class="pagination">';
-echo '<ul class="pagination">';
+            echo '<div class="pagination">';
+            echo '<ul class="pagination">';
 
-// กำหนดจำนวนหน้าที่จะแสดงรอบ ๆ หน้าปัจจุบัน
-$range = 2;
+            // กำหนดจำนวนหน้าที่จะแสดงรอบ ๆ หน้าปัจจุบัน
+            $range = 2;
 
-// สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
-if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
-}
+            // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
+            if ($currentPage > 1) {
+                echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
+            }
 
-// แสดงลิงก์สำหรับหน้าที่อยู่ในช่วง
-for ($i = max(1, $currentPage - $range); $i <= min($totalPages, $currentPage + $range); $i++) {
-    if ($i == $currentPage) {
-        echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-    } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
-    }
-}
+            // แสดงลิงก์สำหรับหน้าที่อยู่ในช่วง
+            for ($i = max(1, $currentPage - $range); $i <= min($totalPages, $currentPage + $range); $i++) {
+                if ($i == $currentPage) {
+                    echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+                } else {
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
+                }
+            }
 
-// เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าสุดท้าย
-if ($currentPage + $range < $totalPages) {
-    echo '<li class="page-item"><span class="page-link">...</span></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">' . $totalPages . '</a></li>';
-}
+            // เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าสุดท้าย
+            if ($currentPage + $range < $totalPages) {
+                echo '<li class="page-item"><span class="page-link">...</span></li>';
+                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">' . $totalPages . '</a></li>';
+            }
 
-// เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าแรก
-if ($currentPage - $range > 1) {
-    echo '<li class="page-item"><span class="page-link">...</span></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">' . 1 . '</a></li>';
-}
+            // เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าแรก
+            if ($currentPage - $range > 1) {
+                echo '<li class="page-item"><span class="page-link">...</span></li>';
+                echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">' . 1 . '</a></li>';
+            }
 
-// สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
-if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
-}
+            // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
+            if ($currentPage < $totalPages) {
+                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
+            }
 
-echo '</ul>';
+            echo '</ul>';
 
-// ฟอร์มสำหรับกรอกหมายเลขหน้า
-echo '<form method="GET" action="" class="mb-2 d-inline-flex">';
-echo '<input type="hidden" name="month" value="' . htmlspecialchars($selectedMonth) . '">';
-// echo '<label for="customPage" class="me-2">ไปหน้าที่:</label>';
-echo '<input type="number" name="page" id="customPage" class="form-control mb-3 mx-2" style="width: 80px;" min="1" max="' . $totalPages . '" value="' . $currentPage . '">';
-echo '<button type="submit" class="mx-2 mb-3 btn btn-primary" style="width: 50px;">Go</button>';
-echo '</form>';
+            // ฟอร์มสำหรับกรอกหมายเลขหน้า
+            echo '<form method="GET" action="" class="mb-2 d-inline-flex">';
+            echo '<input type="hidden" name="month" value="' . htmlspecialchars($selectedMonth) . '">';
+            // echo '<label for="customPage" class="me-2">ไปหน้าที่:</label>';
+            echo '<input type="number" name="page" id="customPage" class="form-control mb-3 mx-2" style="width: 80px;" min="1" max="' . $totalPages . '" value="' . $currentPage . '">';
+            echo '<button type="submit" class="mx-2 mb-3 btn btn-primary" style="width: 50px;">Go</button>';
+            echo '</form>';
 
-echo '</div>';
+            echo '</div>';
 
-?>
+        ?>
         <!-- Modal เช็คการลา -->
         <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -1237,10 +1237,10 @@ echo '</div>';
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
                             leaveStatus =
-                                '<div class="text-success"><?=$strStatusNormal?></div>';
+                                '<div class="text-success"><?php echo $strStatusNormal?></div>';
                         } else if (row['l_leave_status'] == 1) {
                             leaveStatus =
-                                '<div class="text-danger"><?=$strStatusCancel?></div>';
+                                '<div class="text-danger"><?php echo $strStatusCancel?></div>';
                         } else {
                             leaveStatus = 'ไม่พบสถานะใบลา';
                         }
@@ -1249,22 +1249,22 @@ echo '</div>';
                         var approveStatus;
                         if (row['l_approve_status'] == 0) {
                             approveStatus =
-                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
                         } else if (row['l_approve_status'] == 1) {
                             approveStatus =
-                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
                         } else if (row['l_approve_status'] == 2) {
                             approveStatus =
-                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
                         } else if (row['l_approve_status'] == 3) {
                             approveStatus =
-                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
                         } else if (row['l_approve_status'] == 4) {
                             approveStatus =
-                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
-                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
                         } else if (row['l_approve_status'] == 6) {
                             approveStatus =
                                 '';
@@ -1276,22 +1276,22 @@ echo '</div>';
                         var approveStatus2;
                         if (row['l_approve_status2'] == 0) {
                             approveStatus2 =
-                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
                         } else if (row['l_approve_status2'] == 1) {
                             approveStatus2 =
-                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
                         } else if (row['l_approve_status2'] == 2) {
                             approveStatus2 =
-                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
                         } else if (row['l_approve_status2'] == 3) {
                             approveStatus2 =
-                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
                         } else if (row['l_approve_status2'] == 4) {
                             approveStatus2 =
-                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
-                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
                         } else if (row['l_approve_status2'] == 6) {
                             approveStatus2 =
                                 '';
@@ -1303,22 +1303,22 @@ echo '</div>';
                         var approveStatus3;
                         if (row['l_approve_status3'] == 0) {
                             approveStatus3 =
-                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
                         } else if (row['l_approve_status3'] == 1) {
                             approveStatus3 =
-                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
                         } else if (row['l_approve_status3'] == 2) {
                             approveStatus3 =
-                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
                         } else if (row['l_approve_status3'] == 3) {
                             approveStatus3 =
-                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
                         } else if (row['l_approve_status3'] == 4) {
                             approveStatus3 =
-                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
                         } else if (row['l_approve_status3'] == 5) {
                             approveStatus3 =
-                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
                         } else if (row['l_approve_status3'] == 6) {
                             approveStatus3 =
                                 '';
@@ -1339,13 +1339,13 @@ echo '</div>';
                         var confirmStatus = '';
                         if (row['l_hr_status'] == 0) {
                             confirmStatus =
-                                '<div class="text-warning"><b><?=$strStatusHR0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusHR0?></b></div>';
                         } else if (row['l_hr_status'] == 1) {
                             confirmStatus =
-                                '<div class="text-success"><b><?=$strStatusHR1?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusHR1?></b></div>';
                         } else if (row['l_hr_status'] == 2) {
                             confirmStatus =
-                                '<div class="text-danger"><b><?=$strStatusHR2?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusHR2?></b></div>';
                         } else {
                             confirmStatus = row['l_hr_status'];
                         }
@@ -1603,10 +1603,10 @@ echo '</div>';
                         if (row['l_approve_status3'] == 8 || row['l_approve_status3'] ==
                             9) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?=$btnCheck?></button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck?></button>';
                         } else {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?=$btnCheck?></button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?php echo $btnCheck?></button>';
                         }
                         newRow += '</td>' +
                             // 29

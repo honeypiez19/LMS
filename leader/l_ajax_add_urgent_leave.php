@@ -157,11 +157,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
             $proveStatus  = 2;
             $proveStatus2 = 1;
-            $proveStatus3 = 6;
+            $proveStatus3 = ($subDepartment !== 'RD') ? 7 : 6;
         } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
             $proveStatus  = 2;
             $proveStatus2 = 1;
-            $proveStatus3 = 6;
+            $proveStatus3 = ($subDepartment !== 'RD') ? 7 : 6;
         } elseif ($levelApprover == 'GM') {
             $proveStatus  = 2;
             $proveStatus2 = 6;

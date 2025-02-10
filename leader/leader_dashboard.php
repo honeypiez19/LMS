@@ -3293,6 +3293,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                     }
                 });
             });
+
             $('.confirm-late-btn').click(function() {
                 var rowData = $(this).closest('tr').children('td');
                 var createDatetime = $(this).data('createdatetime');

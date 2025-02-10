@@ -1451,18 +1451,27 @@ WHERE l_leave_id = :leave_id
                                 $currentPage = $_GET['page'];
                             }
 
-                            // สร้างคำสั่ง SQL
-                            $sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
+                            $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode";
 
                             if ($selectedMonth != "All") {
-                                $sql .= " AND Month(l_leave_end_date) = '$selectedMonth'";
+                                $sql .= " AND (Month(l_leave_end_date) = :selectedMonth OR l_leave_end_date IS NULL)";
                             }
 
-                            $sql .= " AND Year(l_leave_end_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
+                            $sql .= " AND (Year(l_leave_end_date) = :selectedYear OR l_leave_end_date IS NULL)";
+                            $sql .= " AND (l_create_datetime IS NULL OR l_create_datetime IS NOT NULL)";
+                            $sql .= " ORDER BY l_create_datetime DESC";
 
-                            // หาจำนวนรายการทั้งหมด
-                            $result    = $conn->query($sql);
-                            $totalRows = $result->rowCount();
+                            $stmt = $conn->prepare($sql);
+
+                            $stmt->bindParam(':userCode', $userCode);
+                            if ($selectedMonth != "All") {
+                                $stmt->bindParam(':selectedMonth', $selectedMonth);
+                            }
+                            $stmt->bindParam(':selectedYear', $selectedYear);
+
+                            // ประมวลผลคำสั่ง SQL
+                            $stmt->execute();
+                            $totalRows = $stmt->rowCount();
 
                             // คำนวณหน้าทั้งหมด
                             $totalPages = ceil($totalRows / $itemsPerPage);
@@ -1471,17 +1480,29 @@ WHERE l_leave_id = :leave_id
                             $offset = ($currentPage - 1) * $itemsPerPage;
 
                             // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-                            $sql .= " LIMIT $itemsPerPage OFFSET $offset";
+                            $sql .= " LIMIT :itemsPerPage OFFSET :offset";
+
+                            // เตรียมคำสั่ง SQL
+                            $stmt = $conn->prepare($sql);
+
+                            // ผูกพารามิเตอร์
+                            $stmt->bindParam(':userCode', $userCode);
+                            if ($selectedMonth != "All") {
+                                $stmt->bindParam(':selectedMonth', $selectedMonth);
+                            }
+                            $stmt->bindParam(':selectedYear', $selectedYear);
+                            $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
                             // ประมวลผลคำสั่ง SQL
-                            $result = $conn->query($sql);
+                            $stmt->execute();
 
-                                                                                          // แสดงผลลำดับของแถว
-                            $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+                            // แสดงผลลำดับของแถว
+                            $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
                             // แสดงข้อมูลในตาราง
-                            if ($result->rowCount() > 0) {
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            if ($stmt->rowCount() > 0) {
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     echo '<tr class="text-center align-middle">';
 
                                     // 0
@@ -1981,33 +2002,24 @@ WHERE l_leave_id = :leave_id
                                     }
                                     echo '</td>';
 
-                                                                             // 19
-                                    $leaveDate   = $row['l_leave_end_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
-                                    $currentDate = date('Y-m-d');            // วันที่ปัจจุบัน
+                                    // 19
+                                    $leaveEnd   = $row['l_leave_end_date'] ?? null;
+                                    $leaveStart = $row['l_leave_start_date'] ?? null;
 
-                                    // echo "วันที่ลาสิ้นสุด :" . $leaveDate . " ";
-                                    // echo "วันที่ปัจจุบัน\n" . $currentDate;
+                                    $currentDate = date('Y-m-d');
 
-                                    if ($leaveDate < $currentDate) {
-                                        // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
-                                        echo '<td>';
-                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-                                        echo '</td>';
-                                    } else {
-                                        // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
-                                        echo '<td>';
-                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-                                        echo '</td>';
-                                    }
+                                    $disabledEdit = ((! is_null($leaveEnd) && $leaveEnd < $currentDate) || $row['l_leave_status'] == 1) ? 'disabled' : '';
+
+                                    echo '<td>';
+                                    echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal" ' . $disabledEdit . '>';
+                                    echo '<i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                    echo '</td>';
 
                                     // 20
-                                    $disabled            = $row['l_leave_status'] == 1 ? 'disabled' : '';
-                                    $dateNow             = date('Y-m-d');
-                                    $disabledCancalCheck = (
-                                        $row['l_approve_status'] != 0
-                                        && $row['l_approve_status2'] != 1
-                                        && $row['l_leave_start_date'] < $dateNow
-                                    ) ? 'disabled' : '';
+                                    $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
+                                    $dateNow  = date('Y-m-d');
+
+                                    $disabledCancelCheck = ($row['l_leave_end_date'] < $dateNow) ? 'disabled' : '';
 
                                     $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
 
@@ -2015,10 +2027,8 @@ WHERE l_leave_id = :leave_id
                                         echo '<td></td>';
                                     } else if ($row['l_leave_id'] == 7) {
                                         echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
-                                    } else if ($row['l_leave_id'] != 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     } else {
-                                        echo '<td></td>';
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancelCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     }
 
                                     echo '</tr>';
@@ -2519,6 +2529,20 @@ WHERE l_leave_id = :leave_id
                     flatpickr("#urgentEndDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    });
+
+                    flatpickr("#editLeaveStartDate", {
+                        dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                        // defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    });
+
+                    flatpickr("#editLeaveEndDate", {
+                        dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                        // defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
                         // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
@@ -3187,7 +3211,7 @@ WHERE l_leave_id = :leave_id
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                // var leaveStatus = 'ยกเลิก';
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -3220,7 +3244,7 @@ WHERE l_leave_id = :leave_id
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                leaveStatus: leaveStatus,
+                                // leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
@@ -3714,7 +3738,7 @@ WHERE l_leave_id = :leave_id
                 formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
                 formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
-                formData.append('editTelPhone', $('#editTelPhone').val());
+                // formData.append('editTelPhone', $('#editTelPhone').val());
 
                 // ส่งข้อมูลผ่าน AJAX
                 $.ajax({

@@ -205,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         }
-        echo json_encode(['status' => 'success', 'message' => 'แก้ไขข้อมูลสำเร็จ และแจ้งเตือนไปยังหัวหน้าแล้ว']);
+        echo json_encode(['status' => 'success', 'message' => 'แก้ไขข้อมูลสำเร็จ']);
     } catch (PDOException $e) {
         echo json_encode(['status' => 'error', 'message' => 'ไม่สามารถแก้ไขข้อมูลได้: ' . $e->getMessage()]);
     }

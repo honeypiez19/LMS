@@ -40,7 +40,7 @@
 <body>
     <?php require 'leader_navbar.php'; ?>
 
-    <!--         <?php echo $subDepart; ?> -->
+    <!--                 <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -163,9 +163,8 @@ WHERE
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )";
                                 $stmt = $conn->prepare($sql);
-
-                                // Bind parameters
-                                $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+                                        
+                                $stmt->bindParam(':depart', $depart); 
                                 $stmt->bindParam(':subDepart', $subDepart);
                                 $stmt->bindParam(':subDepart2', $subDepart2);
                                 $stmt->bindParam(':subDepart3', $subDepart3);
@@ -236,7 +235,7 @@ WHERE
 
                                 $stmt = $conn->prepare($sql);
 
-                                // Bind parameters
+                                                                      // Bind parameters
                                 $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
                                 $stmt->bindParam(':subDepart', $subDepart);
                                 $stmt->bindParam(':subDepart2', $subDepart2);
@@ -308,7 +307,7 @@ WHERE
     )";
                                 $stmt = $conn->prepare($sql);
 
-                                // Bind parameters
+                                                                      // Bind parameters
                                 $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
                                 $stmt->bindParam(':subDepart', $subDepart);
                                 $stmt->bindParam(':subDepart2', $subDepart2);
@@ -379,7 +378,7 @@ WHERE
     )";
                                 $stmt = $conn->prepare($sql);
 
-                                // Bind parameters
+                                                                      // Bind parameters
                                 $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
                                 $stmt->bindParam(':subDepart', $subDepart);
                                 $stmt->bindParam(':subDepart2', $subDepart2);
@@ -503,7 +502,7 @@ ORDER BY li.l_create_datetime DESC";
                         // Prepare the statement
                         $stmt = $conn->prepare($sql);
 
-                        // Bind parameters
+                                                              // Bind parameters
                         $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
                         $stmt->bindParam(':subDepart', $subDepart);
                         $stmt->bindParam(':subDepart2', $subDepart2);
@@ -535,7 +534,7 @@ ORDER BY li.l_create_datetime DESC";
                         $stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
                         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
-                        // Bind the parameters again for the final query
+                                                              // Bind the parameters again for the final query
                         $stmt->bindParam(':depart', $depart); // Make sure this is bound correctly
                         $stmt->bindParam(':subDepart', $subDepart);
                         $stmt->bindParam(':subDepart2', $subDepart2);
@@ -1330,10 +1329,10 @@ ORDER BY li.l_create_datetime DESC";
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
                             leaveStatus =
-                                '<div class="text-success"><?php echo $strStatusNormal?></div>';
+                                '<div class="text-success"><?php echo $strStatusNormal ?></div>';
                         } else if (row['l_leave_status'] == 1) {
                             leaveStatus =
-                                '<div class="text-danger"><?php echo $strStatusCancel?></div>';
+                                '<div class="text-danger"><?php echo $strStatusCancel ?></div>';
                         } else {
                             leaveStatus = 'ไม่พบสถานะใบลา';
                         }
@@ -1342,22 +1341,22 @@ ORDER BY li.l_create_datetime DESC";
                         var approveStatus;
                         if (row['l_approve_status'] == 0) {
                             approveStatus =
-                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status'] == 1) {
                             approveStatus =
-                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status'] == 2) {
                             approveStatus =
-                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status'] == 3) {
                             approveStatus =
-                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status'] == 4) {
                             approveStatus =
-                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
-                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status'] == 6) {
                             approveStatus =
                                 '';
@@ -1369,22 +1368,22 @@ ORDER BY li.l_create_datetime DESC";
                         var approveStatus2;
                         if (row['l_approve_status2'] == 0) {
                             approveStatus2 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status2'] == 1) {
                             approveStatus2 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status2'] == 2) {
                             approveStatus2 =
-                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status2'] == 3) {
                             approveStatus2 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status2'] == 4) {
                             approveStatus2 =
-                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status2'] == 6) {
                             approveStatus2 =
                                 '';
@@ -1396,22 +1395,22 @@ ORDER BY li.l_create_datetime DESC";
                         var approveStatus3;
                         if (row['l_approve_status3'] == 0) {
                             approveStatus3 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status3'] == 1) {
                             approveStatus3 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status3'] == 2) {
                             approveStatus3 =
-                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status3'] == 3) {
                             approveStatus3 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status3'] == 4) {
                             approveStatus3 =
-                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status3'] == 5) {
                             approveStatus3 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status3'] == 6) {
                             approveStatus3 =
                                 '';
@@ -1432,13 +1431,13 @@ ORDER BY li.l_create_datetime DESC";
                         var confirmStatus = '';
                         if (row['l_hr_status'] == 0) {
                             confirmStatus =
-                                '<div class="text-warning"><b><?php echo $strStatusHR0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusHR0 ?></b></div>';
                         } else if (row['l_hr_status'] == 1) {
                             confirmStatus =
-                                '<div class="text-success"><b><?php echo $strStatusHR1?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusHR1 ?></b></div>';
                         } else if (row['l_hr_status'] == 2) {
                             confirmStatus =
-                                '<div class="text-danger"><b><?php echo $strStatusHR2?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusHR2 ?></b></div>';
                         } else {
                             confirmStatus = row['l_hr_status'];
                         }
@@ -1695,10 +1694,10 @@ ORDER BY li.l_create_datetime DESC";
                             '<td>';
                         if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck?></button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck ?></button>';
                         } else {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?php echo $btnCheck?></button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?php echo $btnCheck ?></button>';
                         }
                         newRow += '</td>' +
                             // 29
