@@ -304,6 +304,11 @@
                                     $all_total_minutes += $minutes;
                                 }
 
+                                if ($all_total_minutes >= 60) {
+                                    $all_total_hours += floor($all_total_minutes / 60);
+                                    $all_total_minutes = $all_total_minutes % 60;
+                                }
+
                                 echo '<tr class="text-center align-middle">';
                                 echo '<td style="font-weight: bold;">' . $leave_name . '</td>';
 

@@ -156,7 +156,7 @@ if ($selectedMonth != "All") {
 }
 
 $sql .= " AND (
-        (em.e_sub_department = :subDepart)
+        (em.  = :subDepart)
         OR (em.e_sub_department2 = :subDepart2)
         OR (em.e_sub_department3 = :subDepart3)
         OR (em.e_sub_department4 = :subDepart4)

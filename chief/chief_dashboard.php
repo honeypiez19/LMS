@@ -2231,12 +2231,12 @@ WHERE l_leave_id = :leave_id
                                     </select>
                                 </div>
                             </div>
-                            <div class="mt-3 row">
+                            <!-- <div class="mt-3 row">
                                 <div class="col-12">
                                     <label for="editTelPhone" class="form-label">เบอร์โทร</label>
                                     <input type="text" class="form-control" id="editTelPhone">
                                 </div>
-                            </div>
+                            </div> -->
                             <div class=" mt-3 row">
                                 <div class="col-12">
                                     <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
@@ -3206,6 +3206,7 @@ WHERE l_leave_id = :leave_id
                 var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
                 var usercode = $(this).data('usercode');
                 var name = "<?php echo $name ?>";
+                var level = "<?php echo $level ?>";
                 var leaveType = $(rowData[0]).text();
                 var depart = $(rowData[1]).text();
                 var leaveReason = $(rowData[2]).text();
@@ -3250,7 +3251,8 @@ WHERE l_leave_id = :leave_id
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5
+                                subDepart5: subDepart5,
+                                level: level
 
                             },
                             success: function(response) {
