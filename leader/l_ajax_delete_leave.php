@@ -13,6 +13,7 @@ $leaveReason    = $_POST['leaveReason'];
 $startDate      = $_POST['startDate'];
 $endDate        = $_POST['endDate'];
 $depart         = $_POST['depart'];
+$level          = $_POST['level'];
 $workplace      = $_POST['workplace'];
 $subDepart      = $_POST['subDepart'];
 $subDepart2     = $_POST['subDepart2'];
@@ -36,7 +37,7 @@ $updates = [];
 if ($approveStatuses) {
     if (! is_null($approveStatuses['l_approve_status'])) {
         if ($approveStatuses['l_approve_status'] == 0 || $approveStatuses['l_approve_status'] == 2) {
-            $updates[] = "l_approve_status = 2, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
+            $updates[] = "l_approve_status = 0, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
         } else {
             $updates[] = "l_approve_status = 6, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
         }
@@ -69,62 +70,88 @@ $stmtReturn->bindParam(':createDatetime', $createDatetime);
 $stmtReturn->bindParam(':canDatetime', $canDatetime);
 
 if ($stmtReturn->execute()) {
-    $sURL     = 'https://lms.system-samt.com/';
-    $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+    $sURL = 'https://lms.system-samt.com/';
+    // $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-    $sql  = "SELECT e_user_id FROM employees WHERE e_workplace = :workplace AND e_level IN ('chief','manager','manger2','assisManager') AND (e_sub_department = :subDepart OR e_sub_department2 = :subDepart2 OR e_sub_department3 = :subDepart3 OR e_sub_department4 = :subDepart4 OR e_sub_department5 = :subDepart5)";
+    $sql =
+        "SELECT e_user_id, e_username
+            FROM employees
+            WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
+            AND e_level <> :level
+            AND (
+                (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+                OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+                OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+                OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+                OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+                OR (
+                    e_level = 'GM' 
+                    AND :depart <> 'RD'
+                    AND (
+                        e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR (
+                            e_sub_department IS NULL 
+                            AND e_sub_department2 IS NULL 
+                            AND e_sub_department3 IS NULL 
+                            AND e_sub_department4 IS NULL 
+                            AND e_sub_department5 IS NULL
+                        )
+                    )
+                )
+            )
+            AND e_workplace = :workplace";
+
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':workplace', $workplace);
     $stmt->bindParam(':subDepart', $subDepart);
     $stmt->bindParam(':subDepart2', $subDepart2);
     $stmt->bindParam(':subDepart3', $subDepart3);
     $stmt->bindParam(':subDepart4', $subDepart4);
     $stmt->bindParam(':subDepart5', $subDepart5);
 
+    $stmt->bindParam(':depart', $depart);
+    $stmt->bindParam(':workplace', $workplace);
+    $stmt->bindParam(':level', $level);
+
     if ($stmt->execute()) {
-        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        echo "ไม่สามารถดึงข้อมูล userId ของหัวหน้าหรือผู้จัดการได้";
-        $userIds = [];
+        error_log("ไม่สามารถดึงข้อมูล userId ของหัวหน้าหรือผู้จัดการได้");
+        $managers = [];
     }
 
-    if ($approveStatuses['l_approve_status3'] == 7 || $approveStatuses['l_approve_status3'] == 8) {
-        // ดึง userId ของ GM
-        $sqlGM  = "SELECT e_user_id FROM employees WHERE e_level = 'GM' AND e_workplace = :workplace";
-        $stmtGM = $conn->prepare($sqlGM);
-        $stmtGM->bindParam(':workplace', $workplace);
+    if (! empty($managers)) {
+        foreach ($managers as $manager) {
+            $sMessageToManager = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL\n\nถึงคุณ: {$manager['e_username']}";
 
-        if ($stmtGM->execute()) {
-            $gmUserIds = $stmtGM->fetchAll(PDO::FETCH_COLUMN);
-            if ($gmUserIds) {
-                $userIds = array_merge($userIds, $gmUserIds);
+            $data = [
+                'to'       => $manager['e_user_id'],
+                'messages' => [['type' => 'text', 'text' => $sMessageToManager]],
+            ];
+
+            $ch = curl_init('https://api.line.me/v2/bot/message/push');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $access_token,
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+            $response = curl_exec($ch);
+            if (curl_error($ch)) {
+                error_log('LINE API Error: ' . curl_error($ch));
+            } else {
+                error_log('LINE API Response: ' . $response);
             }
-        } else {
-            echo "ไม่สามารถดึงข้อมูล userId ของ GM ได้";
+            curl_close($ch);
         }
+    } else {
+        error_log("ไม่พบหัวหน้าที่ตรงกับเงื่อนไข");
     }
-
-    foreach ($userIds as $userId) {
-        $data = [
-            'to'       => $userId,
-            'messages' => [['type' => 'text', 'text' => $sMessage]],
-        ];
-
-        $ch = curl_init('https://api.line.me/v2/bot/message/push');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $access_token]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-        $response = curl_exec($ch);
-        if (curl_error($ch)) {
-            echo 'Error:' . curl_error($ch);
-        } else {
-            echo 'Response: ' . $response;
-        }
-        curl_close($ch);
-    }
-
 } else {
     echo "Error ในการอัพเดตข้อมูลการลา";
 }

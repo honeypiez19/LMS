@@ -37,7 +37,7 @@ $updates = [];
 if ($approveStatuses) {
     if (! is_null($approveStatuses['l_approve_status'])) {
         if ($approveStatuses['l_approve_status'] == 0 || $approveStatuses['l_approve_status'] == 2) {
-            $updates[] = "l_approve_status = 2, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
+            $updates[] = "l_approve_status = 0, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
         } else {
             $updates[] = "l_approve_status = 6, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
         }
@@ -73,79 +73,48 @@ if ($stmtReturn->execute()) {
     $sURL = 'https://lms.system-samt.com/';
     // $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-    // Office
-    if ($depart == 'Office') {
-        $sql = "SELECT e_user_id, e_username
+    $sql =
+        "SELECT e_user_id, e_username
         FROM employees
         WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-            AND e_level <> :level
-            AND (
-                (e_sub_department = :subDepart AND e_sub_department IS NOT NULL)
-                OR (e_sub_department2 = :subDepart2 AND e_sub_department2 IS NOT NULL)
-                OR (e_sub_department3 = :subDepart3 AND e_sub_department3 IS NOT NULL)
-                OR (e_sub_department4 = :subDepart4 AND e_sub_department4 IS NOT NULL)
-                OR (e_sub_department5 = :subDepart5 AND e_sub_department5 IS NOT NULL)
-                OR (e_level = 'GM' AND e_sub_department IS NULL
-                    AND e_sub_department2 IS NULL
-                    AND e_sub_department3 IS NULL
-                    AND e_sub_department4 IS NULL
-                    AND e_sub_department5 IS NULL)
-            )
-            AND e_workplace = :workplace";
-    }
-    // CAD1
-    elseif ($depart == 'CAD1') {
-        if ($subDepart == 'Modeling' || $subDepart == 'Design') {
-            $sql = "SELECT e_user_id, e_username
-                    FROM employees
-        WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-                        AND e_level <> :level
-                        AND e_sub_department = :subDepart
-                        AND e_workplace = :workplace";
-        } else {
-            echo "";
-        }
-    }
-    // Management
-    elseif ($depart == 'Management') {
-        if ($subDepart == 'CAD1' || $subDepart2 == 'CAD2' || $subDepart3 == 'CAM') {
-            $sql = "SELECT e_user_id, e_username
-                    FROM employees
-                    WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-                        AND e_level <> :level
-                    AND (
-                        (e_sub_department = :subDepart )
-                        OR (e_sub_department2 = :subDepart2 )
-                        OR (e_sub_department3 = :subDepart3)
-                        OR (e_sub_department4 = :subDepart4)
-                        OR (e_sub_department5 = :subDepart5)
+        AND e_level <> :level
+        AND (
+            (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+            OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+            OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+            OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+            OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+            OR (
+                e_level = 'GM' 
+                AND :depart <> 'RD'  -- ไม่เข้าเงื่อนไข GM หาก :depart เป็น 'RD'
+                AND (
+                    e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                    OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                    OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                    OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                    OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                    OR (
+                        e_sub_department IS NULL 
+                        AND e_sub_department2 IS NULL 
+                        AND e_sub_department3 IS NULL 
+                        AND e_sub_department4 IS NULL 
+                        AND e_sub_department5 IS NULL
                     )
-                    AND e_workplace = :workplace";
-        } else {
-            echo "";
-        }
-    }
-    // CAD2 / CAM / RD / PC / QC / MC / FN
-    else {
-        $sql = "SELECT e_user_id, e_username
-        FROM employees
-        WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-            AND e_level <> :level
-            AND e_department = :depart
-            AND e_workplace = :workplace";
-    }
+                )
+            )
+            OR (
+                e_sub_department = 'Sales' 
+                AND e_level = 'GM'  -- หาก e_sub_department = 'Sales' หาเฉพาะ GM
+            )
+        )
+        AND e_workplace = :workplace";
 
     $stmt = $conn->prepare($sql);
-
-    if ($depart == 'Office') {
-        $stmt->bindParam(':subDepart', $subDepart);
-        $stmt->bindParam(':subDepart2', $subDepart2);
-        $stmt->bindParam(':subDepart3', $subDepart3);
-        $stmt->bindParam(':subDepart4', $subDepart4);
-        $stmt->bindParam(':subDepart5', $subDepart5);
-    } elseif ($depart == 'CAD1') {
-        $stmt->bindParam(':subDepart', $subDepart);
-    }
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 
     $stmt->bindParam(':depart', $depart);
     $stmt->bindParam(':workplace', $workplace);

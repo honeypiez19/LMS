@@ -73,89 +73,63 @@ if ($stmtReturn->execute()) {
     $sURL = 'https://lms.system-samt.com/';
     // $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-    // Office
-    if ($depart == 'Office') {
-        $sql = "SELECT e_user_id, e_username
-        FROM employees
-        WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-        AND e_level <> :level
-        AND (
-            (e_sub_department = :subDepart AND e_sub_department <> '')
-            OR (e_sub_department2 = :subDepart2 AND e_sub_department2 <> '')
-            OR (e_sub_department3 = :subDepart3 AND e_sub_department3 <> '')
-            OR (e_sub_department4 = :subDepart4 AND e_sub_department4 <> '')
-            OR (e_sub_department5 = :subDepart5 AND e_sub_department5 <> '')
-            OR (e_level = 'GM'
-                AND (e_sub_department IS NULL OR e_sub_department = '')
-                AND (e_sub_department2 IS NULL OR e_sub_department2 = '')
-                AND (e_sub_department3 IS NULL OR e_sub_department3 = '')
-                AND (e_sub_department4 IS NULL OR e_sub_department4 = '')
-                AND (e_sub_department5 IS NULL OR e_sub_department5 = '')
-            )
-        )
-        AND e_workplace = :workplace";
-    } elseif ($depart == 'CAD1' || $depart == 'CAD2' || $depart == 'CAM') {
-        // ตรวจสอบเงื่อนไขสำหรับ subDepart เป็น Modeling หรือ Design
-        if ($subDepart == 'Modeling' || $subDepart == 'Design') {
-            $sql = "SELECT e_user_id, e_username
+    $sql =
+        "SELECT e_user_id, e_username
             FROM employees
             WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
             AND e_level <> :level
             AND (
-                (e_sub_department = :subDepart AND e_sub_department <> '')
-                OR (e_sub_department2 = :subDepart2 AND e_sub_department2 <> '')
-                OR (e_sub_department3 = :subDepart3 AND e_sub_department3 <> '')
-                OR (e_sub_department4 = :subDepart4 AND e_sub_department4 <> '')
-                OR (e_sub_department5 = :subDepart5 AND e_sub_department5 <> '')
+                (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+                OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+                OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+                OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+                OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+                OR (
+                    e_level = 'GM' 
+                    AND :depart <> 'RD'
+                    AND (
+                        e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        OR (
+                            e_sub_department IS NULL 
+                            AND e_sub_department2 IS NULL 
+                            AND e_sub_department3 IS NULL 
+                            AND e_sub_department4 IS NULL 
+                            AND e_sub_department5 IS NULL
+                        )
+                    )
+                )
             )
             AND e_workplace = :workplace";
-        } else {
-            $sql = "SELECT e_user_id, e_username
-            FROM employees
-            WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-            AND e_level <> :level
-            AND (
-                (e_sub_department = :subDepart AND e_sub_department <> '')
-                OR (e_sub_department2 = :subDepart2 AND e_sub_department2 <> '')
-                OR (e_sub_department3 = :subDepart3 AND e_sub_department3 <> '')
-                OR (e_sub_department4 = :subDepart4 AND e_sub_department4 <> '')
-                OR (e_sub_department5 = :subDepart5 AND e_sub_department5 <> '')
-            )
-            AND e_workplace = :workplace";
-        }
-    } else {
-        // สำหรับกรณี RD / PC / QC / MC / FN
-        $sql = "SELECT e_user_id, e_username
-        FROM employees
-        WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-        AND e_level <> :level
-        AND e_department = :depart
-        AND e_workplace = :workplace";
-    }
 
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':level', $level);
-    $stmt->bindParam(':workplace', $workplace);
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 
-    if ($depart == 'Office' || $depart == 'CAD1' || $depart == 'CAD2' || $depart == 'CAM') {
-        $stmt->bindParam(':subDepart', $subDepart);
-        $stmt->bindParam(':subDepart2', $subDepart2);
-        $stmt->bindParam(':subDepart3', $subDepart3);
-        $stmt->bindParam(':subDepart4', $subDepart4);
-        $stmt->bindParam(':subDepart5', $subDepart5);
+    $stmt->bindParam(':depart', $depart);
+    $stmt->bindParam(':workplace', $workplace);
+    $stmt->bindParam(':level', $level);
+
+    if ($stmt->execute()) {
+        $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        error_log("ไม่สามารถดึงข้อมูล userId ของหัวหน้าหรือผู้จัดการได้");
+        $managers = [];
     }
 
-    $stmt->bindParam(':depart', $depart); // For other departments (e.g., RD/PC/QC)
-
-    $stmt->execute();
-
-    if (! empty($userIds)) {
-        foreach ($userIds as $userId) {
-            $sMessageTouserId = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL\n\nถึงคุณ: {$userId['e_username']}";
+    if (! empty($managers)) {
+        foreach ($managers as $manager) {
+            $sMessageToManager = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL\n\nถึงคุณ: {$manager['e_username']}";
 
             $data = [
-                'to'       => $userId['e_user_id'],
-                'messages' => [['type' => 'text', 'text' => $sMessageTouserId]],
+                'to'       => $manager['e_user_id'],
+                'messages' => [['type' => 'text', 'text' => $sMessageToManager]],
             ];
 
             $ch = curl_init('https://api.line.me/v2/bot/message/push');
