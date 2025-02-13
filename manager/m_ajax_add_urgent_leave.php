@@ -2,7 +2,8 @@
 session_start();
 date_default_timezone_set('Asia/Bangkok');
 
-require '../connect.php';
+include '../connect.php';
+include '../access_token_channel.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $userCode  = $_POST['userCode'];
@@ -33,6 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // วันที่ + เวลาสิ้นสุด
     $urgentEndDate = date('Y-m-d', strtotime($_POST['urgentEndDate']));
     $urgentEndTime = $_POST['urgentEndTime'];
+
+    $proveDate2 = date('Y-m-d H:i:s');
+    $proveName2 = $userName;
 
     $timeMapping = [
         '08:10' => ['08:10', '08:30', '08:10:00'],
@@ -172,14 +176,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             echo "ไม่พบแผนก";
         }
+
     }
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
-        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_time_remark, l_time_remark2)
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_time_remark, l_time_remark2
+        , l_approve_name2, l_approve_datetime2)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :urgentLeaveType, :urgentLeaveReason, :urgentStartDate, :urgentStartTime,
         :urgentEndDate, :urgentEndTime, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
-        :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3, :timeRemark, :timeRemark2)");
+        :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3, :timeRemark, :timeRemark2, :proveName2, :proveDate2)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -204,75 +210,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus3', $proveStatus3);
     $stmt->bindParam(':timeRemark', $timeRemark);
     $stmt->bindParam(':timeRemark2', $timeRemark2);
+    $stmt->bindParam(':proveName2', $proveName2);
+    $stmt->bindParam(':proveDate2', $proveDate2);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_token FROM employees WHERE e_username = :approver";
+        $sql  = "SELECT e_user_id FROM employees WHERE e_username = :approver AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if ($tokens) {
+        if ($userIds) {
             $sURL     = 'https://lms.system-samt.com/';
             $sMessage = "มีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
                 "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
                 "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
 
-            foreach ($tokens as $sToken) {
-                $chOne = curl_init();
-                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-                curl_setopt($chOne, CURLOPT_POST, 1);
-                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
-                $headers = [
-                    'Content-type: application/x-www-form-urlencoded',
-                    'Authorization: Bearer ' . $sToken,
+            foreach ($userIds as $userId) {
+                $data = [
+                    'to'       => $userId,
+                    'messages' => [
+                        [
+                            'type' => 'text',
+                            'text' => $sMessage,
+                        ],
+                    ],
                 ];
-                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-                $result = curl_exec($chOne);
-                curl_close($chOne);
+
+                $ch = curl_init('https://api.line.me/v2/bot/message/push');
+                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $access_token,
+                ]);
+
+                $response = curl_exec($ch);
+                curl_close($ch);
+
+                if ($response === false) {
+                    echo "Error: " . curl_error($ch);
+                }
             }
         } else {
-            echo "ไม่พบ Token ของหัวหน้าที่เลือก";
+            echo "ไม่พบผู้รับข้อความ";
         }
 
-        // แจ้งเตือนไลน์ HR
-        // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-        // $stmt->execute();
-        // $admins = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        // $aMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStart ถึง $leaveDateEnd $leaveTimeEnd\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
-        // if ($admins) {
-        //     foreach ($admins as $sToken) {
-        //         $chOne = curl_init();
-        //         curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-        //         curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-        //         curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-        //         curl_setopt($chOne, CURLOPT_POST, 1);
-        //         curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $aMessage);
-        //         $headers = [
-        //             'Content-type: application/x-www-form-urlencoded',
-        //             'Authorization: Bearer ' . $sToken,
-        //         ];
-        //         curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-        //         curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-        //         $result = curl_exec($chOne);
-
-        //         if (curl_error($chOne)) {
-        //             echo 'Error:' . curl_error($chOne);
-        //         } else {
-        //             $result_ = json_decode($result, true);
-        //             echo "status : " . $result_['status'];
-        //             echo "message : " . $result_['message'];
-        //         }
-
-        //         curl_close($chOne);
-        //     }
-        // } else {
-        //     echo "No tokens found for admin";
-        // }
     } else {
         echo "Error: " . $stmt->errorInfo()[2] . "<br>";
     }

@@ -85,19 +85,19 @@ if ($stmtReturn->execute()) {
                 OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
                 OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
                 OR (
-                    e_level = 'GM' 
+                    e_level = 'GM'
                     AND :depart <> 'RD'
                     AND (
-                        e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
-                        OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
-                        OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
-                        OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
-                        OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) 
+                        e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
                         OR (
-                            e_sub_department IS NULL 
-                            AND e_sub_department2 IS NULL 
-                            AND e_sub_department3 IS NULL 
-                            AND e_sub_department4 IS NULL 
+                            e_sub_department IS NULL
+                            AND e_sub_department2 IS NULL
+                            AND e_sub_department3 IS NULL
+                            AND e_sub_department4 IS NULL
                             AND e_sub_department5 IS NULL
                         )
                     )

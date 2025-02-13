@@ -1094,7 +1094,7 @@ WHERE l_leave_id = :leave_id
                                     <div class="col-6">
                                         <?php
                                             // SQL query
-                                           $sql = "SELECT * FROM employees WHERE e_level IN ('admin')
+                                            $sql = "SELECT * FROM employees WHERE e_level IN ('admin')
                                                     AND e_workplace = :workplace
 
                                             ORDER BY e_username ASC";
@@ -1742,9 +1742,12 @@ WHERE l_leave_id = :leave_id
                                     }
                                     echo '</td>';
 
-                                                                               // 19
-                                    $leaveDate   = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
-                                    $currentDate = date('Y-m-d');              // วันที่ปัจจุบัน
+                                                                             // 19
+                                    $leaveDate   = $row['l_leave_end_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
+                                    $currentDate = date('Y-m-d');            // วันที่ปัจจุบัน
+
+                                    // echo "วันที่ลาสิ้นสุด :" . $leaveDate . " ";
+                                    // echo "วันที่ปัจจุบัน\n" . $currentDate;
 
                                     if ($leaveDate < $currentDate) {
                                         // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
@@ -1759,12 +1762,13 @@ WHERE l_leave_id = :leave_id
                                     }
 
                                     // 20
-                                    $disabled            = $row['l_leave_status'] == 1 ? 'disabled' : '';
-                                    $dateNow             = date('Y-m-d');
+                                    $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
+                                    $dateNow  = date('Y-m-d');
+
                                     $disabledCancalCheck = (
                                         $row['l_approve_status'] != 0
-                                        && $row['l_approve_status2'] != 1
-                                        && $row['l_leave_start_date'] < $dateNow
+                                        && $row['l_approve_status3'] != 7
+                                        && $row['l_leave_end_date'] < $dateNow
                                     ) ? 'disabled' : '';
 
                                     $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
@@ -1979,12 +1983,12 @@ WHERE l_leave_id = :leave_id
                                         </select>
                                     </div>
                                 </div>
-                                <div class="mt-3 row">
+                                <!-- <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="editTelPhone" class="form-label">เบอร์โทร</label>
                                         <input type="text" class="form-control" id="editTelPhone">
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class=" mt-3 row">
                                     <div class="col-12">
                                         <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
@@ -2910,12 +2914,13 @@ WHERE l_leave_id = :leave_id
                 var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
                 var usercode = $(this).data('usercode');
                 var name = "<?php echo $name ?>";
+                var level = "<?php echo $level ?>";
                 var leaveType = $(rowData[0]).text();
                 var depart = $(rowData[1]).text();
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                // var leaveStatus = 'ยกเลิก';
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -2923,8 +2928,6 @@ WHERE l_leave_id = :leave_id
                 var subDepart4 = "<?php echo $subDepart4 ?>";
                 var subDepart5 = "<?php echo $subDepart5 ?>";
 
-
-                // alert(endDate)
                 Swal.fire({
                     title: "ต้องการยกเลิกรายการ ?",
                     icon: "question",
@@ -2949,14 +2952,14 @@ WHERE l_leave_id = :leave_id
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                leaveStatus: leaveStatus,
+                                // leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5
-
+                                subDepart5: subDepart5,
+                                level: level
                             },
                             success: function(response) {
                                 Swal.fire({
@@ -3436,6 +3439,7 @@ WHERE l_leave_id = :leave_id
                 formData.append('workplace', '<?php echo $workplace; ?>');
                 formData.append('depart', '<?php echo $depart; ?>');
                 formData.append('subDepart', '<?php echo $subDepart; ?>');
+                formData.append('level', '<?php echo $level; ?>');
                 formData.append('createDatetime', $(this).data('createdatetime'));
                 formData.append('editLeaveType', $('.editLeaveType').val());
                 formData.append('editLeaveReason', $('#editLeaveReason').val());
@@ -3443,7 +3447,7 @@ WHERE l_leave_id = :leave_id
                 formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
                 formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
-                formData.append('editTelPhone', $('#editTelPhone').val());
+                // formData.append('editTelPhone', $('#editTelPhone').val());
 
                 // ส่งข้อมูลผ่าน AJAX
                 $.ajax({

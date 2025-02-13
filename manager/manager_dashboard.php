@@ -2006,30 +2006,25 @@ WHERE l_leave_id = :leave_id
                                     }
                                     echo '</td>';
 
-                                                                               // 19
-                                    $leaveDate   = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
-                                    $currentDate = date('Y-m-d');              // วันที่ปัจจุบัน
+                                    // 19
+                                    $leaveEnd   = $row['l_leave_end_date'] ?? null;
+                                    $leaveStart = $row['l_leave_start_date'] ?? null;
 
-                                    if ($leaveDate < $currentDate) {
-                                        // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
-                                        echo '<td>';
-                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-                                        echo '</td>';
-                                    } else {
-                                        // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
-                                        echo '<td>';
-                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
-                                        echo '</td>';
-                                    }
+                                    $currentDate = date('Y-m-d');
+
+                                    // ปรับเงื่อนไขการตรวจสอบ
+                                    $disabledEdit = ((! is_null($leaveEnd) && $leaveEnd < $currentDate) || $row['l_leave_status'] == 1) ? 'disabled' : '';
+
+                                    echo '<td>';
+                                    echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal" ' . $disabledEdit . '>';
+                                    echo '<i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                    echo '</td>';
 
                                     // 20
-                                    $disabled            = $row['l_leave_status'] == 1 ? 'disabled' : '';
-                                    $dateNow             = date('Y-m-d');
-                                    $disabledCancalCheck = (
-                                        $row['l_approve_status'] != 0
-                                        && $row['l_approve_status2'] != 1
-                                        && $row['l_leave_start_date'] < $dateNow
-                                    ) ? 'disabled' : '';
+                                    $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
+                                    $dateNow  = date('Y-m-d');
+
+                                    $disabledCancelCheck = ($row['l_leave_end_date'] < $dateNow) ? 'disabled' : '';
 
                                     $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
 
@@ -2037,10 +2032,8 @@ WHERE l_leave_id = :leave_id
                                         echo '<td></td>';
                                     } else if ($row['l_leave_id'] == 7) {
                                         echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
-                                    } else if ($row['l_leave_id'] != 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     } else {
-                                        echo '<td></td>';
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancelCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     }
 
                                     echo '</tr>';
@@ -2243,12 +2236,12 @@ WHERE l_leave_id = :leave_id
                                         </select>
                                     </div>
                                 </div>
-                                <div class="mt-3 row">
+                                <!-- <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="editTelPhone" class="form-label">เบอร์โทร</label>
                                         <input type="text" class="form-control" id="editTelPhone">
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class=" mt-3 row">
                                     <div class="col-12">
                                         <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
@@ -2535,6 +2528,20 @@ WHERE l_leave_id = :leave_id
                     flatpickr("#urgentEndDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    });
+
+                    flatpickr("#editLeaveStartDate", {
+                        dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                        // defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    });
+
+                    flatpickr("#editLeaveEndDate", {
+                        dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                        // defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
                         // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
@@ -3198,12 +3205,13 @@ WHERE l_leave_id = :leave_id
                 var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
                 var usercode = $(this).data('usercode');
                 var name = "<?php echo $name ?>";
+                var level = "<?php echo $level ?>";
                 var leaveType = $(rowData[0]).text();
                 var depart = $(rowData[1]).text();
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                // var leaveStatus = 'ยกเลิก';
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -3237,13 +3245,14 @@ WHERE l_leave_id = :leave_id
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                leaveStatus: leaveStatus,
+                                // leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5
+                                subDepart5: subDepart5,
+                                level: level
 
                             },
                             success: function(response) {
@@ -3706,24 +3715,27 @@ WHERE l_leave_id = :leave_id
                 e.preventDefault();
 
                 var formData = new FormData();
-                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
-                var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+                var editFile = $('#editFile')[0].files[0];
+                var currentFile = $('#currentFile').val();
 
-                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
                 if (editFile) {
-                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
+                    formData.append('file', editFile);
                 } else if (currentFile) {
                     formData.append('currentFile',
-                        currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                        currentFile);
                 }
 
-                // เพิ่มค่าฟอร์มอื่นๆ
                 formData.append('userCode', '<?php echo $userCode; ?>');
                 formData.append('userName', '<?php echo $userName ?>');
                 formData.append('name', '<?php echo $name ?>');
                 formData.append('workplace', '<?php echo $workplace; ?>');
                 formData.append('depart', '<?php echo $depart; ?>');
                 formData.append('subDepart', '<?php echo $subDepart; ?>');
+                formData.append('subDepart2', '<?php echo $subDepart2; ?>');
+                formData.append('subDepart3', '<?php echo $subDepart3; ?>');
+                formData.append('subDepart4', '<?php echo $subDepart4; ?>');
+                formData.append('subDepart5', '<?php echo $subDepart5; ?>');
+                formData.append('level', '<?php echo $level; ?>');
                 formData.append('createDatetime', $(this).data('createdatetime'));
                 formData.append('editLeaveType', $('.editLeaveType').val());
                 formData.append('editLeaveReason', $('#editLeaveReason').val());
@@ -3731,54 +3743,44 @@ WHERE l_leave_id = :leave_id
                 formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
                 formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
-                formData.append('editTelPhone', $('#editTelPhone').val());
+                // formData.append('editTelPhone', $('#editTelPhone').val());
 
-                // ส่งข้อมูลผ่าน AJAX
                 $.ajax({
                     url: 'm_upd_leave.php',
                     type: 'POST',
                     data: formData,
-                    contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
-                    processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
+                    contentType: false,
+                    processData: false,
                     success: function(response) {
-                        try {
-                            var res = JSON.parse(response);
-                            if (res.status === 'success') {
-                                Swal.fire({
-                                    title: 'สำเร็จ!',
-                                    text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
-                                    icon: 'success',
-                                    confirmButtonText: 'ตกลง',
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'เกิดข้อผิดพลาด',
-                                    text: res.message ||
-                                        'ไม่สามารถแก้ไขข้อมูลได้',
-                                    icon: 'error',
-                                    confirmButtonText: 'ตกลง',
-                                });
-                            }
-                        } catch (error) {
+                        if (response.status === 'success') {
                             Swal.fire({
-                                title: 'ข้อผิดพลาดในการประมวลผล',
-                                text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
+                                title: 'สำเร็จ!',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'ตกลง',
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
                                 icon: 'error',
                                 confirmButtonText: 'ตกลง',
                             });
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',
                             text: 'ไม่สามารถแก้ไขข้อมูลได้',
                             icon: 'error',
                             confirmButtonText: 'ตกลง',
                         });
+                        console.log('Error:', error); // Log the actual error instead
                     },
                 });
+
             });
         });
 

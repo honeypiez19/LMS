@@ -36,6 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $leaveDateEnd = date('Y-m-d', strtotime($_POST['endDate']));
     $leaveTimeEnd = $_POST['endTime'];
 
+    $proveDate = date('Y-m-d H:i:s');
+    $proveName = $userName;
+
     $timeMappings = [
         '08:10' => ['08:10', '08:30', '08:10:00'],
         '08:15' => ['08:15', '08:30', '08:15:00'],
@@ -176,10 +179,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
-        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_time_remark, l_approve_status3, l_time_remark2)
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_time_remark, l_approve_status3, l_time_remark2,
+        l_approve_name, l_approve_datetime)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
         :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
-        :proveStatus, :level, :proveStatus2, :workplace, :timeRemark, :proveStatus3, :timeRemark2)");
+        :proveStatus, :level, :proveStatus2, :workplace, :timeRemark, :proveStatus3, :timeRemark2, :proveName, :proveDate)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -203,6 +207,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':timeRemark', $timeRemark);
     $stmt->bindParam(':timeRemark2', $timeRemark2);
     $stmt->bindParam(':proveStatus3', $proveStatus3);
+    $stmt->bindParam(':proveName', $proveName);
+    $stmt->bindParam(':proveDate', $proveDate);
 
     if ($stmt->execute()) {
         $sql  = "SELECT e_user_id FROM employees WHERE e_username = :approver AND e_workplace = :workplace";
