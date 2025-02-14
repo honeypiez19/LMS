@@ -1,173 +1,157 @@
 <?php
-// เชื่อมต่อฐานข้อมูล
-include_once '../connect.php';
+include '../connect.php';
+include '../access_token_channel.php';
+
 date_default_timezone_set('Asia/Bangkok');
 
-$leaveID = $_POST['leaveId'];
+$leaveID        = $_POST['leaveId'];
 $createDatetime = $_POST['createDatetime'];
-$usercode = $_POST['usercode'];
-$name = $_POST['name'];
-$leaveType = $_POST['leaveType'];
-$leaveReason = $_POST['leaveReason'];
-$startDate = $_POST['startDate'];
-$endDate = $_POST['endDate'];
-$depart = $_POST['depart'];
-$leaveStatus = $_POST['leaveStatus'];
+$usercode       = $_POST['usercode'];
+$name           = $_POST['name'];
+$leaveType      = $_POST['leaveType'];
+$leaveReason    = $_POST['leaveReason'];
+$startDate      = $_POST['startDate'];
+$endDate        = $_POST['endDate'];
+$depart         = $_POST['depart'];
+$level          = $_POST['level'];
+$workplace      = $_POST['workplace'];
+$subDepart      = $_POST['subDepart'];
+$subDepart2     = $_POST['subDepart2'];
+$subDepart3     = $_POST['subDepart3'];
+$subDepart4     = $_POST['subDepart4'];
+$subDepart5     = $_POST['subDepart5'];
 
 $canDatetime = date('Y-m-d H:i:s');
 
-$workplace = $_POST['workplace'];
-$subDepart = $_POST['subDepart'];
-$subDepart2 = $_POST['subDepart2'];
-$subDepart3 = $_POST['subDepart3'];
-$subDepart4 = $_POST['subDepart4'];
-$subDepart5 = $_POST['subDepart5'];
-// คืนจำนวนวันลา
-$sqlReturn = "UPDATE leave_list SET
-                l_leave_status = 1,
-                l_cancel_datetime = :canDatetime,
-                l_approve_status = 6,
-                l_approve_name = '',
-                l_approve_datetime = NULL,
-                l_reason = '',
-                l_approve_status2 = 1,
-                l_approve_name2 = '',
-                l_approve_datetime2 = NULL,
-                l_reason2 = '',
-                l_hr_status = 0,
-                l_hr_name = '',
-                l_hr_datetime = NULL
-              WHERE l_leave_id = :leaveID AND l_create_datetime = :createDatetime";
-$stmtReturn = $conn->prepare($sqlReturn);
+$sqlCheck = "SELECT l_approve_status, l_approve_status2, l_approve_status3 FROM leave_list
+WHERE l_leave_id = :leaveID AND l_create_datetime = :createDatetime AND l_usercode = :usercode";
+
+$stmtCheck = $conn->prepare($sqlCheck);
+$stmtCheck->bindParam(':leaveID', $leaveID);
+$stmtCheck->bindParam(':createDatetime', $createDatetime);
+$stmtCheck->bindParam(':usercode', $usercode);
+$stmtCheck->execute();
+$approveStatuses = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+$updates = [];
+if ($approveStatuses) {
+    if (! is_null($approveStatuses['l_approve_status'])) {
+        if ($approveStatuses['l_approve_status'] == 0 || $approveStatuses['l_approve_status'] == 2) {
+            $updates[] = "l_approve_status = 6, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
+        } else {
+            $updates[] = "l_approve_status = 6, l_approve_name = '', l_approve_datetime = NULL, l_reason = ''";
+        }
+    }
+    if (! is_null($approveStatuses['l_approve_status2'])) {
+        if ($approveStatuses['l_approve_status2'] == 1 || $approveStatuses['l_approve_status2'] == 4) {
+            $updates[] = "l_approve_status2 = 1, l_approve_name2 = '', l_approve_datetime2 = NULL, l_reason2 = ''";
+        } else {
+            $updates[] = "l_approve_status2 = 6, l_approve_name2 = '', l_approve_datetime2 = NULL, l_reason2 = ''";
+        }
+    }
+    if (! is_null($approveStatuses['l_approve_status3'])) {
+        if ($approveStatuses['l_approve_status3'] == 7 || $approveStatuses['l_approve_status3'] == 8) {
+            $updates[] = "l_approve_status3 = 7, l_approve_name3 = '', l_approve_datetime3 = NULL, l_reason3 = ''";
+        } else {
+            $updates[] = "l_approve_status3 = 6, l_approve_name3 = '', l_approve_datetime3 = NULL, l_reason3 = ''";
+        }
+    }
+}
+
+$updateQuery = "UPDATE leave_list SET l_leave_status = 1, l_cancel_datetime = :canDatetime, l_hr_status = 0, l_hr_name = '', l_hr_datetime = NULL, l_hr_reason = ''";
+if (! empty($updates)) {
+    $updateQuery .= ", " . implode(", ", $updates);
+}
+$updateQuery .= " WHERE l_leave_id = :leaveID AND l_create_datetime = :createDatetime";
+
+$stmtReturn = $conn->prepare($updateQuery);
 $stmtReturn->bindParam(':leaveID', $leaveID);
 $stmtReturn->bindParam(':createDatetime', $createDatetime);
 $stmtReturn->bindParam(':canDatetime', $canDatetime);
 
 if ($stmtReturn->execute()) {
     $sURL = 'https://lms.system-samt.com/';
-    // $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-    $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+    // $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-    // แจ้งเตือนไลน์หัวหน้ากับ ผจก ในแผนก
-    // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('chief', 'manager')");
+    $sql =
+        "SELECT e_user_id, e_username
+            FROM employees
+            WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
+            AND e_level <> :level
+            AND (
+                (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+                OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+                OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+                OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+                OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+                OR (
+                    e_level = 'GM'
+                    AND :depart <> 'RD'
+                    AND (
+                        e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                        OR (
+                            e_sub_department IS NULL
+                            AND e_sub_department2 IS NULL
+                            AND e_sub_department3 IS NULL
+                            AND e_sub_department4 IS NULL
+                            AND e_sub_department5 IS NULL
+                        )
+                    )
+                )
+            )
+            AND e_workplace = :workplace";
 
-    // $stmt->bindParam(':depart', $depart);
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':subDepart', $subDepart);
+    $stmt->bindParam(':subDepart2', $subDepart2);
+    $stmt->bindParam(':subDepart3', $subDepart3);
+    $stmt->bindParam(':subDepart4', $subDepart4);
+    $stmt->bindParam(':subDepart5', $subDepart5);
 
-    if ($depart == 'RD') {
-        // แจ้งไลน์โฮซัง
-        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
-        // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
-        // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
-        $stmt->bindParam(':workplace', $workplace);
-        // $stmt->bindParam(':depart', $depart);
+    $stmt->bindParam(':depart', $depart);
+    $stmt->bindParam(':workplace', $workplace);
+    $stmt->bindParam(':level', $level);
 
-    } else if ($depart == 'Office') {
-        // บัญชี
-        if ($subDepart == 'AC') {
-            // แจ้งเตือนพี่แวว
-            // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = :subDepart");
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'AC'");
-            $stmt->bindParam(':workplace', $workplace);
-            // $stmt->bindParam(':subDepart', $subDepart);
-        }
-        // เซลล์
-        else if ($subDepart == 'Sales') {
-            // แจ้งเตือนพี่เจี๊ยบหรือพี่อ้อม
-            // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = :subDepart");
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_workplace = :workplace AND e_level = 'chief' AND e_sub_department = 'Sales'");
-            $stmt->bindParam(':workplace', $workplace);
-            // $stmt->bindParam(':subDepart', $subDepart);
-        }
-        // สโตร์
-        else if ($subDepart == 'Store') {
-            // แจ้งเตือนพี่เก๋
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Store'");
-            $stmt->bindParam(':workplace', $workplace);
-            // $stmt->bindParam(':subDepart', $subDepart);
-        }
-        // HR
-        else if ($subDepart == 'All') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-            $stmt->bindParam(':workplace', $workplace);
-            // $stmt->bindParam(':subDepart', $subDepart);
-        }
-        // พี่เต๋ / พี่น้อย / พี่ไว
-        else if ($subDepart == '') {
-            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
-            $stmt->bindParam(':workplace', $workplace);
-            // $stmt->bindParam(':subDepart', $subDepart);
-        }
+    if ($stmt->execute()) {
+        $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        echo "ไม่พบเงื่อนไข";
+        error_log("ไม่สามารถดึงข้อมูล userId ของหัวหน้าหรือผู้จัดการได้");
+        $managers = [];
     }
 
-    $stmt->execute();
-    $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    if (! empty($managers)) {
+        foreach ($managers as $manager) {
+            $sMessageToManager = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-    if ($tokens) {
-        foreach ($tokens as $sToken) {
-            $chOne = curl_init();
-            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
-            $headers = [
-                'Content-type: application/x-www-form-urlencoded',
-                'Authorization: Bearer ' . $sToken,
+            $data = [
+                'to'       => $manager['e_user_id'],
+                'messages' => [['type' => 'text', 'text' => $sMessageToManager]],
             ];
-            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-            $result = curl_exec($chOne);
 
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
+            $ch = curl_init('https://api.line.me/v2/bot/message/push');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $access_token,
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+            $response = curl_exec($ch);
+            if (curl_error($ch)) {
+                error_log('LINE API Error: ' . curl_error($ch));
             } else {
-                $result_ = json_decode($result, true);
-                echo "status : " . $result_['status'];
-                echo "message : " . $result_['message'];
+                error_log('LINE API Response: ' . $response);
             }
-
-            curl_close($chOne);
+            curl_close($ch);
         }
     } else {
-        echo "ไม่พบ Token ของหัวหน้าหรือผู้จัดการ";
+        error_log("ไม่พบหัวหน้าที่ตรงกับเงื่อนไข");
     }
-    // แจ้งเตือนไลน์ HR
-    // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-    // $stmt->execute();
-    // $admins = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-    // $aMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-    // if ($admins) {
-    //     foreach ($admins as $sToken) {
-    //         $chOne = curl_init();
-    //         curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-    //         curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-    //         curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-    //         curl_setopt($chOne, CURLOPT_POST, 1);
-    //         curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $aMessage);
-    //         $headers = [
-    //             'Content-type: application/x-www-form-urlencoded',
-    //             'Authorization: Bearer ' . $sToken,
-    //         ];
-    //         curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-    //         curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-    //         $result = curl_exec($chOne);
-
-    //         if (curl_error($chOne)) {
-    //             echo 'Error:' . curl_error($chOne);
-    //         } else {
-    //             $result_ = json_decode($result, true);
-    //             echo "status : " . $result_['status'];
-    //             echo "message : " . $result_['message'];
-    //         }
-
-    //         curl_close($chOne);
-    //     }
-    // } else {
-    //     echo "ไม่พบ Token ของ admin";
-    // }
 } else {
-    echo "Error";
+    echo "Error ในการอัพเดตข้อมูลการลา";
 }

@@ -160,7 +160,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $proveStatus  = 0;
             $proveStatus2 = 1;
             $proveStatus3 = 6;
-            $proveName    = $chkApprover;
         } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 1;

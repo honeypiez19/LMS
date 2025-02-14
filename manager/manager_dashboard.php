@@ -3212,6 +3212,7 @@ WHERE l_leave_id = :leave_id
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
                 // var leaveStatus = 'ยกเลิก';
+                var userName = "<?php echo $userName ?>";
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -3252,7 +3253,8 @@ WHERE l_leave_id = :leave_id
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
                                 subDepart5: subDepart5,
-                                level: level
+                                level: level,
+                                userName: userName
 
                             },
                             success: function(response) {

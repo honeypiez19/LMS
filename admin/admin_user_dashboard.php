@@ -2982,7 +2982,9 @@ WHERE l_leave_id = :leave_id
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                // var leaveStatus = 'ยกเลิก';
+                var level = "<?php echo $level ?>";
+
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -3015,14 +3017,14 @@ WHERE l_leave_id = :leave_id
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                leaveStatus: leaveStatus,
+                                // leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5
-
+                                subDepart5: subDepart5,
+                                level: level
                             },
                             success: function(response) {
                                 Swal.fire({
@@ -3480,23 +3482,27 @@ WHERE l_leave_id = :leave_id
                 e.preventDefault();
 
                 var formData = new FormData();
-                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
-                var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+                var editFile = $('#editFile')[0].files[0];
+                var currentFile = $('#currentFile').val();
 
-                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
                 if (editFile) {
-                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
+                    formData.append('file', editFile);
                 } else if (currentFile) {
-                    formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                    formData.append('currentFile',
+                        currentFile);
                 }
 
-                // เพิ่มค่าฟอร์มอื่นๆ
                 formData.append('userCode', '<?php echo $userCode; ?>');
                 formData.append('userName', '<?php echo $userName ?>');
                 formData.append('name', '<?php echo $name ?>');
                 formData.append('workplace', '<?php echo $workplace; ?>');
                 formData.append('depart', '<?php echo $depart; ?>');
                 formData.append('subDepart', '<?php echo $subDepart; ?>');
+                formData.append('subDepart2', '<?php echo $subDepart2; ?>');
+                formData.append('subDepart3', '<?php echo $subDepart3; ?>');
+                formData.append('subDepart4', '<?php echo $subDepart4; ?>');
+                formData.append('subDepart5', '<?php echo $subDepart5; ?>');
+                formData.append('level', '<?php echo $level; ?>');
                 formData.append('createDatetime', $(this).data('createdatetime'));
                 formData.append('editLeaveType', $('.editLeaveType').val());
                 formData.append('editLeaveReason', $('#editLeaveReason').val());
@@ -3504,51 +3510,40 @@ WHERE l_leave_id = :leave_id
                 formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
                 formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
-                formData.append('editTelPhone', $('#editTelPhone').val());
 
-                // ส่งข้อมูลผ่าน AJAX
                 $.ajax({
                     url: 'a_u_upd_leave.php',
                     type: 'POST',
                     data: formData,
-                    contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
-                    processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
+                    contentType: false,
+                    processData: false,
                     success: function(response) {
-                        try {
-                            var res = JSON.parse(response);
-                            if (res.status === 'success') {
-                                Swal.fire({
-                                    title: 'สำเร็จ!',
-                                    text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
-                                    icon: 'success',
-                                    confirmButtonText: 'ตกลง',
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'เกิดข้อผิดพลาด',
-                                    text: res.message || 'ไม่สามารถแก้ไขข้อมูลได้',
-                                    icon: 'error',
-                                    confirmButtonText: 'ตกลง',
-                                });
-                            }
-                        } catch (error) {
+                        if (response.status === 'success') {
                             Swal.fire({
-                                title: 'ข้อผิดพลาดในการประมวลผล',
-                                text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
+                                title: 'สำเร็จ!',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'ตกลง',
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
                                 icon: 'error',
                                 confirmButtonText: 'ตกลง',
                             });
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',
                             text: 'ไม่สามารถแก้ไขข้อมูลได้',
                             icon: 'error',
                             confirmButtonText: 'ตกลง',
                         });
+                        console.log('Error:', error); // Log the actual error instead
                     },
                 });
             });

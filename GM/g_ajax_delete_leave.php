@@ -7,6 +7,7 @@ date_default_timezone_set('Asia/Bangkok');
 $leaveID        = $_POST['leaveId'];
 $createDatetime = $_POST['createDatetime'];
 $usercode       = $_POST['usercode'];
+$userName       = $_POST['userName'];
 $name           = $_POST['name'];
 $leaveType      = $_POST['leaveType'];
 $leaveReason    = $_POST['leaveReason'];
@@ -22,6 +23,8 @@ $subDepart4     = $_POST['subDepart4'];
 $subDepart5     = $_POST['subDepart5'];
 
 $canDatetime = date('Y-m-d H:i:s');
+$proveDate3  = date('Y-m-d H:i:s');
+$proveName3  = $userName;
 
 $sqlCheck = "SELECT l_approve_status, l_approve_status2, l_approve_status3 FROM leave_list
 WHERE l_leave_id = :leaveID AND l_create_datetime = :createDatetime AND l_usercode = :usercode";
@@ -51,7 +54,7 @@ if ($approveStatuses) {
     }
     if (! is_null($approveStatuses['l_approve_status3'])) {
         if ($approveStatuses['l_approve_status3'] == 7 || $approveStatuses['l_approve_status3'] == 8) {
-            $updates[] = "l_approve_status3 = 8, l_approve_name3 = '', l_approve_datetime3 = NULL, l_reason3 = ''";
+            $updates[] = "l_approve_status3 = 8, l_approve_name3 = :proveName3, l_approve_datetime3 = :proveDate3, l_reason3 = ''";
         } else {
             $updates[] = "l_approve_status3 = 6, l_approve_name3 = '', l_approve_datetime3 = NULL, l_reason3 = ''";
         }
@@ -68,6 +71,8 @@ $stmtReturn = $conn->prepare($updateQuery);
 $stmtReturn->bindParam(':leaveID', $leaveID);
 $stmtReturn->bindParam(':createDatetime', $createDatetime);
 $stmtReturn->bindParam(':canDatetime', $canDatetime);
+$stmtReturn->bindParam(':proveName3', $proveName3);
+$stmtReturn->bindParam(':proveDate3', $proveDate3);
 
 if ($stmtReturn->execute()) {
     $sURL = 'https://lms.system-samt.com/';
@@ -94,7 +99,7 @@ if ($stmtReturn->execute()) {
 
     if (! empty($managers)) {
         foreach ($managers as $manager) {
-            $sMessageToManager = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL\n\nถึงคุณ: {$manager['e_username']}";
+            $sMessageToManager = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : ยกเลิก\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
             $data = [
                 'to'       => $manager['e_user_id'],
