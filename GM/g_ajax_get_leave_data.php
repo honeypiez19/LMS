@@ -3,8 +3,8 @@
 include '../connect.php';
 
 $status = $_GET['status'];
-$month = $_GET['month'];
-$year = $_GET['year'];
+$month  = $_GET['month'];
+$year   = $_GET['year'];
 
 // Prepare a SQL query to select leave data based on the status
 $sql = "SELECT
@@ -14,19 +14,19 @@ FROM
 WHERE
     li.l_department <> 'RD'
     AND li.l_leave_id NOT IN (6, 7)
-    AND li.l_level IN ('user', 'chief', 'leader', 'admin')
+            AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
  AND (
         YEAR(li.l_create_datetime) = :year
         OR YEAR(li.l_leave_end_date) = :year
     )";
 if ($status == 'all') {
     // No additional filters for 'all' status
-} else if ($status == 1) {
-    $sql .= " AND li.l_approve_status2 = 1";
-} else if ($status == 4) {
-    $sql .= " AND li.l_approve_status2 = 4";
-} else if ($status == 5) {
-    $sql .= " AND li.l_approve_status2 = 5";
+} else if ($status == 7) {
+    $sql .= " AND li.l_approve_status3 = 7";
+} else if ($status == 8) {
+    $sql .= " AND li.l_approve_status3 = 8";
+} else if ($status == 9) {
+    $sql .= " AND li.l_approve_status3 = 9";
 } else {
     echo json_encode(['error' => 'ไม่พบสถานะ']);
     exit;
@@ -66,23 +66,23 @@ foreach ($results as &$row) {
     $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
     $holiday_stmt->execute();
 
-    $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+    $holiday_data  = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
     $holiday_count = $holiday_data['holiday_count'] ?? 0;
 
     // Calculate leave duration
     $start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-    $end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-    $interval = $start_date->diff($end_date);
+    $end_date   = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+    $interval   = $start_date->diff($end_date);
 
-    $leave_days = $interval->days - $holiday_count;
-    $leave_hours = $interval->h;
+    $leave_days    = $interval->days - $holiday_count;
+    $leave_hours   = $interval->h;
     $leave_minutes = $interval->i;
 
     // Adjust hours for out-of-range times
     $start_hour = (int) $start_date->format('H');
-    $end_hour = (int) $end_date->format('H');
+    $end_hour   = (int) $end_date->format('H');
 
-    if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+    if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
         (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
         $leave_hours -= 1;
     }
@@ -97,8 +97,8 @@ foreach ($results as &$row) {
     }
 
     $row['calculated_leave'] = [
-        'days' => $leave_days,
-        'hours' => $leave_hours,
+        'days'    => $leave_days,
+        'hours'   => $leave_hours,
         'minutes' => $leave_minutes,
     ];
 }

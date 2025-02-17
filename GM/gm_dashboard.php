@@ -1748,6 +1748,7 @@ WHERE l_leave_id = :leave_id
 
                                     $currentDate = date('Y-m-d');
 
+                                    // ปรับเงื่อนไขการตรวจสอบ
                                     $disabledEdit = ((! is_null($leaveEnd) && $leaveEnd < $currentDate) || $row['l_leave_status'] == 1) ? 'disabled' : '';
 
                                     echo '<td>';
@@ -1786,31 +1787,24 @@ WHERE l_leave_id = :leave_id
                 </table>
             </div>
             <?php
-                echo '<div class="pagination">';
-                echo '<ul class="pagination">';
-
-                // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
+                echo '<div class="mt-3">';
+                echo '<nav>';
+                echo '<ul class="pagination justify-content-start">';
                 if ($currentPage > 1) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&year=' . $selectedYear . '&month=' . $selectedMonth . '&codeSearch=' . $searchCode . '">«</a></li>';
                 }
-
-                // สร้างลิงก์สำหรับแต่ละหน้า
                 for ($i = 1; $i <= $totalPages; $i++) {
                     if ($i == $currentPage) {
                         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
                     } else {
-                        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
+                        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&year=' . $selectedYear . '&month=' . $selectedMonth . '&codeSearch=' . $searchCode . '">' . $i . '</a></li>';
                     }
                 }
-
-                // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
                 if ($currentPage < $totalPages) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&year=' . $selectedYear . '&month=' . $selectedMonth . '&codeSearch=' . $searchCode . '">»</a></li>';
                 }
-
                 echo '</ul>';
+                echo '</nav>';
                 echo '</div>';
 
             ?>

@@ -40,7 +40,7 @@
 <body>
     <?php include 'gm_navbar.php'?>
 
-    <!--         <?php echo $subDepart; ?>
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?>
 <?php echo $subDepart2; ?>
 <?php echo $userName; ?> -->
 
@@ -139,7 +139,7 @@ leave_list li
 WHERE
 li.l_department <> 'RD'
 AND li.l_leave_id NOT IN (6, 7)
-AND li.l_level IN ('user', 'chief', 'leader','admin')
+AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
     AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
@@ -178,7 +178,7 @@ AND li.l_level IN ('user', 'chief', 'leader','admin')
             </div>
 
             <!-- รายการลาที่รออนุมัติ -->
-            <div class="col-3 filter-card" data-status="1">
+            <div class="col-3 filter-card" data-status="7">
                 <div class="card text-bg-warning mb-3">
                     <div class="card-body">
                         <h5 class="card-title">
@@ -191,8 +191,8 @@ leave_list li
 WHERE
 li.l_department <> 'RD'
 AND li.l_leave_id NOT IN (6, 7)
-AND li.l_level IN ('user', 'chief', 'leader','admin')
-AND li.l_approve_status2 = 1
+AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+AND li.l_approve_status3 = 7
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
@@ -229,7 +229,7 @@ AND li.l_approve_status2 = 1
                     </div>
                 </div>
             </div>
-            <div class="col-3 filter-card" data-status="4">
+            <div class="col-3 filter-card" data-status="8">
                 <div class="card text-bg-success mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
@@ -243,8 +243,8 @@ leave_list li
 WHERE
 li.l_department <> 'RD'
 AND li.l_leave_id NOT IN (6, 7)
-AND li.l_level IN ('user', 'chief', 'leader','admin')
-AND li.l_approve_status2 = 4
+AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+AND li.l_approve_status3 = 8
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
@@ -282,7 +282,7 @@ AND li.l_approve_status2 = 4
                     </div>
                 </div>
             </div>
-            <div class="col-3 filter-card" data-status="5">
+            <div class="col-3 filter-card" data-status="9">
                 <div class="card text-bg-danger mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
@@ -296,8 +296,8 @@ leave_list li
 WHERE
 li.l_department <> 'RD'
 AND li.l_leave_id NOT IN (6, 7)
-AND li.l_level IN ('user', 'chief', 'leader','admin')
-AND li.l_approve_status2 = 5
+AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+AND li.l_approve_status3 = 9
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
@@ -348,7 +348,7 @@ AND li.l_approve_status2 = 5
                         <th rowspan="1"><?php echo $strEmpCode; ?></th>
                         <th rowspan="1"><?php echo $strEmpName; ?></th>
                         <th rowspan="2"><?php echo $strSubDate; ?></th>
-                        <th rowspan="1"><?php echo $strLeaveType; ?></th>
+                        <th rowspan="2"><?php echo $strLeaveType; ?></th>
                         <th colspan="2" class="text-center"><?php echo $strDateTime; ?></th>
                         <th rowspan="2">จำนวนวันลา</th>
                         <th rowspan="2"><?php echo $strFile; ?></th>
@@ -371,75 +371,81 @@ AND li.l_approve_status2 = 5
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
+                        <th> <input type="text" class="form-control" id="codeSearch" style="width: 100px;"></th>
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
-                        <th> <input type="text" class="form-control" id="leaveSearch"></th>
                         <th style="width: 8%;">จาก</th>
                         <th style="width: 8%;">ถึง</th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
                     <?php
-                        // กำหนดจำนวนรายการต่อหน้า
+                        // จำนวนรายการต่อหน้า
                         $itemsPerPage = 10;
 
-                        // ตรวจสอบหน้าปัจจุบัน
+                        // กำหนดค่าของหน้าปัจจุบัน
                         $currentPage = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
-                        // คำนวณค่า offset สำหรับ pagination
+                        // ค้นหาค่ารหัสพนักงาน
+                        $searchCode = isset($_GET['codeSearch']) ? trim($_GET['codeSearch']) : '';
+
+                        // เริ่มการคำนวณ OFFSET
                         $offset = ($currentPage - 1) * $itemsPerPage;
 
-                        // สร้างคำสั่ง SQL
-                        $sql = "SELECT
-            li.*
-        FROM
-            leave_list li
-        WHERE
-            li.l_department <> 'RD'
-            AND li.l_leave_id NOT IN (6, 7)
-            AND li.l_level IN ('user', 'chief', 'leader', 'admin')
-            AND (
-                YEAR(li.l_create_datetime) = :selectedYear
-                OR YEAR(li.l_leave_end_date) = :selectedYear
-            )";
+                        // คำสั่ง SQL หลัก (จะไม่คำนึงถึงการแบ่งหน้าในตอนนี้)
+                        $sql = "SELECT li.*
+                        FROM leave_list li
+                        WHERE li.l_department <> 'RD'
+                        AND li.l_leave_id NOT IN (6, 7)
+                        AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+                        AND (YEAR(li.l_create_datetime) = :selectedYear
+                        OR YEAR(li.l_leave_end_date) = :selectedYear)";
 
+                        // ถ้าเลือกเดือน ให้กรองข้อมูลตามเดือน
                         if ($selectedMonth != "All") {
-                            $sql .= " AND (
-                Month(li.l_create_datetime) = :selectedMonth
-                OR Month(li.l_leave_end_date) = :selectedMonth
-             )";
+                            $sql .= " AND (MONTH(li.l_create_datetime) = :selectedMonth
+                         OR MONTH(li.l_leave_end_date) = :selectedMonth)";
                         }
 
+                        // ถ้ามีการค้นหา รหัสพนักงาน
+                        if (! empty($searchCode)) {
+                            $sql .= " AND li.l_usercode LIKE :searchCode";
+                        }
+
+                        // กำหนดการเรียงลำดับ
                         $sql .= " ORDER BY li.l_create_datetime DESC";
 
-                        // ประมวลผลคำสั่ง SQL เพื่อหาจำนวนแถวทั้งหมด
+                        // เตรียมคำสั่ง SQL สำหรับการค้นหา
                         $stmt = $conn->prepare($sql);
-
-                        // ผูกค่า (bind parameters)
                         $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 
                         if ($selectedMonth != "All") {
                             $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
                         }
 
-                        $stmt->execute();
+                        if (! empty($searchCode)) {
+                            $searchParam = "%$searchCode%";
+                            $stmt->bindParam(':searchCode', $searchParam, PDO::PARAM_STR);
+                        }
 
-                        // นับจำนวนแถวทั้งหมด
-                        $totalRows = $stmt->rowCount();
+                        $stmt->execute();
+                        $totalRows = $stmt->rowCount(); // นับจำนวนแถวทั้งหมด
 
                         // คำนวณจำนวนหน้าทั้งหมด
                         $totalPages = ceil($totalRows / $itemsPerPage);
 
-                        // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
+                        // เพิ่ม LIMIT และ OFFSET
                         $sql .= " LIMIT :itemsPerPage OFFSET :offset";
 
-                        // เตรียมคำสั่ง SQL ใหม่สำหรับดึงข้อมูลรายการในหน้าที่กำหนด
+                        // ดึงข้อมูลที่จำเป็นสำหรับแสดงในหน้าปัจจุบัน
                         $stmt = $conn->prepare($sql);
-
-                        // ผูกค่า (bind parameters) ใหม่
                         $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 
                         if ($selectedMonth != "All") {
                             $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                        }
+
+                        if (! empty($searchCode)) {
+                            $stmt->bindParam(':searchCode', $searchParam, PDO::PARAM_STR);
                         }
 
                         $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
@@ -447,13 +453,13 @@ AND li.l_approve_status2 = 5
 
                         $stmt->execute();
 
-                        // แสดงข้อมูลในตาราง
-                        $rowNumber = $totalRows - $offset; // กำหนดลำดับของแถวเริ่มต้น
+                        // แสดงข้อมูล
+                        $rowNumber = $totalRows - $offset;
                         if ($stmt->rowCount() > 0) {
                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 echo '<tr class="align-middle">';
 
-                        // 0
+                                // 0
                                 echo '<td hidden>';
                                 if ($row['l_leave_id'] == 1) {
                                     echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>';
@@ -662,10 +668,10 @@ AND li.l_approve_status2 = 5
                                 echo '<td>';
                                 // Query to check holidays in the leave period
                                 $holiday_query = "SELECT COUNT(*) as holiday_count
-                  FROM holiday
-                  WHERE h_start_date BETWEEN :start_date AND :end_date
-                  AND h_holiday_status = 'วันหยุด'
-                  AND h_status = 0";
+                                FROM holiday
+                                WHERE h_start_date BETWEEN :start_date AND :end_date
+                                AND h_holiday_status = 'วันหยุด'
+                                AND h_status = 0";
 
                                 // Prepare the query
                                 $holiday_stmt = $conn->prepare($holiday_query);
@@ -902,7 +908,7 @@ AND li.l_approve_status2 = 5
 
                                 // 29
                                 echo '<td>
-        <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
+                                <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
 
                                 echo '</tr>';
 
@@ -916,59 +922,8 @@ AND li.l_approve_status2 = 5
                 </tbody>
             </table>
         </div>
-        <?php
-            echo '<div class="pagination">';
-            echo '<ul class="pagination">';
+        <div id="pagination"></div>
 
-            // กำหนดจำนวนหน้าที่จะแสดงรอบ ๆ หน้าปัจจุบัน
-            $range = 2;
-
-            // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
-            if ($currentPage > 1) {
-                echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
-            }
-
-            // แสดงลิงก์สำหรับหน้าที่อยู่ในช่วง
-            for ($i = max(1, $currentPage - $range); $i <= min($totalPages, $currentPage + $range); $i++) {
-                if ($i == $currentPage) {
-                    echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-                } else {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
-                }
-            }
-
-            // เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าสุดท้าย
-            if ($currentPage + $range < $totalPages) {
-                echo '<li class="page-item"><span class="page-link">...</span></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">' . $totalPages . '</a></li>';
-            }
-
-            // เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าแรก
-            if ($currentPage - $range > 1) {
-                echo '<li class="page-item"><span class="page-link">...</span></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">' . 1 . '</a></li>';
-            }
-
-            // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
-            if ($currentPage < $totalPages) {
-                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
-            }
-
-            echo '</ul>';
-
-            // ฟอร์มสำหรับกรอกหมายเลขหน้า
-            echo '<form method="GET" action="" class="mb-2 d-inline-flex">';
-            echo '<input type="hidden" name="month" value="' . htmlspecialchars($selectedMonth) . '">';
-            // echo '<label for="customPage" class="me-2">ไปหน้าที่:</label>';
-            echo '<input type="number" name="page" id="customPage" class="form-control mb-3 mx-2" style="width: 80px;" min="1" max="' . $totalPages . '" value="' . $currentPage . '">';
-            echo '<button type="submit" class="mx-2 mb-3 btn btn-primary" style="width: 50px;">Go</button>';
-            echo '</form>';
-
-            echo '</div>';
-
-        ?>
         <!-- Modal เช็คการลา -->
         <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -1006,6 +961,80 @@ AND li.l_approve_status2 = 5
     </div>
 
     <script>
+    $(document).ready(function() {
+        // ค้นหาข้อมูลเมื่อมีการเปลี่ยนแปลงในช่องค้นหา
+        $('#codeSearch').on('input', function() {
+            var searchCode = $(this).val();
+            var selectedYear = $('#yearSelect').val();
+            var selectedMonth = $('#monthSelect').val();
+            var currentPage = 1; // หน้าแรก
+
+            // ตรวจสอบค่าที่จะส่ง
+            console.log("🔍 Searching for:", searchCode, selectedYear, selectedMonth);
+
+            // เรียก AJAX
+            $.ajax({
+                url: 'your_php_file.php',
+                method: 'GET',
+                data: {
+                    page: currentPage,
+                    codeSearch: searchCode,
+                    year: selectedYear,
+                    month: selectedMonth
+                },
+                success: function(response) {
+                    console.log("✅ Response received:", response);
+                    var data = JSON.parse(response);
+
+                    // แสดงข้อมูลในตาราง
+                    $('#leaveTable tbody').html(data.data);
+
+                    // แสดง Pagination
+                    $('#pagination').html(data.pagination);
+                },
+                error: function(xhr, status, error) {
+                    console.error("❌ AJAX Error:", error);
+                }
+            });
+        });
+
+        // เมื่อคลิกที่ลิงก์ Pagination
+        $(document).on('click', '.pagination-link', function(e) {
+            e.preventDefault();
+            var page = $(this).data('page');
+            var searchCode = $('#codeSearch').val();
+            var selectedYear = $('#yearSelect').val();
+            var selectedMonth = $('#monthSelect').val();
+
+            console.log("🔍 Going to page:", page);
+
+            // เรียก AJAX เพื่อโหลดข้อมูลในหน้านั้น
+            $.ajax({
+                url: 'your_php_file.php',
+                method: 'GET',
+                data: {
+                    page: page,
+                    codeSearch: searchCode,
+                    year: selectedYear,
+                    month: selectedMonth
+                },
+                success: function(response) {
+                    console.log("✅ Response received:", response);
+                    var data = JSON.parse(response);
+
+                    // แสดงข้อมูลในตาราง
+                    $('#leaveTable tbody').html(data.data);
+
+                    // แสดง Pagination
+                    $('#pagination').html(data.pagination);
+                },
+                error: function(xhr, status, error) {
+                    console.error("❌ AJAX Error:", error);
+                }
+            });
+        });
+    });
+
     $(".leaveChk").click(function() {
         var rowData = $(this).closest("tr").find("td");
 
@@ -1237,10 +1266,10 @@ AND li.l_approve_status2 = 5
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
                             leaveStatus =
-                                '<div class="text-success"><?php echo $strStatusNormal?></div>';
+                                '<div class="text-success"><?php echo $strStatusNormal ?></div>';
                         } else if (row['l_leave_status'] == 1) {
                             leaveStatus =
-                                '<div class="text-danger"><?php echo $strStatusCancel?></div>';
+                                '<div class="text-danger"><?php echo $strStatusCancel ?></div>';
                         } else {
                             leaveStatus = 'ไม่พบสถานะใบลา';
                         }
@@ -1249,22 +1278,22 @@ AND li.l_approve_status2 = 5
                         var approveStatus;
                         if (row['l_approve_status'] == 0) {
                             approveStatus =
-                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status'] == 1) {
                             approveStatus =
-                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status'] == 2) {
                             approveStatus =
-                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status'] == 3) {
                             approveStatus =
-                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status'] == 4) {
                             approveStatus =
-                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
-                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status'] == 6) {
                             approveStatus =
                                 '';
@@ -1276,22 +1305,22 @@ AND li.l_approve_status2 = 5
                         var approveStatus2;
                         if (row['l_approve_status2'] == 0) {
                             approveStatus2 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status2'] == 1) {
                             approveStatus2 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status2'] == 2) {
                             approveStatus2 =
-                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status2'] == 3) {
                             approveStatus2 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status2'] == 4) {
                             approveStatus2 =
-                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status2'] == 6) {
                             approveStatus2 =
                                 '';
@@ -1303,22 +1332,22 @@ AND li.l_approve_status2 = 5
                         var approveStatus3;
                         if (row['l_approve_status3'] == 0) {
                             approveStatus3 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve0 ?></b></div>';
                         } else if (row['l_approve_status3'] == 1) {
                             approveStatus3 =
-                                '<div class="text-warning"><b><?php echo $strStatusProve1?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusProve1 ?></b></div>';
                         } else if (row['l_approve_status3'] == 2) {
                             approveStatus3 =
-                                '<div class="text-success"><b><?php echo $strStatusProve2?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve2 ?></b></div>';
                         } else if (row['l_approve_status3'] == 3) {
                             approveStatus3 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve3?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve3 ?></b></div>';
                         } else if (row['l_approve_status3'] == 4) {
                             approveStatus3 =
-                                '<div class="text-success"><b><?php echo $strStatusProve4?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusProve4 ?></b></div>';
                         } else if (row['l_approve_status3'] == 5) {
                             approveStatus3 =
-                                '<div class="text-danger"><b><?php echo $strStatusProve5?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusProve5 ?></b></div>';
                         } else if (row['l_approve_status3'] == 6) {
                             approveStatus3 =
                                 '';
@@ -1339,13 +1368,13 @@ AND li.l_approve_status2 = 5
                         var confirmStatus = '';
                         if (row['l_hr_status'] == 0) {
                             confirmStatus =
-                                '<div class="text-warning"><b><?php echo $strStatusHR0?></b></div>';
+                                '<div class="text-warning"><b><?php echo $strStatusHR0 ?></b></div>';
                         } else if (row['l_hr_status'] == 1) {
                             confirmStatus =
-                                '<div class="text-success"><b><?php echo $strStatusHR1?></b></div>';
+                                '<div class="text-success"><b><?php echo $strStatusHR1 ?></b></div>';
                         } else if (row['l_hr_status'] == 2) {
                             confirmStatus =
-                                '<div class="text-danger"><b><?php echo $strStatusHR2?></b></div>';
+                                '<div class="text-danger"><b><?php echo $strStatusHR2 ?></b></div>';
                         } else {
                             confirmStatus = row['l_hr_status'];
                         }
@@ -1603,10 +1632,10 @@ AND li.l_approve_status2 = 5
                         if (row['l_approve_status3'] == 8 || row['l_approve_status3'] ==
                             9) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck?></button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck ?></button>';
                         } else {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?php echo $btnCheck?></button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?php echo $btnCheck ?></button>';
                         }
                         newRow += '</td>' +
                             // 29
@@ -1887,14 +1916,14 @@ AND li.l_approve_status2 = 5
         });
     });
 
-    $("#nameSearch").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-        });
-    });
+    // $("#codeSearch").on("keyup", function() {
+    //     var value = $(this).val().toLowerCase();
+    //     $("tbody tr").filter(function() {
+    //         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+    //     });
+    // });
 
-    $("#leaveSearch").on("keyup", function() {
+    $("#nameSearch").on("keyup", function() {
         var value2 = $(this).val().toLowerCase();
         $("tbody tr").filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
