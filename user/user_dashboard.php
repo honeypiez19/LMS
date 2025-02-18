@@ -2200,7 +2200,7 @@ WHERE l_leave_id = :leave_id
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
                 var userCode = '<?php echo $userCode; ?>';
                 var depart = '<?php echo $depart; ?>';
-                var selectedYear =                                   <?php echo json_encode($selectedYear); ?>;
+                var selectedYear = <?php echo json_encode($selectedYear); ?>;
                 var nameType = '';
 
                 if (leaveType == 1) {
@@ -2464,13 +2464,11 @@ WHERE l_leave_id = :leave_id
                                     }
                                 }
 
-                                // ลากิจ, ลาพักร้อนให้ลาล่วงหน้า 1 วัน
                                 if (leaveType == 1 || leaveType == 5) {
                                     var startDate = $('#startDate').val();
                                     var parts = startDate.split('-');
                                     var formattedDate = parts[2] + '-' + parts[1] + '-' +
-                                        parts[
-                                            0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+                                        parts[0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
 
                                     // สร้าง Date object โดยไม่ต้องตั้งเวลา
                                     var leaveStartDate = new Date(formattedDate +
@@ -2480,19 +2478,58 @@ WHERE l_leave_id = :leave_id
                                     currentDate.setHours(0, 0, 0,
                                         0); // ตั้งเวลาเป็น 00:00:00
 
-                                    console.log("leaveStartDate :" + leaveStartDate);
-                                    console.log("currentDate: " + currentDate);
+                                    var tomorrow = new Date();
+                                    tomorrow.setDate(currentDate.getDate() +
+                                        1); // วันพรุ่งนี้
+                                    tomorrow.setHours(0, 0, 0, 0);
 
-                                    // เช็คว่า startDate เก่ากว่าหรือไม่
-                                    if (leaveStartDate <= currentDate) {
+                                    console.log("leaveStartDate: " + leaveStartDate);
+                                    console.log("currentDate: " + currentDate);
+                                    console.log("tomorrow: " + tomorrow);
+
+                                    // เช็คว่าถ้าลาวันพรุ่งนี้หรือมากกว่าต้องเตือน
+                                    if (leaveStartDate >= tomorrow) {
                                         Swal.fire({
                                             title: "ไม่สามารถลาได้",
                                             text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
                                             icon: "error"
                                         });
                                         return false; // หยุดการส่งแบบฟอร์ม
+                                    } else if () {
+
                                     }
                                 }
+
+                                // if (leaveType == 1 || leaveType == 5) {
+                                //     var startDate = $('#startDate').val();
+                                //     var parts = startDate.split('-');
+                                //     var formattedDate = parts[2] + '-' + parts[1] + '-' +
+                                //         parts[
+                                //             0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+
+                                //     // สร้าง Date object โดยไม่ต้องตั้งเวลา
+                                //     var leaveStartDate = new Date(formattedDate +
+                                //         'T00:00:00'); // ตั้งเวลาเป็น 00:00:00
+
+                                //     var currentDate = new Date();
+                                //     currentDate.setHours(0, 0, 0,
+                                //         0); // ตั้งเวลาเป็น 00:00:00
+
+                                //     console.log("leaveStartDate :" + leaveStartDate);
+                                //     console.log("currentDate: " + currentDate);
+
+                                //     // เช็คว่า startDate เก่ากว่าหรือไม่
+                                //     if (leaveStartDate <= currentDate) {
+                                //         Swal.fire({
+                                //             title: "ไม่สามารถลาได้",
+                                //             text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                                //             icon: "error"
+                                //         });
+                                //         return false; // หยุดการส่งแบบฟอร์ม
+                                //     } else {
+
+                                //     }
+                                // }
 
                                 var checkStartDate = $('#startDate').val();
                                 var checkEndDate = $('#endDate').val();
