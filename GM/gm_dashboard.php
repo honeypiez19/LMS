@@ -1093,6 +1093,7 @@ WHERE l_leave_id = :leave_id
                                 <div class="mt-2 row">
                                     <div class="col-6">
                                         <?php
+<<<<<<< Updated upstream
                                         // SQL query
                                         $sql = "SELECT * FROM employees WHERE e_level IN ('admin')
                                                     AND e_workplace = :workplace
@@ -1104,6 +1105,15 @@ WHERE l_leave_id = :leave_id
 
                                         $stmt->execute();
                                         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+=======
+                                            // SQL query
+                                            $sql = "SELECT * FROM employees WHERE e_level IN ('admin')
+                                            ORDER BY e_username ASC";
+
+                                            $stmt = $conn->prepare($sql);
+                                            $stmt->execute();
+                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+>>>>>>> Stashed changes
 
                                         // ตั้งค่า default approver
                                         $defaultApprover = '';
@@ -1564,10 +1574,231 @@ WHERE l_leave_id = :leave_id
                                 $start_hour = (int) $l_leave_start_date->format('H');
                                 $end_hour   = (int) $l_leave_end_date->format('H');
 
+<<<<<<< Updated upstream
                                 if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
                                     (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
                                     // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
                                     $leave_hours -= 1;
+=======
+                                    if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+                                        (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
+                                        // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
+                                        $leave_hours -= 1;
+                                    }
+
+                                    // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
+                                    if ($leave_hours >= 8) {
+                                        $leave_days += floor($leave_hours / 8);
+                                        $leave_hours = $leave_hours % 8; // Remaining hours after converting to days
+                                    }
+
+                                    // ตรวจสอบการนาที
+                                    if ($leave_minutes >= 30) {
+                                        $leave_minutes = 30; // ถ้านาทีมากกว่าหรือเท่ากับ 30 นับเป็น 5 นาที
+                                    }
+
+                                    // แสดงผลลัพธ์
+                                    if ($row['l_leave_id'] == 7) {
+                                        echo '';
+                                    } else {
+                                        echo '<span class="text-primary">' . $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที</span>';
+                                    }
+
+                                    echo '</td>';
+
+                                    // 12
+                                    if (! empty($row['l_file'])) {
+                                        echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
+                                    } else {
+                                        echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
+                                    }
+
+                                    // 13
+                                    echo '<td>';
+                                    if ($row['l_leave_status'] == 0) {
+                                        echo '<span class="text-success">ปกติ</span>';
+                                    } else {
+                                        echo '<span class="text-danger">ยกเลิก</span>';
+                                    }
+                                    echo '</td>';
+
+                                    // 14
+                                    echo '<td>';
+                                    if ($row['l_late_datetime'] == '') {
+                                        echo '';
+                                    } else {
+                                        echo '<span class="text-success">ยืนยัน</span>';
+                                    }
+                                    echo '</td>';
+
+                                    // 15
+                                    echo '<td>';
+                                    // รอหัวหน้าอนุมัติ
+                                    if ($row['l_approve_status'] == 0) {
+                                        echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                    }
+                                    // รอผจกอนุมัติ
+                                    elseif ($row['l_approve_status'] == 1) {
+                                        echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                    }
+                                    // หัวหน้าอนุมัติ
+                                    elseif ($row['l_approve_status'] == 2) {
+                                        echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                    }
+                                    // หัวหน้าไม่อนุมัติ
+                                    elseif ($row['l_approve_status'] == 3) {
+                                        echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                    }
+                                    //  ผจก อนุมัติ
+                                    elseif ($row['l_approve_status'] == 4) {
+                                        echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                    }
+                                    //  ผจก ไม่อนุมัติ
+                                    elseif ($row['l_approve_status'] == 5) {
+                                        echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                    } elseif ($row['l_approve_status'] == 6) {
+                                        echo '';
+                                    }
+                                    // ไม่มีสถานะ
+                                    else {
+                                            echo 'ไม่มีสถานะ';
+                                        }
+                                        echo '</td>';
+
+                                        // 16
+                                        echo '<td>';
+                                        // รอหัวหน้าอนุมัติ
+                                        if ($row['l_approve_status2'] == 0) {
+                                            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                        }
+                                        // รอผจกอนุมัติ
+                                    elseif ($row['l_approve_status2'] == 1) {
+                                        echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                    }
+                                    // หัวหน้าอนุมัติ
+                                    elseif ($row['l_approve_status2'] == 2) {
+                                        echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                    }
+                                    // หัวหน้าไม่อนุมัติ
+                                    elseif ($row['l_approve_status2'] == 3) {
+                                        echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                    }
+                                    //  ผจก อนุมัติ
+                                    elseif ($row['l_approve_status2'] == 4) {
+                                        echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                    }
+                                    //  ผจก ไม่อนุมัติ
+                                    elseif ($row['l_approve_status2'] == 5) {
+                                        echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                    } elseif ($row['l_approve_status2'] == 6) {
+                                        echo '';
+                                    }
+                                    // ไม่มีสถานะ
+                                    else {
+                                            echo 'ไม่มีสถานะ';
+                                        }
+                                        echo '</td>';
+
+                                        // 17
+                                        echo '<td>';
+                                        // รอหัวหน้าอนุมัติ
+                                        if ($row['l_approve_status3'] == 0) {
+                                            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
+                                        }
+                                        // รอผจกอนุมัติ
+                                    elseif ($row['l_approve_status3'] == 1) {
+                                        echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
+                                    }
+                                    // หัวหน้าอนุมัติ
+                                    elseif ($row['l_approve_status3'] == 2) {
+                                        echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
+                                    }
+                                    // หัวหน้าไม่อนุมัติ
+                                    elseif ($row['l_approve_status3'] == 3) {
+                                        echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
+                                    }
+                                    //  ผจก อนุมัติ
+                                    elseif ($row['l_approve_status3'] == 4) {
+                                        echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
+                                    }
+                                    //  ผจก ไม่อนุมัติ
+                                    elseif ($row['l_approve_status3'] == 5) {
+                                        echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
+                                    }
+                                    // ช่องว่าง
+                                    elseif ($row['l_approve_status3'] == 6) {
+                                        echo '';
+                                    }
+                                    // รอ GM
+                                    elseif ($row['l_approve_status3'] == 7) {
+                                        echo '<div class="text-warning"><b>' . 'รอ GM อนุมัติ' . '</b></div>';
+                                    }
+                                    // GM อนุมัติ
+                                    elseif ($row['l_approve_status3'] == 8) {
+                                        echo '<div class="text-success"><b>' . 'GM อนุมัติ' . '</b></div>';
+                                    }
+                                    // GM ไม่อนุมัติ
+                                    elseif ($row['l_approve_status3'] == 9) {
+                                        echo '<div class="text-danger"><b>' . 'GM ไม่อนุมัติ' . '</b></div>';
+                                    }
+                                    // ไม่มีสถานะ
+                                    else {
+                                            echo 'ไม่พบสถานะ';
+                                        }
+                                        echo '</td>';
+
+                                        // 18
+                                        echo '<td>';
+                                        if ($row['l_hr_status'] == 0) {
+                                            echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
+                                        } elseif ($row['l_hr_status'] == 1) {
+                                        echo '<span class="text-success"><b>ผ่าน</b></span>';
+                                    } else {
+                                        echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
+                                    }
+                                    echo '</td>';
+
+                                                                               // 19
+                                    $leaveDate   = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
+                                    $currentDate = date('Y-m-d');              // วันที่ปัจจุบัน
+
+                                    if ($leaveDate < $currentDate) {
+                                        // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
+                                        echo '<td>';
+                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                        echo '</td>';
+                                    } else {
+                                        // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
+                                        echo '<td>';
+                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                        echo '</td>';
+                                    }
+
+                                    // 20
+                                    $disabled            = $row['l_leave_status'] == 1 ? 'disabled' : '';
+                                    $dateNow             = date('Y-m-d');
+                                    $disabledCancalCheck = (
+                                        $row['l_approve_status'] != 0
+                                        && $row['l_approve_status2'] != 1
+                                        && $row['l_leave_start_date'] < $dateNow
+                                    ) ? 'disabled' : '';
+
+                                    $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
+
+                                    if ($row['l_leave_id'] == 6) {
+                                        echo '<td></td>';
+                                    } else if ($row['l_leave_id'] == 7) {
+                                        echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+                                    } else if ($row['l_leave_id'] != 7) {
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+                                    } else {
+                                        echo '<td></td>';
+                                    }
+
+                                    echo '</tr>';
+                                    $rowNumber--;
+                                    // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
+>>>>>>> Stashed changes
                                 }
 
                                 // ตรวจสอบการหักเวลาเมื่อเกิน 8 ชั่วโมง
@@ -1787,6 +2018,7 @@ WHERE l_leave_id = :leave_id
                 </table>
             </div>
             <?php
+<<<<<<< Updated upstream
             echo '<div class="mt-3">';
             echo '<nav>';
             echo '<ul class="pagination justify-content-start">';
@@ -1806,6 +2038,34 @@ WHERE l_leave_id = :leave_id
             echo '</ul>';
             echo '</nav>';
             echo '</div>';
+=======
+                echo '<div class="pagination">';
+                echo '<ul class="pagination">';
+
+                // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
+                if ($currentPage > 1) {
+                    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
+                }
+
+                // สร้างลิงก์สำหรับแต่ละหน้า
+                for ($i = 1; $i <= $totalPages; $i++) {
+                    if ($i == $currentPage) {
+                        echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+                    } else {
+                        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
+                    }
+                }
+
+                // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
+                if ($currentPage < $totalPages) {
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
+                }
+
+                echo '</ul>';
+                echo '</div>';
+>>>>>>> Stashed changes
 
             ?>
             <div class="modal fade" id="imageModal<?php echo $rowNumber ?>" tabindex="-1"
@@ -1965,12 +2225,12 @@ WHERE l_leave_id = :leave_id
                                         </select>
                                     </div>
                                 </div>
-                                <!-- <div class="mt-3 row">
+                                <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="editTelPhone" class="form-label">เบอร์โทร</label>
                                         <input type="text" class="form-control" id="editTelPhone">
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class=" mt-3 row">
                                     <div class="col-12">
                                         <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
@@ -2413,13 +2673,11 @@ WHERE l_leave_id = :leave_id
                                     }
                                 }
 
-                                // ลากิจ, ลาพักร้อนให้ลาล่วงหน้า 1 วัน
                                 if (leaveType == 1 || leaveType == 5) {
                                     var startDate = $('#startDate').val();
                                     var parts = startDate.split('-');
                                     var formattedDate = parts[2] + '-' + parts[1] + '-' +
-                                        parts[
-                                            0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+                                        parts[0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
 
                                     // สร้าง Date object โดยไม่ต้องตั้งเวลา
                                     var leaveStartDate = new Date(formattedDate +
@@ -2429,11 +2687,18 @@ WHERE l_leave_id = :leave_id
                                     currentDate.setHours(0, 0, 0,
                                         0); // ตั้งเวลาเป็น 00:00:00
 
-                                    console.log("leaveStartDate :" + leaveStartDate);
-                                    console.log("currentDate: " + currentDate);
+                                    var tomorrow = new Date();
+                                    tomorrow.setDate(currentDate.getDate() +
+                                        1); // วันพรุ่งนี้
+                                    tomorrow.setHours(0, 0, 0, 0);
 
-                                    // เช็คว่า startDate เก่ากว่าหรือไม่
-                                    if (leaveStartDate <= currentDate) {
+                                    console.log("leaveStartDate: " + leaveStartDate);
+                                    console.log("currentDate: " + currentDate);
+                                    console.log("tomorrow: " + tomorrow);
+
+                                    // ไม่สามารถลาในวันที่ปัจจุบันได้
+                                    if (leaveStartDate.getTime() === currentDate
+                                        .getTime()) {
                                         Swal.fire({
                                             title: "ไม่สามารถลาได้",
                                             text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
@@ -2441,6 +2706,16 @@ WHERE l_leave_id = :leave_id
                                         });
                                         return false; // หยุดการส่งแบบฟอร์ม
                                     }
+
+                                    // เช็คว่าถ้าลาวันพรุ่งนี้หรือมากกว่าต้องเตือน
+                                    // if (leaveStartDate >= tomorrow) {
+                                    //     Swal.fire({
+                                    //         title: "ไม่สามารถลาได้",
+                                    //         text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                                    //         icon: "error"
+                                    //     });
+                                    //     return false; // หยุดการส่งแบบฟอร์ม
+                                    // }
                                 }
 
                                 var checkStartDate = $('#startDate').val();
@@ -2896,14 +3171,12 @@ WHERE l_leave_id = :leave_id
                 var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
                 var usercode = $(this).data('usercode');
                 var name = "<?php echo $name ?>";
-                var level = "<?php echo $level ?>";
                 var leaveType = $(rowData[0]).text();
                 var depart = $(rowData[1]).text();
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                // var leaveStatus = 'ยกเลิก';
-                var userName = "<?php echo $userName ?>";
+                var leaveStatus = 'ยกเลิก';
                 var workplace = "<?php echo $workplace ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
@@ -2911,6 +3184,8 @@ WHERE l_leave_id = :leave_id
                 var subDepart4 = "<?php echo $subDepart4 ?>";
                 var subDepart5 = "<?php echo $subDepart5 ?>";
 
+
+                // alert(endDate)
                 Swal.fire({
                     title: "ต้องการยกเลิกรายการ ?",
                     icon: "question",
@@ -2935,15 +3210,14 @@ WHERE l_leave_id = :leave_id
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                // leaveStatus: leaveStatus,
+                                leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5,
-                                level: level,
-                                userName: userName
+                                subDepart5: subDepart5
+
                             },
                             success: function(response) {
                                 Swal.fire({
@@ -3405,27 +3679,24 @@ WHERE l_leave_id = :leave_id
                 e.preventDefault();
 
                 var formData = new FormData();
-                var editFile = $('#editFile')[0].files[0];
-                var currentFile = $('#currentFile').val();
+                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
+                var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
 
+                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
                 if (editFile) {
-                    formData.append('file', editFile);
+                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
                 } else if (currentFile) {
                     formData.append('currentFile',
-                        currentFile);
+                        currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
                 }
 
+                // เพิ่มค่าฟอร์มอื่นๆ
                 formData.append('userCode', '<?php echo $userCode; ?>');
                 formData.append('userName', '<?php echo $userName ?>');
                 formData.append('name', '<?php echo $name ?>');
                 formData.append('workplace', '<?php echo $workplace; ?>');
                 formData.append('depart', '<?php echo $depart; ?>');
                 formData.append('subDepart', '<?php echo $subDepart; ?>');
-                formData.append('subDepart2', '<?php echo $subDepart2; ?>');
-                formData.append('subDepart3', '<?php echo $subDepart3; ?>');
-                formData.append('subDepart4', '<?php echo $subDepart4; ?>');
-                formData.append('subDepart5', '<?php echo $subDepart5; ?>');
-                formData.append('level', '<?php echo $level; ?>');
                 formData.append('createDatetime', $(this).data('createdatetime'));
                 formData.append('editLeaveType', $('.editLeaveType').val());
                 formData.append('editLeaveReason', $('#editLeaveReason').val());
@@ -3433,43 +3704,54 @@ WHERE l_leave_id = :leave_id
                 formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
                 formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
+                formData.append('editTelPhone', $('#editTelPhone').val());
 
+                // ส่งข้อมูลผ่าน AJAX
                 $.ajax({
                     url: 'g_upd_leave.php',
                     type: 'POST',
                     data: formData,
-                    contentType: false,
-                    processData: false,
+                    contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
+                    processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
                     success: function(response) {
-                        if (response.status === 'success') {
+                        try {
+                            var res = JSON.parse(response);
+                            if (res.status === 'success') {
+                                Swal.fire({
+                                    title: 'สำเร็จ!',
+                                    text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
+                                    icon: 'success',
+                                    confirmButtonText: 'ตกลง',
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: res.message ||
+                                        'ไม่สามารถแก้ไขข้อมูลได้',
+                                    icon: 'error',
+                                    confirmButtonText: 'ตกลง',
+                                });
+                            }
+                        } catch (error) {
                             Swal.fire({
-                                title: 'สำเร็จ!',
-                                text: response.message,
-                                icon: 'success',
-                                confirmButtonText: 'ตกลง',
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'เกิดข้อผิดพลาด',
-                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
+                                title: 'ข้อผิดพลาดในการประมวลผล',
+                                text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
                                 icon: 'error',
                                 confirmButtonText: 'ตกลง',
                             });
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function() {
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',
                             text: 'ไม่สามารถแก้ไขข้อมูลได้',
                             icon: 'error',
                             confirmButtonText: 'ตกลง',
                         });
-                        console.log('Error:', error); // Log the actual error instead
                     },
                 });
-
             });
         });
 

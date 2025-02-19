@@ -2396,8 +2396,142 @@ WHERE l_leave_id = :leave_id
                                 fd.append('formattedDate', formattedDate);
                                 // alert(formattedDate);
 
+<<<<<<< Updated upstream
                                 // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
                                 if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
+=======
+                                // ตรวจสอบว่าค่าวันที่มีค่าหรือไม่
+                                if (!startDate || !endDate || !startTime || !endTime) {
+                                    Swal.fire({
+                                        title: "ข้อผิดพลาด",
+                                        text: "กรุณาเลือกวันที่เริ่มต้น, วันที่สิ้นสุด, เวลาเริ่มต้น และเวลาเสร็จสิ้น",
+                                        icon: "error"
+                                    });
+                                    return false; // หยุดการทำงาน
+                                }
+
+                                // แปลงวันที่เป็นรูปแบบ Date พร้อมเวลา
+                                var start = new Date(startDate.substring(0, 4), startDate
+                                    .substring(4, 6) - 1,
+                                    startDate
+                                    .substring(6, 8), startTime.split(':')[0], startTime
+                                    .split(':')[1]);
+                                var end = new Date(endDate.substring(0, 4), endDate
+                                    .substring(4, 6) - 1, endDate
+                                    .substring(6, 8), endTime.split(':')[0], endTime
+                                    .split(':')[1]);
+
+                                // ตรวจสอบว่าการแปลงวันที่สำเร็จหรือไม่
+                                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                                    Swal.fire({
+                                        title: "ข้อผิดพลาด",
+                                        text: "วันที่หรือเวลาไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
+                                        icon: "error"
+                                    });
+                                    return false; // หยุดการทำงาน
+                                }
+
+                                // คำนวณความแตกต่างของวันและเวลา
+                                var timeDiff = end - start; // ความแตกต่างเป็นมิลลิวินาที
+                                var fullDays = Math.floor(timeDiff / (1000 * 3600 *
+                                    8)); // จำนวนวันเต็ม
+                                var remainingTimeInMs = timeDiff % (1000 * 3600 *
+                                    8); // มิลลิวินาทีที่เหลือจากวันเต็ม
+                                var hoursDiff = Math.floor(remainingTimeInMs / (1000 *
+                                    3600)); // จำนวนชั่วโมงที่เหลือ
+                                var minutesDiff = Math.floor((remainingTimeInMs % (1000 *
+                                    3600)) / (1000 *
+                                    60)); // คำนวณนาทีที่เหลือ
+
+                                // คำนวณวันที่รวมทั้งหมดเป็นทศนิยม (เช่น 2.5 สำหรับ 2 วันกับ 4 ชั่วโมง)
+                                var totalDaysWithHoursAndMinutes = fullDays + (hoursDiff /
+                                    8) + (minutesDiff /
+                                    480); // ใช้ 8 ชั่วโมงและ 480 นาทีต่อวันเป็นฐาน
+
+                                // console.log(totalDaysWithHoursAndMinutes); // แสดงผลลัพธ์ใน console
+
+                                // เงื่อนไขสำหรับ leaveType = 3
+                                if (leaveType == 3) {
+                                    if (totalDaysWithHoursAndMinutes >
+                                        219145.125) { // หากเวลาลามากกว่า 3 วัน
+                                        if (files.length === 0) {
+                                            Swal.fire({
+                                                title: "ไม่สามารถลาได้",
+                                                text: "กรุณาแนบไฟล์เมื่อลาเกิน 3 วัน",
+                                                icon: "error"
+                                            });
+                                            return false;
+                                        }
+                                    }
+                                }
+
+                                if (leaveType == 1 || leaveType == 5) {
+                                    var startDate = $('#startDate').val();
+                                    var parts = startDate.split('-');
+                                    var formattedDate = parts[2] + '-' + parts[1] + '-' +
+                                        parts[0]; // เปลี่ยนเป็น 'YYYY-MM-DD'
+
+                                    // สร้าง Date object โดยไม่ต้องตั้งเวลา
+                                    var leaveStartDate = new Date(formattedDate +
+                                        'T00:00:00'); // ตั้งเวลาเป็น 00:00:00
+
+                                    var currentDate = new Date();
+                                    currentDate.setHours(0, 0, 0,
+                                        0); // ตั้งเวลาเป็น 00:00:00
+
+                                    var tomorrow = new Date();
+                                    tomorrow.setDate(currentDate.getDate() +
+                                        1); // วันพรุ่งนี้
+                                    tomorrow.setHours(0, 0, 0, 0);
+
+                                    console.log("leaveStartDate: " + leaveStartDate);
+                                    console.log("currentDate: " + currentDate);
+                                    console.log("tomorrow: " + tomorrow);
+
+                                    // ไม่สามารถลาในวันที่ปัจจุบันได้
+                                    if (leaveStartDate.getTime() === currentDate
+                                        .getTime()) {
+                                        Swal.fire({
+                                            title: "ไม่สามารถลาได้",
+                                            text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                                            icon: "error"
+                                        });
+                                        return false; // หยุดการส่งแบบฟอร์ม
+                                    }
+
+                                    // เช็คว่าถ้าลาวันพรุ่งนี้หรือมากกว่าต้องเตือน
+                                    // if (leaveStartDate >= tomorrow) {
+                                    //     Swal.fire({
+                                    //         title: "ไม่สามารถลาได้",
+                                    //         text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
+                                    //         icon: "error"
+                                    //     });
+                                    //     return false; // หยุดการส่งแบบฟอร์ม
+                                    // }
+                                }
+
+                                var checkStartDate = $('#startDate').val();
+                                var checkEndDate = $('#endDate').val();
+
+                                // แปลงวันที่จาก string เป็น Date object
+                                var startDateParts = checkStartDate.split("-");
+                                var endDateParts = checkEndDate.split("-");
+
+                                // แปลงเป็น Date object
+                                var startDate = new Date(startDateParts[2], startDateParts[
+                                    1] - 1, startDateParts[
+                                    0]); // ปี, เดือน (0-based), วัน
+                                var endDate = new Date(endDateParts[2], endDateParts[1] - 1,
+                                    endDateParts[
+                                        0]); // ปี, เดือน (0-based), วัน
+
+                                // แสดงข้อมูลวันที่ที่ถูกแปลงแล้ว (ตรวจสอบได้)
+                                // alert("Start Date:" + startDate);
+                                // alert("End Date:" + endDate);
+
+                                // ตรวจสอบวันที่
+                                if (endDate < startDate) {
+>>>>>>> Stashed changes
                                     Swal.fire({
                                         title: "ไม่สามารถลาได้",
                                         text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
@@ -2986,6 +3120,7 @@ WHERE l_leave_id = :leave_id
                     });
                 });
 
+<<<<<<< Updated upstream
                 $('.cancel-leave-btn').click(function() {
                     var rowData = $(this).closest('tr').children('td');
                     var leaveId = $(this).data('leaveid');
@@ -3537,6 +3672,557 @@ WHERE l_leave_id = :leave_id
                                 Swal.fire({
                                     title: 'สำเร็จ!',
                                     text: response.message,
+=======
+            $('.cancel-leave-btn').click(function() {
+                var rowData = $(this).closest('tr').children('td');
+                var leaveId = $(this).data('leaveid');
+                var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
+                var usercode = $(this).data('usercode');
+                var name = "<?php echo $name ?>";
+                var leaveType = $(rowData[0]).text();
+                var depart = $(rowData[1]).text();
+                var leaveReason = $(rowData[2]).text();
+                var startDate = $(rowData[9]).text();
+                var endDate = $(rowData[10]).text();
+                var leaveStatus = 'ยกเลิก';
+                var workplace = "<?php echo $workplace ?>";
+                var subDepart = "<?php echo $subDepart ?>";
+                var subDepart2 = "<?php echo $subDepart2 ?>";
+                var subDepart3 = "<?php echo $subDepart3 ?>";
+                var subDepart4 = "<?php echo $subDepart4 ?>";
+                var subDepart5 = "<?php echo $subDepart5 ?>";
+
+                // alert(endDate)
+                Swal.fire({
+                    title: "ต้องการยกเลิกรายการ ?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'ใช่',
+                    cancelButtonText: 'ไม่'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // ยืนยันก่อนส่ง AJAX request
+                        $.ajax({
+                            url: 'a_u_ajax_delete_leave.php',
+                            method: 'POST',
+                            data: {
+                                leaveId: leaveId,
+                                createDatetime: createDatetime,
+                                usercode: usercode,
+                                name: name,
+                                leaveType: leaveType,
+                                leaveReason: leaveReason,
+                                startDate: startDate,
+                                endDate: endDate,
+                                depart: depart,
+                                leaveStatus: leaveStatus,
+                                workplace: workplace,
+                                subDepart: subDepart,
+                                subDepart2: subDepart2,
+                                subDepart3: subDepart3,
+                                subDepart4: subDepart4,
+                                subDepart5: subDepart5
+
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'ยกเลิกใบลาสำเร็จ',
+                                    icon: 'success'
+                                }).then(() => {
+                                    location
+                                        .reload(); // โหลดหน้าใหม่หลังจากยกเลิกใบลา
+                                });
+                            },
+                            error: function() {
+                                alert('มีบางอย่างผิดพลาด');
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('.confirm-late-btn').click(function() {
+                var rowData = $(this).closest('tr').children('td');
+                var createDatetime = $(this).data('createdatetime');
+                var userCode = $(this).data('usercode');
+                var userName = "<?php echo $userName ?>";
+                var comfirmName = "<?php echo $name ?>";
+                var workplace = "<?php echo $workplace ?>";
+                // var leaveType = $(rowData[0]).text();
+                var depart = $(rowData[1]).text();
+                var lateDate = $(rowData[3]).text();
+                var lateStart = $(rowData[4]).text();
+                var lateEnd = $(rowData[5]).text();
+                var leaveStatus = $(rowData[13]).text();
+
+                // alert(comfirmName)
+                Swal.fire({
+                    title: "ยืนยันรายการมาสาย ?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#DC3545',
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'a_u_upd_late_time.php',
+                            method: 'POST',
+                            data: {
+                                userName: userName,
+                                createDateTime: createDatetime,
+                                depart: depart,
+                                lateDate: lateDate,
+                                lateStart: lateStart,
+                                lateEnd: lateEnd,
+                                userCode: userCode,
+                                comfirmName: comfirmName,
+                                leaveStatus: leaveStatus,
+                                workplace: workplace,
+                                action: 'comfirm'
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'ยืนยันสำเร็จ',
+                                    icon: 'success'
+                                }).then(() => {
+                                    location
+                                        .reload();
+                                });
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'มีบางอย่างผิดพลาด',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('.edit-btn').click(function() {
+                var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime
+                var userCode = $(this).data('usercode');
+
+                // ตั้งค่า createDatetime ให้กับฟอร์ม
+                $('#editLeaveForm').data('createdatetime', createDatetime);
+
+                $.ajax({
+                    url: 'a_u_ajax_get_leave.php', // ไฟล์ PHP ที่ดึงข้อมูล
+                    type: 'POST',
+                    data: {
+                        createDatetime: createDatetime,
+                        userCode: userCode
+                    },
+                    dataType: 'json', // แจ้งว่าเราคาดหวังผลลัพธ์เป็น JSON
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error); // แสดงข้อความข้อผิดพลาด
+                        } else {
+
+                            // ใส่ข้อมูลในฟอร์ม Modal
+                            $('.editLeaveType').val(response.l_leave_id);
+                            $('#editLeaveReason').val(response.l_leave_reason);
+                            $('#editLeaveStartDate').val(response.l_leave_start_date);
+                            $('#editLeaveEndDate').val(response.l_leave_end_date);
+                            $('#editTelPhone').val(response.l_phone);
+
+                            var existingFile = response.l_file;
+
+                            // ถ้ามีไฟล์เดิม ให้แสดงชื่อไฟล์และพรีวิว
+                            if (existingFile && existingFile.trim() !== "") {
+                                // แสดงชื่อไฟล์
+                                $('#currentFile').text('ไฟล์เดิม: ' + existingFile);
+
+                                // สร้าง URL สำหรับไฟล์พรีวิว
+                                var fileUrl = '../upload/' +
+                                    existingFile; // เปลี่ยนเป็นเส้นทางของไฟล์ที่ถูกต้องในเซิร์ฟเวอร์
+
+                                // แสดงรูปพรีวิว
+                                var previewImage = $(
+                                    '#imagePreview'); // สมมติว่ามี <img id="imagePreview">
+                                previewImage.attr('src',
+                                    fileUrl); // ตั้งค่า src ของรูปให้เป็น URL ของไฟล์
+                                previewImage.show(); // แสดงรูปพรีวิว
+                            } else {
+                                // ถ้าไม่มีไฟล์ ให้เคลียร์ชื่อไฟล์และซ่อนรูปพรีวิว
+                                $('#currentFile').text('');
+                                $('#imagePreview').hide(); // ซ่อนรูปพรีวิวเมื่อไม่มีไฟล์
+                            }
+
+                            // เวลาที่เริ่มต้น
+                            // 08:10
+                            if (response.l_leave_start_time === "08:30:00" &&
+                                response
+                                .l_time_remark === "08:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 08:15
+                            else if (response.l_leave_start_time === "08:30:00" &&
+                                response
+                                .l_time_remark === "08:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 08:45
+                            else if (response.l_leave_start_time === "09:00:00" &&
+                                response
+                                .l_time_remark === "08:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 09:10
+                            else if (response.l_leave_start_time === "09:30:00" &&
+                                response
+                                .l_time_remark === "09:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 09:15
+                            else if (response.l_leave_start_time === "09:30:00" &&
+                                response
+                                .l_time_remark === "09:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 09:45
+                            else if (response.l_leave_start_time === "10:00:00" &&
+                                response
+                                .l_time_remark === "09:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 10:10
+                            else if (response.l_leave_start_time === "10:30:00" &&
+                                response
+                                .l_time_remark === "10:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 10:15
+                            else if (response.l_leave_start_time === "10:30:00" &&
+                                response
+                                .l_time_remark === "10:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 10:45
+                            else if (response.l_leave_start_time === "11:00:00" &&
+                                response
+                                .l_time_remark === "10:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 11:45
+                            else if (response.l_leave_start_time === "12:00:00" &&
+                                response
+                                .l_time_remark === "11:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 12:45
+                            else if (response.l_leave_start_time === "13:00:00") {
+                                $('#editLeaveStartTime2').val(
+                                    '12:45:00'); // กำหนดค่าใหม่
+                            }
+                            // 13:10
+                            else if (response.l_leave_start_time === "13:30:00" &&
+                                response
+                                .l_time_remark === "13:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 13:15
+                            else if (response.l_leave_start_time === "13:30:00" &&
+                                response
+                                .l_time_remark === "13:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 13:40
+                            else if (response.l_leave_start_time === "14:00:00" &&
+                                response
+                                .l_time_remark === "13:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 13:45
+                            else if (response.l_leave_start_time === "14:00:00" &&
+                                response
+                                .l_time_remark === "13:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 14:10
+                            else if (response.l_leave_start_time === "14:30:00" &&
+                                response
+                                .l_time_remark === "14:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 14:15
+                            else if (response.l_leave_start_time === "14:30:00" &&
+                                response
+                                .l_time_remark === "14:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 14:40
+                            else if (response.l_leave_start_time === "15:00:00" &&
+                                response
+                                .l_time_remark === "14:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 14:45
+                            else if (response.l_leave_start_time === "15:00:00" &&
+                                response
+                                .l_time_remark === "14:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 15:10
+                            else if (response.l_leave_start_time === "15:30:00" &&
+                                response
+                                .l_time_remark === "15:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 15:15
+                            else if (response.l_leave_start_time === "15:30:00" &&
+                                response
+                                .l_time_remark === "15:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 15:40
+                            else if (response.l_leave_start_time === "16:00:00" &&
+                                response
+                                .l_time_remark === "15:40:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 15:45
+                            else if (response.l_leave_start_time === "16:00:00" &&
+                                response
+                                .l_time_remark === "15:45:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 16:10
+                            else if (response.l_leave_start_time === "16:30:00" &&
+                                response
+                                .l_time_remark === "16:10:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 16:15
+                            else if (response.l_leave_start_time === "16:30:00" &&
+                                response
+                                .l_time_remark === "16:15:00") {
+                                $('#editLeaveStartTime2').val(response.l_time_remark);
+                            }
+                            // 16:40
+                            else if (response.l_leave_start_time === "17:00:00") {
+                                $('#editLeaveStartTime2').val('16:40:00');
+                            } else {
+                                $('#editLeaveStartTime2').val(response
+                                    .l_leave_start_time);
+                            }
+
+                            // เวลาที่สิ้นสุด
+                            // 08:10
+                            if (response.l_leave_end_time === "08:30:00" && response
+                                .l_time_remark2 === "08:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 08:15
+                            else if (response.l_leave_end_time === "08:30:00" &&
+                                response
+                                .l_time_remark2 === "08:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 08:45
+                            else if (response.l_leave_end_time === "09:00:00" &&
+                                response
+                                .l_time_remark2 === "08:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 09:10
+                            else if (response.l_leave_end_time === "09:30:00" &&
+                                response
+                                .l_time_remark2 === "09:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 09:15
+                            else if (response.l_leave_end_time === "09:30:00" &&
+                                response
+                                .l_time_remark2 === "09:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 09:45
+                            else if (response.l_leave_end_time === "10:00:00" &&
+                                response
+                                .l_time_remark2 === "09:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 10:10
+                            else if (response.l_leave_end_time === "10:30:00" &&
+                                response
+                                .l_time_remark2 === "10:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 10:15
+                            else if (response.l_leave_end_time === "10:30:00" &&
+                                response
+                                .l_time_remark2 === "10:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 10:45
+                            else if (response.l_leave_end_time === "11:00:00" &&
+                                response
+                                .l_time_remark2 === "10:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 11:45
+                            else if (response.l_leave_end_time === "12:00:00" &&
+                                response
+                                .l_time_remark2 === "11:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 12:45
+                            else if (response.l_leave_end_time === "13:00:00") {
+                                $('#editLeaveEndTime2').val(
+                                    '12:45:00'); // กำหนดค่าใหม่
+                            }
+                            // 13:10
+                            else if (response.l_leave_end_time === "13:30:00" &&
+                                response
+                                .l_time_remark2 === "13:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 13:15
+                            else if (response.l_leave_end_time === "13:30:00" &&
+                                response
+                                .l_time_remark2 === "13:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 13:40
+                            else if (response.l_leave_end_time === "14:00:00" &&
+                                response
+                                .l_time_remark2 === "13:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 13:45
+                            else if (response.l_leave_end_time === "14:00:00" &&
+                                response
+                                .l_time_remark2 === "13:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 14:10
+                            else if (response.l_leave_end_time === "14:30:00" &&
+                                response
+                                .l_time_remark2 === "14:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 14:15
+                            else if (response.l_leave_end_time === "14:30:00" &&
+                                response
+                                .l_time_remark2 === "14:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 14:40
+                            else if (response.l_leave_end_time === "15:00:00" &&
+                                response
+                                .l_time_remark2 === "14:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 14:45
+                            else if (response.l_leave_end_time === "15:00:00" &&
+                                response
+                                .l_time_remark2 === "14:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 15:10
+                            else if (response.l_leave_end_time === "15:30:00" &&
+                                response
+                                .l_time_remark2 === "15:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 15:15
+                            else if (response.l_leave_end_time === "15:30:00" &&
+                                response
+                                .l_time_remark2 === "15:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 15:40
+                            else if (response.l_leave_end_time === "16:00:00" &&
+                                response
+                                .l_time_remark2 === "15:40:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 15:45
+                            else if (response.l_leave_end_time === "16:00:00" &&
+                                response
+                                .l_time_remark2 === "15:45:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 16:10
+                            else if (response.l_leave_end_time === "16:30:00" &&
+                                response
+                                .l_time_remark2 === "16:10:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 16:15
+                            else if (response.l_leave_end_time === "16:30:00" &&
+                                response
+                                .l_time_remark2 === "16:15:00") {
+                                $('#editLeaveEndTime2').val(response.l_time_remark2);
+                            }
+                            // 16:40
+                            else if (response.l_leave_end_time === "17:00:00") {
+                                $('#editLeaveEndTime2').val('16:40:00');
+                            } else {
+                                $('#editLeaveEndTime2').val(response
+                                    .l_leave_end_time);
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('ไม่สามารถดึงข้อมูลการลาได้');
+                        console.log(xhr
+                            .responseText); // ดูข้อความข้อผิดพลาดจากเซิร์ฟเวอร์
+                    }
+                });
+            });
+
+            $('#editLeaveForm').on('submit', function(e) {
+                e.preventDefault();
+
+                var formData = new FormData();
+                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
+                var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+
+                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
+                if (editFile) {
+                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
+                } else if (currentFile) {
+                    formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                }
+
+                // เพิ่มค่าฟอร์มอื่นๆ
+                formData.append('userCode', '<?php echo $userCode; ?>');
+                formData.append('userName', '<?php echo $userName ?>');
+                formData.append('name', '<?php echo $name ?>');
+                formData.append('workplace', '<?php echo $workplace; ?>');
+                formData.append('depart', '<?php echo $depart; ?>');
+                formData.append('subDepart', '<?php echo $subDepart; ?>');
+                formData.append('createDatetime', $(this).data('createdatetime'));
+                formData.append('editLeaveType', $('.editLeaveType').val());
+                formData.append('editLeaveReason', $('#editLeaveReason').val());
+                formData.append('editLeaveStartDate', $('#editLeaveStartDate').val());
+                formData.append('editLeaveStartTime', $('#editLeaveStartTime').val());
+                formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
+                formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
+                formData.append('editTelPhone', $('#editTelPhone').val());
+
+                // ส่งข้อมูลผ่าน AJAX
+                $.ajax({
+                    url: 'a_u_upd_leave.php',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
+                    processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
+                    success: function(response) {
+                        try {
+                            var res = JSON.parse(response);
+                            if (res.status === 'success') {
+                                Swal.fire({
+                                    title: 'สำเร็จ!',
+                                    text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
+>>>>>>> Stashed changes
                                     icon: 'success',
                                     confirmButtonText: 'ตกลง',
                                 }).then(() => {
@@ -3545,11 +4231,16 @@ WHERE l_leave_id = :leave_id
                             } else {
                                 Swal.fire({
                                     title: 'เกิดข้อผิดพลาด',
+<<<<<<< Updated upstream
                                     text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
+=======
+                                    text: res.message || 'ไม่สามารถแก้ไขข้อมูลได้',
+>>>>>>> Stashed changes
                                     icon: 'error',
                                     confirmButtonText: 'ตกลง',
                                 });
                             }
+<<<<<<< Updated upstream
                         },
                         error: function(xhr, status, error) {
                             Swal.fire({
@@ -3561,9 +4252,29 @@ WHERE l_leave_id = :leave_id
                             console.log('Error:', error); // Log the actual error instead
                         },
                     });
+=======
+                        } catch (error) {
+                            Swal.fire({
+                                title: 'ข้อผิดพลาดในการประมวลผล',
+                                text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
+                                icon: 'error',
+                                confirmButtonText: 'ตกลง',
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาด',
+                            text: 'ไม่สามารถแก้ไขข้อมูลได้',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
+                        });
+                    },
+>>>>>>> Stashed changes
                 });
             });
 
+<<<<<<< Updated upstream
             // ฟังก์ชันสำหรับจัดรูปแบบวันที่
             function formatDate(date) {
                 const parts = date.split('-');
@@ -3588,6 +4299,120 @@ WHERE l_leave_id = :leave_id
                     endDate = document.getElementById('endDate').value;
                     endTime = document.getElementById('endTime').value;
                     targetElement = document.getElementById('leaveDuration');
+=======
+        // ฟังก์ชันสำหรับจัดรูปแบบวันที่
+        function formatDate(date) {
+            const parts = date.split('-');
+            return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงเป็น yyyy-mm-dd
+        }
+
+        function calculateLeaveDuration() {
+            // ตรวจสอบว่ากำลังใช้ฟอร์มไหน (ปกติ หรือ ฉุกเฉิน)
+            const isUrgent = document.getElementById('urgentLeaveModal').classList.contains('show');
+
+            // เลือกข้อมูลจากฟอร์มที่กำลังใช้งาน
+            let startDate, startTime, endDate, endTime, targetElement;
+            if (isUrgent) {
+                startDate = document.getElementById('urgentStartDate').value;
+                startTime = document.getElementById('urgentStartTime').value;
+                endDate = document.getElementById('urgentEndDate').value;
+                endTime = document.getElementById('urgentEndTime').value;
+                targetElement = document.getElementById('urgentLeaveDuration');
+            } else {
+                startDate = document.getElementById('startDate').value;
+                startTime = document.getElementById('startTime').value;
+                endDate = document.getElementById('endDate').value;
+                endTime = document.getElementById('endTime').value;
+                targetElement = document.getElementById('leaveDuration');
+            }
+
+            // ตรวจสอบว่ามีการกรอกข้อมูลครบหรือไม่
+            if (!startDate || !startTime || !endDate || !endTime) {
+                targetElement.textContent = "1 วัน 0 ชั่วโมง 0 นาที"; // กำหนดค่าเริ่มต้นเป็น 1 วัน
+                return;
+            }
+
+            // แปลงวันที่และเวลาเป็น Date object
+            const formattedStartDate = formatDate(startDate);
+            const formattedEndDate = formatDate(endDate);
+            let startDateTime = new Date(`${formattedStartDate}T${startTime}:00`);
+            let endDateTime = new Date(`${formattedEndDate}T${endTime}:00`);
+
+            const startMinutes = startDateTime.getMinutes();
+            if (startMinutes > 0 && startMinutes <= 15) {
+                startDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (startMinutes > 15 && startMinutes < 30) {
+                startDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (startMinutes > 30 && startMinutes <= 45) {
+                startDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                startDateTime.setHours(startDateTime.getHours() + 1);
+            } else if (startMinutes > 45) {
+                startDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                startDateTime.setHours(startDateTime.getHours() + 1);
+            }
+
+            const endMinutes = endDateTime.getMinutes();
+            if (endMinutes > 0 && endMinutes <= 15) {
+                endDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (endMinutes > 15 && endMinutes < 30) {
+                endDateTime.setMinutes(30); // ปัดเป็น 30 นาที
+            } else if (endMinutes > 30 && endMinutes <= 45) {
+                endDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                endDateTime.setHours(endDateTime.getHours() + 1);
+            } else if (endMinutes > 45) {
+                endDateTime.setMinutes(0); // ปัดเป็นชั่วโมงถัดไป
+                endDateTime.setHours(endDateTime.getHours() + 1);
+            }
+
+            // ดึงวันหยุดจากฐานข้อมูล
+            let holidays = [];
+            $.ajax({
+                url: 'a_u_ajax_get_holiday.php',
+                async: false,
+                success: function(response) {
+                    holidays = JSON.parse(response).holidays;
+                }
+            });
+
+            // ฟังก์ชันเช็คว่าเป็นวันหยุดหรือไม่
+            function isHoliday(date) {
+                let formattedDate = formatDateToHoliday(date);
+                return holidays.includes(formattedDate);
+            }
+
+            // ฟังก์ชันแปลงวันที่ให้ตรงกับรูปแบบวันหยุด
+            function formatDateToHoliday(date) {
+                // Ensure date is a string
+                if (typeof date !== 'string') {
+                    // Convert the Date object to a string if necessary
+                    date = date.toISOString().split('T')[0]; // Formats as "YYYY-MM-DD"
+                }
+
+                let [year, month, day] = date.split("-"); // Split the date string
+                return `${day}-${month}-${year}`; // Return in the "DD-MM-YYYY" format
+            }
+
+
+            // ตรวจสอบความถูกต้องของวันที่และเวลา
+            if (endDateTime < startDateTime) {
+                targetElement.textContent = "";
+                return;
+            }
+
+            // การคำนวณเวลาทำงาน
+            const workStart = 8; // 8:00 AM
+            const workEnd = 17; // 5:00 PM
+            const lunchStart = 12; // 12:00 PM
+            const lunchEnd = 13; // 1:00 PM
+
+            let totalMilliseconds = 0;
+
+            // วนลูปคำนวณระยะเวลาในแต่ละวัน
+            while (startDateTime < endDateTime) {
+                // ปรับเวลาเริ่มต้นให้อยู่ในช่วงเวลาทำงาน
+                if (startDateTime.getHours() < workStart) {
+                    startDateTime.setHours(workStart, 0, 0, 0);
+>>>>>>> Stashed changes
                 }
 
                 // ตรวจสอบว่ามีการกรอกข้อมูลครบหรือไม่
@@ -3741,16 +4566,58 @@ WHERE l_leave_id = :leave_id
                     leaveForm.addEventListener('change', calculateLeaveDuration);
                 }
 
+<<<<<<< Updated upstream
                 if (urgentLeaveForm) {
                     urgentLeaveForm.addEventListener('change', calculateLeaveDuration);
                 }
+=======
+                // หักวันหยุด
+                if (isHoliday(startDateTime)) {
+                    dailyDuration = 0; // ถ้าเป็นวันหยุด ไม่ต้องนับวันนั้น
+                }
+
+                totalMilliseconds += dailyDuration;
+>>>>>>> Stashed changes
 
                 // ตรวจสอบสถานะการเปิดของโมดัล
                 $('#urgentLeaveModal').on('shown.bs.modal', function() {
                     calculateLeaveDuration();
                 });
 
+<<<<<<< Updated upstream
                 // คำนวณครั้งแรกเมื่อโหลดหน้า
+=======
+            // แปลงมิลลิวินาทีเป็นวัน ชั่วโมง นาที
+            const millisecondsPerDay = 8 * 60 * 60 * 1000;
+            const leaveDays = Math.floor(totalMilliseconds / millisecondsPerDay);
+            totalMilliseconds %= millisecondsPerDay;
+
+            const millisecondsPerHour = 60 * 60 * 1000;
+            const leaveHours = Math.floor(totalMilliseconds / millisecondsPerHour);
+            totalMilliseconds %= millisecondsPerHour;
+
+            const millisecondsPerMinute = 60 * 1000;
+            let leaveMinutes = Math.floor(totalMilliseconds / millisecondsPerMinute);
+
+            // แสดงผลลัพธ์
+            targetElement.textContent = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const leaveForm = document.getElementById('leaveForm');
+            const urgentLeaveForm = document.getElementById('urgentLeaveForm');
+
+            if (leaveForm) {
+                leaveForm.addEventListener('change', calculateLeaveDuration);
+            }
+
+            if (urgentLeaveForm) {
+                urgentLeaveForm.addEventListener('change', calculateLeaveDuration);
+            }
+
+            // ตรวจสอบสถานะการเปิดของโมดัล
+            $('#urgentLeaveModal').on('shown.bs.modal', function() {
+>>>>>>> Stashed changes
                 calculateLeaveDuration();
             });
 
