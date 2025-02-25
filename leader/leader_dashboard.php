@@ -1046,52 +1046,84 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                                 $specialUsers[] = 'Anchana';
                                             }
 
-                                            // SQL query
-                                            $sql = "SELECT *
-                                            FROM employees
-                                            WHERE (
-                                                e_sub_department = :subDepart
-                                                OR e_sub_department2 = :subDepart2
-                                                OR e_sub_department3 = :subDepart3
-                                                OR e_sub_department4 = :subDepart4
-                                                OR e_sub_department5 = :subDepart5
-                                                OR e_username IN (:specialUser1, :specialUser2)
-                                            )
-                                            AND e_level IN ('manager', 'assisManager', 'GM')
-                                            AND e_workplace = :workplace
-                                            ORDER BY e_username ASC";
+                                            // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
+                                            $specialUserRecords = [];
+                                            foreach ($specialUsers as $userName) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :username AND e_workplace = :workplace";
+                                                $stmt       = $conn->prepare($sqlSpecial);
+                                                $stmt->bindParam(':username', $userName);
+                                                $stmt->bindParam(':workplace', $workplace);
+                                                $stmt->execute();
+                                                $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                                            $stmt = $conn->prepare($sql);
-                                            $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
-                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
-
-                                            // ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
-                                            $specialUser1 = $specialUsers[0] ?? null;
-                                            $specialUser2 = $specialUsers[1] ?? null;
-                                            $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
-                                            $stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
-
-                                            $stmt->execute();
-                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                            // แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
-                                            $specialOptions  = [];
-                                            $filteredResults = [];
-                                            foreach ($results as $row) {
-                                                if (in_array($row['e_username'], $specialUsers)) {
-                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
-                                                } else {
-                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
+                                                if ($specialUser) {
+                                                    $specialUserRecords[] = $specialUser;
                                                 }
                                             }
-                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
-                                            $filteredResults = array_merge($filteredResults, $specialOptions);
 
-                                            // ตั้งค่า default approver
+                                            // ดึงข้อมูลหัวหน้างานและผู้จัดการตามเงื่อนไขเดิม
+                                            $sql = "SELECT *
+    FROM employees
+    WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
+    AND e_level <> :level
+    AND (
+        (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+        OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+        OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+        OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+        OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+        OR (
+            e_level = 'GM'
+            AND :depart <> 'RD'
+            AND (
+                e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR (
+                    e_sub_department IS NULL
+                    AND e_sub_department2 IS NULL
+                    AND e_sub_department3 IS NULL
+                    AND e_sub_department4 IS NULL
+                    AND e_sub_department5 IS NULL
+                )
+            )
+        )
+    )
+    AND e_workplace = :workplace";
+
+                                            $stmt = $conn->prepare($sql);
+                                            $stmt->bindParam(':subDepart', $subDepart);
+                                            $stmt->bindParam(':subDepart2', $subDepart2);
+                                            $stmt->bindParam(':subDepart3', $subDepart3);
+                                            $stmt->bindParam(':subDepart4', $subDepart4);
+                                            $stmt->bindParam(':subDepart5', $subDepart5);
+                                            $stmt->bindParam(':depart', $depart);
+                                            $stmt->bindParam(':workplace', $workplace);
+                                            $stmt->bindParam(':level', $level);
+                                            // ลบ $stmt->bindParam(':userCode', $userCode); ออกเพราะไม่มีในคำสั่ง SQL
+
+                                            $stmt->execute();
+                                            $regularResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                            // กรอง regularResults ไม่ให้มีรายชื่อผู้ใช้พิเศษที่ซ้ำกัน
+                                            $filteredResults = [];
+                                            foreach ($regularResults as $row) {
+                                                if (! in_array($row['e_username'], $specialUsers)) {
+                                                    $filteredResults[] = $row;
+                                                }
+                                            }
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            usort($specialUserRecords, function ($a, $b) {
+                                                return strcmp($a['e_username'], $b['e_username']);
+                                            });
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            $filteredResults = array_merge($filteredResults, $specialUserRecords);
+
+                                            // ตั้งค่า default approver (ไม่ต้องเปลี่ยน)
                                             $defaultApprover = '';
                                             if ($subDepart === 'RD') {
                                                 foreach ($filteredResults as $row) {
@@ -1102,7 +1134,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                                 }
                                             } else {
                                                 foreach ($filteredResults as $row) {
-                                                    if (in_array($row['e_level'], ['manager', 'assisManager', 'GM'])) {
+                                                    if (in_array($row['e_level'], ['chief', 'manager', 'assisManager', 'GM'])) {
                                                         $defaultApprover = $row['e_username'];
                                                         break;
                                                     }
@@ -1323,51 +1355,80 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                                 $specialUsers[] = 'Anchana';
                                             }
 
-                                            // SQL query
-                                            $sql = "SELECT *
-                                            FROM employees
-                                            WHERE (
-                                                e_sub_department = :subDepart
-                                                OR e_sub_department2 = :subDepart2
-                                                OR e_sub_department3 = :subDepart3
-                                                OR e_sub_department4 = :subDepart4
-                                                OR e_sub_department5 = :subDepart5
-                                                OR e_username IN (:specialUser1, :specialUser2)
-                                            )
-                                            AND e_level IN ('manager', 'assisManager', 'GM')
-                                                    AND e_workplace = :workplace
+                                            // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
+                                            $specialUserRecords = [];
+                                            foreach ($specialUsers as $userName) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :username AND e_workplace = :workplace";
+                                                $stmt       = $conn->prepare($sqlSpecial);
+                                                $stmt->bindParam(':username', $userName);
+                                                $stmt->bindParam(':workplace', $workplace);
+                                                $stmt->execute();
+                                                $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                                            ORDER BY e_username ASC";
-
-                                            $stmt = $conn->prepare($sql);
-                                            $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
-                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
-
-                                            $specialUser1 = $specialUsers[0] ?? null;
-                                            $specialUser2 = $specialUsers[1] ?? null;
-                                            $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
-                                            $stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
-
-                                            $stmt->execute();
-                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                            $specialOptions  = [];
-                                            $filteredResults = [];
-                                            foreach ($results as $row) {
-                                                if (in_array($row['e_username'], $specialUsers)) {
-                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
-                                                } else {
-                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
+                                                if ($specialUser) {
+                                                    $specialUserRecords[] = $specialUser;
                                                 }
                                             }
-                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
-                                            $filteredResults = array_merge($filteredResults, $specialOptions);
 
-                                            // ตั้งค่า default approver
+                                            // ดึงข้อมูลหัวหน้างานและผู้จัดการตามเงื่อนไขเดิม
+                                            $sql = "SELECT *
+    FROM employees
+    WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
+    AND e_level <> :level
+    AND (
+        (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+        OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+        OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+        OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+        OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+        OR (
+            e_level = 'GM'
+            AND :depart <> 'RD'
+            AND (
+                e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR (
+                    e_sub_department IS NULL
+                    AND e_sub_department2 IS NULL
+                    AND e_sub_department3 IS NULL
+                    AND e_sub_department4 IS NULL
+                    AND e_sub_department5 IS NULL
+                )
+            )
+        )
+    )
+    AND e_workplace = :workplace
+    ORDER BY e_username ASC";
+
+                                            $stmt = $conn->prepare($sql);
+                                            $stmt->bindParam(':subDepart', $subDepart);
+                                            $stmt->bindParam(':subDepart2', $subDepart2);
+                                            $stmt->bindParam(':subDepart3', $subDepart3);
+                                            $stmt->bindParam(':subDepart4', $subDepart4);
+                                            $stmt->bindParam(':subDepart5', $subDepart5);
+                                            $stmt->bindParam(':depart', $depart);
+                                            $stmt->bindParam(':workplace', $workplace);
+                                            $stmt->bindParam(':level', $level);
+                                            // ลบ $stmt->bindParam(':userCode', $userCode); ออกเพราะไม่มีในคำสั่ง SQL
+
+                                            $stmt->execute();
+                                            $regularResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                            // กรอง regularResults ไม่ให้มีรายชื่อผู้ใช้พิเศษที่ซ้ำกัน
+                                            $filteredResults = [];
+                                            foreach ($regularResults as $row) {
+                                                if (! in_array($row['e_username'], $specialUsers)) {
+                                                    $filteredResults[] = $row;
+                                                }
+                                            }
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            $filteredResults = array_merge($filteredResults, $specialUserRecords);
+
+                                            // ตั้งค่า default approver (ไม่ต้องเปลี่ยน)
                                             $defaultApprover = '';
                                             if ($subDepart === 'RD') {
                                                 foreach ($filteredResults as $row) {
@@ -1378,7 +1439,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                                 }
                                             } else {
                                                 foreach ($filteredResults as $row) {
-                                                    if (in_array($row['e_level'], ['manager', 'assisManager', 'GM'])) {
+                                                    if (in_array($row['e_level'], ['chief', 'manager', 'assisManager', 'GM'])) {
                                                         $defaultApprover = $row['e_username'];
                                                         break;
                                                     }
@@ -1386,6 +1447,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                                             }
 
                                         ?>
+
                                         <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
                                         <span style="color: red;">* </span>
                                         <select class="form-select" id="urgentApprover" name="urgentApprover">
@@ -2283,30 +2345,6 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
 
         // });
 
-        function calculateLeaveDays(startDate, startTime, endDate, endTime) {
-            var start = new Date(startDate + ' ' + startTime); // สร้างวันที่เริ่มต้น
-            var end = new Date(endDate + ' ' + endTime); // สร้างวันที่สิ้นสุด
-
-            // ตรวจสอบว่ามีการเลือกวันที่สิ้นสุดก่อนวันที่เริ่มต้นหรือไม่
-            if (end <= start) {
-                console.log("End date/time must be after start date/time."); // แจ้งเตือนเมื่อวันที่สิ้นสุดก่อน
-                return 0; // คืนค่าศูนย์หรือจัดการในกรณีนี้ตามต้องการ
-            }
-
-            // คำนวณความแตกต่างในหน่วยมิลลิวินาที
-            var timeDiff = end - start;
-
-            // แปลงมิลลิวินาทีเป็นชั่วโมง
-            var hours = timeDiff / (1000 * 60 * 60);
-            console.log("Hours: ", hours); // แสดงจำนวนชั่วโมง
-
-            // แปลงจำนวนชั่วโมงเป็นจำนวนวัน โดย 1 วัน = 7.40 ชั่วโมง
-            var days = hours / 7.40;
-            console.log("Calculated Leave Days: ", days); // แสดงจำนวนวันที่คำนวณได้
-
-            return days; // คืนค่าจำนวนวันที่คำนวณได้
-        }
-
         $(document).ready(function() {
             document.getElementById("editFile").addEventListener("change", function(event) {
                 const fileInput = event.target;
@@ -2332,35 +2370,35 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 }
             });
 
-            $('#startDate').on('change', function() {
-                var selectedDate = $(this).val();
-                if (selectedDate) {
-                    var dateObject = new Date(selectedDate);
-                    var selectedYear = dateObject.getFullYear();
+            // $('#startDate').on('change', function() {
+            //     var selectedDate = $(this).val();
+            //     if (selectedDate) {
+            //         var dateObject = new Date(selectedDate);
+            //         var selectedYear = dateObject.getFullYear();
 
-                    // รีเซ็ต leaveType และแสดงข้อความให้เลือกใหม่
-                    $('#leaveType').val("เลือกประเภทการลา").trigger('change'); // รีเซ็ต dropdown
-                    $('#remaining-days').text('-'); // รีเซ็ตจำนวนคงเหลือ
-                    $('#remaining-hours').text('-');
-                    $('#remaining-minutes').text('-');
-                    // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
-                }
-            });
+            //         // รีเซ็ต leaveType และแสดงข้อความให้เลือกใหม่
+            //         $('#leaveType').val("เลือกประเภทการลา").trigger('change'); // รีเซ็ต dropdown
+            //         $('#remaining-days').text('-'); // รีเซ็ตจำนวนคงเหลือ
+            //         $('#remaining-hours').text('-');
+            //         $('#remaining-minutes').text('-');
+            //         // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
+            //     }
+            // });
 
-            $('#urgentStartDate').on('change', function() {
-                var selectedDate = $(this).val();
-                if (selectedDate) {
-                    var dateObject = new Date(selectedDate);
-                    var selectedYear = dateObject.getFullYear();
+            // $('#urgentStartDate').on('change', function() {
+            //     var selectedDate = $(this).val();
+            //     if (selectedDate) {
+            //         var dateObject = new Date(selectedDate);
+            //         var selectedYear = dateObject.getFullYear();
 
-                    // รีเซ็ต leaveType และแสดงข้อความให้เลือกใหม่
-                    $('#urgentLeaveType').val("เลือกประเภทการลา").trigger('change'); // รีเซ็ต dropdown
-                    $('#remaining-days2').text('-'); // รีเซ็ตจำนวนคงเหลือ
-                    $('#remaining-hours2').text('-');
-                    $('#remaining-minutes2').text('-');
-                    // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
-                }
-            });
+            //         // รีเซ็ต leaveType และแสดงข้อความให้เลือกใหม่
+            //         $('#urgentLeaveType').val("เลือกประเภทการลา").trigger('change'); // รีเซ็ต dropdown
+            //         $('#remaining-days2').text('-'); // รีเซ็ตจำนวนคงเหลือ
+            //         $('#remaining-hours2').text('-');
+            //         $('#remaining-minutes2').text('-');
+            //         // alert('กรุณาเลือกประเภทการลาใหม่ เนื่องจากเปลี่ยนปีเป็น ' + selectedYear);
+            //     }
+            // });
 
             $('#leaveType').on('change', function() {
                 var leaveType = $(this).val();
@@ -2370,13 +2408,11 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 console.log("Selected Date: " + selectedDate);
 
                 if (selectedDate) {
-                    var parts = selectedDate.split('-'); // แยกวันที่จากรูปแบบ YYYY-MM-DD
+                    var parts = selectedDate.split('-');
                     if (parts.length === 3) {
-                        var selectedDay = parseInt(parts[0]); // ดึงวันที่ (ส่วนแรก)
-                        var selectedMonth = parseInt(parts[1]); // ดึงเดือน (ส่วนที่สอง)
-                        var selectedYear = parseInt(parts[
-                            2]); // ดึงปี (ส่วนที่สาม)
-                        // แสดงค่าที่ดึงออกมา
+                        var selectedDay = parseInt(parts[0]);
+                        var selectedMonth = parseInt(parts[1]);
+                        var selectedYear = parseInt(parts[2]);
                         console.log("Day: " + selectedDay);
                         console.log("Month: " + selectedMonth);
                         console.log("Year: " + selectedYear);
@@ -2503,10 +2539,10 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 });
             });
 
-            $('#startDate').change(function() {
-                var leaveType = $('#leaveType').val();
-                checkDays(leaveType);
-            });
+            // $('#startDate').change(function() {
+            //     var leaveType = $('#leaveType').val();
+            //     checkDays(leaveType);
+            // });
 
             $.ajax({
                 url: 'l_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
@@ -2540,6 +2576,20 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                     flatpickr("#urgentEndDate", {
                         dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
                         defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    });
+
+                    flatpickr("#editLeaveStartDate", {
+                        dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                        // defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
+                        // minDate: today, // ห้ามเลือกวันที่ในอดีต
+                        disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    });
+
+                    flatpickr("#editLeaveEndDate", {
+                        dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
+                        // defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
                         // minDate: today, // ห้ามเลือกวันที่ในอดีต
                         disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
                     });
@@ -2590,6 +2640,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                     fd.append('file', files[0]);
                 }
 
+                // alert(approver)
                 // เช็คลาซ้ำ
                 $.ajax({
                     url: 'l_ajax_chk_leave_double.php',
@@ -3282,6 +3333,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                     }
                 });
             });
+
             $('.confirm-late-btn').click(function() {
                 var rowData = $(this).closest('tr').children('td');
                 var createDatetime = $(this).data('createdatetime');
@@ -3732,8 +3784,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 if (editFile) {
                     formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
                 } else if (currentFile) {
-                    formData.append('currentFile',
-                        currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                    formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
                 }
 
                 // เพิ่มค่าฟอร์มอื่นๆ
@@ -3757,46 +3808,45 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                     url: 'l_upd_leave.php',
                     type: 'POST',
                     data: formData,
-                    contentType: false, // ปิด content type เพื่อให้ส่งข้อมูลแบบ FormData
-                    processData: false, // ปิด process data เพื่อให้ส่งไฟล์ได้
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json', // กำหนดชัดเจนว่าต้องการรับ JSON กลับมา
                     success: function(response) {
-                        try {
-                            var res = JSON.parse(response);
-                            if (res.status === 'success') {
-                                Swal.fire({
-                                    title: 'สำเร็จ!',
-                                    text: 'อัปโหลดไฟล์และแก้ไขข้อมูลเรียบร้อยแล้ว',
-                                    icon: 'success',
-                                    confirmButtonText: 'ตกลง',
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'เกิดข้อผิดพลาด',
-                                    text: res.message ||
-                                        'ไม่สามารถแก้ไขข้อมูลได้',
-                                    icon: 'error',
-                                    confirmButtonText: 'ตกลง',
-                                });
-                            }
-                        } catch (error) {
+                        console.log('Response received:', response);
+
+                        if (response.status === 'success') {
                             Swal.fire({
-                                title: 'ข้อผิดพลาดในการประมวลผล',
-                                text: 'เกิดข้อผิดพลาดในการตอบกลับจากเซิร์ฟเวอร์',
+                                title: 'สำเร็จ!',
+                                text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
+                                icon: 'success',
+                                confirmButtonText: 'ตกลง',
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
                                 icon: 'error',
                                 confirmButtonText: 'ตกลง',
                             });
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
+                        console.error('AJAX error:', {
+                            xhr: xhr,
+                            status: status,
+                            error: error
+                        });
+                        // console.log('Response text:', xhr.responseText);
+
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',
-                            text: 'ไม่สามารถแก้ไขข้อมูลได้',
+                            text: 'ไม่สามารถแก้ไขข้อมูลได้ - ' + error,
                             icon: 'error',
                             confirmButtonText: 'ตกลง',
                         });
-                    },
+                    }
                 });
             });
         });
@@ -3827,7 +3877,6 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
                 targetElement = document.getElementById('leaveDuration');
             }
 
-            // ตรวจสอบว่ามีการกรอกข้อมูลครบหรือไม่
             if (!startDate || !startTime || !endDate || !endTime) {
                 targetElement.textContent = "1 วัน 0 ชั่วโมง 0 นาที"; // กำหนดค่าเริ่มต้นเป็น 1 วัน
                 return;
@@ -3868,7 +3917,7 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
             // ดึงวันหยุดจากฐานข้อมูล
             let holidays = [];
             $.ajax({
-                url: 'u_ajax_get_holiday.php',
+                url: 'l_ajax_get_holiday.php',
                 async: false,
                 success: function(response) {
                     holidays = JSON.parse(response).holidays;
@@ -3967,28 +4016,95 @@ WHERE l_leave_id IN ('1', '2', '3', '4', '5', '7', '8')";
             let leaveMinutes = Math.floor(totalMilliseconds / millisecondsPerMinute);
 
             // แสดงผลลัพธ์
-            targetElement.textContent = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+            // targetElement.textContent = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+
+            var userCode = '<?php echo $userCode; ?>'; // ค่าจาก PHP
+            var leaveType = document.getElementById('leaveType').value; // ค่า leaveType จาก element
+
+            var selectedDate = document.getElementById('startDate').value;
+
+            if (selectedDate) {
+                var parts = selectedDate.split('-'); // แยกวันที่จากรูปแบบ YYYY-MM-DD
+                if (parts.length === 3) {
+                    var selectedDay = parseInt(parts[0]); // ดึงวันที่ (ส่วนแรก)
+                    var selectedMonth = parseInt(parts[1]); // ดึงเดือน (ส่วนที่สอง)
+                    var selectedYear = parseInt(parts[2]); // ดึงปี (ส่วนที่สาม)
+                } else {
+                    console.error("Invalid date format: " + selectedDate);
+                    return; // ป้องกันไม่ให้ทำงานต่อหากข้อมูลวันที่ไม่ถูกต้อง
+                }
+
+                $.ajax({
+                    url: 'l_ajax_get_leave_balance.php',
+                    type: 'POST',
+                    data: {
+                        leaveType: leaveType,
+                        userCode: userCode,
+                        selectedYear: selectedYear
+                    },
+                    success: function(response) {
+                        // ตรวจสอบว่า response มีข้อมูลครบหรือไม่
+                        if (response && response.remaining_days !== undefined && response
+                            .remaining_hours !== undefined && response.remaining_minutes !==
+                            undefined) {
+                            const remainingDays = response.remaining_days;
+                            const remainingHours = response.remaining_hours;
+                            const remainingMinutes = response.remaining_minutes;
+
+                            if (leaveType == 'เลือกประเภทการลา') {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'กรุณาเลือกประเภทการลา',
+                                    // text: 'โปรดเลือกประเภทการลาก่อนดำเนินการต่อ',
+                                    confirmButtonText: 'ตกลง'
+                                });
+                                document.getElementById('btnSubmitForm1').disabled = true; // ปิดปุ่มบันทึก
+                            } else {
+                                if (leaveDays > remainingDays || leaveHours > remainingHours ||
+                                    leaveMinutes >
+                                    remainingMinutes
+                                ) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'ไม่สามารถลาได้',
+                                        html: 'จำนวนวันลาเกินกว่าจำนวนวันลาคงเหลือที่ใช้ได้<br>' +
+                                            'ลาน้อยกว่าหรือเท่ากับ ' + remainingDays + ' วัน ' +
+                                            remainingHours + ' ชั่วโมง ' + remainingMinutes +
+                                            ' นาที',
+                                        confirmButtonText: 'ตกลง'
+                                    });
+                                    targetElement.textContent =
+                                        `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+                                    document.getElementById('btnSubmitForm1').disabled =
+                                        true; // ปิดปุ่มบันทึก
+
+                                } else {
+                                    targetElement.textContent =
+                                        `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+                                    document.getElementById('btnSubmitForm1').disabled =
+                                        false; // เปิดปุ่มบันทึก
+                                }
+                            }
+                        } else {
+                            alert('ข้อมูลวันลาคงเหลือไม่สมบูรณ์');
+                        }
+                    },
+                    error: function() {
+                        alert('เกิดข้อผิดพลาดในการดึงข้อมูลวันลาคงเหลือ');
+                    }
+                });
+            }
         }
-
         document.addEventListener('DOMContentLoaded', function() {
-            const leaveForm = document.getElementById('leaveForm');
-            const urgentLeaveForm = document.getElementById('urgentLeaveForm');
-
-            if (leaveForm) {
-                leaveForm.addEventListener('change', calculateLeaveDuration);
-            }
-
-            if (urgentLeaveForm) {
-                urgentLeaveForm.addEventListener('change', calculateLeaveDuration);
-            }
-
-            // ตรวจสอบสถานะการเปิดของโมดัล
-            $('#urgentLeaveModal').on('shown.bs.modal', function() {
+            // ตรวจสอบว่ามี element จริงๆ
+            const leaveDurationElement = document.getElementById('leaveDuration');
+            if (leaveDurationElement) {
+                console.log('พบ element leaveDuration');
+                // เรียกฟังก์ชันคำนวณ
                 calculateLeaveDuration();
-            });
-
-            // คำนวณครั้งแรกเมื่อโหลดหน้า
-            calculateLeaveDuration();
+            } else {
+                console.error('ไม่พบ element leaveDuration');
+            }
         });
 
         function checkOther(select) {

@@ -1,9 +1,10 @@
 <?php
 include '../connect.php';
+header('Content-Type: application/json');
 
 // รับค่าตัวแปรจาก POST
-$userCode = $_POST['userCode'] ?? '';
-$leaveType = $_POST['leaveType'] ?? ''; // ประเภทการลา
+$userCode     = $_POST['userCode'] ?? '';
+$leaveType    = $_POST['leaveType'] ?? '';    // ประเภทการลา
 $selectedYear = $_POST['selectedYear'] ?? ''; // ปีที่ต้องการดึงข้อมูล
 
 if (empty($userCode) || empty($leaveType) || empty($selectedYear)) {
@@ -49,7 +50,8 @@ WHERE l_leave_id = :leaveType
   AND YEAR(l_leave_end_date) = :selectedYear
   AND l_leave_status = 0
   AND l_approve_status IN (2,6)
-  AND l_approve_status2 = 4";
+  AND l_approve_status2 IN (4,6)
+AND l_approve_status3 IN (8,6)";
 
 // เตรียม query
 $stmt_leave = $conn->prepare($sql_leave);
@@ -62,22 +64,22 @@ $stmt_leave->execute();
 $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
 
 if ($result_leave) {
-    // จำนวนวันและเวลาในการใช้ลา
-    $days_used = $result_leave['total_leave_days'] ?? 0; // วันที่ใช้ไป
-    $hours_used = $result_leave['total_leave_hours'] ?? 0; // ชั่วโมงที่ใช้ไป
+                                                               // จำนวนวันและเวลาในการใช้ลา
+    $days_used    = $result_leave['total_leave_days'] ?? 0;    // วันที่ใช้ไป
+    $hours_used   = $result_leave['total_leave_hours'] ?? 0;   // ชั่วโมงที่ใช้ไป
     $minutes_used = $result_leave['total_leave_minutes'] ?? 0; // นาทีที่ใช้ไป
 
-    // จำนวนวันลาแบบต่างๆ
-    $total_personal = $result_leave['total_personal'] ?? 0; // จำนวนวันลาโดยรวม
+                                                                  // จำนวนวันลาแบบต่างๆ
+    $total_personal    = $result_leave['total_personal'] ?? 0;    // จำนวนวันลาโดยรวม
     $total_personal_no = $result_leave['total_personal_no'] ?? 0; // จำนวนวันลาแบบอื่น
-    $total_sick = $result_leave['total_sick'] ?? 0;
-    $total_sick_work = $result_leave['total_sick_work'] ?? 0;
-    $total_annual = $result_leave['total_annual'] ?? 0;
-    $total_other = $result_leave['total_other'] ?? 0;
+    $total_sick        = $result_leave['total_sick'] ?? 0;
+    $total_sick_work   = $result_leave['total_sick_work'] ?? 0;
+    $total_annual      = $result_leave['total_annual'] ?? 0;
+    $total_other       = $result_leave['total_other'] ?? 0;
 
-    // คำนวณวันลาเต็มวันจากการใช้ชั่วโมง (1 วัน = 8 ชั่วโมง)
+                                          // คำนวณวันลาเต็มวันจากการใช้ชั่วโมง (1 วัน = 8 ชั่วโมง)
     $days_used += intdiv($hours_used, 8); // คำนวณวันจากชั่วโมง
-    $hours_used = $hours_used % 8; // คงเหลือชั่วโมงที่ไม่ครบ 8
+    $hours_used = $hours_used % 8;        // คงเหลือชั่วโมงที่ไม่ครบ 8
 
     // ปรับนาทีเป็นชั่วโมง ถ้านาทีมากกว่า 60 นาที
     $hours_used += intdiv($minutes_used, 60);
@@ -110,19 +112,19 @@ if ($result_leave) {
     $total_remaining_minutes = ($remaining_days * 8 * 60) - ($hours_used * 60 + $minutes_used);
 
     if ($total_remaining_minutes < 0) {
-        $remaining_days = 0;
-        $remaining_hours = 0;
+        $remaining_days    = 0;
+        $remaining_hours   = 0;
         $remaining_minutes = 0;
     } else {
-        $remaining_days = intdiv($total_remaining_minutes, (8 * 60)); // แปลงกลับเป็นวัน
-        $remaining_hours = intdiv($total_remaining_minutes % (8 * 60), 60); // ชั่วโมงที่เหลือ
-        $remaining_minutes = $total_remaining_minutes % 60; // นาทีที่เหลือ
+        $remaining_days    = intdiv($total_remaining_minutes, (8 * 60));      // แปลงกลับเป็นวัน
+        $remaining_hours   = intdiv($total_remaining_minutes % (8 * 60), 60); // ชั่วโมงที่เหลือ
+        $remaining_minutes = $total_remaining_minutes % 60;                   // นาทีที่เหลือ
     }
 
     // แสดงผลลัพธ์
     echo json_encode([
-        'remaining_days' => $remaining_days,
-        'remaining_hours' => $remaining_hours,
+        'remaining_days'    => $remaining_days,
+        'remaining_hours'   => $remaining_hours,
         'remaining_minutes' => $remaining_minutes,
     ]);
 }

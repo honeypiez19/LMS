@@ -153,11 +153,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $subDepartment = $result['e_sub_department'];
         $levelApprover = $result['e_level'];
 
-        $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'MC', 'FN', 'PC', 'QC'];
-        $leaders     = ['leader', 'subLeader', 'chief'];
-        $managers    = ['manager', 'manager2', 'assisManager'];
+        $departments  = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'QC'];
+        $specialDepts = ['MC', 'FN', 'PC'];
+        $leaders      = ['leader', 'subLeader', 'chief'];
+        $managers     = ['manager', 'manager2', 'assisManager'];
 
-        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+        if (in_array($subDepartment, $specialDepts)) {
+            $proveStatus  = 6;
+            $proveStatus2 = 4;
+            $proveStatus3 = 7;
+        } else if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
             $proveStatus  = 6;
             $proveStatus2 = 4;
             $proveStatus3 = 6;
