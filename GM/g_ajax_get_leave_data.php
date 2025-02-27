@@ -25,7 +25,7 @@ if ($status == 'all') {
     $sql .= " AND li.l_approve_status3 = 7";
 } else if ($status == 8) {
     $sql .= " AND li.l_approve_status3 = 8";
-} else if ($status == 9) {
+} else if ($status == 3) {
     $sql .= " AND li.l_approve_status3 = 9";
 } else {
     echo json_encode(['error' => 'ไม่พบสถานะ']);

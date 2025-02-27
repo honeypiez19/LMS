@@ -153,19 +153,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $subDepartment = $result['e_sub_department'];
         $levelApprover = $result['e_level'];
 
-        $departments  = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'QC'];
-        $specialDepts = ['MC', 'FN', 'PC'];
-        $leaders      = ['leader', 'subLeader', 'chief'];
-        $managers     = ['manager', 'manager2', 'assisManager'];
+        $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'QC', 'MC', 'FN', 'PC'];
+        $leaders     = ['leader', 'subLeader', 'chief'];
+        $managers    = ['manager', 'manager2', 'assisManager'];
 
-        // เช็คแผนกพิเศษก่อน (MC, PC, FN)
-        if (in_array($subDepartment, $specialDepts)) {
-            $proveStatus  = 0;
-            $proveStatus2 = 6;
-            $proveStatus3 = 7;
-        }
-        // เช็คแผนกทั่วไปและระดับตำแหน่ง
-        elseif (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
             $proveStatus  = 2;
             $proveStatus2 = 1;
             $proveStatus3 = ($subDepartment !== 'RD') ? 7 : 6;

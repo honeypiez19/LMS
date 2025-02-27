@@ -156,26 +156,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $managers    = ['manager', 'manager2', 'assisManager'];
         $workplaceAt = ['Bang Phli', 'Korat'];
 
-        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 0;
             $proveStatus2 = 1;
             $proveStatus3 = 7;
-        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
+        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 1;
             $proveStatus3 = 7;
-        } elseif ($levelApprover == 'GM') {
+        } elseif ($levelApprover == 'GM' && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 6;
             $proveStatus3 = 7;
-        } elseif ($levelApprover == 'admin') {
+        } elseif ($levelApprover == 'admin' && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 6;
             $proveStatus3 = 6;
         } else {
-            echo "ไม่พบแผนก";
+            echo "ไม่พบแผนกหรือสถานที่";
         }
-
     }
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,

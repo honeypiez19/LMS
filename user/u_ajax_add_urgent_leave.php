@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentLeaveType   = $_POST['urgentLeaveType'];
     $urgentLeaveReason = $_POST['urgentLeaveReason'];
 
-    $approver = $_POST['urgentApprover'];
+    $urgentApprover = $_POST['urgentApprover'];
 
     // ประเภทการลา
     $leaveTypes = [
@@ -136,9 +136,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT * FROM employees WHERE e_username = :approver";
+    $chkApprover = "SELECT * FROM employees WHERE e_username = :urgentApprover";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -209,9 +209,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':timeRemark2', $timeRemark2);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_username = :approver AND e_workplace = :workplace";
+        $sql  = "SELECT e_user_id FROM employees WHERE e_username = :urgentApprover AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':urgentApprover', $urgentApprover);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
         $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);

@@ -257,42 +257,42 @@
                 </thead>
                 <tbody class="text-center my-table">
                     <?php
-                        $sql = "SELECT * FROM employees
+                    $sql = "SELECT * FROM employees
                         WHERE e_status <> '1'";
 
-                        $stmt = $conn->prepare($sql);
+                    $stmt = $conn->prepare($sql);
 
-                        $stmt->execute();
+                    $stmt->execute();
 
-                        $rowNumber = 1;
+                    $rowNumber = 1;
 
-                        $leave_types = [
-                            1 => 'ลากิจได้รับค่าจ้าง',
-                            2 => 'ลากิจไม่ได้รับค่าจ้าง',
-                            3 => 'ลาป่วย',
-                            4 => 'ลาป่วยจากงาน',
-                            5 => 'ลาพักร้อน',
-                            7 => 'มาสาย',
-                            6 => 'ขาดงาน',
-                            8 => 'อื่น ๆ',
-                        ];
+                    $leave_types = [
+                        1 => 'ลากิจได้รับค่าจ้าง',
+                        2 => 'ลากิจไม่ได้รับค่าจ้าง',
+                        3 => 'ลาป่วย',
+                        4 => 'ลาป่วยจากงาน',
+                        5 => 'ลาพักร้อน',
+                        7 => 'มาสาย',
+                        6 => 'ขาดงาน',
+                        8 => 'อื่น ๆ',
+                    ];
 
-                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                            echo '<tr>';
-                            echo '<td>' . $rowNumber . '</td>';
-                            echo '<td>' . $row['e_usercode'] . '</td>';
-                            echo '<td>' . $row['e_name'] . '</td>';
-                            echo '<td>' . $row['e_department'] . '</td>';
-                            echo '<td>' . $row['e_yearexp'] . '</td>';
-                            echo '<td>' . $row['e_level'] . '</td>';
-                            echo '<td>' . $row['e_workplace'] . '</td>';
+                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        echo '<tr>';
+                        echo '<td>' . $rowNumber . '</td>';
+                        echo '<td>' . $row['e_usercode'] . '</td>';
+                        echo '<td>' . $row['e_name'] . '</td>';
+                        echo '<td>' . $row['e_department'] . '</td>';
+                        echo '<td>' . $row['e_yearexp'] . '</td>';
+                        echo '<td>' . $row['e_level'] . '</td>';
+                        echo '<td>' . $row['e_workplace'] . '</td>';
 
-                            $all_total_days    = 0;
-                            $all_total_hours   = 0;
-                            $all_total_minutes = 0;
+                        $all_total_days    = 0;
+                        $all_total_hours   = 0;
+                        $all_total_minutes = 0;
 
-                            foreach ($leave_types as $leave_id => $leave_name) {
-                                $sql_leave = "SELECT
+                        foreach ($leave_types as $leave_id => $leave_name) {
+                            $sql_leave = "SELECT
                         SUM(
                             DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
                             - (SELECT COUNT(1)
@@ -333,213 +333,213 @@
                         AND l_approve_status3 IN (8, 6)
                         AND (l_leave_end_date BETWEEN :startDate AND :endDate)";
 
-                                $stmt_leave = $conn->prepare($sql_leave);
-                                $stmt_leave->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
-                                $stmt_leave->bindParam(':userCode', $row['e_usercode']);
-                                $stmt_leave->bindParam(':startDate', $startDate);
-                                $stmt_leave->bindParam(':endDate', $endDate);
-                                $stmt_leave->execute();
+                            $stmt_leave = $conn->prepare($sql_leave);
+                            $stmt_leave->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
+                            $stmt_leave->bindParam(':userCode', $row['e_usercode']);
+                            $stmt_leave->bindParam(':startDate', $startDate);
+                            $stmt_leave->bindParam(':endDate', $endDate);
+                            $stmt_leave->execute();
 
-                                $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
+                            $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
 
-                                if ($result_leave) {
-                                    $days    = $result_leave['total_leave_days'] ?? 0;
-                                    $hours   = $result_leave['total_leave_hours'] ?? 0;
-                                    $minutes = $result_leave['total_leave_minutes'] ?? 0;
+                            if ($result_leave) {
+                                $days    = $result_leave['total_leave_days'] ?? 0;
+                                $hours   = $result_leave['total_leave_hours'] ?? 0;
+                                $minutes = $result_leave['total_leave_minutes'] ?? 0;
 
-                                    $total_personal    = $result_leave['total_personal'] ?? 0;
-                                    $total_personal_no = $result_leave['total_personal_no'] ?? 0;
-                                    $total_sick        = $result_leave['total_sick'] ?? 0;
-                                    $total_sick_work   = $result_leave['total_sick_work'] ?? 0;
-                                    $total_annual      = $result_leave['total_annual'] ?? 0;
-                                    $total_other       = $result_leave['total_other'] ?? 0;
-                                    $total_late        = $result_leave['late_count'] ?? 0;
-                                    // $total_stop_work   = $result_leave['stop_work_count'] ?? 0;
+                                $total_personal    = $result_leave['total_personal'] ?? 0;
+                                $total_personal_no = $result_leave['total_personal_no'] ?? 0;
+                                $total_sick        = $result_leave['total_sick'] ?? 0;
+                                $total_sick_work   = $result_leave['total_sick_work'] ?? 0;
+                                $total_annual      = $result_leave['total_annual'] ?? 0;
+                                $total_other       = $result_leave['total_other'] ?? 0;
+                                $total_late        = $result_leave['late_count'] ?? 0;
+                                // $total_stop_work   = $result_leave['stop_work_count'] ?? 0;
 
-                                    $days += floor($hours / 8);
-                                    $hours = $hours % 8;
+                                $days += floor($hours / 8);
+                                $hours = $hours % 8;
 
-                                    if ($minutes >= 60) {
-                                        $hours += floor($minutes / 60);
-                                        $minutes = $minutes % 60;
+                                if ($minutes >= 60) {
+                                    $hours += floor($minutes / 60);
+                                    $minutes = $minutes % 60;
+                                }
+
+                                if ($minutes > 0 && $minutes <= 30) {
+                                    $minutes = 30;
+                                } elseif ($minutes > 30) {
+                                    $minutes = 0;
+                                    $hours += 1;
+                                }
+
+                                // ลากิจได้รับค่าจ้าง
+                                if ($leave_id == 1) {
+                                    $total_minutes_used      = ($days * 8 * 60) + ($hours * 60) + $minutes;
+                                    $total_minutes           = $total_personal * 8 * 60;
+                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
+                                    $remaining_days          = floor($total_remaining_minutes / (8 * 60));
+                                    $remaining_hours         = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                    $remaining_minutes       = $total_remaining_minutes % 60;
+
+                                    if ($remaining_minutes == 30 && $minutes == 30) {
+                                        $remaining_minutes = 5;
+                                        $minutes           = 5;
+                                    } elseif ($remaining_minutes > 30) {
+                                        $remaining_minutes = 0;
+                                        $remaining_hours += 1;
                                     }
 
-                                    if ($minutes > 0 && $minutes <= 30) {
-                                        $minutes = 30;
-                                    } elseif ($minutes > 30) {
-                                        $minutes = 0;
-                                        $hours += 1;
+                                    echo '<td>' . $total_personal . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
+                                }
+                                // ลากิจไม่ได้รับค่าจ้าง
+                                else if ($leave_id == 2) {
+                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                    $total_minutes = $total_personal_no * 8 * 60;
+
+                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                    $remaining_minutes = $total_remaining_minutes % 60;
+
+                                    if ($remaining_minutes == 30 && $minutes == 30) {
+                                        $remaining_minutes = 5;
+                                        $minutes           = 5;
+                                    } elseif ($remaining_minutes > 30) {
+                                        $remaining_minutes = 0;
+                                        $remaining_hours += 1;
                                     }
 
-                                    // ลากิจได้รับค่าจ้าง
-                                    if ($leave_id == 1) {
-                                        $total_minutes_used      = ($days * 8 * 60) + ($hours * 60) + $minutes;
-                                        $total_minutes           = $total_personal * 8 * 60;
-                                        $total_remaining_minutes = $total_minutes - $total_minutes_used;
-                                        $remaining_days          = floor($total_remaining_minutes / (8 * 60));
-                                        $remaining_hours         = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                        $remaining_minutes       = $total_remaining_minutes % 60;
+                                    echo '<td>' . $total_personal_no . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
+                                }
+                                // ลาป่วย
+                                else if ($leave_id == 3) {
 
-                                        if ($remaining_minutes == 30 && $minutes == 30) {
-                                            $remaining_minutes = 5;
-                                            $minutes           = 5;
-                                        } elseif ($remaining_minutes > 30) {
-                                            $remaining_minutes = 0;
-                                            $remaining_hours += 1;
-                                        }
+                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
 
-                                        echo '<td>' . $total_personal . '</td>';
-                                        echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                        echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-                                    }
-                                    // ลากิจไม่ได้รับค่าจ้าง
-                                    else if ($leave_id == 2) {
-                                        $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+                                    $total_minutes = $total_sick * 8 * 60;
 
-                                        $total_minutes = $total_personal_no * 8 * 60;
+                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
 
-                                        $total_remaining_minutes = $total_minutes - $total_minutes_used;
+                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                    $remaining_minutes = $total_remaining_minutes % 60;
 
-                                        $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                        $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                        $remaining_minutes = $total_remaining_minutes % 60;
-
-                                        if ($remaining_minutes == 30 && $minutes == 30) {
-                                            $remaining_minutes = 5;
-                                            $minutes           = 5;
-                                        } elseif ($remaining_minutes > 30) {
-                                            $remaining_minutes = 0;
-                                            $remaining_hours += 1;
-                                        }
-
-                                        echo '<td>' . $total_personal_no . '</td>';
-                                        echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                        echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-                                    }
-                                    // ลาป่วย
-                                    else if ($leave_id == 3) {
-
-                                        $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                        $total_minutes = $total_sick * 8 * 60;
-
-                                        $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                        $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                        $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                        $remaining_minutes = $total_remaining_minutes % 60;
-
-                                        if ($remaining_minutes == 30 && $minutes == 30) {
-                                            $remaining_minutes = 5;
-                                            $minutes           = 5;
-                                        } elseif ($remaining_minutes > 30) {
-                                            $remaining_minutes = 0;
-                                            $remaining_hours += 1;
-                                        }
-
-                                        echo '<td>' . $total_sick . '</td>';
-                                        echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                        echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                    }
-                                    // ลาป่วยจากงาน
-                                    else if ($leave_id == 4) {
-
-                                        $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                        $total_minutes = $total_sick_work * 8 * 60;
-
-                                        $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                        $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                        $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                        $remaining_minutes = $total_remaining_minutes % 60;
-
-                                        if ($remaining_minutes == 30 && $minutes == 30) {
-                                            $remaining_minutes = 5;
-                                            $minutes           = 5;
-                                        } elseif ($remaining_minutes > 30) {
-                                            $remaining_minutes = 0;
-                                            $remaining_hours += 1;
-                                        }
-
-                                        echo '<td>' . $total_sick_work . '</td>';
-                                        echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                        echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                    }
-                                    // ลาพักร้อน
-                                    else if ($leave_id == 5) {
-
-                                        $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                        $total_minutes = $total_annual * 8 * 60;
-
-                                        $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                        $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                        $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                        $remaining_minutes = $total_remaining_minutes % 60;
-
-                                        if ($remaining_minutes == 30 && $minutes == 30) {
-                                            $remaining_minutes = 5;
-                                            $minutes           = 5;
-                                        } elseif ($remaining_minutes > 30) {
-                                            $remaining_minutes = 0;
-                                            $remaining_hours += 1;
-                                        }
-
-                                        echo '<td>' . $total_annual . '</td>';
-                                        echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                        echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                    }
-                                    // อื่น ๆ
-                                    else if ($leave_id == 8) {
-                                        $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                        $total_minutes = $total_other * 8 * 60;
-
-                                        $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                        $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                        $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                        $remaining_minutes = $total_remaining_minutes % 60;
-
-                                        if ($remaining_minutes == 30 && $minutes == 30) {
-                                            $remaining_minutes = 5;
-                                            $minutes           = 5;
-                                        } elseif ($remaining_minutes > 30) {
-                                            $remaining_minutes = 0;
-                                            $remaining_hours += 1;
-                                        }
-
-                                        echo '<td>' . $total_other . '</td>';
-                                        echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                        echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
+                                    if ($remaining_minutes == 30 && $minutes == 30) {
+                                        $remaining_minutes = 5;
+                                        $minutes           = 5;
+                                    } elseif ($remaining_minutes > 30) {
+                                        $remaining_minutes = 0;
+                                        $remaining_hours += 1;
                                     }
 
-                                    // ไม่รวมพักร้อนกับมาสาย
-                                    if ($leave_id != 5 && $leave_id != 7 && $leave_id != 6) {
-                                        $all_total_days += $days;
-                                        $all_total_hours += $hours;
-                                        $all_total_minutes += $minutes;
+                                    echo '<td>' . $total_sick . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
+
+                                }
+                                // ลาป่วยจากงาน
+                                else if ($leave_id == 4) {
+
+                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                    $total_minutes = $total_sick_work * 8 * 60;
+
+                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                    $remaining_minutes = $total_remaining_minutes % 60;
+
+                                    if ($remaining_minutes == 30 && $minutes == 30) {
+                                        $remaining_minutes = 5;
+                                        $minutes           = 5;
+                                    } elseif ($remaining_minutes > 30) {
+                                        $remaining_minutes = 0;
+                                        $remaining_hours += 1;
                                     }
+
+                                    echo '<td>' . $total_sick_work . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
+
+                                }
+                                // ลาพักร้อน
+                                else if ($leave_id == 5) {
+
+                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                    $total_minutes = $total_annual * 8 * 60;
+
+                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                    $remaining_minutes = $total_remaining_minutes % 60;
+
+                                    if ($remaining_minutes == 30 && $minutes == 30) {
+                                        $remaining_minutes = 5;
+                                        $minutes           = 5;
+                                    } elseif ($remaining_minutes > 30) {
+                                        $remaining_minutes = 0;
+                                        $remaining_hours += 1;
+                                    }
+
+                                    echo '<td>' . $total_annual . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
+
+                                }
+                                // อื่น ๆ
+                                else if ($leave_id == 8) {
+                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
+
+                                    $total_minutes = $total_other * 8 * 60;
+
+                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
+
+                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
+                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
+                                    $remaining_minutes = $total_remaining_minutes % 60;
+
+                                    if ($remaining_minutes == 30 && $minutes == 30) {
+                                        $remaining_minutes = 5;
+                                        $minutes           = 5;
+                                    } elseif ($remaining_minutes > 30) {
+                                        $remaining_minutes = 0;
+                                        $remaining_hours += 1;
+                                    }
+
+                                    echo '<td>' . $total_other . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
+
+                                }
+
+                                // ไม่รวมพักร้อนกับมาสาย
+                                if ($leave_id != 5 && $leave_id != 7 && $leave_id != 6) {
+                                    $all_total_days += $days;
+                                    $all_total_hours += $hours;
+                                    $all_total_minutes += $minutes;
                                 }
                             }
-
-                            echo '<td>' . $total_late . ' ครั้ง' . '</td>';
-                            // echo '<td>' . $days . ' วัน' . '</td>';
-
-                            // Display the total leave used, excluding annual leave
-                            echo '<td >' . $all_total_days . '(' . $all_total_hours . '.' . $all_total_minutes . ')' . '</td>';
-                            echo '</tr>';
-
-                            $rowNumber++;
-
                         }
-                    ?>
+
+                        echo '<td>' . $total_late . ' ครั้ง' . '</td>';
+                        // echo '<td>' . $days . ' วัน' . '</td>';
+
+                        // Display the total leave used, excluding annual leave
+                        echo '<td >' . $all_total_days . '(' . $all_total_hours . '.' . $all_total_minutes . ')' . '</td>';
+                        echo '</tr>';
+
+                        $rowNumber++;
+
+                    }
+                ?>
                 </tbody>
             </table>
         </div>

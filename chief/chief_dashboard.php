@@ -880,7 +880,7 @@ WHERE l_leave_id = :leave_id
                                     </div>
                                     <div class="col-12">
                                         <label for="leaveType" class="form-label">ประเภทการลา</label>
-                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ
+                                        <span class="badge rounded-pill text-bg-info" hidden>เหลือ
                                             <span id="remaining-days">0 </span> วัน
                                             <span id="remaining-hours">0 </span> ชั่วโมง
                                             <span id="remaining-minutes">0 </span> นาที
@@ -1090,13 +1090,13 @@ WHERE l_leave_id = :leave_id
 
                                         ?>
 
-                                        <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
+                                        <label for="labelApprover" class="form-label">หัวหน้าอนุมัติ</label>
                                         <span style="color: red;">* </span>
                                         <select class="form-select" id="approver" name="approver">
-                                            <option value="">เลือกผู้อนุมัติ</option>
+                                            <option value="เลือกหัวหน้า" selected>เลือกหัวหน้า</option>
                                             <?php foreach ($filteredResults as $row): ?>
                                             <option value="<?php echo htmlspecialchars($row['e_username']) ?>"
-                                                <?php echo $defaultApprover === $row['e_username'] ? 'selected' : '' ?>>
+                                                <?php echo $defaultApprover === $row['e_username'] ?: '' ?>>
                                                 <?php echo htmlspecialchars($row['e_username']) ?>
                                             </option>
                                             <?php endforeach; ?>
@@ -1156,7 +1156,7 @@ WHERE l_leave_id = :leave_id
                                     <div class="col-12">
                                         <label for="urgentLeaveType" class="form-label">ประเภทการลา</label>
                                         <span style="color: red;">*</span>
-                                        <span class="badge rounded-pill text-bg-info" name="totalDays">เหลือ
+                                        <span class="badge rounded-pill text-bg-info" hidden>เหลือ
                                             <span id="remaining-days2">0</span> วัน
                                             <span id="remaining-hours2">0</span> ชั่วโมง
                                             <span id="remaining-minutes2">0</span> นาที
@@ -1364,13 +1364,13 @@ WHERE l_leave_id = :leave_id
                                                 }
                                             }
                                         ?>
-                                        <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
+                                        <label for="labelApprover" class="form-label">หัวหน้าอนุมัติ</label>
                                         <span style="color: red;">* </span>
                                         <select class="form-select" id="urgentApprover" name="urgentApprover">
-                                            <option value="">เลือกผู้อนุมัติ</option>
+                                            <option value="เลือกหัวหน้า" selected>เลือกหัวหน้า</option>
                                             <?php foreach ($filteredResults as $row): ?>
                                             <option value="<?php echo htmlspecialchars($row['e_username']) ?>"
-                                                <?php echo $defaultApprover === $row['e_username'] ? 'selected' : '' ?>>
+                                                <?php echo $defaultApprover === $row['e_username'] ?: '' ?>>
                                                 <?php echo htmlspecialchars($row['e_username']) ?>
                                             </option>
                                             <?php endforeach; ?>
@@ -1981,6 +1981,43 @@ WHERE l_leave_id = :leave_id
                                     }
                                     echo '</td>';
 
+                                                                               // 19
+                                    $leaveDate   = $row['l_leave_start_date']; // สมมติว่าใช้วันที่ลาหรือวันที่สิ้นสุด
+                                    $currentDate = date('Y-m-d');              // วันที่ปัจจุบัน
+
+                                    if ($leaveDate < $currentDate) {
+                                        // ถ้าถึงวันที่ลาแล้วไม่ให้กดปุ่มแก้ไข
+                                        echo '<td>';
+                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                        echo '</td>';
+                                    } else {
+                                        // ถ้ายังไม่ถึงวันที่ลา ให้แสดงปุ่มแก้ไขได้ปกติ
+                                        echo '<td>';
+                                        echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
+                                        echo '</td>';
+                                    }
+
+                                    // 20
+                                    $disabled            = $row['l_leave_status'] == 1 ? 'disabled' : '';
+                                    $dateNow             = date('Y-m-d');
+                                    $disabledCancalCheck = (
+                                        $row['l_approve_status'] != 0
+                                        && $row['l_approve_status2'] != 1
+                                        && $row['l_leave_start_date'] < $dateNow
+                                    ) ? 'disabled' : '';
+
+                                    $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
+
+                                    if ($row['l_leave_id'] == 6) {
+                                        echo '<td></td>';
+                                    } else if ($row['l_leave_id'] == 7) {
+                                        echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+                                    } else if ($row['l_leave_id'] != 7) {
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+                                    } else {
+                                        echo '<td></td>';
+                                    }
+
                                     echo '</tr>';
                                     $rowNumber--;
                                     // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
@@ -2550,16 +2587,6 @@ WHERE l_leave_id = :leave_id
                             fd.append('formattedDate', formattedDate);
                             // alert(formattedDate);
 
-                            // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
-                            if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
-                                Swal.fire({
-                                    title: "ไม่สามารถลาได้",
-                                    text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
-                                    icon: "error"
-                                });
-                                return false; // หยุดการส่งฟอร์ม
-                            }
-
                             // ตรวจสอบข้อมูลก่อนการส่ง
                             if (leaveType == 'เลือกประเภทการลา') {
                                 Swal.fire({
@@ -2572,6 +2599,13 @@ WHERE l_leave_id = :leave_id
                                 Swal.fire({
                                     title: "ไม่สามารถลาได้",
                                     text: "กรุณาระบุเหตุผลการลา",
+                                    icon: "error"
+                                });
+                                return false;
+                            } else if (approver == 'เลือกหัวหน้า') {
+                                Swal.fire({
+                                    title: "ไม่สามารถลาได้",
+                                    text: "กรุณาเลือกหัวหน้า",
                                     icon: "error"
                                 });
                                 return false;
@@ -2858,7 +2892,7 @@ WHERE l_leave_id = :leave_id
                 var urgentEndDate = $('#urgentEndDate').val();
                 var urgentEndTime = $('#urgentEndTime').val();
                 var urgentFiles = $('#urgentFile')[0].files;
-                var approver = $('#urgentApprover').val();
+                var urgentApprover = $('#urgentApprover').val();
 
                 fd.append('urgentLeaveType', urgentLeaveType);
                 fd.append('urgentLeaveReason', urgentLeaveReason);
@@ -2866,7 +2900,7 @@ WHERE l_leave_id = :leave_id
                 fd.append('urgentStartTime', urgentStartTime);
                 fd.append('urgentEndDate', urgentEndDate);
                 fd.append('urgentEndTime', urgentEndTime);
-                fd.append('urgentApprover', approver);
+                fd.append('urgentApprover', urgentApprover);
 
                 if (urgentFiles.length > 0) {
                     fd.append('urgentFile', urgentFiles[0]);
@@ -2920,6 +2954,13 @@ WHERE l_leave_id = :leave_id
                                 Swal.fire({
                                     title: "ไม่สามารถลาได้",
                                     text: "กรุณาระบุเหตุผลการลา",
+                                    icon: "error"
+                                });
+                                return false;
+                            } else if (urgentApprover == 'เลือกหัวหน้า') {
+                                Swal.fire({
+                                    title: "ไม่สามารถลาได้",
+                                    text: "กรุณาเลือกหัวหน้า",
                                     icon: "error"
                                 });
                                 return false;

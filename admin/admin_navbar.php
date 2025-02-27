@@ -248,8 +248,7 @@
                             <li><a class="dropdown-item" href="admin_employee_leave_form.php">ใบลาย้อนหลังของพนักงาน
                                     (เฉพาะ HR ยื่นใบลาย้อนหลัง)</a>
                             <li><a class="dropdown-item" href="admin_employee.php">ข้อมูลของพนักงาน</a></li>
-                            <li><a class="dropdown-item" href="admin_employee_leave.php">สถิติการลาของพนักงาน
-                                </a></li>
+                            <li><a class="dropdown-item" href="admin_employee_leave.php">สถิติการลาของพนักงาน</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

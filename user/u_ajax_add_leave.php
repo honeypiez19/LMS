@@ -157,13 +157,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $workplaceAt = ['Bang Phli', 'Korat'];
 
         if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
-            $proveStatus  = 0;
-            $proveStatus2 = 1;
-            $proveStatus3 = 6;
+            if ($subDepartment == 'QC') {
+                $proveStatus  = 0;
+                $proveStatus2 = 6;
+                $proveStatus3 = 7;
+            } else {
+                $proveStatus  = 0;
+                $proveStatus2 = 1;
+                $proveStatus3 = 6;
+            }
         } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
-            $proveStatus  = 6;
-            $proveStatus2 = 1;
-            $proveStatus3 = 6;
+            if ($subDepartment == 'QC') {
+                $proveStatus  = 0;
+                $proveStatus2 = 6;
+                $proveStatus3 = 7;
+            } else {
+                $proveStatus  = 6;
+                $proveStatus2 = 1;
+                $proveStatus3 = 6;
+            }
         } elseif ($levelApprover == 'GM' && in_array($workplace, $workplaceAt)) {
             $proveStatus  = 6;
             $proveStatus2 = 6;

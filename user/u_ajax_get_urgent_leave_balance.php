@@ -47,9 +47,10 @@ JOIN employees ON employees.e_usercode = leave_list.l_usercode
 WHERE l_leave_id = :leaveType
   AND l_usercode = :userCode
   AND YEAR(l_leave_end_date) = :selectedYear
-  AND l_leave_status = 0
+   AND l_leave_status = 0
   AND l_approve_status IN (2,6)
-  AND l_approve_status2 = 4";
+  AND l_approve_status2 IN (4,6)
+AND l_approve_status3 IN (8,6)";
 
 // เตรียม query
 $stmt_leave = $conn->prepare($sql_leave);

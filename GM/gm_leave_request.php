@@ -40,7 +40,7 @@
 <body>
     <?php include 'gm_navbar.php'?>
 
-    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?>
+    <!--                                                                                                                                                                         <?php echo $subDepart; ?>
 <?php echo $subDepart2; ?>
 <?php echo $userName; ?> -->
 
@@ -348,7 +348,7 @@ AND li.l_approve_status3 = 9
                         <th rowspan="1"><?php echo $strEmpCode; ?></th>
                         <th rowspan="1"><?php echo $strEmpName; ?></th>
                         <th rowspan="2"><?php echo $strSubDate; ?></th>
-                        <th rowspan="2"><?php echo $strLeaveType; ?></th>
+                        <th rowspan="1"><?php echo $strLeaveType; ?></th>
                         <th colspan="2" class="text-center"><?php echo $strDateTime; ?></th>
                         <th rowspan="2">จำนวนวันลา</th>
                         <th rowspan="2"><?php echo $strFile; ?></th>
@@ -371,81 +371,75 @@ AND li.l_approve_status3 = 9
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
-                        <th> <input type="text" class="form-control" id="codeSearch" style="width: 100px;"></th>
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
+                        <th> <input type="text" class="form-control" id="leaveSearch"></th>
                         <th style="width: 8%;">จาก</th>
                         <th style="width: 8%;">ถึง</th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
                     <?php
-                        // จำนวนรายการต่อหน้า
+                        // กำหนดจำนวนรายการต่อหน้า
                         $itemsPerPage = 10;
 
-                        // กำหนดค่าของหน้าปัจจุบัน
+                        // ตรวจสอบหน้าปัจจุบัน
                         $currentPage = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
-                        // ค้นหาค่ารหัสพนักงาน
-                        $searchCode = isset($_GET['codeSearch']) ? trim($_GET['codeSearch']) : '';
-
-                        // เริ่มการคำนวณ OFFSET
+                        // คำนวณค่า offset สำหรับ pagination
                         $offset = ($currentPage - 1) * $itemsPerPage;
 
-                        // คำสั่ง SQL หลัก (จะไม่คำนึงถึงการแบ่งหน้าในตอนนี้)
-                        $sql = "SELECT li.*
-                        FROM leave_list li
-                        WHERE li.l_department <> 'RD'
-                        AND li.l_leave_id NOT IN (6, 7)
-                        AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
-                        AND (YEAR(li.l_create_datetime) = :selectedYear
-                        OR YEAR(li.l_leave_end_date) = :selectedYear)";
+                        // สร้างคำสั่ง SQL
+                        $sql = "SELECT
+            li.*
+        FROM
+            leave_list li
+        WHERE
+            li.l_department <> 'RD'
+            AND li.l_leave_id NOT IN (6, 7)
+            AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+            AND (
+                YEAR(li.l_create_datetime) = :selectedYear
+                OR YEAR(li.l_leave_end_date) = :selectedYear
+            )";
 
-                        // ถ้าเลือกเดือน ให้กรองข้อมูลตามเดือน
                         if ($selectedMonth != "All") {
-                            $sql .= " AND (MONTH(li.l_create_datetime) = :selectedMonth
-                         OR MONTH(li.l_leave_end_date) = :selectedMonth)";
+                            $sql .= " AND (
+                Month(li.l_create_datetime) = :selectedMonth
+                OR Month(li.l_leave_end_date) = :selectedMonth
+             )";
                         }
 
-                        // ถ้ามีการค้นหา รหัสพนักงาน
-                        if (! empty($searchCode)) {
-                            $sql .= " AND li.l_usercode LIKE :searchCode";
-                        }
-
-                        // กำหนดการเรียงลำดับ
                         $sql .= " ORDER BY li.l_create_datetime DESC";
 
-                        // เตรียมคำสั่ง SQL สำหรับการค้นหา
+                        // ประมวลผลคำสั่ง SQL เพื่อหาจำนวนแถวทั้งหมด
                         $stmt = $conn->prepare($sql);
+
+                        // ผูกค่า (bind parameters)
                         $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 
                         if ($selectedMonth != "All") {
                             $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
                         }
 
-                        if (! empty($searchCode)) {
-                            $searchParam = "%$searchCode%";
-                            $stmt->bindParam(':searchCode', $searchParam, PDO::PARAM_STR);
-                        }
-
                         $stmt->execute();
-                        $totalRows = $stmt->rowCount(); // นับจำนวนแถวทั้งหมด
+
+                        // นับจำนวนแถวทั้งหมด
+                        $totalRows = $stmt->rowCount();
 
                         // คำนวณจำนวนหน้าทั้งหมด
                         $totalPages = ceil($totalRows / $itemsPerPage);
 
-                        // เพิ่ม LIMIT และ OFFSET
+                        // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
                         $sql .= " LIMIT :itemsPerPage OFFSET :offset";
 
-                        // ดึงข้อมูลที่จำเป็นสำหรับแสดงในหน้าปัจจุบัน
+                        // เตรียมคำสั่ง SQL ใหม่สำหรับดึงข้อมูลรายการในหน้าที่กำหนด
                         $stmt = $conn->prepare($sql);
+
+                        // ผูกค่า (bind parameters) ใหม่
                         $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 
                         if ($selectedMonth != "All") {
                             $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-                        }
-
-                        if (! empty($searchCode)) {
-                            $stmt->bindParam(':searchCode', $searchParam, PDO::PARAM_STR);
                         }
 
                         $stmt->bindParam(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
@@ -453,8 +447,8 @@ AND li.l_approve_status3 = 9
 
                         $stmt->execute();
 
-                        // แสดงข้อมูล
-                        $rowNumber = $totalRows - $offset;
+                                                           // แสดงข้อมูลในตาราง
+                        $rowNumber = $totalRows - $offset; // กำหนดลำดับของแถวเริ่มต้น
                         if ($stmt->rowCount() > 0) {
                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 echo '<tr class="align-middle">';
@@ -922,8 +916,35 @@ AND li.l_approve_status3 = 9
                 </tbody>
             </table>
         </div>
-        <div id="pagination"></div>
+        <?php
+            echo '<div class="mt-3">';
+            echo '<nav>';
+            echo '<ul class="pagination justify-content-start">';
 
+            // ปุ่มย้อนกลับ
+            if ($currentPage > 1) {
+                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&year=' . $selectedYear . '&month=' . $selectedMonth . '">«</a></li>';
+            }
+
+            // แสดงหมายเลขหน้า
+            for ($i = 1; $i <= $totalPages; $i++) {
+                if ($i == $currentPage) {
+                    echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+                } else {
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&year=' . $selectedYear . '&month=' . $selectedMonth . '">' . $i . '</a></li>';
+                }
+            }
+
+            // ปุ่มถัดไป
+            if ($currentPage < $totalPages) {
+                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&year=' . $selectedYear . '&month=' . $selectedMonth . '">»</a></li>';
+            }
+
+            echo '</ul>';
+            echo '</nav>';
+            echo '</div>';
+
+        ?>
         <!-- Modal เช็คการลา -->
         <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -961,80 +982,6 @@ AND li.l_approve_status3 = 9
     </div>
 
     <script>
-    $(document).ready(function() {
-        // ค้นหาข้อมูลเมื่อมีการเปลี่ยนแปลงในช่องค้นหา
-        $('#codeSearch').on('input', function() {
-            var searchCode = $(this).val();
-            var selectedYear = $('#yearSelect').val();
-            var selectedMonth = $('#monthSelect').val();
-            var currentPage = 1; // หน้าแรก
-
-            // ตรวจสอบค่าที่จะส่ง
-            console.log("🔍 Searching for:", searchCode, selectedYear, selectedMonth);
-
-            // เรียก AJAX
-            $.ajax({
-                url: 'your_php_file.php',
-                method: 'GET',
-                data: {
-                    page: currentPage,
-                    codeSearch: searchCode,
-                    year: selectedYear,
-                    month: selectedMonth
-                },
-                success: function(response) {
-                    console.log("✅ Response received:", response);
-                    var data = JSON.parse(response);
-
-                    // แสดงข้อมูลในตาราง
-                    $('#leaveTable tbody').html(data.data);
-
-                    // แสดง Pagination
-                    $('#pagination').html(data.pagination);
-                },
-                error: function(xhr, status, error) {
-                    console.error("❌ AJAX Error:", error);
-                }
-            });
-        });
-
-        // เมื่อคลิกที่ลิงก์ Pagination
-        $(document).on('click', '.pagination-link', function(e) {
-            e.preventDefault();
-            var page = $(this).data('page');
-            var searchCode = $('#codeSearch').val();
-            var selectedYear = $('#yearSelect').val();
-            var selectedMonth = $('#monthSelect').val();
-
-            console.log("🔍 Going to page:", page);
-
-            // เรียก AJAX เพื่อโหลดข้อมูลในหน้านั้น
-            $.ajax({
-                url: 'your_php_file.php',
-                method: 'GET',
-                data: {
-                    page: page,
-                    codeSearch: searchCode,
-                    year: selectedYear,
-                    month: selectedMonth
-                },
-                success: function(response) {
-                    console.log("✅ Response received:", response);
-                    var data = JSON.parse(response);
-
-                    // แสดงข้อมูลในตาราง
-                    $('#leaveTable tbody').html(data.data);
-
-                    // แสดง Pagination
-                    $('#pagination').html(data.pagination);
-                },
-                error: function(xhr, status, error) {
-                    console.error("❌ AJAX Error:", error);
-                }
-            });
-        });
-    });
-
     $(".leaveChk").click(function() {
         var rowData = $(this).closest("tr").find("td");
 
@@ -1916,14 +1863,14 @@ AND li.l_approve_status3 = 9
         });
     });
 
-    // $("#codeSearch").on("keyup", function() {
-    //     var value = $(this).val().toLowerCase();
-    //     $("tbody tr").filter(function() {
-    //         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-    //     });
-    // });
-
     $("#nameSearch").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+
+    $("#leaveSearch").on("keyup", function() {
         var value2 = $(this).val().toLowerCase();
         $("tbody tr").filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
