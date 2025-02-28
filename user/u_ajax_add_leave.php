@@ -122,21 +122,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $subDepart4 = $_POST['subDepart4'];
     $subDepart5 = $_POST['subDepart5'];
 
-    $filename = null;
-    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-        $filename      = $_FILES['file']['name'];
-        $location      = "../upload/" . $filename;
-        $imageFileType = strtolower(pathinfo($location, PATHINFO_EXTENSION));
+    // ตัวแปรสำหรับเก็บชื่อไฟล์ทั้ง 3 ไฟล์
+    $filename  = null;
+    $filename2 = null;
+    $filename3 = null;
 
-        $valid_extensions = ["jpg", "jpeg", "png"];
-        if (in_array($imageFileType, $valid_extensions)) {
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $location)) {
-                $response = $location;
+    if (isset($_FILES['file1']) && $_FILES['file1']['error'] === UPLOAD_ERR_OK) {
+        $filename = time() . '_1_' . $_FILES['file1']['name']; // เพิ่ม timestamp และลำดับไฟล์เพื่อป้องกันชื่อซ้ำ
+        $location = "../upload/" . $filename;
+        $fileType = strtolower(pathinfo($location, PATHINFO_EXTENSION));
+
+        $valid_extensions = ["jpg", "jpeg", "png", "pdf"]; // เพิ่ม PDF เข้าไปในรายการไฟล์ที่อนุญาต
+        if (in_array($fileType, $valid_extensions)) {
+            if (move_uploaded_file($_FILES['file1']['tmp_name'], $location)) {
+                // อัปโหลดสำเร็จ
+            } else {
+                $filename = null; // กรณีอัปโหลดไม่สำเร็จ
             }
+        } else {
+            $filename = null; // กรณีไฟล์ไม่ใช่รูปภาพหรือ PDF ที่รองรับ
         }
     }
 
-    $chkApprover = "SELECT * FROM employees WHERE e_username = :approver";
+// จัดการอัปโหลดไฟล์ที่ 2
+    if (isset($_FILES['file2']) && $_FILES['file2']['error'] === UPLOAD_ERR_OK) {
+        $filename2 = time() . '_2_' . $_FILES['file2']['name'];
+        $location  = "../upload/" . $filename2;
+        $fileType  = strtolower(pathinfo($location, PATHINFO_EXTENSION));
+
+        $valid_extensions = ["jpg", "jpeg", "png", "pdf"]; // เพิ่ม PDF เข้าไปในรายการไฟล์ที่อนุญาต
+        if (in_array($fileType, $valid_extensions)) {
+            if (move_uploaded_file($_FILES['file2']['tmp_name'], $location)) {
+                // อัปโหลดสำเร็จ
+            } else {
+                $filename2 = null;
+            }
+        } else {
+            $filename2 = null;
+        }
+    }
+
+// จัดการอัปโหลดไฟล์ที่ 3
+    if (isset($_FILES['file3']) && $_FILES['file3']['error'] === UPLOAD_ERR_OK) {
+        $filename3 = time() . '_3_' . $_FILES['file3']['name'];
+        $location  = "../upload/" . $filename3;
+        $fileType  = strtolower(pathinfo($location, PATHINFO_EXTENSION));
+
+        $valid_extensions = ["jpg", "jpeg", "png", "pdf"]; // เพิ่ม PDF เข้าไปในรายการไฟล์ที่อนุญาต
+        if (in_array($fileType, $valid_extensions)) {
+            if (move_uploaded_file($_FILES['file3']['tmp_name'], $location)) {
+                // อัปโหลดสำเร็จ
+            } else {
+                $filename3 = null;
+            }
+        } else {
+            $filename3 = null;
+        }
+    }
+
+    $chkApprover = "SELECT * FROM employees WHERE e_name = :approver";
     $stmt        = $conn->prepare($chkApprover);
     $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
     $stmt->execute();
@@ -189,11 +233,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // แก้ไขคำสั่ง SQL เพื่อรองรับไฟล์เพิ่มเติม
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
-        l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
+        l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_file2, l_file3, l_leave_status,
         l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_time_remark, l_approve_status3, l_time_remark2)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
-        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
+        :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :filename2, :filename3, :leaveStatus, :comfirmStatus,
         :proveStatus, :level, :proveStatus2, :workplace, :timeRemark, :proveStatus3, :timeRemark2)");
 
     $stmt->bindParam(':userCode', $userCode);
@@ -209,6 +254,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':leaveTimeEnd', $leaveTimeEnd);
     $stmt->bindParam(':formattedDate', $formattedDate);
     $stmt->bindParam(':filename', $filename);
+    $stmt->bindParam(':filename2', $filename2); // เพิ่มพารามิเตอร์ใหม่
+    $stmt->bindParam(':filename3', $filename3); // เพิ่มพารามิเตอร์ใหม่
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
@@ -220,7 +267,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveStatus3', $proveStatus3);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_username = :approver AND e_workplace = :workplace";
+        $sql  = "SELECT e_user_id FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':approver', $approver);
         $stmt->bindParam(':workplace', $workplace);
@@ -231,7 +278,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sURL     = 'https://lms.system-samt.com/';
             $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\n" .
                 "วันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\n" .
-                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL" . "";
 
             foreach ($userIds as $userId) {
                 $data = [
@@ -264,6 +311,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             echo "ไม่พบผู้รับข้อความ";
         }
+
+        echo "success"; // ส่งสถานะการทำงานกลับไปยัง AJAX
     } else {
         echo "Error: " . $stmt->errorInfo()[2] . "<br>";
     }
