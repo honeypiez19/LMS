@@ -45,6 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:10' => ['10:10', '10:30', '10:10:00'],
         '10:15' => ['10:15', '10:30', '10:15:00'],
         '10:45' => ['10:45', '11:00', '10:45:00'],
+        '11:10' => ['11:10', '11:30', '11:10:00'],
+        '11:15' => ['11:15', '11:30', '11:15:00'],
+        '11:45' => ['11:45', '12:00', null],
         '12:00' => ['11:45', '12:00', null],
         '13:00' => ['12:45', '13:00', null],
         '13:10' => ['13:10', '13:30', '13:10:00'],
@@ -80,6 +83,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:10' => ['10:10', '10:30', '10:10:00'],
         '10:15' => ['10:15', '10:30', '10:15:00'],
         '10:45' => ['10:45', '11:00', '10:45:00'],
+        '11:10' => ['11:10', '11:30', '11:10:00'],
+        '11:15' => ['11:15', '11:30', '11:15:00'],
+        '11:45' => ['11:45', '12:00', null],
         '12:00' => ['11:45', '12:00', null],
         '13:00' => ['12:45', '13:00', null],
         '13:10' => ['13:10', '13:30', '13:10:00'],
@@ -122,21 +128,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $subDepart4 = $_POST['subDepart4'];
     $subDepart5 = $_POST['subDepart5'];
 
-    $filename = null;
-    if (isset($_FILES['urgentFile']) && $_FILES['urgentFile']['error'] === UPLOAD_ERR_OK) {
-        $filename      = $_FILES['urgentFile']['name'];
+    $filename  = null;
+    $filename2 = null;
+    $filename3 = null;
+
+// จัดการอัปโหลดไฟล์ที่ 1
+    if (isset($_FILES['file1']) && $_FILES['file1']['error'] === UPLOAD_ERR_OK) {
+        $filename      = time() . '_1_' . $_FILES['file1']['name']; // เพิ่ม timestamp และลำดับไฟล์เพื่อป้องกันชื่อซ้ำ
         $location      = "../upload/" . $filename;
         $imageFileType = strtolower(pathinfo($location, PATHINFO_EXTENSION));
 
         $valid_extensions = ["jpg", "jpeg", "png"];
         if (in_array($imageFileType, $valid_extensions)) {
-            if (move_uploaded_file($_FILES['urgentFile']['tmp_name'], $location)) {
-                $response = $location;
+            if (move_uploaded_file($_FILES['file1']['tmp_name'], $location)) {
+                // อัปโหลดสำเร็จ
+            } else {
+                $filename = null; // กรณีอัปโหลดไม่สำเร็จ
             }
+        } else {
+            $filename = null; // กรณีไฟล์ไม่ใช่รูปภาพที่รองรับ
         }
     }
 
-    $chkApprover = "SELECT * FROM employees WHERE e_username = :approver";
+// จัดการอัปโหลดไฟล์ที่ 2
+    if (isset($_FILES['file2']) && $_FILES['file2']['error'] === UPLOAD_ERR_OK) {
+        $filename2     = time() . '_2_' . $_FILES['file2']['name'];
+        $location      = "../upload/" . $filename2;
+        $imageFileType = strtolower(pathinfo($location, PATHINFO_EXTENSION));
+
+        $valid_extensions = ["jpg", "jpeg", "png"];
+        if (in_array($imageFileType, $valid_extensions)) {
+            if (move_uploaded_file($_FILES['file2']['tmp_name'], $location)) {
+                // อัปโหลดสำเร็จ
+            } else {
+                $filename2 = null;
+            }
+        } else {
+            $filename2 = null;
+        }
+    }
+
+// จัดการอัปโหลดไฟล์ที่ 3
+    if (isset($_FILES['file3']) && $_FILES['file3']['error'] === UPLOAD_ERR_OK) {
+        $filename3     = time() . '_3_' . $_FILES['file3']['name'];
+        $location      = "../upload/" . $filename3;
+        $imageFileType = strtolower(pathinfo($location, PATHINFO_EXTENSION));
+
+        $valid_extensions = ["jpg", "jpeg", "png"];
+        if (in_array($imageFileType, $valid_extensions)) {
+            if (move_uploaded_file($_FILES['file3']['tmp_name'], $location)) {
+                // อัปโหลดสำเร็จ
+            } else {
+                $filename3 = null;
+            }
+        } else {
+            $filename3 = null;
+        }
+    }
+
+    $chkApprover = "SELECT * FROM employees WHERE e_name = :approver";
     $stmt        = $conn->prepare($chkApprover);
     $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
     $stmt->execute();
@@ -180,10 +230,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
-        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_time_remark, l_time_remark2)
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_time_remark, l_time_remark2,
+        l_file2, l_file3)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :urgentLeaveType, :urgentLeaveReason, :urgentStartDate, :urgentStartTime,
         :urgentEndDate, :urgentEndTime, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
-        :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3, :timeRemark, :timeRemark2)");
+        :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3, :timeRemark, :timeRemark2,:filename2,:filename3)");
 
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
@@ -198,6 +249,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':urgentEndTime', $urgentEndTime);
     $stmt->bindParam(':formattedDate', $formattedDate);
     $stmt->bindParam(':filename', $filename);
+    $stmt->bindParam(':filename2', $filename2);
+    $stmt->bindParam(':filename3', $filename3);
+
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
@@ -210,7 +264,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':timeRemark2', $timeRemark2);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_username = :approver AND e_workplace = :workplace";
+        $sql  = "SELECT e_user_id FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':approver', $approver);
         $stmt->bindParam(':workplace', $workplace);

@@ -1915,20 +1915,20 @@ WHERE l_leave_id = :leave_id
 
                                     if ($hasFiles) {
                                         // แสดงปุ่มเปิดแกลเลอรี่
-                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . '">
-                <i class="fa-solid fa-file"></i> (' . $fileCount . ')
-              </button>';
+                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '">
+            <i class="fa-solid fa-file"></i> (' . $fileCount . ')
+        </button>';
 
                                         // สร้าง Modal สำหรับแสดงแกลเลอรี่
-                                        echo '<div class="modal fade" id="fileGallery' . '" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">';
+                                        echo '<div class="modal fade" id="fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">';
 
                                         // แสดงไฟล์ทั้งหมดในแกลเลอรี่
                                         if (! empty($row['l_file'])) {
@@ -2004,9 +2004,7 @@ WHERE l_leave_id = :leave_id
 
                                         echo '</div>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-              </div>
+
             </div>
           </div>
         </div>';
@@ -2596,23 +2594,48 @@ WHERE l_leave_id = :leave_id
                     return;
                 }
 
-                // แสดงตัวอย่างรูปภาพ
+                // แสดงตัวอย่างไฟล์
                 for (let i = 0; i < fileInput.files.length; i++) {
                     const file = fileInput.files[i];
-                    if (file.type.match('image.*')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        if (file.type.match('image.*')) {
+                            // แสดงตัวอย่างรูปภาพ
                             filePreview.append(`
                     <div class="position-relative">
                         <img src="${e.target.result}" class="img-thumbnail" style="height: 100px;">
                         <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
                     </div>
                 `);
+                        } else if (file.type === 'application/pdf') {
+                            // แสดงตัวอย่างไฟล์ PDF
+                            filePreview.append(`
+                    <div class="position-relative">
+                        <div class="img-thumbnail d-flex flex-column align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                            <i class="fa fa-file-pdf text-danger" style="font-size: 40px;"></i>
+                            <small class="text-center text-truncate" style="max-width: 90px;">${file.name}</small>
+                        </div>
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                        } else {
+                            // ไฟล์ประเภทที่ไม่รองรับ
+                            Swal.fire({
+                                title: "รูปแบบไฟล์ไม่ถูกต้อง",
+                                text: "กรุณาแนบไฟล์ที่เป็นรูปภาพ (PNG, JPG, JPEG) หรือ PDF เท่านั้น",
+                                icon: "error"
+                            });
+                            fileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                            filePreview.empty();
+                            return;
                         }
-                        reader.readAsDataURL(file);
-                    }
+                    };
+
+                    reader.readAsDataURL(file);
                 }
             });
+
 
             $('#urgentFile').change(function() {
                 const urgentFileInput = this;

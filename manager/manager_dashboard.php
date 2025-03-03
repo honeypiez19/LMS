@@ -1178,9 +1178,9 @@ WHERE l_leave_id = :leave_id
                                         <label for="urgentLeaveType" class="form-label">ประเภทการลา</label>
                                         <span style="color: red;">*</span>
                                         <span class="badge rounded-pill text-bg-info" hidden>เหลือ
-                                            <span id="remaining-days2">0</span> วัน
-                                            <span id="remaining-hours2">0</span> ชั่วโมง
-                                            <span id="remaining-minutes2">0</span> นาที
+                                            <span id="remaining-days">0</span> วัน
+                                            <span id="remaining-hours">0</span> ชั่วโมง
+                                            <span id="remaining-minutes">0</span> นาที
                                         </span>
                                         <select class="form-select" id="urgentLeaveType" required>
                                             <option selected>เลือกประเภทการลา</option>
@@ -1207,13 +1207,14 @@ WHERE l_leave_id = :leave_id
                                     <div class="col-6">
                                         <label for="urgentStartDate" class="form-label">วันที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
-                                        <input type="text" class="form-control" id="urgentStartDate" required>
+                                        <input type="text" class="form-control" id="urgentStartDate" required
+                                            onchange="calculateLeaveDuration()">
                                     </div>
                                     <div class="col-6">
                                         <label for="urgentStartTime" class="form-label">เวลาที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="urgentStartTime" name="urgentStartTime"
-                                            required>
+                                        <select class="form-select" id="urgentStartTime" name="urgentStartTime" required
+                                            onchange="calculateLeaveDuration()">
                                             <option value="08:00" selected>08:00</option>
                                             <option value="08:10">08:10</option>
                                             <option value="08:15">08:15</option>
@@ -1258,12 +1259,14 @@ WHERE l_leave_id = :leave_id
                                     <div class="col-6">
                                         <label for="urgentEndDate" class="form-label">วันที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
-                                        <input type="text" class="form-control" id="urgentEndDate" required>
+                                        <input type="text" class="form-control" id="urgentEndDate" required
+                                            onchange="calculateLeaveDuration()">
                                     </div>
                                     <div class="col-6">
                                         <label for="urgentEndTime" class="form-label">เวลาที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
-                                        <select class="form-select" id="urgentEndTime" name="urgentEndTime" required>
+                                        <select class="form-select" id="urgentEndTime" name="urgentEndTime" required
+                                            onchange="calculateLeaveDuration()">
                                             <option value="08:00">08:00</option>
                                             <option value="08:10">08:10</option>
                                             <option value="08:15">08:15</option>
@@ -1427,8 +1430,9 @@ WHERE l_leave_id = :leave_id
                                 </div>
                                 <!-- Submit Button -->
                                 <div class="mt-3 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-success" name="submit"
-                                        style="width: 100px;"><?php echo $btnSave; ?></button>
+                                    <button type="submit" class="btn btn-success" name="submit" style="width: 100px;"
+                                        id="btnSubmitForm2">
+                                        <?php echo $btnSave; ?></button>
                                 </div>
                             </form>
                         </div>
@@ -1871,20 +1875,20 @@ WHERE l_leave_id = :leave_id
 
                                     if ($hasFiles) {
                                         // แสดงปุ่มเปิดแกลเลอรี่
-                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . '">
-                <i class="fa-solid fa-file"></i> (' . $fileCount . ')
-              </button>';
+                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '">
+            <i class="fa-solid fa-file"></i> (' . $fileCount . ')
+        </button>';
 
                                         // สร้าง Modal สำหรับแสดงแกลเลอรี่
-                                        echo '<div class="modal fade" id="fileGallery' . '" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">';
+                                        echo '<div class="modal fade" id="fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">';
 
                                         // แสดงไฟล์ทั้งหมดในแกลเลอรี่
                                         if (! empty($row['l_file'])) {
@@ -1959,9 +1963,6 @@ WHERE l_leave_id = :leave_id
                                         }
 
                                         echo '</div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
               </div>
             </div>
           </div>
@@ -2424,7 +2425,7 @@ WHERE l_leave_id = :leave_id
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
                 var userCode = '<?php echo $userCode; ?>';
                 var depart = '<?php echo $depart; ?>';
-                var selectedYear = <?php echo json_encode($selectedYear); ?>;
+                var selectedYear =                                   <?php echo json_encode($selectedYear); ?>;
                 var nameType = '';
 
                 if (leaveType == 1) {

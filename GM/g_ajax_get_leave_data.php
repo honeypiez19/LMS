@@ -14,6 +14,7 @@ FROM
 WHERE
     li.l_department <> 'RD'
     AND li.l_leave_id NOT IN (6, 7)
+    AND li.l_approve_status2 = 4
             AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
  AND (
         YEAR(li.l_create_datetime) = :year
@@ -25,7 +26,7 @@ if ($status == 'all') {
     $sql .= " AND li.l_approve_status3 = 7";
 } else if ($status == 8) {
     $sql .= " AND li.l_approve_status3 = 8";
-} else if ($status == 3) {
+} else if ($status == 9) {
     $sql .= " AND li.l_approve_status3 = 9";
 } else {
     echo json_encode(['error' => 'ไม่พบสถานะ']);

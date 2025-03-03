@@ -106,21 +106,44 @@ if (isset($timeMappings[$editLeaveEndTime])) {
 }
 
 // จัดการไฟล์
-$filename = null; // กำหนดค่าเริ่มต้น
+$filenames = [];
 
-if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
-    $fileTmpPath = $_FILES['file']['tmp_name'];
-    $fileName    = $_FILES['file']['name'];
-    $fileSize    = $_FILES['file']['size'];
-    $fileType    = $_FILES['file']['type'];
+// ตรวจสอบว่ามีไฟล์ใหม่หรือไม่
+if (isset($_FILES['file']) && ! empty($_FILES['file']['name'][0])) {
+    $fileCount = count($_FILES['file']['name']);
 
-    $allowedFileTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    if (in_array($fileType, $allowedFileTypes)) {
-        $uploadDir = 'uploads/';
-        $dest_path = $uploadDir . $fileName;
+    // ตรวจสอบจำนวนไฟล์
+    if ($fileCount > 3) {
+        echo json_encode([
+            'status'  => 'error',
+            'message' => 'จำนวนไฟล์เกิน 3 ไฟล์',
+        ]);
+        exit;
+    }
+
+    $uploadDir = 'uploads/';
+
+    for ($i = 0; $i < $fileCount; $i++) {
+        $fileName    = $_FILES['file']['name'][$i];
+        $fileTmpPath = $_FILES['file']['tmp_name'][$i];
+        $fileType    = $_FILES['file']['type'][$i];
+
+        // ตรวจสอบประเภทไฟล์
+        $allowedFileTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (! in_array($fileType, $allowedFileTypes)) {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'ประเภทไฟล์ไม่ถูกต้อง (รองรับเฉพาะ PNG, JPG, JPEG)',
+            ]);
+            exit;
+        }
+
+        // สร้างชื่อไฟล์ใหม่เพื่อป้องกันการซ้ำ
+        $newFileName = $userCode . '_' . date('YmdHis') . '_' . $i . '.' . pathinfo($fileName, PATHINFO_EXTENSION);
+        $dest_path   = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $dest_path)) {
-            $filename = $dest_path;
+            $filenames[] = $dest_path;
         } else {
             echo json_encode([
                 'status'  => 'error',
@@ -128,16 +151,14 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
             ]);
             exit;
         }
-    } else {
-        echo json_encode([
-            'status'  => 'error',
-            'message' => 'ไฟล์ไม่ถูกต้อง',
-        ]);
-        exit;
     }
-} elseif (isset($_POST['currentFile']) && ! empty($_POST['currentFile'])) {
-    $filename = $_POST['currentFile'];
+} elseif (isset($_POST['currentFiles']) && ! empty($_POST['currentFiles'])) {
+    // ใช้ไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+    $filenames = json_decode($_POST['currentFiles'], true);
 }
+
+// แปลงรายการไฟล์เป็น JSON สำหรับเก็บในฐานข้อมูล
+$filenamesJson = json_encode($filenames);
 
 try {
     $sql = "UPDATE leave_list SET l_leave_id = :editLeaveType, l_leave_reason = :editLeaveReason,
@@ -145,7 +166,7 @@ try {
             l_leave_end_date = :endDate, l_leave_end_time = :editLeaveEndTime,
             l_time_remark = :timeRemark,
             l_time_remark2 = :timeRemark2,
-            l_file = :filename
+            l_file = :filenamesJson
             WHERE l_usercode = :userCode AND l_create_datetime = :createDatetime";
 
     $stmt = $conn->prepare($sql);
@@ -155,7 +176,7 @@ try {
     $stmt->bindParam(':editLeaveStartTime', $editLeaveStartTime);
     $stmt->bindParam(':endDate', $endDate);
     $stmt->bindParam(':editLeaveEndTime', $editLeaveEndTime);
-    $stmt->bindParam(':filename', $filename);
+    $stmt->bindParam(':filenamesJson', $filenamesJson);
     $stmt->bindParam(':createDatetime', $createDatetime);
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':timeRemark', $timeRemark);

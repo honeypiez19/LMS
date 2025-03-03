@@ -1,12 +1,12 @@
 <?php
 include '../connect.php';
-
 header('Content-Type: application/json');
 
 // รับค่าตัวแปรจาก POST
-$userCode     = $_POST['userCode'] ?? '';
-$leaveType    = $_POST['leaveType'] ?? '';    // ประเภทการลา
-$selectedYear = $_POST['selectedYear'] ?? ''; // ปีที่ต้องการดึงข้อมูล
+$userCode        = $_POST['userCode'] ?? '';
+$leaveType       = $_POST['leaveType'] ?? '';       // ประเภทการลา
+$selectedYear    = $_POST['selectedYear'] ?? '';    // ปีที่ต้องการดึงข้อมูล
+$urgentLeaveType = $_POST['urgentLeaveType'] ?? ''; // ประเภทการลา
 
 if (empty($userCode) || empty($leaveType) || empty($selectedYear)) {
     echo json_encode(['error' => 'Invalid input']);

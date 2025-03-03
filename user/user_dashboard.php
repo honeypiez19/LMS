@@ -1671,43 +1671,43 @@ WHERE l_leave_id = :leave_id
 
                                     if ($hasFiles) {
                                         // แสดงปุ่มเปิดแกลเลอรี่
-                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . '">
-                <i class="fa-solid fa-file"></i> (' . $fileCount . ')
-              </button>';
+                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '">
+            <i class="fa-solid fa-file"></i> (' . $fileCount . ')
+        </button>';
 
                                         // สร้าง Modal สำหรับแสดงแกลเลอรี่
-                                        echo '<div class="modal fade" id="fileGallery' . '" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">';
+                                        echo '<div class="modal fade" id="fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">';
 
                                         // แสดงไฟล์ทั้งหมดในแกลเลอรี่
                                         if (! empty($row['l_file'])) {
                                             $fileExt = strtolower(pathinfo($row['l_file'], PATHINFO_EXTENSION));
                                             if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
                                                 echo '<div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <img src="../upload/' . $row['l_file'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
-                            <div class="card-body text-center">
-                                <h6 class="card-title">ไฟล์ที่ 1</h6>
-                            </div>
+                    <div class="card h-100">
+                        <img src="../upload/' . $row['l_file'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">ไฟล์ที่ 1</h6>
                         </div>
-                      </div>';
+                    </div>
+                </div>';
                                             } else {
                                                 echo '<div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fa-solid fa-file fa-5x mb-3"></i>
-                                <h6 class="card-title">ไฟล์ที่ 1 (' . $fileExt . ')</h6>
-                                <a href="../upload/' . $row['l_file'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
-                            </div>
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa-solid fa-file fa-5x mb-3"></i>
+                            <h6 class="card-title">ไฟล์ที่ 1 (' . $fileExt . ')</h6>
+                            <a href="../upload/' . $row['l_file'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
                         </div>
-                      </div>';
+                    </div>
+                </div>';
                                             }
                                         }
 
@@ -1715,23 +1715,23 @@ WHERE l_leave_id = :leave_id
                                             $fileExt = strtolower(pathinfo($row['l_file2'], PATHINFO_EXTENSION));
                                             if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
                                                 echo '<div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <img src="../upload/' . $row['l_file2'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
-                            <div class="card-body text-center">
-                                <h6 class="card-title">ไฟล์ที่ 2</h6>
-                            </div>
+                    <div class="card h-100">
+                        <img src="../upload/' . $row['l_file2'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">ไฟล์ที่ 2</h6>
                         </div>
-                      </div>';
+                    </div>
+                </div>';
                                             } else {
                                                 echo '<div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fa-solid fa-file fa-5x mb-3"></i>
-                                <h6 class="card-title">ไฟล์ที่ 2 (' . $fileExt . ')</h6>
-                                <a href="../upload/' . $row['l_file2'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
-                            </div>
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa-solid fa-file fa-5x mb-3"></i>
+                            <h6 class="card-title">ไฟล์ที่ 2 (' . $fileExt . ')</h6>
+                            <a href="../upload/' . $row['l_file2'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
                         </div>
-                      </div>';
+                    </div>
+                </div>';
                                             }
                                         }
 
@@ -1739,32 +1739,31 @@ WHERE l_leave_id = :leave_id
                                             $fileExt = strtolower(pathinfo($row['l_file3'], PATHINFO_EXTENSION));
                                             if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
                                                 echo '<div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <img src="../upload/' . $row['l_file3'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
-                            <div class="card-body text-center">
-                                <h6 class="card-title">ไฟล์ที่ 3</h6>
-                            </div>
+                    <div class="card h-100">
+                        <img src="../upload/' . $row['l_file3'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">ไฟล์ที่ 3</h6>
                         </div>
-                      </div>';
+                    </div>
+                </div>';
                                             } else {
                                                 echo '<div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                <i class="fa-solid fa-file fa-5x mb-3"></i>
-                                <h6 class="card-title">ไฟล์ที่ 3 (' . $fileExt . ')</h6>
-                            </div>
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa-solid fa-file fa-5x mb-3"></i>
+                            <h6 class="card-title">ไฟล์ที่ 3 (' . $fileExt . ')</h6>
+                            <a href="../upload/' . $row['l_file3'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
                         </div>
-                      </div>';
+                    </div>
+                </div>';
                                             }
                                         }
 
                                         echo '</div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-              </div>
+                    </div>
+
+                </div>
             </div>
-          </div>
         </div>';
                                     } else {
                                         // ถ้าไม่มีไฟล์แนบเลย
@@ -2172,17 +2171,10 @@ WHERE l_leave_id = :leave_id
                                 <div class=" mt-3 row">
                                     <div class="col-12">
                                         <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
-                                        <input class="form-control" type="file" id="editFile" name="editFile" />
-                                        <!-- แสดงชื่อไฟล์เดิม -->
-                                        <small id="currentFile" class="form-text text-muted">
-                                            <!-- ชื่อไฟล์เดิมจะแสดงที่นี่ -->
-                                        </small>
-                                        <!-- Preview รูป -->
-                                        <div class="mt-3"
-                                            style="display: flex; justify-content: center; align-items: center;">
-                                            <img id="imagePreview" src="#" alt="Preview Image"
-                                                style="max-width: 100%; display: none; width: 200px; height: 200px;" />
-                                        </div>
+                                        <input class="form-control" type="file" id="editFile" name="editFile" multiple
+                                            accept="image/png, image/jpeg, image/jpg" />
+                                        <small class="text-muted">เลือกไฟล์รูปภาพได้สูงสุด 3 ไฟล์</small>
+                                        <div id="editFilePreview" class="mt-2 d-flex flex-wrap gap-2"></div>
                                     </div>
                                 </div>
                                 <div class="mt-3 d-flex justify-content-end">
@@ -2212,29 +2204,29 @@ WHERE l_leave_id = :leave_id
         // });
 
         $(document).ready(function() {
-            document.getElementById("editFile").addEventListener("change", function(event) {
-                const fileInput = event.target;
-                const file = fileInput.files[0]; // ไฟล์ที่อัปโหลด
-                const preview = document.getElementById("imagePreview");
-                const currentFile = document.getElementById("currentFile");
+            // document.getElementById("editFile").addEventListener("change", function(event) {
+            //     const fileInput = event.target;
+            //     const file = fileInput.files[0]; // ไฟล์ที่อัปโหลด
+            //     const preview = document.getElementById("imagePreview");
+            //     const currentFile = document.getElementById("currentFile");
 
-                if (file) {
-                    // แสดงชื่อไฟล์
-                    currentFile.textContent = `ชื่อไฟล์: ${file.name}`;
+            //     if (file) {
+            //         // แสดงชื่อไฟล์
+            //         currentFile.textContent = `ชื่อไฟล์: ${file.name}`;
 
-                    // แสดงพรีวิวรูปภาพ
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        preview.src = e.target.result; // ตั้งค่า src ให้ preview
-                        preview.style.display = "block"; // แสดง img
-                    };
-                    reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL
-                } else {
-                    currentFile.textContent = "ยังไม่มีไฟล์ที่เลือก";
-                    preview.src = "#";
-                    preview.style.display = "none"; // ซ่อน img
-                }
-            });
+            //         // แสดงพรีวิวรูปภาพ
+            //         const reader = new FileReader();
+            //         reader.onload = function(e) {
+            //             preview.src = e.target.result; // ตั้งค่า src ให้ preview
+            //             preview.style.display = "block"; // แสดง img
+            //         };
+            //         reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL
+            //     } else {
+            //         currentFile.textContent = "ยังไม่มีไฟล์ที่เลือก";
+            //         preview.src = "#";
+            //         preview.style.display = "none"; // ซ่อน img
+            //     }
+            // });
 
             $('.filter-card').click(function() {
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
@@ -2391,7 +2383,7 @@ WHERE l_leave_id = :leave_id
                 }
             });
 
-            // เพิ่มส่วนนี้ 28/02/68
+
             $('#urgentFile').change(function() {
                 const urgentFileInput = this;
                 const urgentFilePreview = $('#urgentFilePreview');
@@ -2408,21 +2400,89 @@ WHERE l_leave_id = :leave_id
                     return;
                 }
 
-                // แสดงตัวอย่างรูปภาพ
+                // แสดงตัวอย่างไฟล์
                 for (let i = 0; i < urgentFileInput.files.length; i++) {
                     const file = urgentFileInput.files[i];
-                    if (file.type.match('image.*')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        if (file.type.match('image.*')) {
+                            // แสดงตัวอย่างรูปภาพ
                             urgentFilePreview.append(`
                     <div class="position-relative">
                         <img src="${e.target.result}" class="img-thumbnail" style="height: 100px;">
                         <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
                     </div>
                 `);
+                        } else if (file.type === 'application/pdf') {
+                            // แสดงตัวอย่างไฟล์ PDF
+                            urgentFilePreview.append(`
+                    <div class="position-relative">
+                        <div class="img-thumbnail d-flex flex-column align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                            <i class="fa fa-file-pdf text-danger" style="font-size: 40px;"></i>
+                            <small class="text-center text-truncate" style="max-width: 90px;">${file.name}</small>
+                        </div>
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                        } else {
+                            // ไฟล์ประเภทที่ไม่รองรับ
+                            Swal.fire({
+                                title: "รูปแบบไฟล์ไม่ถูกต้อง",
+
+                                text: "กรุณาแนบไฟล์ที่เป็นรูปภาพ (PNG, JPG, JPEG) หรือ PDF เท่านั้น",
+                                icon: "error"
+                            });
+                            urgentFileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                            urgentFilePreview.empty();
+                            return;
                         }
-                        reader.readAsDataURL(file);
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $('#editFile').on('change', function() {
+                var fileInput = this;
+                var previewContainer = $('#editFilePreview');
+                previewContainer.empty();
+
+                // Validate file count
+                if (fileInput.files.length > 3) {
+                    Swal.fire({
+                        title: 'ข้อผิดพลาด',
+                        text: 'เลือกไฟล์รูปภาพได้สูงสุด 3 ไฟล์',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                    });
+                    return false;
+                }
+
+                // Create previews
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    var file = fileInput.files[i];
+                    if (!file.type.match('image.*')) {
+                        continue;
                     }
+
+                    var reader = new FileReader();
+                    reader.onload = (function(file) {
+                        return function(e) {
+                            var imgWrapper = $('<div>').addClass('position-relative');
+                            var img = $('<img>').attr({
+                                'src': e.target.result,
+                                'title': file.name
+                            }).addClass('img-thumbnail').css({
+                                'width': '100px',
+                                'height': '100px',
+                                'object-fit': 'cover'
+                            });
+                            imgWrapper.append(img);
+                            previewContainer.append(imgWrapper);
+                        };
+                    })(file);
+                    reader.readAsDataURL(file);
                 }
             });
 
@@ -2462,7 +2522,10 @@ WHERE l_leave_id = :leave_id
                 fd.append('endTime', endTime);
                 fd.append('approver', approver);
 
-                // เพิ่มส่วนนี้ 28/02/68
+                // ในส่วนที่ประมวลผลการส่งฟอร์ม
+                console.log('userName:', fd.get('userName'));
+                console.log('approver:', fd.get('approver'));
+
                 // เก็บไฟล์ทั้ง 3 ไฟล์แยกกัน (หากมี)
                 if (files.length > 0) {
                     for (let i = 0; i < Math.min(files.length, 3); i++) {
@@ -2530,6 +2593,7 @@ WHERE l_leave_id = :leave_id
                                 var origEndDate = $('#endDate').val(); // รูปแบบ dd-mm-yyyy
                                 var startTime = $('#startTime').val(); // รูปแบบ hh:mm
                                 var endTime = $('#endTime').val(); // รูปแบบ hh:mm
+
 
                                 // ตรวจสอบว่าค่าวันที่และเวลามีครบหรือไม่
                                 if (!origStartDate || !origEndDate || !startTime || !
@@ -2703,14 +2767,14 @@ WHERE l_leave_id = :leave_id
                                         '-' + endParts[
                                             0];
 
-                                    // console.log("Formatted Start Date: " + formattedStartDate);
-                                    // console.log("Formatted End Date: " + formattedEndDate);
-
                                     if (startTime === '12:00') {
                                         startTime = '11:45';
                                     } else if (startTime === '13:00') {
                                         startTime = '12:45';
-                                    } else if (endTime === '12:00') {
+                                    }
+
+
+                                    if (endTime === '12:00') {
                                         endTime = '11:45';
                                     } else if (endTime === '13:00') {
                                         endTime = '12:45';
@@ -2718,6 +2782,7 @@ WHERE l_leave_id = :leave_id
                                         endTime = '16:40';
                                     }
 
+                                    // alert("endTime" + endTime)
                                     // เพิ่มส่วนนี้ 28/02/68
                                     let fileInfo = '';
                                     if (files.length > 0) {
@@ -3739,17 +3804,43 @@ ${fileInfo}
             $('#editLeaveForm').on('submit', function(e) {
                 e.preventDefault();
 
-                var formData = new FormData();
-                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
-                var currentFile = $('#currentFile')
-                    .val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+                var startDate = new Date($('#editLeaveStartDate').val());
+                var endDate = new Date($('#editLeaveEndDate').val());
 
-                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
-                if (editFile) {
-                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
-                } else if (currentFile) {
-                    formData.append('currentFile',
-                        currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                if (endDate < startDate) {
+                    Swal.fire({
+                        title: 'ไม่สามารถลาได้',
+                        text: 'กรุณาเลือกวันที่เริ่มต้นลาใหม่',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                    });
+                    return false;
+                }
+
+                var formData = new FormData();
+                var fileInput = $('#editFile')[0];
+                var currentFiles = $('#currentFile')
+                    .val(); // Assuming this is a JSON string of existing files
+
+                // Check if new files are selected
+                if (fileInput.files.length > 0) {
+                    // Validate file count
+                    if (fileInput.files.length > 3) {
+                        Swal.fire({
+                            title: 'ข้อผิดพลาด',
+                            text: 'เลือกไฟล์รูปภาพได้สูงสุด 3 ไฟล์',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
+                        });
+                        return false;
+                    }
+
+                    // Add each file to formData - NOTE THE CHANGE HERE: 'file[]' instead of 'editFile'
+                    for (var i = 0; i < fileInput.files.length; i++) {
+                        formData.append('file[]', fileInput.files[i]);
+                    }
+                } else if (currentFiles) {
+                    formData.append('currentFiles', currentFiles);
                 }
 
                 // เพิ่มค่าฟอร์มอื่นๆ
@@ -3767,6 +3858,12 @@ ${fileInfo}
                 formData.append('editLeaveEndDate', $('#editLeaveEndDate').val());
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
                 formData.append('editTelPhone', $('#editTelPhone').val());
+
+                // For debugging
+                console.log('Sending form data:', {
+                    files: fileInput.files.length,
+                    currentFiles: currentFiles
+                });
 
                 // ส่งข้อมูลผ่าน AJAX
                 $.ajax({
@@ -3804,7 +3901,7 @@ ${fileInfo}
                             status: status,
                             error: error
                         });
-                        // console.log('Response text:', xhr.responseText);
+                        console.log('Response text:', xhr.responseText);
 
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',

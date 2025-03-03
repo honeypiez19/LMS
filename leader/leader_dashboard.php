@@ -1866,20 +1866,20 @@ GROUP BY li.l_name";
 
                                     if ($hasFiles) {
                                         // แสดงปุ่มเปิดแกลเลอรี่
-                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . '">
-                <i class="fa-solid fa-file"></i> (' . $fileCount . ')
-              </button>';
+                                        echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '">
+            <i class="fa-solid fa-file"></i> (' . $fileCount . ')
+        </button>';
 
                                         // สร้าง Modal สำหรับแสดงแกลเลอรี่
-                                        echo '<div class="modal fade" id="fileGallery' . '" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">';
+                                        echo '<div class="modal fade" id="fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">';
 
                                         // แสดงไฟล์ทั้งหมดในแกลเลอรี่
                                         if (! empty($row['l_file'])) {
@@ -1955,9 +1955,7 @@ GROUP BY li.l_name";
 
                                         echo '</div>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-              </div>
+
             </div>
           </div>
         </div>';

@@ -83,6 +83,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:10' => ['10:10', '10:30', '10:10:00'],
         '10:15' => ['10:15', '10:30', '10:15:00'],
         '10:45' => ['10:45', '11:00', '10:45:00'],
+        '11:10' => ['11:10', '11:30', '11:10:00'],
+        '11:15' => ['11:15', '11:30', '11:15:00'],
+        '11:45' => ['11:45', '12:00', null],
         '12:00' => ['11:45', '12:00', null],
         '13:00' => ['12:45', '13:00', null],
         '13:10' => ['13:10', '13:30', '13:10:00'],
@@ -253,7 +256,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':formattedDate', $formattedDate);
     $stmt->bindParam(':filename', $filename);
     $stmt->bindParam(':filename2', $filename2); // เพิ่มพารามิเตอร์ใหม่
-$stmt->bindParam(':filename3', $filename3); // เพิ่มพารามิเตอร์ใหม่
+    $stmt->bindParam(':filename3', $filename3); // เพิ่มพารามิเตอร์ใหม่
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);

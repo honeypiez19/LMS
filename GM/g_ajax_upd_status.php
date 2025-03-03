@@ -95,6 +95,63 @@ if ($status == 8) {
             curl_close($ch);
         }
 
+        $adminMessage = "ข้อมูลการลา - $empName\nการอนุมัติโดย: $proveName\nประเภทการลา: $leaveType\nสถานะ: " .
+            ($leaveStatus == 'ยกเลิกใบลา' ? 'อนุมัติการยกเลิก' : 'อนุมัติ') .
+            "\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate";
+
+        // ดึงข้อมูลผู้ใช้ระดับ admin
+        $adminStmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_level = 'admin' AND e_workplace = :workplace");
+        $stmt->bindParam(':workplace', $workplace);
+
+        $adminStmt->execute();
+        $adminUsers = $adminStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // ส่งข้อความแจ้งเตือนไปยังผู้ใช้ระดับ admin ทุกคน
+        foreach ($adminUsers as $adminUserId) {
+            if (! empty($adminUserId)) {
+                // สร้าง message data สำหรับ admin
+                $adminMessageData = [
+                    'to'       => $adminUserId,
+                    'messages' => [
+                        [
+                            'type' => 'text',
+                            'text' => $adminMessage,
+                        ],
+                    ],
+                ];
+
+                // แปลงข้อมูลเป็น JSON
+                $adminJsonData = json_encode($adminMessageData);
+
+                // ส่งข้อความด้วย cURL
+                $adminCh = curl_init();
+                curl_setopt($adminCh, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
+                curl_setopt($adminCh, CURLOPT_POST, true);
+                curl_setopt($adminCh, CURLOPT_CUSTOMREQUEST, 'POST');
+                curl_setopt($adminCh, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($adminCh, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($adminCh, CURLOPT_POSTFIELDS, $adminJsonData);
+                curl_setopt($adminCh, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $access_token,
+                ]);
+
+                $adminResult = curl_exec($adminCh);
+
+                if (curl_error($adminCh)) {
+                    echo 'Error sending to admin: ' . curl_error($adminCh) . "\n";
+                } else {
+                    $adminResponseData = json_decode($adminResult, true);
+                    if (isset($adminResponseData['message'])) {
+                        echo "Error sending to admin: " . $adminResponseData['message'] . "\n";
+                    } else {
+                        echo "Message sent to admin successfully\n";
+                    }
+                }
+                curl_close($adminCh);
+            }
+        }
+
         // แจ้งเตือนตามเงื่อนไขของผู้อนุมัติ
         if ($userName == 'Anchana') {
             // แจ้งเตือน Pornsuk
@@ -259,7 +316,6 @@ if ($status == 8) {
             }
         }
     }
-
 } else if ($status == 9) {
     $sql = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName, l_reason3 = :reasonNoProve
             WHERE l_usercode = :userCode AND l_create_datetime = :createDate";

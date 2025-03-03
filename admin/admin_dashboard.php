@@ -796,12 +796,123 @@ AND l_leave_status = 1";
                                 echo '</td>';
 
                                 // 12
-                                echo '</td>';
+                                echo '<td>';
+
+                                $hasFiles  = ! empty($row['l_file']) || ! empty($row['l_file2']) || ! empty($row['l_file3']);
+                                $fileCount = 0;
                                 if (! empty($row['l_file'])) {
-                                    echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
-                                } else {
-                                    echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
+                                    $fileCount++;
                                 }
+
+                                if (! empty($row['l_file2'])) {
+                                    $fileCount++;
+                                }
+
+                                if (! empty($row['l_file3'])) {
+                                    $fileCount++;
+                                }
+
+                                if ($hasFiles) {
+                                    // แสดงปุ่มเปิดแกลเลอรี่
+                                    echo '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '">
+            <i class="fa-solid fa-file"></i> (' . $fileCount . ')
+        </button>';
+
+                                    // สร้าง Modal สำหรับแสดงแกลเลอรี่
+                                    echo '<div class="modal fade" id="fileGallery' . $row['l_leave_id'] . '_' . $row['l_usercode'] . '" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">';
+
+                                    // แสดงไฟล์ทั้งหมดในแกลเลอรี่
+                                    if (! empty($row['l_file'])) {
+                                        $fileExt = strtolower(pathinfo($row['l_file'], PATHINFO_EXTENSION));
+                                        if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                            echo '<div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <img src="../upload/' . $row['l_file'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">ไฟล์ที่ 1</h6>
+                        </div>
+                    </div>
+                </div>';
+                                        } else {
+                                            echo '<div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa-solid fa-file fa-5x mb-3"></i>
+                            <h6 class="card-title">ไฟล์ที่ 1 (' . $fileExt . ')</h6>
+                            <a href="../upload/' . $row['l_file'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
+                        </div>
+                    </div>
+                </div>';
+                                        }
+                                    }
+
+                                    if (! empty($row['l_file2'])) {
+                                        $fileExt = strtolower(pathinfo($row['l_file2'], PATHINFO_EXTENSION));
+                                        if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                            echo '<div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <img src="../upload/' . $row['l_file2'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">ไฟล์ที่ 2</h6>
+                        </div>
+                    </div>
+                </div>';
+                                        } else {
+                                            echo '<div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa-solid fa-file fa-5x mb-3"></i>
+                            <h6 class="card-title">ไฟล์ที่ 2 (' . $fileExt . ')</h6>
+                            <a href="../upload/' . $row['l_file2'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
+                        </div>
+                    </div>
+                </div>';
+                                        }
+                                    }
+
+                                    if (! empty($row['l_file3'])) {
+                                        $fileExt = strtolower(pathinfo($row['l_file3'], PATHINFO_EXTENSION));
+                                        if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                            echo '<div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <img src="../upload/' . $row['l_file3'] . '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">ไฟล์ที่ 3</h6>
+                        </div>
+                    </div>
+                </div>';
+                                        } else {
+                                            echo '<div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa-solid fa-file fa-5x mb-3"></i>
+                            <h6 class="card-title">ไฟล์ที่ 3 (' . $fileExt . ')</h6>
+                            <a href="../upload/' . $row['l_file3'] . '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>
+                        </div>
+                    </div>
+                </div>';
+                                        }
+                                    }
+
+                                    echo '</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>';
+                                } else {
+                                    // ถ้าไม่มีไฟล์แนบเลย
+                                    echo '<button id="imgNoBtn" class="btn btn-secondary" disabled><i class="fa-solid fa-file-excel"></i> </button>';
+                                }
+
                                 echo '</td>';
 
                                 // 13
@@ -1245,6 +1356,124 @@ AND l_leave_status = 1";
             }
         });
 
+        $('#file').change(function() {
+            const fileInput = this;
+            const filePreview = $('#filePreview');
+            filePreview.empty();
+
+            // ตรวจสอบว่ามีไฟล์เกิน 3 ไฟล์หรือไม่
+            if (fileInput.files.length > 3) {
+                Swal.fire({
+                    title: "จำนวนไฟล์เกินกำหนด",
+                    text: "กรุณาเลือกไฟล์ไม่เกิน 3 ไฟล์",
+                    icon: "warning"
+                });
+                fileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                return;
+            }
+
+            // แสดงตัวอย่างไฟล์
+            for (let i = 0; i < fileInput.files.length; i++) {
+                const file = fileInput.files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    if (file.type.match('image.*')) {
+                        // แสดงตัวอย่างรูปภาพ
+                        filePreview.append(`
+                    <div class="position-relative">
+                        <img src="${e.target.result}" class="img-thumbnail" style="height: 100px;">
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                    } else if (file.type === 'application/pdf') {
+                        // แสดงตัวอย่างไฟล์ PDF
+                        filePreview.append(`
+                    <div class="position-relative">
+                        <div class="img-thumbnail d-flex flex-column align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                            <i class="fa fa-file-pdf text-danger" style="font-size: 40px;"></i>
+                            <small class="text-center text-truncate" style="max-width: 90px;">${file.name}</small>
+                        </div>
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                    } else {
+                        // ไฟล์ประเภทที่ไม่รองรับ
+                        Swal.fire({
+                            title: "รูปแบบไฟล์ไม่ถูกต้อง",
+                            text: "กรุณาแนบไฟล์ที่เป็นรูปภาพ (PNG, JPG, JPEG) หรือ PDF เท่านั้น",
+                            icon: "error"
+                        });
+                        fileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                        filePreview.empty();
+                        return;
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // เพิ่มส่วนนี้ 28/02/68
+        $('#urgentFile').change(function() {
+            const urgentFileInput = this;
+            const urgentFilePreview = $('#urgentFilePreview');
+            urgentFilePreview.empty();
+
+            // ตรวจสอบว่ามีไฟล์เกิน 3 ไฟล์หรือไม่
+            if (urgentFileInput.files.length > 3) {
+                Swal.fire({
+                    title: "จำนวนไฟล์เกินกำหนด",
+                    text: "กรุณาเลือกไฟล์ไม่เกิน 3 ไฟล์สำหรับการลาฉุกเฉิน",
+                    icon: "warning"
+                });
+                urgentFileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                return;
+            }
+
+            // แสดงตัวอย่างไฟล์
+            for (let i = 0; i < urgentFileInput.files.length; i++) {
+                const file = urgentFileInput.files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    if (file.type.match('image.*')) {
+                        // แสดงตัวอย่างรูปภาพ
+                        urgentFilePreview.append(`
+                    <div class="position-relative">
+                        <img src="${e.target.result}" class="img-thumbnail" style="height: 100px;">
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                    } else if (file.type === 'application/pdf') {
+                        // แสดงตัวอย่างไฟล์ PDF
+                        urgentFilePreview.append(`
+                    <div class="position-relative">
+                        <div class="img-thumbnail d-flex flex-column align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                            <i class="fa fa-file-pdf text-danger" style="font-size: 40px;"></i>
+                            <small class="text-center text-truncate" style="max-width: 90px;">${file.name}</small>
+                        </div>
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                    } else {
+                        // ไฟล์ประเภทที่ไม่รองรับ
+                        Swal.fire({
+                            title: "รูปแบบไฟล์ไม่ถูกต้อง",
+
+                            text: "กรุณาแนบไฟล์ที่เป็นรูปภาพ (PNG, JPG, JPEG) หรือ PDF เท่านั้น",
+                            icon: "error"
+                        });
+                        urgentFileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                        urgentFilePreview.empty();
+                        return;
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
         $(".leaveChk").click(function() {
             var rowData = $(this).closest("tr").find("td");
 
@@ -1389,7 +1618,11 @@ AND l_leave_status = 1";
             var selectedMonth = $("#selectedMonth").val();
             var selectedYear = $("#selectedYear").val();
 
-            // alert(status)
+            // เพิ่มการแสดง loading
+            $("tbody").html(
+                '<tr><td colspan="27" class="text-center"><i class="fa fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</td></tr>'
+            );
+
             $.ajax({
                 url: 'a_ajax_get_leave_data.php',
                 method: 'GET',
@@ -1493,7 +1726,7 @@ AND l_leave_status = 1";
                                 approveStatus2 = 'ไม่พบสถานะ';
                             }
 
-                            // สถานะอนุมัติ 3
+                            // สถานะอนุมัติ 3 - แก้ไขเงื่อนไขซ้ำซ้อน
                             var approveStatus3;
                             if (row['l_approve_status3'] == 0) {
                                 approveStatus3 =
@@ -1522,15 +1755,6 @@ AND l_leave_status = 1";
                             } else if (row['l_approve_status3'] == 8) {
                                 approveStatus3 =
                                     '<div class="text-success"><b>GM อนุมัติ</b></div>';
-                            } else if (row['l_approve_status3'] == 9) {
-                                approveStatus3 =
-                                    '<div class="text-danger"><b>GM ไม่อนุมัติ</b></div>';
-                            } else if (row['l_approve_status3'] == 7) {
-                                approveStatus3 =
-                                    '<div class="text-danger"><b>รอ GM อนุมัติ</b></div>';
-                            } else if (row['l_approve_status3'] == 8) {
-                                approveStatus3 =
-                                    '<div class="text-danger"><b>GM อนุมัติ</b></div>';
                             } else if (row['l_approve_status3'] == 9) {
                                 approveStatus3 =
                                     '<div class="text-danger"><b>GM ไม่อนุมัติ</b></div>';
@@ -1803,16 +2027,142 @@ AND l_leave_status = 1";
                                     '') +
                                 '</td>';
 
-                            // 12
+                            // 12 - แก้ไขส่วนแสดงไฟล์แนบให้รองรับหลายไฟล์
+                            newRow += '<td>';
+
+                            var hasFiles = row['l_file'] || row['l_file2'] || row[
+                                'l_file3'];
+                            var fileCount = 0;
+
                             if (row['l_file']) {
-                                newRow +=
-                                    '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' +
-                                    row['l_file'] +
-                                    '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
-                            } else {
-                                newRow +=
-                                    '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
+                                fileCount++;
                             }
+                            if (row['l_file2']) {
+                                fileCount++;
+                            }
+                            if (row['l_file3']) {
+                                fileCount++;
+                            }
+
+                            if (hasFiles) {
+                                // สร้างปุ่มเปิดแกลเลอรี่
+                                var galleryId = 'fileGallery' + row['l_leave_id'] +
+                                    '_' + row['l_usercode'];
+                                newRow +=
+                                    '<button id="imgBtn" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#' +
+                                    galleryId +
+                                    '"><i class="fa-solid fa-file"></i> (' +
+                                    fileCount + ')</button>';
+
+                                // สร้าง Modal สำหรับแกลเลอรี่
+                                newRow += '<div class="modal fade" id="' +
+                                    galleryId +
+                                    '" tabindex="-1" aria-hidden="true">' +
+                                    '<div class="modal-dialog modal-xl">' +
+                                    '<div class="modal-content">' +
+                                    '<div class="modal-header">' +
+                                    '<h5 class="modal-title">ไฟล์แนบทั้งหมด</h5>' +
+                                    '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' +
+                                    '</div>' +
+                                    '<div class="modal-body">' +
+                                    '<div class="row">';
+
+                                // ส่วนของไฟล์ที่ 1
+                                if (row['l_file']) {
+                                    var fileExt = row['l_file'].split('.').pop()
+                                        .toLowerCase();
+                                    var isImage = ['jpg', 'jpeg', 'png', 'gif']
+                                        .includes(fileExt);
+
+                                    if (isImage) {
+                                        newRow += '<div class="col-md-4 mb-3">' +
+                                            '<div class="card h-100">' +
+                                            '<img src="../upload/' + row['l_file'] +
+                                            '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">' +
+                                            '<div class="card-body text-center">' +
+                                            '<h6 class="card-title">ไฟล์ที่ 1</h6>' +
+                                            '</div></div></div>';
+                                    } else {
+                                        newRow += '<div class="col-md-4 mb-3">' +
+                                            '<div class="card h-100">' +
+                                            '<div class="card-body text-center">' +
+                                            '<i class="fa-solid fa-file fa-5x mb-3"></i>' +
+                                            '<h6 class="card-title">ไฟล์ที่ 1 (' +
+                                            fileExt + ')</h6>' +
+                                            '<a href="../upload/' + row['l_file'] +
+                                            '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>' +
+                                            '</div></div></div>';
+                                    }
+                                }
+
+                                // ส่วนของไฟล์ที่ 2
+                                if (row['l_file2']) {
+                                    var fileExt2 = row['l_file2'].split('.').pop()
+                                        .toLowerCase();
+                                    var isImage2 = ['jpg', 'jpeg', 'png', 'gif']
+                                        .includes(fileExt2);
+
+                                    if (isImage2) {
+                                        newRow += '<div class="col-md-4 mb-3">' +
+                                            '<div class="card h-100">' +
+                                            '<img src="../upload/' + row[
+                                                'l_file2'] +
+                                            '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">' +
+                                            '<div class="card-body text-center">' +
+                                            '<h6 class="card-title">ไฟล์ที่ 2</h6>' +
+                                            '</div></div></div>';
+                                    } else {
+                                        newRow += '<div class="col-md-4 mb-3">' +
+                                            '<div class="card h-100">' +
+                                            '<div class="card-body text-center">' +
+                                            '<i class="fa-solid fa-file fa-5x mb-3"></i>' +
+                                            '<h6 class="card-title">ไฟล์ที่ 2 (' +
+                                            fileExt2 + ')</h6>' +
+                                            '<a href="../upload/' + row['l_file2'] +
+                                            '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>' +
+                                            '</div></div></div>';
+                                    }
+                                }
+
+                                // ส่วนของไฟล์ที่ 3
+                                if (row['l_file3']) {
+                                    var fileExt3 = row['l_file3'].split('.').pop()
+                                        .toLowerCase();
+                                    var isImage3 = ['jpg', 'jpeg', 'png', 'gif']
+                                        .includes(fileExt3);
+
+                                    if (isImage3) {
+                                        newRow += '<div class="col-md-4 mb-3">' +
+                                            '<div class="card h-100">' +
+                                            '<img src="../upload/' + row[
+                                                'l_file3'] +
+                                            '" class="card-img-top img-fluid" style="max-height: 500px; object-fit: contain;">' +
+                                            '<div class="card-body text-center">' +
+                                            '<h6 class="card-title">ไฟล์ที่ 3</h6>' +
+                                            '</div></div></div>';
+                                    } else {
+                                        newRow += '<div class="col-md-4 mb-3">' +
+                                            '<div class="card h-100">' +
+                                            '<div class="card-body text-center">' +
+                                            '<i class="fa-solid fa-file fa-5x mb-3"></i>' +
+                                            '<h6 class="card-title">ไฟล์ที่ 3 (' +
+                                            fileExt3 + ')</h6>' +
+                                            '<a href="../upload/' + row['l_file3'] +
+                                            '" class="btn btn-sm btn-primary" target="_blank">เปิดไฟล์</a>' +
+                                            '</div></div></div>';
+                                    }
+                                }
+
+                                // ปิด Modal
+                                newRow += '</div></div></div></div></div>';
+
+                            } else {
+                                // ถ้าไม่มีไฟล์แนบเลย
+                                newRow +=
+                                    '<button id="imgNoBtn" class="btn btn-secondary" disabled><i class="fa-solid fa-file-excel"></i> </button>';
+                            }
+
+                            newRow += '</td>';
                             newRow +=
                                 // 13
                                 '<td>' + leaveStatus + '</td>' +
@@ -1912,9 +2262,35 @@ AND l_leave_status = 1";
                             $("tbody").append(newRow);
                         });
 
+                        // แก้ไขส่วนของการตรวจสอบใบลา
                         $(".leaveChk").click(function() {
-                            var rowData = $(this).closest("tr").find(
-                                "td");
+                            var rowData = $(this).closest("tr").find("td");
+
+                            // เก็บค่าต่างๆ ไว้ใน data attributes ของ modal
+                            var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
+                            var depart = $(rowData[2]).text(); // แผนก
+                            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
+                            var userCode = $(rowData[5]).text(); // รหัสพนักงาน
+                            var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
+                            var leaveStartDate = $(rowData[9])
+                                .text(); // วันเวลาที่ลาเริ่มต้น
+                            var leaveEndDate = $(rowData[10])
+                                .text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveStatus = $(rowData[13]).text(); // สถานะใบลา
+
+                            // เก็บข้อมูลลงใน data attributes ของ modal
+                            $('#leaveModal').data({
+                                'leaveType': leaveType.trim(),
+                                'empName': empName.trim(),
+                                'depart': depart.trim(),
+                                'leaveReason': leaveReason.trim(),
+                                'userCode': userCode.trim(),
+                                'createDate': createDate.trim(),
+                                'leaveStartDate': leaveStartDate.trim(),
+                                'leaveEndDate': leaveEndDate.trim(),
+                                'leaveStatus': leaveStatus.trim()
+                            });
 
                             // Populate modal content
                             $('#leaveModal .modal-body').html(
@@ -1965,176 +2341,179 @@ AND l_leave_status = 1";
                             );
 
                             $('#leaveModal').modal('show');
-                            $('.modal-footer .btn-success').off('click')
-                                .on(
-                                    'click',
-                                    function() {
-                                        var leaveType = $(rowData[0])
-                                            .text(); // ประเภทการลา
-                                        var empName = $(rowData[1])
-                                            .text(); // ชื่อพนักงาน
-                                        var depart = $(rowData[2])
-                                            .text(); // แผนก
-                                        var leaveReason = $(rowData[3])
-                                            .text(); // เหตุผลการลา
-                                        var userCode = $(rowData[5])
-                                            .text(); // รหัสพนักงาน
-                                        var createDate = $(rowData[7])
-                                            .text(); // วันที่ยื่นใบลา
-                                        var leaveStartDate = $(rowData[
-                                                9])
-                                            .text(); // วันเวลาที่ลาเริ่มต้น
-                                        var leaveEndDate = $(rowData[
-                                                10])
-                                            .text(); // วันเวลาที่ลาสิ้นสุด
-                                        var leaveStatus = $(rowData[12])
-                                            .text(); // สถานะใบลา
 
-                                        var checkFirm = '1'; // ผ่าน
-                                        var userName =
-                                            '<?php echo $userName; ?>';
+                            // แก้ไขการทำงานของปุ่ม "ผ่าน"
+                            $('.modal-footer .btn-success').off('click').on('click',
+                                function() {
+                                    var modalData = $('#leaveModal').data();
+                                    var checkFirm = '1'; // ผ่าน
+                                    var userName = '<?php echo $userName; ?>';
 
-                                        $.ajax({
-                                            url: 'a_ajax_upd_status.php',
-                                            method: 'POST',
-                                            data: {
-                                                leaveType: leaveType,
-                                                empName: empName,
-                                                depart: depart,
-                                                leaveReason: leaveReason,
-                                                userCode: userCode,
-                                                createDate: createDate,
-                                                leaveStartDate: leaveStartDate,
-                                                leaveEndDate: leaveEndDate,
-                                                checkFirm: checkFirm,
-                                                userName: userName,
-                                                empName: empName,
-                                                leaveStatus: leaveStatus
-                                                // name: name,
-                                                // createDate: createDate,
-                                                // userCode: userCode,
-                                                // userName: userName,
-                                                // leaveType: leaveType,
-                                                // leaveReason: leaveReason,
-                                                // leaveStartDate: leaveStartDate,
-                                                // leaveEndDate: leaveEndDate,
-                                                // depart: depart,
-                                                // checkFirm: checkFirm
-                                            },
-                                            success: function(
-                                                response) {
-                                                $('#leaveModal')
-                                                    .modal(
-                                                        'hide'
-                                                    );
-                                                Swal.fire({
-                                                    title: 'สำเร็จ!',
-                                                    text: 'ตรวจสอบผ่านสำเร็จ',
-                                                    icon: 'success',
-                                                    confirmButtonText: 'ตกลง'
-                                                }).then(
-                                                    () => {
-                                                        location
-                                                            .reload(); // Reload the page after user clicks confirm
-                                                    });
-                                            },
-                                            error: function(xhr,
-                                                status,
-                                                error) {
-                                                console
-                                                    .error(
-                                                        error
-                                                    );
+                                    // ป้องกันการกดซ้ำ
+                                    var $btn = $(this);
+                                    $btn.prop('disabled', true).html(
+                                        '<i class="fa fa-spinner fa-spin"></i> กำลังบันทึก...'
+                                    );
+
+                                    $.ajax({
+                                        url: 'a_ajax_upd_status.php',
+                                        method: 'POST',
+                                        data: {
+                                            leaveType: modalData
+                                                .leaveType,
+                                            empName: modalData.empName,
+                                            depart: modalData.depart,
+                                            leaveReason: modalData
+                                                .leaveReason,
+                                            userCode: modalData
+                                                .userCode,
+                                            createDate: modalData
+                                                .createDate,
+                                            leaveStartDate: modalData
+                                                .leaveStartDate,
+                                            leaveEndDate: modalData
+                                                .leaveEndDate,
+                                            checkFirm: checkFirm,
+                                            userName: userName,
+                                            leaveStatus: modalData
+                                                .leaveStatus
+                                        },
+                                        success: function(response) {
+                                            $('#leaveModal').modal(
+                                                'hide');
+                                            Swal.fire({
+                                                title: 'สำเร็จ!',
+                                                text: 'ตรวจสอบผ่านสำเร็จ',
+                                                icon: 'success',
+                                                confirmButtonText: 'ตกลง'
+                                            }).then(() => {
+                                                location
+                                                    .reload();
+                                            });
+                                        },
+                                        error: function(xhr, status,
+                                            error) {
+                                            console.error(error);
+                                            // เพิ่มการแจ้งเตือนเมื่อเกิดข้อผิดพลาด
+                                            Swal.fire({
+                                                title: 'เกิดข้อผิดพลาด!',
+                                                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                                                icon: 'error',
+                                                confirmButtonText: 'ตกลง'
+                                            });
+                                            // คืนค่าปุ่มเป็นปกติ
+                                            $btn.prop('disabled',
+                                                false).html(
+                                                'ผ่าน');
+                                        },
+                                        // เพิ่ม timeout เพื่อไม่ให้ request ค้างนานเกินไป
+                                        timeout: 30000,
+                                        complete: function() {
+                                            if ($btn.prop(
+                                                    'disabled')) {
+                                                $btn.prop(
+                                                    'disabled',
+                                                    false).html(
+                                                    'ผ่าน');
                                             }
-                                        });
+                                        }
                                     });
-                            $('.modal-footer .btn-danger').off('click')
-                                .on(
-                                    'click',
-                                    function() {
-                                        var leaveType = $(rowData[0])
-                                            .text(); // ประเภทการลา
-                                        var empName = $(rowData[1])
-                                            .text(); // ชื่อพนักงาน
-                                        var depart = $(rowData[2])
-                                            .text(); // แผนก
-                                        var leaveReason = $(rowData[3])
-                                            .text(); // เหตุผลการลา
-                                        var userCode = $(rowData[5])
-                                            .text(); // รหัสพนักงาน
-                                        var createDate = $(rowData[7])
-                                            .text(); // วันที่ยื่นใบลา
-                                        var leaveStartDate = $(rowData[
-                                                9])
-                                            .text(); // วันเวลาที่ลาเริ่มต้น
-                                        var leaveEndDate = $(rowData[
-                                                10])
-                                            .text(); // วันเวลาที่ลาสิ้นสุด
-                                        var leaveStatus = $(rowData[12])
-                                            .text(); // สถานะใบลา
+                                });
 
-                                        var checkFirm = '2'; // ไม่ผ่าน
-                                        var userName =
-                                            '<?php echo $userName; ?>';
+                            // แก้ไขการทำงานของปุ่ม "ไม่ผ่าน"
+                            $('.modal-footer .btn-danger').off('click').on('click',
+                                function() {
+                                    var modalData = $('#leaveModal').data();
+                                    var checkFirm = '2'; // ไม่ผ่าน
+                                    var userName = '<?php echo $userName; ?>';
 
-                                        console.log(leaveType)
-                                        console.log(name)
-                                        console.log(depart)
-                                        console.log(leaveReason)
-                                        console.log(userCode)
-                                        console.log(createDate)
-                                        console.log(leaveStartDate)
-                                        console.log(leaveEndDate)
-                                        console.log(checkFirm)
-                                        console.log(userName)
+                                    // ป้องกันการกดซ้ำ
+                                    var $btn = $(this);
+                                    $btn.prop('disabled', true).html(
+                                        '<i class="fa fa-spinner fa-spin"></i> กำลังบันทึก...'
+                                    );
 
-                                        $.ajax({
-                                            url: 'a_ajax_upd_status.php',
-                                            method: 'POST',
-                                            data: {
-                                                leaveType: leaveType,
-                                                empName: empName,
-                                                depart: depart,
-                                                leaveReason: leaveReason,
-                                                userCode: userCode,
-                                                createDate: createDate,
-                                                leaveStartDate: leaveStartDate,
-                                                leaveEndDate: leaveEndDate,
-                                                checkFirm: checkFirm,
-                                                userName: userName,
-                                                empName: empName,
-                                                leaveStatus: leaveStatus
-                                            },
-                                            success: function(
-                                                response) {
-                                                $('#leaveModal')
-                                                    .modal(
-                                                        'hide'
-                                                    );
-                                                Swal.fire({
-                                                    title: 'สำเร็จ!',
-                                                    text: 'ตรวจสอบไม่ผ่านสำเร็จ',
-                                                    icon: 'success',
-                                                    confirmButtonText: 'ตกลง'
-                                                }).then(
-                                                    () => {
-                                                        location
-                                                            .reload(); // Reload the page after user clicks confirm
-                                                    });
-                                            },
-                                            error: function(xhr,
-                                                status,
-                                                error) {
-                                                console
-                                                    .error(
-                                                        error
-                                                    );
+                                    $.ajax({
+                                        url: 'a_ajax_upd_status.php',
+                                        method: 'POST',
+                                        data: {
+                                            leaveType: modalData
+                                                .leaveType,
+                                            empName: modalData.empName,
+                                            depart: modalData.depart,
+                                            leaveReason: modalData
+                                                .leaveReason,
+                                            userCode: modalData
+                                                .userCode,
+                                            createDate: modalData
+                                                .createDate,
+                                            leaveStartDate: modalData
+                                                .leaveStartDate,
+                                            leaveEndDate: modalData
+                                                .leaveEndDate,
+                                            checkFirm: checkFirm,
+                                            userName: userName,
+                                            leaveStatus: modalData
+                                                .leaveStatus
+                                        },
+                                        success: function(response) {
+                                            $('#leaveModal').modal(
+                                                'hide');
+                                            Swal.fire({
+                                                title: 'สำเร็จ!',
+                                                text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                                                icon: 'success',
+                                                confirmButtonText: 'ตกลง'
+                                            }).then(() => {
+                                                location
+                                                    .reload();
+                                            });
+                                        },
+                                        error: function(xhr, status,
+                                            error) {
+                                            console.error(error);
+                                            // เพิ่มการแจ้งเตือนเมื่อเกิดข้อผิดพลาด
+                                            Swal.fire({
+                                                title: 'เกิดข้อผิดพลาด!',
+                                                text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                                                icon: 'error',
+                                                confirmButtonText: 'ตกลง'
+                                            });
+                                            // คืนค่าปุ่มเป็นปกติ
+                                            $btn.prop('disabled',
+                                                false).html(
+                                                'ไม่ผ่าน');
+                                        },
+                                        // เพิ่ม timeout เพื่อไม่ให้ request ค้างนานเกินไป
+                                        timeout: 30000,
+                                        complete: function() {
+                                            if ($btn.prop(
+                                                    'disabled')) {
+                                                $btn.prop(
+                                                    'disabled',
+                                                    false).html(
+                                                    'ไม่ผ่าน');
                                             }
-                                        });
+                                        }
                                     });
+                                });
                         });
 
+                        // ปรับปรุงส่วนของการแก้ไขข้อมูล
                         $('.edit-btn').click(function() {
+                            // แสดง loading
+                            Swal.fire({
+                                title: 'กำลังโหลดข้อมูล...',
+                                text: 'กรุณารอสักครู่',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                allowEnterKey: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+
                             // Get data attributes from the button
                             var createDateTime = $(this).data('createdatetime');
                             var userCode = $(this).data('usercode');
@@ -2149,22 +2528,18 @@ AND l_leave_status = 1";
                                 },
                                 dataType: 'json', // Expect JSON response
                                 success: function(response) {
-                                    if (response.status ===
-                                        'success') {
+                                    Swal.close();
+                                    if (response.status === 'success') {
                                         // Populate modal fields with the fetched data
-                                        $('.editLeaveType').val(
-                                            response
+                                        $('.editLeaveType').val(response
                                             .l_leave_id);
-                                        $('#editCreateDateTime')
-                                            .val(
-                                                response
-                                                .l_create_datetime);
-                                        $('#editUserCode').val(
+                                        $('#editCreateDateTime').val(
                                             response
+                                            .l_create_datetime);
+                                        $('#editUserCode').val(response
                                             .l_usercode);
                                         $('#editLeaveReason').val(
-                                            response
-                                            .l_leave_reason);
+                                            response.l_leave_reason);
                                         $('#editName').val(response
                                             .l_name);
 
@@ -2173,157 +2548,135 @@ AND l_leave_status = 1";
                                         var endDate = response
                                             .l_leave_end_date;
 
-                                        var dateParts = startDate
-                                            .split(
-                                                '-'); // แยกวันที่
-                                        var dateParts2 = endDate
-                                            .split(
-                                                '-'); // แยกวันที่
+                                        var dateParts = startDate.split(
+                                            '-'); // แยกวันที่
+                                        var dateParts2 = endDate.split(
+                                            '-'); // แยกวันที่
 
-                                        var formattedDate =
-                                            dateParts[
-                                                2] + '-' +
-                                            dateParts[
+                                        var formattedDate = dateParts[
+                                                2] + '-' + dateParts[
                                                 1] +
-                                            '-' +
-                                            dateParts[
-                                                0
-                                            ]; // แปลงเป็น d-m-y
-                                        var formattedDate2 =
-                                            dateParts2[
-                                                2] + '-' +
-                                            dateParts2[
-                                                1] + '-' +
-                                            dateParts2[
-                                                0
-                                            ]; // แปลงเป็น d-m-y
+                                            '-' + dateParts[
+                                                0]; // แปลงเป็น d-m-y
+                                        var formattedDate2 = dateParts2[
+                                            2] + '-' + dateParts2[
+                                            1] + '-' + dateParts2[
+                                            0]; // แปลงเป็น d-m-y
 
-                                        $('#editLeaveStartDate')
-                                            .val(
-                                                formattedDate);
+                                        $('#editLeaveStartDate').val(
+                                            formattedDate);
                                         $('#editLeaveEndDate').val(
                                             formattedDate2);
 
                                         // เวลาที่เริ่มต้น
                                         const leaveStartTimeMap = {
-                                            "08:30:00": [
-                                                "08:10:00",
+                                            "08:30:00": ["08:10:00",
                                                 "08:15:00"
                                             ],
                                             "09:00:00": [
                                                 "08:45:00"
                                             ],
-                                            "09:30:00": [
-                                                "09:10:00",
+                                            "09:30:00": ["09:10:00",
                                                 "09:15:00"
                                             ],
                                             "10:00:00": [
                                                 "09:45:00"
                                             ],
-                                            "10:30:00": [
-                                                "10:10:00",
+                                            "10:30:00": ["10:10:00",
                                                 "10:15:00"
                                             ],
                                             "11:00:00": [
                                                 "10:45:00"
                                             ],
-                                            "11:30:00": [
-                                                "11:10:00",
+                                            "11:30:00": ["11:10:00",
                                                 "11:15:00"
                                             ],
                                             "12:00:00": [
-                                                "11:45:00"
+                                                "11:45:00", ""
                                             ],
                                             "13:00:00": [
                                                 "12:45:00"
                                             ],
-                                            "13:30:00": [
-                                                "13:10:00",
+                                            "13:30:00": ["13:10:00",
                                                 "13:15:00"
                                             ],
-                                            "14:00:00": [
-                                                "13:40:00",
+                                            "14:00:00": ["13:40:00",
                                                 "13:45:00"
                                             ],
-                                            "14:30:00": [
-                                                "14:10:00",
+                                            "14:30:00": ["14:10:00",
                                                 "14:15:00"
                                             ],
-                                            "15:00:00": [
-                                                "14:40:00",
+                                            "15:00:00": ["14:40:00",
                                                 "14:45:00"
                                             ],
-                                            "15:30:00": [
-                                                "15:10:00",
+                                            "15:30:00": ["15:10:00",
                                                 "15:15:00"
                                             ],
-                                            "16:00:00": [
-                                                "15:40:00",
+                                            "16:00:00": ["15:40:00",
                                                 "15:45:00"
                                             ],
-                                            "16:30:00": [
-                                                "16:10:00",
+                                            "16:30:00": ["16:10:00",
                                                 "16:15:00"
                                             ],
-                                            "17:00:00": [
-                                                "16:40:00"
-                                            ]
+                                            "17:00:00": ["16:40:00"]
                                         };
 
-                                        if (leaveStartTimeMap[
-                                                response
-                                                .l_leave_start_time]
-                                            ?.includes(response
-                                                .l_remark)) {
+                                        try {
+                                            if (leaveStartTimeMap[
+                                                    response
+                                                    .l_leave_start_time]
+                                                ?.includes(response
+                                                    .l_remark)) {
+                                                $('#editLeaveStartTime2')
+                                                    .val(response
+                                                        .l_remark);
+                                            } else if (response
+                                                .l_leave_start_time ===
+                                                "13:00:00") {
+                                                $('#editLeaveStartTime2')
+                                                    .val("12:45:00");
+                                            } else if (response
+                                                .l_leave_start_time ===
+                                                "17:00:00") {
+                                                $('#editLeaveStartTime2')
+                                                    .val("16:40:00");
+                                            } else {
+                                                $('#editLeaveStartTime2')
+                                                    .val(response
+                                                        .l_leave_start_time
+                                                    );
+                                            }
+                                        } catch (err) {
+                                            console.error(
+                                                "เกิดข้อผิดพลาดในการตั้งค่าเวลาเริ่มต้น:",
+                                                err);
                                             $('#editLeaveStartTime2')
                                                 .val(response
-                                                    .l_remark);
-                                        } else if (response
-                                            .l_leave_start_time ===
-                                            "13:00:00") {
-                                            $('#editLeaveStartTime2')
-                                                .val(
-                                                    "12:45:00"
-                                                );
-                                        } else if (response
-                                            .l_leave_start_time ===
-                                            "17:00:00") {
-                                            $('#editLeaveStartTime2')
-                                                .val(
-                                                    "16:40:00"
-                                                );
-                                        } else {
-                                            $('#editLeaveStartTime2')
-                                                .val(response
-                                                    .l_leave_start_time
-                                                );
+                                                    .l_leave_start_time ||
+                                                    "08:30:00");
                                         }
 
                                         // เวลาที่สิ้นสุด
                                         const leaveEndTimeMap = {
-                                            "08:30:00": [
-                                                "08:10:00",
+                                            "08:30:00": ["08:10:00",
                                                 "08:15:00"
                                             ],
                                             "09:00:00": [
                                                 "08:45:00"
                                             ],
-                                            "09:30:00": [
-                                                "09:10:00",
+                                            "09:30:00": ["09:10:00",
                                                 "09:15:00"
                                             ],
                                             "10:00:00": [
                                                 "09:45:00"
                                             ],
-                                            "10:30:00": [
-                                                "10:10:00",
+                                            "10:30:00": ["10:10:00",
                                                 "10:15:00"
                                             ],
                                             "11:00:00": [
                                                 "10:45:00"
                                             ],
-                                            "11:30:00": [
-                                                "11:10:00",
+                                            "11:30:00": ["11:10:00",
                                                 "11:15:00"
                                             ],
                                             "12:00:00": [
@@ -2332,97 +2685,102 @@ AND l_leave_status = 1";
                                             "13:00:00": [
                                                 "12:45:00"
                                             ],
-                                            "13:30:00": [
-                                                "13:10:00",
+                                            "13:30:00": ["13:10:00",
                                                 "13:15:00"
                                             ],
-                                            "14:00:00": [
-                                                "13:40:00",
+                                            "14:00:00": ["13:40:00",
                                                 "13:45:00"
                                             ],
-                                            "14:30:00": [
-                                                "14:10:00",
+                                            "14:30:00": ["14:10:00",
                                                 "14:15:00"
                                             ],
-                                            "15:00:00": [
-                                                "14:40:00",
+                                            "15:00:00": ["14:40:00",
                                                 "14:45:00"
                                             ],
-                                            "15:30:00": [
-                                                "15:10:00",
+                                            "15:30:00": ["15:10:00",
                                                 "15:15:00"
                                             ],
-                                            "16:00:00": [
-                                                "15:40:00",
+                                            "16:00:00": ["15:40:00",
                                                 "15:45:00"
                                             ],
-                                            "16:30:00": [
-                                                "16:10:00",
+                                            "16:30:00": ["16:10:00",
                                                 "16:15:00"
                                             ],
-                                            "17:00:00": [
-                                                "16:40:00"
-                                            ]
+                                            "17:00:00": ["16:40:00"]
                                         };
 
-                                        if (leaveEndTimeMap[response
-                                                .l_leave_end_time]
-                                            ?.includes(response
-                                                .l_remark)) {
-                                            $('#editLeaveEndTime2')
-                                                .val(response
-                                                    .l_remark);
-                                        } else if (response
-                                            .l_leave_end_time ===
-                                            "13:00:00") {
-                                            $('#editLeaveEndTime2')
-                                                .val(
-                                                    "12:45:00"
-                                                );
-                                        } else if (response
-                                            .l_leave_end_time ===
-                                            "17:00:00") {
-                                            $('#editLeaveEndTime2')
-                                                .val(
-                                                    "16:40:00"
-                                                );
-                                        } else {
-                                            $('#editLeaveEndTime2')
-                                                .val(response
-                                                    .l_leave_end_time
-                                                );
+                                        try {
+                                            if (leaveEndTimeMap[response
+                                                    .l_leave_end_time]
+                                                ?.includes(response
+                                                    .l_remark)) {
+                                                $('#editLeaveEndTime2')
+                                                    .val(response
+                                                        .l_remark);
+                                            } else if (response
+                                                .l_leave_end_time ===
+                                                "13:00:00") {
+                                                $('#editLeaveEndTime2')
+                                                    .val("12:45:00");
+                                            } else if (response
+                                                .l_leave_end_time ===
+                                                "17:00:00") {
+                                                $('#editLeaveEndTime2')
+                                                    .val("16:40:00");
+                                            } else {
+                                                $('#editLeaveEndTime2')
+                                                    .val(response
+                                                        .l_leave_end_time
+                                                    );
+                                            }
+                                        } catch (err) {
+                                            console.error(
+                                                "เกิดข้อผิดพลาดในการตั้งค่าเวลาสิ้นสุด:",
+                                                err);
+                                            $('#editLeaveEndTime2').val(
+                                                response
+                                                .l_leave_end_time ||
+                                                "17:00:00");
                                         }
 
                                         // Show the modal
-                                        $('#editModal').modal(
-                                            'show');
+                                        $('#editModal').modal('show');
                                     } else {
                                         // Show error message from response
-                                        alert(response.message ||
-                                            'ไม่พบข้อมูล');
+                                        Swal.fire({
+                                            title: 'ไม่พบข้อมูล',
+                                            text: response
+                                                .message ||
+                                                'ไม่สามารถดึงข้อมูลได้',
+                                            icon: 'error',
+                                            confirmButtonText: 'ตกลง'
+                                        });
                                     }
                                 },
-                                error: function() {
-                                    alert(
-                                        'เกิดข้อผิดพลาดในการดึงข้อมูล'
-                                    );
+                                error: function(xhr, status, error) {
+                                    Swal.close();
+                                    Swal.fire({
+                                        title: 'เกิดข้อผิดพลาด',
+                                        text: 'ไม่สามารถดึงข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                                        icon: 'error',
+                                        confirmButtonText: 'ตกลง'
+                                    });
                                 },
+                                timeout: 30000
                             });
                         });
 
+                        // ปรับปรุงการ submit form แก้ไข
                         $('#editForm').submit(function(e) {
                             e.preventDefault();
 
-                            var editCreateDateTime = $('#editCreateDateTime')
-                                .val();
+                            var editCreateDateTime = $('#editCreateDateTime').val();
                             var editUserCode = $('#editUserCode').val();
                             var editLeaveType = $('#editLeaveType').val();
                             var editLeaveReason = $('#editLeaveReason').val();
-                            var editLeaveStartDate = $('#editLeaveStartDate')
-                                .val();
+                            var editLeaveStartDate = $('#editLeaveStartDate').val();
                             var editLeaveEndDate = $('#editLeaveEndDate').val();
-                            var editLeaveStartTime = $('#editLeaveStartTime')
-                                .val();
+                            var editLeaveStartTime = $('#editLeaveStartTime').val();
                             var editLeaveEndTime = $('#editLeaveEndTime').val();
 
                             if (editLeaveStartDate > editLeaveEndDate) {
@@ -2431,15 +2789,28 @@ AND l_leave_status = 1";
                                     text: 'กรุณาเลือกวันที่เริ่มต้นลาใหม่',
                                     icon: 'error',
                                     confirmButtonText: 'ตกลง'
-                                })
+                                });
+                                return false;
                             } else if (editLeaveStartTime > editLeaveEndTime) {
                                 Swal.fire({
                                     title: 'ไม่สามารถลาได้',
                                     text: 'กรุณาเลือกเวลาเริ่มต้นใหม่',
                                     icon: 'error',
                                     confirmButtonText: 'ตกลง'
-                                })
+                                });
+                                return false;
                             } else {
+                                // แสดง loading
+                                Swal.fire({
+                                    title: 'กำลังบันทึกข้อมูล...',
+                                    text: 'กรุณารอสักครู่',
+                                    allowOutsideClick: false,
+                                    showConfirmButton: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+
                                 $.ajax({
                                     url: 'a_ajax_upd_leave.php',
                                     method: 'POST',
@@ -2454,31 +2825,36 @@ AND l_leave_status = 1";
                                         editLeaveEndTime: editLeaveEndTime
                                     },
                                     success: function(response) {
+                                        Swal.close();
                                         Swal.fire({
                                             title: 'แก้ไขสำเร็จ',
                                             icon: 'success',
                                             confirmButtonText: 'ตกลง'
                                         }).then((result) => {
                                             if (result
-                                                .isConfirmed
-                                            ) {
+                                                .isConfirmed) {
                                                 location
                                                     .reload();
                                             }
                                         });
 
-                                        $('#editModal').modal(
-                                            'hide');
+                                        $('#editModal').modal('hide');
                                     },
-                                    error: function() {
-                                        alert(
-                                            'เกิดข้อผิดพลาดในการบันทึกข้อมูล'
-                                        );
-                                    }
+                                    error: function(xhr, status, error) {
+                                        Swal.close();
+                                        Swal.fire({
+                                            title: 'เกิดข้อผิดพลาด',
+                                            text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                                            icon: 'error',
+                                            confirmButtonText: 'ตกลง'
+                                        });
+                                    },
+                                    timeout: 30000
                                 });
                             }
                         });
 
+                        // ปรับปรุงส่วนของการยกเลิกใบลา
                         $('.cancel-btn').click(function() {
                             var createDateTime = $(this).data(
                                 'createdatetime'); // ดึงค่า createDateTime
@@ -2489,14 +2865,12 @@ AND l_leave_status = 1";
                             var rowData = $(this).closest('tr').find('td');
 
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
-                            var leaveReason = $(rowData[3])
-                                .text(); // เหตุผลการลา
+                            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
                             var leaveEndDate = $(rowData[10])
                                 .text(); // วันเวลาที่ลาสิ้นสุด
 
-                            // alert(leaveType)
                             Swal.fire({
                                 title: 'ยืนยันการยกเลิก?',
                                 text: "คุณต้องการยกเลิกรายการนี้หรือไม่?",
@@ -2508,6 +2882,17 @@ AND l_leave_status = 1";
                                 cancelButtonText: 'ไม่'
                             }).then((result) => {
                                 if (result.isConfirmed) {
+                                    // แสดง loading
+                                    Swal.fire({
+                                        title: 'กำลังดำเนินการ...',
+                                        text: 'กรุณารอสักครู่',
+                                        allowOutsideClick: false,
+                                        showConfirmButton: false,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
+
                                     $.ajax({
                                         url: 'a_ajax_delete_leave.php',
                                         type: 'POST',
@@ -2522,6 +2907,7 @@ AND l_leave_status = 1";
                                         },
                                         success: function(
                                             response) {
+                                            Swal.close();
                                             if (response ===
                                                 'success') {
                                                 Swal.fire(
@@ -2531,7 +2917,7 @@ AND l_leave_status = 1";
                                                 ).then(
                                                     () => {
                                                         location
-                                                            .reload(); //
+                                                            .reload();
                                                     });
                                             } else {
                                                 Swal.fire(
@@ -2541,9 +2927,9 @@ AND l_leave_status = 1";
                                                 );
                                             }
                                         },
-                                        error: function(xhr,
-                                            status,
+                                        error: function(xhr, status,
                                             error) {
+                                            Swal.close();
                                             console.error(
                                                 'Error:',
                                                 error);
@@ -2552,17 +2938,28 @@ AND l_leave_status = 1";
                                                 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
                                                 'error'
                                             );
-                                        }
+                                        },
+                                        timeout: 30000
                                     });
                                 }
                             });
                         });
-
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error fetching data:', error);
-                }
+                    $("tbody").html(
+                        '<tr><td colspan="27" class="text-danger" style="text-align: left;">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง</td></tr>'
+                    );
+
+                    Swal.fire({
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง'
+                    });
+                },
+                timeout: 60000 // เพิ่ม timeout เป็น 60 วินาที
             });
         });
 

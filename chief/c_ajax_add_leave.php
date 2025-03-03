@@ -49,6 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:10' => ['10:10', '10:30', '10:10:00'],
         '10:15' => ['10:15', '10:30', '10:15:00'],
         '10:45' => ['10:45', '11:00', '10:45:00'],
+        '11:10' => ['11:10', '11:30', '11:10:00'],
+        '11:15' => ['11:15', '11:30', '11:15:00'],
+        '11:45' => ['11:45', '12:00', null],
         '12:00' => ['11:45', '12:00', null],
         '13:00' => ['12:45', '13:00', null],
         '13:10' => ['13:10', '13:30', '13:10:00'],
@@ -145,7 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-// จัดการอัปโหลดไฟล์ที่ 2
+    // จัดการอัปโหลดไฟล์ที่ 2
     if (isset($_FILES['file2']) && $_FILES['file2']['error'] === UPLOAD_ERR_OK) {
         $filename2     = time() . '_2_' . $_FILES['file2']['name'];
         $location      = "../upload/" . $filename2;
@@ -163,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-// จัดการอัปโหลดไฟล์ที่ 3
+    // จัดการอัปโหลดไฟล์ที่ 3
     if (isset($_FILES['file3']) && $_FILES['file3']['error'] === UPLOAD_ERR_OK) {
         $filename3     = time() . '_3_' . $_FILES['file3']['name'];
         $location      = "../upload/" . $filename3;
@@ -231,7 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
         l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_time_remark, l_approve_status3, l_time_remark2,
-        l_approve_name, l_approve_datetime, l_file3, l_file3)
+        l_approve_name, l_approve_datetime, l_file2, l_file3)
         VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
         :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
         :proveStatus, :level, :proveStatus2, :workplace, :timeRemark, :proveStatus3, :timeRemark2, :proveName, :proveDate
@@ -250,6 +253,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':leaveTimeEnd', $leaveTimeEnd);
     $stmt->bindParam(':formattedDate', $formattedDate);
     $stmt->bindParam(':filename', $filename);
+    $stmt->bindParam(':filename2', $filename2); // เพิ่มพารามิเตอร์ใหม่
+    $stmt->bindParam(':filename3', $filename3); // เพิ่มพารามิเตอร์ใหม่    
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
