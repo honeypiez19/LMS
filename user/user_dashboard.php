@@ -780,10 +780,10 @@ WHERE l_leave_id = :leave_id
 
                                             // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
                                             $specialUserRecords = [];
-                                            foreach ($specialUsers as $userName) {
-                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :username AND e_workplace = :workplace";
+                                            foreach ($specialUsers as $specialUserss) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :specialUserss AND e_workplace = :workplace";
                                                 $stmt       = $conn->prepare($sqlSpecial);
-                                                $stmt->bindParam(':username', $userName);
+                                                $stmt->bindParam(':specialUserss', $specialUserss);
                                                 $stmt->bindParam(':workplace', $workplace);
                                                 $stmt->execute();
                                                 $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1092,10 +1092,10 @@ WHERE l_leave_id = :leave_id
 
                                             // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
                                             $specialUserRecords = [];
-                                            foreach ($specialUsers as $userName) {
-                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :username AND e_workplace = :workplace";
+                                            foreach ($specialUsers as $specialUserss) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :specialUserss AND e_workplace = :workplace";
                                                 $stmt       = $conn->prepare($sqlSpecial);
-                                                $stmt->bindParam(':username', $userName);
+                                                $stmt->bindParam(':specialUserss', $specialUserss);
                                                 $stmt->bindParam(':workplace', $workplace);
                                                 $stmt->execute();
                                                 $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -2525,6 +2525,7 @@ WHERE l_leave_id = :leave_id
                 // ในส่วนที่ประมวลผลการส่งฟอร์ม
                 console.log('userName:', fd.get('userName'));
                 console.log('approver:', fd.get('approver'));
+                console.log('level:', fd.get('level'));
 
                 // เก็บไฟล์ทั้ง 3 ไฟล์แยกกัน (หากมี)
                 if (files.length > 0) {

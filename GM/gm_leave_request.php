@@ -40,7 +40,7 @@
 <body>
     <?php include 'gm_navbar.php'?>
 
-    <!--                                                                                                                                                                                                                                                         <?php echo $subDepart; ?>
+    <!--                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?>
 <?php echo $subDepart2; ?>
 <?php echo $userName; ?> -->
 
@@ -400,8 +400,8 @@ AND li.l_approve_status3 = 9
         WHERE
             li.l_department <> 'RD'
             AND li.l_leave_id NOT IN (6, 7)
-            AND li.l_approve_status2 IN (4,6)
             AND li.l_approve_status IN (2,6)
+            AND li.l_approve_status2 IN (4,6)
             AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
             AND (
                 YEAR(li.l_create_datetime) = :selectedYear
@@ -901,7 +901,7 @@ AND li.l_approve_status3 = 9
 
                                 // 28
                                 if ($row['l_approve_status3'] == 8 || $row['l_approve_status3'] == 9) {
-                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
+                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
                                 } else {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
                                 }
@@ -1042,7 +1042,13 @@ AND li.l_approve_status3 = 9
             var status = 8; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
-
+            var level = '<?php echo $level; ?>';
+            var subDepart = '<?php echo $subDepart; ?>';
+            var subDepart2 = '<?php echo $subDepart2; ?>';
+            var subDepart3 = '<?php echo $subDepart3; ?>';
+            var subDepart4 = '<?php echo $subDepart4; ?>';
+            var subDepart5 = '<?php echo $subDepart5; ?>';
+            var workplace = '<?php echo $workplace; ?>';
             // alert(leaveStatus)
             $.ajax({
                 url: 'g_ajax_upd_status.php',
@@ -1059,7 +1065,14 @@ AND li.l_approve_status3 = 9
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     empName: empName,
-                    leaveStatus: leaveStatus
+                    leaveStatus: leaveStatus,
+                    level: level,
+                    subDepart: subDepart,
+                    subDepart2: subDepart2,
+                    subDepart3: subDepart3,
+                    subDepart4: subDepart4,
+                    subDepart5: subDepart5,
+                    workplace: workplace
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -1140,8 +1153,15 @@ AND li.l_approve_status3 = 9
             var status = 9; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
+            var subDepart = '<?php echo $subDepart; ?>';
+            var subDepart2 = '<?php echo $subDepart2; ?>';
+            var subDepart3 = '<?php echo $subDepart3; ?>';
+            var subDepart4 = '<?php echo $subDepart4; ?>';
+            var subDepart5 = '<?php echo $subDepart5; ?>';
+            var workplace = '<?php echo $workplace; ?>';
 
-            var reason = reasonNoProve;
+            var reasonNoProve = reasonNoProve;
 
             $.ajax({
                 url: 'g_ajax_upd_status.php',
@@ -1159,7 +1179,14 @@ AND li.l_approve_status3 = 9
                     depart: depart,
                     leaveStatus: leaveStatus,
                     empName: empName,
-                    reasonNoProve: reasonNoProve
+                    reasonNoProve: reasonNoProve,
+                    level: level,
+                    subDepart: subDepart,
+                    subDepart2: subDepart2,
+                    subDepart3: subDepart3,
+                    subDepart4: subDepart4,
+                    subDepart5: subDepart5,
+                    workplace: workplace
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
@@ -1667,6 +1694,13 @@ AND li.l_approve_status3 = 9
                                 var status = 8; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var level = '<?php echo $level; ?>';
+                                var subDepart = '<?php echo $subDepart; ?>';
+                                var subDepart2 = '<?php echo $subDepart2; ?>';
+                                var subDepart3 = '<?php echo $subDepart3; ?>';
+                                var subDepart4 = '<?php echo $subDepart4; ?>';
+                                var subDepart5 = '<?php echo $subDepart5; ?>';
+                                var workplace = '<?php echo $workplace; ?>';
 
                                 $.ajax({
                                     url: 'g_ajax_upd_status.php',
@@ -1683,7 +1717,14 @@ AND li.l_approve_status3 = 9
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
                                         leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        level: level,
+                                        subDepart: subDepart,
+                                        subDepart2: subDepart2,
+                                        subDepart3: subDepart3,
+                                        subDepart4: subDepart4,
+                                        subDepart5: subDepart5,
+                                        workplace: workplace
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1776,9 +1817,15 @@ AND li.l_approve_status3 = 9
                             var status = 9; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+                            var level = '<?php echo $level; ?>';
+                            var subDepart = '<?php echo $subDepart; ?>';
+                            var subDepart2 = '<?php echo $subDepart2; ?>';
+                            var subDepart3 = '<?php echo $subDepart3; ?>';
+                            var subDepart4 = '<?php echo $subDepart4; ?>';
+                            var subDepart5 = '<?php echo $subDepart5; ?>';
+                            var workplace = '<?php echo $workplace; ?>';
 
-                            var reason = reasonNoProve;
-
+                            var reasonNoProve = reasonNoProve;
                             $.ajax({
                                 url: 'g_ajax_upd_status.php',
                                 method: 'POST',
@@ -1795,7 +1842,14 @@ AND li.l_approve_status3 = 9
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName,
-                                    reasonNoProve: reasonNoProve
+                                    reasonNoProve: reasonNoProve,
+                                    level: level,
+                                    subDepart: subDepart,
+                                    subDepart2: subDepart2,
+                                    subDepart3: subDepart3,
+                                    subDepart4: subDepart4,
+                                    subDepart5: subDepart5,
+                                    workplace: workplace
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal(

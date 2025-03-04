@@ -18,7 +18,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=2.0">
     <title>ใบลาของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
@@ -38,14 +38,10 @@
 </head>
 
 <body>
-    <?php include 'manager_navbar.php'?>
+    <?php require 'manager_navbar.php'; ?>
 
-    <!--                                                         <?php echo $subDepart; ?>
-<?php echo $subDepart2; ?>
-<?php echo $userName; ?> -->
-
-    <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-  border: none;">
+    <!--                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
+    <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
                 <div class="col-auto">
@@ -129,7 +125,6 @@
         </form>
     </div>
 
-    <!-- รายการลาทั้งหมด -->
     <div class="container">
         <div class="mt-3 row">
             <div class="col-3 filter-card" data-status="all">
@@ -138,7 +133,6 @@
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-
                                 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
     li.l_username,
@@ -215,21 +209,21 @@ WHERE
                                 }
 
                             ?>
+
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
-                                <!-- <i class="mt-4 fas fa-file-alt ml-2 fa-2xl"></i> -->
                                 <i class="mt-4 fa-regular fa-folder-open fa-2xl"></i>
                             </div>
                         </h5>
                         <p class="card-text">
-                            <?php echo $strAll; ?>
+                            รายการลาทั้งหมด
                         </p>
                     </div>
                 </div>
             </div>
 
             <!-- รายการลาที่รออนุมัติ -->
-            <div class="col-3 filter-card" data-status="1">
+            <div class="col-3 filter-card" data-status="0">
                 <div class="card text-bg-warning mb-3">
                     <div class="card-body">
                         <h5 class="card-title">
@@ -311,6 +305,7 @@ WHERE
                                 }
 
                             ?>
+
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
                                 <!-- <i class="mt-4 fa-solid fa-clock-rotate-left fa-2xl" style="color: #ffffff;"></i> -->
@@ -318,14 +313,12 @@ WHERE
                             </div>
                         </h5>
                         <p class="card-text">
-                            <?php echo $strPendProve; ?>
+                            รายการลาที่รออนุมัติ
                         </p>
                     </div>
                 </div>
             </div>
-
-            <!-- รายการลาที่อนุมัติ -->
-            <div class="col-3 filter-card" data-status="4">
+            <div class="col-3 filter-card" data-status="2">
                 <div class="card text-bg-success mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
@@ -333,24 +326,16 @@ WHERE
                             <?php
                                 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
-    li.l_username,
-    li.l_name,
-    li.l_department,
-    em.e_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+em.*,
+li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (2,3,6)
-    AND li.l_approve_status2 = 4
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
+    li.l_approve_status = 2
+    AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
- AND (
+    AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
@@ -362,40 +347,25 @@ WHERE
     ) ";
                                 }
 
-                                if ($subDepart === "Office" || $subDepart2 === "Management") {
-                                    $sql .= " AND (
-        em.e_department = :subDepart AND li.l_department = :subDepart
-        OR li.l_department = :subDepart
-        OR li.l_department = :subDepart2
-        AND em.e_sub_department = 'AC'
+                                $sql .= " AND (
+        (em.e_sub_department = :subDepart)
+        OR (em.e_sub_department2 = :subDepart2)
+        OR (em.e_sub_department3 = :subDepart3)
+        OR (em.e_sub_department4 = :subDepart4)
+        OR (em.e_sub_department5 = :subDepart5)
     )";
-                                } else {
-                                    $sql .= " AND (
-           (em.e_department = :subDepart AND li.l_department = :subDepart)
-            OR (li.l_department = :subDepart2)
-            OR (li.l_department = :subDepart3)
-            OR (li.l_department = :subDepart4)
-            OR (li.l_department = :subDepart5)
-        )";
-                                }
-
                                 $stmt = $conn->prepare($sql);
+
+                                                                      // Bind parameters
+                                $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+                                $stmt->bindParam(':subDepart', $subDepart);
+                                $stmt->bindParam(':subDepart2', $subDepart2);
+                                $stmt->bindParam(':subDepart3', $subDepart3);
+                                $stmt->bindParam(':subDepart4', $subDepart4);
+                                $stmt->bindParam(':subDepart5', $subDepart5);
                                 $stmt->bindParam(':selectedYear', $selectedYear);
                                 if ($selectedMonth != "All") {
                                     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
-                                }
-                                if ($subDepart === "Office") {
-                                    $stmt->bindParam(':subDepart', $subDepart);
-                                    $stmt->bindParam(':subDepart2', $subDepart2);
-                                    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
-                                    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
-                                    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
-                                } else {
-                                    $stmt->bindParam(':subDepart', $subDepart);
-                                    $stmt->bindParam(':subDepart2', $subDepart2);
-                                    $stmt->bindParam(':subDepart3', $subDepart3);
-                                    $stmt->bindParam(':subDepart4', $subDepart4);
-                                    $stmt->bindParam(':subDepart5', $subDepart5);
                                 }
                                 // Execute and check for errors
                                 if ($stmt->execute()) {
@@ -406,7 +376,6 @@ WHERE
                                     echo "SQL Error: " . $errorInfo[2];
                                     $totalLeaveItems = 0;
                                 }
-
                             ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -415,14 +384,12 @@ WHERE
                             </div>
                         </h5>
                         <p class="card-text">
-                            <?php echo $strProve; ?>
+                            รายการลาที่อนุมัติ
                         </p>
                     </div>
                 </div>
             </div>
-
-            <!-- รายการลาที่ไม่อนุมัติ -->
-            <div class="col-3 filter-card" data-status="5">
+            <div class="col-3 filter-card" data-status="3">
                 <div class="card text-bg-danger mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
@@ -504,6 +471,7 @@ WHERE
                                     $totalLeaveItems = 0;
                                 }
                             ?>
+
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
                                 <!-- <i class="mt-4 fa-solid fa-thumbs-down fa-2xl"></i> -->
@@ -511,17 +479,17 @@ WHERE
                             </div>
                         </h5>
                         <p class="card-text">
-                            <?php echo $strNotProve; ?>
+                            รายการลาที่ไม่อนุมัติ
                         </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
         <div class="table-responsive">
+
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
@@ -552,11 +520,14 @@ WHERE
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
-                        <th> <input type="text" class="form-control" id="codeSearch"></th>
+                        <?php $searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
+                        ?>
+                        <th><input type="text" class="form-control" id="codeSearch"
+                                value="<?php echo htmlspecialchars($searchCode); ?>"></th>
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
                         <th> <input type="text" class="form-control" id="leaveSearch"></th>
-                        <th style="width: 8%;"><?php echo $strFrom; ?></th>
-                        <th style="width: 8%;"><?php echo $strTo; ?></th>
+                        <th style="width: 8%;">จาก</th>
+                        <th style="width: 8%;">ถึง</th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
@@ -580,7 +551,7 @@ INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
     li.l_approve_status IN (2,3,6)
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
+    AND li.l_level IN ('user', 'chief', 'leader','subLeader')
     AND li.l_leave_id NOT IN (6, 7)
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
@@ -630,6 +601,7 @@ WHERE
                         }
 
                         $stmt->execute();
+
                         $totalRows = $stmt->rowCount();
 
                         // Calculate total pages
@@ -669,6 +641,7 @@ WHERE
 
                         // Display data in table
                         if ($stmt->rowCount() > 0) {
+
                             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 echo '<tr class="align-middle">';
 
@@ -740,6 +713,7 @@ WHERE
                                 echo '</td>';
 
                                 // 9
+                                // 08:45
                                 // 08:45
                                 if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
                                     echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
@@ -881,10 +855,10 @@ WHERE
                                 echo '<td>';
                                 // Query to check holidays in the leave period
                                 $holiday_query = "SELECT COUNT(*) as holiday_count
-                  FROM holiday
-                  WHERE h_start_date BETWEEN :start_date AND :end_date
-                  AND h_holiday_status = 'วันหยุด'
-                  AND h_status = 0";
+                        FROM holiday
+                        WHERE h_start_date BETWEEN :start_date AND :end_date
+                        AND h_holiday_status = 'วันหยุด'
+                        AND h_status = 0";
 
                                 // Prepare the query
                                 $holiday_stmt = $conn->prepare($holiday_query);
@@ -1113,7 +1087,7 @@ WHERE
                                 echo '<td>' . $row['l_remark2'] . '</td>';
 
                                 // 28
-                                if ($row['l_approve_status2'] == 4 || $row['l_approve_status2'] == 5) {
+                                if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
                                 } else {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
@@ -1124,107 +1098,81 @@ WHERE
         <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
 
                                 echo '</tr>';
-
                                 $rowNumber--;
                             }
 
                         } else {
-                            echo '<tr><td colspan="19" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
+                            echo '<tr><td colspan="20" style="text-align: left; color:red;">ไม่พบข้อมูล</td></tr>';
                         }
                     ?>
                 </tbody>
             </table>
-        </div>
-        <?php
-            echo '<div class="pagination">';
-            echo '<ul class="pagination">';
+            <?php
+                echo '<div class="pagination">';
+                echo '<ul class="pagination">';
 
-            // กำหนดจำนวนหน้าที่จะแสดงรอบ ๆ หน้าปัจจุบัน
-            $range = 2;
-
-            // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
-            if ($currentPage > 1) {
-                echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">&laquo;</a></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">&lt;</a></li>';
-            }
-
-            // แสดงลิงก์สำหรับหน้าที่อยู่ในช่วง
-            for ($i = max(1, $currentPage - $range); $i <= min($totalPages, $currentPage + $range); $i++) {
-                if ($i == $currentPage) {
-                    echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-                } else {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">' . $i . '</a></li>';
+                // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
+                if ($currentPage > 1) {
+                    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
                 }
-            }
 
-            // เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าสุดท้าย
-            if ($currentPage + $range < $totalPages) {
-                echo '<li class="page-item"><span class="page-link">...</span></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">' . $totalPages . '</a></li>';
-            }
+                // สร้างลิงก์สำหรับแต่ละหน้า
+                for ($i = 1; $i <= $totalPages; $i++) {
+                    if ($i == $currentPage) {
+                        echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
+                    } else {
+                        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+                    }
+                }
 
-            // เพิ่ม "..." ถ้าช่วงมีความห่างจากหน้าแรก
-            if ($currentPage - $range > 1) {
-                echo '<li class="page-item"><span class="page-link">...</span></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">' . 1 . '</a></li>';
-            }
+                // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
+                if ($currentPage < $totalPages) {
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+                }
 
-            // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
-            if ($currentPage < $totalPages) {
-                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">&gt;</a></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '&year=' . urlencode($selectedYear) . '">&raquo;</a></li>';
-            }
+                echo '</ul>';
+                echo '</div>';
 
-            echo '</ul>';
-
-            // ฟอร์มสำหรับกรอกหมายเลขหน้า
-            echo '<form method="GET" action="" class="mb-2 d-inline-flex">';
-            echo '<input type="hidden" name="month" value="' . htmlspecialchars($selectedMonth) . '">';
-            // echo '<label for="customPage" class="me-2">ไปหน้าที่:</label>';
-            echo '<input type="number" name="page" id="customPage" class="form-control mb-3 mx-2" style="width: 80px;" min="1" max="' . $totalPages . '" value="' . $currentPage . '">';
-            echo '<button type="submit" class="mx-2 mb-3 btn btn-primary" style="width: 50px;">Go</button>';
-            echo '</form>';
-
-            echo '</div>';
-
-        ?>
-        <!-- Modal เช็คการลา -->
-        <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title
+            ?>
+            <!-- Modal เช็คการลา -->
+            <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title
                         01f s-5" id="staticBackdropLabel">รายละเอียดการลา</h4>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
-                    </div>
-                    <div class="modal-body">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
+                        </div>
+                        <div class="modal-body">
 
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger button-shadow"><?php echo $btnNotProve; ?></button>
-                        <button type="button" class="btn btn-success button-shadow"><?php echo $btnProve; ?></button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
+                            <button type="button" class="btn btn-success button-shadow">อนุมัติ</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- ประวัติลาของพนักงาน -->
-        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
+            <!-- Modal HTML -->
+            <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <script>
     $(".leaveChk").click(function() {
         var rowData = $(this).closest("tr").find("td");
@@ -1287,7 +1235,7 @@ WHERE
             var subDepart4 = '<?php echo $subDepart4; ?>';
             var subDepart5 = '<?php echo $subDepart5; ?>';
             var workplace = '<?php echo $workplace; ?>';
-            // alert(leaveStatus)
+            // alert(leaveType)
             $.ajax({
                 url: 'm_ajax_upd_status.php',
                 method: 'POST',
@@ -1319,7 +1267,8 @@ WHERE
                         title: 'อนุมัติใบลาสำเร็จ !',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
-                        if (result.isConfirmed) {
+                        if (result
+                            .isConfirmed) {
                             location.reload();
                         }
                     });
@@ -1427,13 +1376,14 @@ WHERE
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
                     Swal.fire({
-                        title: 'ไม่อนุมัติใบลาสำเร็จ !',
+                        title: 'ไม่อนุมัติสำเร็จ !',
                         // text: 'ทำรายการเสร็จสิ้น',
                         icon: 'success',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                            location
+                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
                         }
                     });
                 },
@@ -1462,7 +1412,7 @@ WHERE
         var subDepart4 = <?php echo json_encode($subDepart4); ?>;
         var subDepart5 = <?php echo json_encode($subDepart5); ?>;
 
-        // alert(selectedYear)
+
         $.ajax({
             url: 'm_ajax_get_leave_data.php',
             method: 'GET',
@@ -1476,6 +1426,7 @@ WHERE
                 subDepart3: subDepart3,
                 subDepart4: subDepart4,
                 subDepart5: subDepart5
+
             },
             dataType: 'json',
             success: function(data) {
@@ -1484,12 +1435,33 @@ WHERE
 
                 if (data.length === 0) {
                     $("tbody").append(
-                        '<tr><td colspan="26" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
+                        '<tr><td colspan="20" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
                     );
                 } else {
                     var totalItems = data.length; // Store total count
 
                     $.each(data, function(index, row) {
+                        // var leaveType = '';
+                        // if (row['l_leave_id'] == 1) {
+                        //     leaveType = 'ลากิจได้รับค่าจ้าง';
+                        // } else if (row['l_leave_id'] == 2) {
+                        //     leaveType = 'ลากิจไม่ได้รับค่าจ้าง';
+                        // } else if (row['l_leave_id'] == 3) {
+                        //     leaveType = 'ลาป่วย';
+                        // } else if (row['l_leave_id'] == 4) {
+                        //     leaveType = 'ลาป่วยจากงาน';
+                        // } else if (row['l_leave_id'] == 5) {
+                        //     leaveType = 'ลาพักร้อน';
+                        // } else if (row['l_leave_id'] == 6) {
+                        //     leaveType = 'ขาดงาน';
+                        // } else if (row['l_leave_id'] == 7) {
+                        //     leaveType = 'มาสาย';
+                        // } else if (row['l_leave_id'] == 8) {
+                        //     leaveType = 'อื่น ๆ';
+                        // } else {
+                        //     leaveType = row['l_leave_id'];
+                        // }
+
                         // สถานะใบลา
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
@@ -1857,8 +1829,7 @@ WHERE
 
                             //28
                             '<td>';
-                        if (row['l_approve_status2'] == 4 || row['l_approve_status2'] ==
-                            5) {
+                        if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
                             newRow +=
                                 '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck ?></button>';
                         } else {
@@ -1934,9 +1905,7 @@ WHERE
                                     .text(); // วันเวลาที่ลาเริ่มต้น
                                 var leaveEndDate = $(rowData[10])
                                     .text(); // วันเวลาที่ลาสิ้นสุด
-                                var leaveStatus = $(rowData[12])
-                                    .text(); // สถานะใบลา
-
+                                var leaveStatus = $(rowData[13]).text(); // สถานะใบลา
 
                                 var status = '4'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
@@ -1948,6 +1917,7 @@ WHERE
                                 var subDepart4 = '<?php echo $subDepart4; ?>';
                                 var subDepart5 = '<?php echo $subDepart5; ?>';
                                 var workplace = '<?php echo $workplace; ?>';
+
                                 $.ajax({
                                     url: 'm_ajax_upd_status.php',
                                     method: 'POST',
@@ -1981,8 +1951,7 @@ WHERE
                                         }).then((result) => {
                                             if (result
                                                 .isConfirmed) {
-                                                location
-                                                    .reload();
+                                                location.reload();
                                             }
                                         });
                                     },
@@ -1991,19 +1960,18 @@ WHERE
                                     }
                                 });
                             });
-                        $('.modal-footer .btn-danger').off('click').on('click',
-                            function() {
-                                // ซ่อน modal หลัก
-                                $('#leaveModal').modal('hide');
+                        $('.modal-footer .btn-danger').off('click').on('click', function() {
+                            // ซ่อน modal หลัก
+                            $('#leaveModal').modal('hide');
 
-                                // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
-                                setTimeout(function() {
-                                        showInputDialog
-                                            (); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
-                                    },
-                                    300
-                                ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
-                            });
+                            // เรียกใช้ SweetAlert2 หลังจากที่ modal หลักถูกซ่อนไปแล้ว
+                            setTimeout(function() {
+                                    showInputDialog
+                                        (); // เรียกใช้ฟังก์ชันเพื่อแสดงกล่องโต้ตอบ
+                                },
+                                300
+                            ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
+                        });
 
                         function showInputDialog() {
                             Swal.fire({
@@ -2017,16 +1985,14 @@ WHERE
                                 preConfirm: (inputValue) => {
                                     if (!inputValue) {
                                         Swal.showValidationMessage(
-                                            'กรุณากรอกเหตุผลการไม่อนุมัติ'
-                                        );
+                                            'กรุณากรอกเหตุผลการไม่อนุมัติ');
                                     }
                                 }
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     const reasonNoProve = result
                                         .value; // รับค่าจาก input
-                                    console.log(
-                                        reasonNoProve); // ตรวจสอบค่าที่กรอก
+                                    console.log(reasonNoProve); // ตรวจสอบค่าที่กรอก
                                     noApprove(
                                         reasonNoProve
                                     ); // เรียกใช้ฟังก์ชัน noApprove
@@ -2055,23 +2021,15 @@ WHERE
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
-                            var leaveEndDate = $(rowData[10])
-                                .text(); // วันเวลาที่ลาสิ้นสุด
-                            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+                            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveStatus = $(rowData[13]).text(); // สถานะใบลา
 
                             var status = '5'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
-
                             var level = '<?php echo $level; ?>';
-                            var subDepart = '<?php echo $subDepart; ?>';
-                            var subDepart2 = '<?php echo $subDepart2; ?>';
-                            var subDepart3 = '<?php echo $subDepart3; ?>';
-                            var subDepart4 = '<?php echo $subDepart4; ?>';
-                            var subDepart5 = '<?php echo $subDepart5; ?>';
-                            var workplace = '<?php echo $workplace; ?>';
 
-                            var reasonNoProve = reasonNoProve;
+                            var reason = reasonNoProve;
 
                             $.ajax({
                                 url: 'm_ajax_upd_status.php',
@@ -2090,17 +2048,10 @@ WHERE
                                     leaveStatus: leaveStatus,
                                     empName: empName,
                                     reasonNoProve: reasonNoProve,
-                                    level: level,
-                                    subDepart: subDepart,
-                                    subDepart2: subDepart2,
-                                    subDepart3: subDepart3,
-                                    subDepart4: subDepart4,
-                                    subDepart5: subDepart5,
-                                    workplace: workplace
+                                    level: level
                                 },
                                 success: function(response) {
-                                    $('#leaveModal').modal(
-                                        'hide'); // ปิด modal
+                                    $('#leaveModal').modal('hide'); // ปิด modal
                                     Swal.fire({
                                         title: 'ไม่อนุมัติสำเร็จ !',
                                         // text: 'ทำรายการเสร็จสิ้น',
@@ -2132,8 +2083,7 @@ WHERE
                             success: function(response) {
                                 // แสดงข้อมูลประวัติการลาหรือทำสิ่งที่ต้องการหลังจากได้รับข้อมูล
                                 // เช่น แสดงใน modal หรือ alert
-                                $('#historyModal .modal-body').html(
-                                    response);
+                                $('#historyModal .modal-body').html(response);
                                 $('#historyModal').modal('show');
                             },
                             error: function() {

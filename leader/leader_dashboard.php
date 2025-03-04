@@ -977,10 +977,10 @@ GROUP BY li.l_name";
 
                                             // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
                                             $specialUserRecords = [];
-                                            foreach ($specialUsers as $userName) {
-                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :username AND e_workplace = :workplace";
+                                            foreach ($specialUsers as $specialUserss) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :specialUserss AND e_workplace = :workplace";
                                                 $stmt       = $conn->prepare($sqlSpecial);
-                                                $stmt->bindParam(':username', $userName);
+                                                $stmt->bindParam(':specialUserss', $specialUserss);
                                                 $stmt->bindParam(':workplace', $workplace);
                                                 $stmt->execute();
                                                 $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1290,10 +1290,10 @@ GROUP BY li.l_name";
 
                                             // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
                                             $specialUserRecords = [];
-                                            foreach ($specialUsers as $userName) {
-                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :username AND e_workplace = :workplace";
+                                            foreach ($specialUsers as $specialUserss) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :specialUserss AND e_workplace = :workplace";
                                                 $stmt       = $conn->prepare($sqlSpecial);
-                                                $stmt->bindParam(':username', $userName);
+                                                $stmt->bindParam(':specialUserss', $specialUserss);
                                                 $stmt->bindParam(':workplace', $workplace);
                                                 $stmt->execute();
                                                 $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);

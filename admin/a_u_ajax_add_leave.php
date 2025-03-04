@@ -240,12 +240,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $result['e_sub_department5'],
             ];
 
-            $level = $result['e_level'];
+            $levelApporve = $result['e_level'];
 
             $leaderChiefDepartments = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
             $managerDepartments     = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
 
-            if (in_array($level, ['leader', 'chief'])) {
+            if (in_array($levelApporve, ['leader', 'chief'])) {
                 if (in_array('Office', $departments)) {
                     $proveStatus = 6;
                 }
@@ -255,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $proveStatus2 = 1;
                 }
                 $proveStatus3 = 7;
-            } elseif (in_array($level, ['manager', 'manager2', 'assisManager'])) {
+            } elseif (in_array($levelApporve, ['manager', 'manager2', 'assisManager'])) {
                 $proveStatus = 6;
                 if (in_array('Sales', $departments) || in_array('QC', $departments)) {
                     $proveStatus2 = 6;
@@ -317,20 +317,24 @@ VALUES (
 
             if ($stmt->execute()) {
                 try {
-                    $sql  = "SELECT e_user_id FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
+                    $sql  = "SELECT e_user_id, e_username FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
                     $stmt = $conn->prepare($sql);
                     $stmt->bindParam(':approver', $approver);
                     $stmt->bindParam(':workplace', $workplace);
                     $stmt->execute();
-                    $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    $userList = $stmt->fetchAll(PDO::FETCH_ASSOC); // ดึงข้อมูลเป็น associative array
 
-                    if ($userIds) {
-                        $sURL     = 'https://lms.system-samt.com/';
-                        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\n" .
-                            "วันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\n" .
-                            "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL" . "";
+                    if ($userList) {
+                        $sURL = 'https://lms.system-samt.com/';
 
-                        foreach ($userIds as $userId) {
+                        foreach ($userList as $user) {
+                            $userId    = $user['e_user_id'];
+                            $proveName = $user['e_username'];
+
+                            $sMessage = "K." . $proveName . "\n\nมีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\n" .
+                                "วันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\n" .
+                                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+
                             $data = [
                                 'to'       => $userId,
                                 'messages' => [

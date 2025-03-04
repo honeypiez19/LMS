@@ -2234,7 +2234,7 @@ WHERE l_leave_id = :leave_id
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
                 var userCode = '<?php echo $userCode; ?>';
                 var depart = '<?php echo $depart; ?>';
-                var selectedYear = <?php echo json_encode($selectedYear); ?>;
+                var selectedYear =                                   <?php echo json_encode($selectedYear); ?>;
                 var nameType = '';
 
                 if (leaveType == 1) {

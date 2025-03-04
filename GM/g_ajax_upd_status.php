@@ -1,558 +1,274 @@
 <?php
 // Start session
 session_start();
+date_default_timezone_set('Asia/Bangkok'); // Set timezone to Thailand
 
 include '../connect.php';
-include '../access_token_channel.php';     // Include database connection file
-                                           // Include database connection file
-date_default_timezone_set('Asia/Bangkok'); // เวลาไทย
+include '../access_token_channel.php';
 
 $appDate = date("Y-m-d H:i:s");
 
 // รับค่าที่ส่งมาจาก AJAX
-$userCode       = $_POST['userCode'];
-$createDate     = $_POST['createDate'];
-$status         = $_POST['status'];
-$empName        = $_POST['empName'];
-$userName       = $_POST['userName'];
-$proveName      = $_POST['proveName'];
-$leaveType      = $_POST['leaveType'];
-$leaveReason    = $_POST['leaveReason'];
-$leaveStartDate = $_POST['leaveStartDate'];
-$leaveEndDate   = $_POST['leaveEndDate'];
-$depart         = $_POST['depart'];
-$leaveStatus    = $_POST['leaveStatus'];
-$subDepart      = $_POST['subDepart'];
-$reasonNoProve  = $_POST['reasonNoProve'];
+$userCode       = isset($_POST['userCode']) ? $_POST['userCode'] : '';
+$createDate     = isset($_POST['createDate']) ? $_POST['createDate'] : '';
+$status         = isset($_POST['status']) ? $_POST['status'] : '';
+$empName        = isset($_POST['empName']) ? $_POST['empName'] : '';
+$userName       = isset($_POST['userName']) ? $_POST['userName'] : '';
+$proveName      = isset($_POST['proveName']) ? $_POST['proveName'] : '';
+$leaveType      = isset($_POST['leaveType']) ? $_POST['leaveType'] : '';
+$leaveReason    = isset($_POST['leaveReason']) ? $_POST['leaveReason'] : '';
+$leaveStartDate = isset($_POST['leaveStartDate']) ? $_POST['leaveStartDate'] : '';
+$leaveEndDate   = isset($_POST['leaveEndDate']) ? $_POST['leaveEndDate'] : '';
+$depart         = isset($_POST['depart']) ? $_POST['depart'] : '';
+$leaveStatus    = isset($_POST['leaveStatus']) ? $_POST['leaveStatus'] : '';
+$reasonNoProve  = isset($_POST['reasonNoProve']) ? $_POST['reasonNoProve'] : '';
+$workplace      = isset($_POST['workplace']) ? $_POST['workplace'] : '';
+$level          = isset($_POST['level']) ? $_POST['level'] : '';
+$subDepart      = isset($_POST['subDepart']) ? $_POST['subDepart'] : '';
+$subDepart2     = isset($_POST['subDepart2']) ? $_POST['subDepart2'] : '';
+$subDepart3     = isset($_POST['subDepart3']) ? $_POST['subDepart3'] : '';
+$subDepart4     = isset($_POST['subDepart4']) ? $_POST['subDepart4'] : '';
+$subDepart5     = isset($_POST['subDepart5']) ? $_POST['subDepart5'] : '';
 
-if ($status == 8) {
-    // เตรียมคำสั่ง SQL
-    $sql = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName
-            WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+// URL ของระบบ
+$sURL = 'https://lms.system-samt.com/';
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':status', $status);
-    $stmt->bindParam(':appDate', $appDate);
-    $stmt->bindParam(':userName', $userName);
-    $stmt->bindParam(':userCode', $userCode);
-    $stmt->bindParam(':createDate', $createDate);
+try {
+    // เริ่ม transaction
+    $conn->beginTransaction();
 
-    if ($stmt->execute()) {
-        $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_usercode = :usercode");
-        $stmt->bindParam(':usercode', $userCode);
-        $stmt->execute();
-        $userId = $stmt->fetchColumn(); // เปลี่ยนชื่อตัวแปรเพื่อความชัดเจน
-        $sURL   = 'https://lms.system-samt.com/';
+    // อัปเดตสถานะการลาในฐานข้อมูล
+    $sqlUpdateLeave = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName, l_reason3 = :reasonNoProve
+                      WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+    $stmt   = $conn->prepare($sqlUpdateLeave);
+    $result = $stmt->execute([
+        ':status'        => $status,
+        ':appDate'       => $appDate,
+        ':userName'      => $userName,
+        ':userCode'      => $userCode,
+        ':createDate'    => $createDate,
+        ':reasonNoProve' => $reasonNoProve,
+    ]);
 
-        // ข้อความแจ้งเตือน
-        $message = "$proveName อนุมัติใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
+    $notifiedList = [];
 
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-        }
+    // กรณีไม่อนุมัติ (status = 3) ให้แจ้งเตือนกลับไปยังพนักงานเจ้าของใบลา
+    if ($status == '9') {
+        // ต้องดึงข้อมูลสถานะการอนุมัติก่อน
+        $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3,
+                              l_approve_name, l_approve_name2, l_username
+                       FROM leave_list
+                       WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+        $stmt = $conn->prepare($sqlGetApproveStatus);
+        $stmt->execute([
+            ':userCode'   => $userCode,
+            ':createDate' => $createDate,
+        ]);
+        $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // แจ้งเตือนพนักงาน
-        if ($userId) {
-            // สร้าง message data
-            $messageData = [
-                'to'       => $userId,
-                'messages' => [
-                    [
-                        'type' => 'text',
-                        'text' => $message,
-                    ],
-                ],
-            ];
+        $managers = []; // Initialize the managers array
 
-            // แปลงข้อมูลเป็น JSON
-            $jsonData = json_encode($messageData);
-
-            // ส่งข้อความด้วย cURL
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $access_token,
+        // 1. ส่งแจ้งเตือนไปยังหัวหน้าระดับแรก (l_approve_name)
+        if (! empty($approveStatus['l_approve_name'])) {
+            $sqlFindPrevManager = "SELECT e_user_id, e_username, e_name, e_level
+                          FROM employees
+                          WHERE e_username = :username";
+            $stmt = $conn->prepare($sqlFindPrevManager);
+            $stmt->execute([
+                ':username' => $approveStatus['l_approve_name'],
             ]);
+            $prevManager = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $result = curl_exec($ch);
-
-            if (curl_error($ch)) {
-                echo 'Error: ' . curl_error($ch);
-            } else {
-                $responseData = json_decode($result, true);
-                if (isset($responseData['message'])) {
-                    echo "Error message: " . $responseData['message'] . "\n";
-                } else {
-                    echo "Message sent to employee successfully\n";
-                }
-            }
-            curl_close($ch);
-        }
-
-        $adminMessage = "ข้อมูลการลา - $empName\nการอนุมัติโดย: $proveName\nประเภทการลา: $leaveType\nสถานะ: " .
-            ($leaveStatus == 'ยกเลิกใบลา' ? 'อนุมัติการยกเลิก' : 'อนุมัติ') .
-            "\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate";
-
-        // ดึงข้อมูลผู้ใช้ระดับ admin
-        $adminStmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_level = 'admin' AND e_workplace = :workplace");
-        $stmt->bindParam(':workplace', $workplace);
-
-        $adminStmt->execute();
-        $adminUsers = $adminStmt->fetchAll(PDO::FETCH_COLUMN);
-
-        // ส่งข้อความแจ้งเตือนไปยังผู้ใช้ระดับ admin ทุกคน
-        foreach ($adminUsers as $adminUserId) {
-            if (! empty($adminUserId)) {
-                // สร้าง message data สำหรับ admin
-                $adminMessageData = [
-                    'to'       => $adminUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $adminMessage,
-                        ],
-                    ],
-                ];
-
-                // แปลงข้อมูลเป็น JSON
-                $adminJsonData = json_encode($adminMessageData);
-
-                // ส่งข้อความด้วย cURL
-                $adminCh = curl_init();
-                curl_setopt($adminCh, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($adminCh, CURLOPT_POST, true);
-                curl_setopt($adminCh, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($adminCh, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($adminCh, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($adminCh, CURLOPT_POSTFIELDS, $adminJsonData);
-                curl_setopt($adminCh, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $adminResult = curl_exec($adminCh);
-
-                if (curl_error($adminCh)) {
-                    echo 'Error sending to admin: ' . curl_error($adminCh) . "\n";
-                } else {
-                    $adminResponseData = json_decode($adminResult, true);
-                    if (isset($adminResponseData['message'])) {
-                        echo "Error sending to admin: " . $adminResponseData['message'] . "\n";
-                    } else {
-                        echo "Message sent to admin successfully\n";
-                    }
-                }
-                curl_close($adminCh);
+            if ($prevManager && ! empty($prevManager['e_user_id'])) {
+                $managers[] = $prevManager;
+                error_log("พบหัวหน้าระดับแรก: " . $prevManager['e_username']);
             }
         }
 
-        // แจ้งเตือนตามเงื่อนไขของผู้อนุมัติ
-        if ($userName == 'Anchana') {
-            // แจ้งเตือน Pornsuk
-            $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_username = 'Pornsuk'");
-            $stmt->execute();
-            $pornsukUserId = $stmt->fetchColumn();
+        // 2. ส่งแจ้งเตือนไปยังหัวหน้าระดับสอง (l_approve_name2)
+        if (! empty($approveStatus['l_approve_name2'])) {
+            $sqlFindSecondManager = "SELECT e_user_id, e_username, e_name, e_level
+                          FROM employees
+                          WHERE e_username = :username";
+            $stmt = $conn->prepare($sqlFindSecondManager);
+            $stmt->execute([
+                ':username' => $approveStatus['l_approve_name2'],
+            ]);
+            $secondManager = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $notifyMessage = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $notifyMessage = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
+            if ($secondManager && ! empty($secondManager['e_user_id'])) {
+                $managers[] = $secondManager;
+                error_log("พบหัวหน้าระดับสอง: " . $secondManager['e_username']);
             }
+        }
 
-            if ($pornsukUserId) {
-                $messageData = [
-                    'to'       => $pornsukUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $notifyMessage,
-                        ],
-                    ],
-                ];
+        // 3. ส่งแจ้งเตือนกลับไปยังพนักงานที่ขอลา
+        if (! empty($approveStatus['l_username'])) {
+            $sqlFindEmployee = "SELECT e_user_id, e_username, e_name, e_level
+                       FROM employees
+                       WHERE e_username = :username";
+            $stmt = $conn->prepare($sqlFindEmployee);
+            $stmt->execute([
+                ':username' => $approveStatus['l_username'],
+            ]);
+            $employee = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                $jsonData = json_encode($messageData);
+            if ($employee && ! empty($employee['e_user_id'])) {
+                $managers[] = $employee;
+                error_log("พบพนักงานที่ขอลา: " . $employee['e_username']);
+            }
+        }
 
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $result = curl_exec($ch);
-
-                if (curl_error($ch)) {
-                    echo 'Error: ' . curl_error($ch);
-                } else {
-                    $responseData = json_decode($result, true);
-                    if (isset($responseData['message'])) {
-                        echo "Error message (Pornsuk): " . $responseData['message'] . "\n";
-                    } else {
-                        echo "Message sent to Pornsuk successfully\n";
+        // ส่งข้อความแจ้งเตือน
+        foreach ($managers as $manager) {
+            if (! empty($manager['e_user_id'])) {
+                // ข้อความแจ้งเตือนขึ้นอยู่กับผู้รับ
+                if ($manager['e_username'] == $approveStatus['l_approve_name']) {
+                    // ข้อความสำหรับหัวหน้าระดับแรก
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    if ($leaveStatus == 'ยกเลิกใบลา') {
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    }
+                } else if ($manager['e_username'] == $approveStatus['l_approve_name2']) {
+                    // ข้อความสำหรับหัวหน้าระดับสอง
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    if ($leaveStatus == 'ยกเลิกใบลา') {
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    }
+                } else if ($manager['e_username'] == $approveStatus['l_username']) {
+                    // ข้อความสำหรับพนักงานที่ขอลา
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    if ($leaveStatus == 'ยกเลิกใบลา') {
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติการยกเลิกใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     }
                 }
-                curl_close($ch);
-            }
-        } else if ($userName == 'Horita') {
-            // แจ้งเตือน Matsumoto
-            $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_username = 'Matsumoto'");
-            $stmt->execute();
-            $matsumotoUserId = $stmt->fetchColumn();
 
-            $notifyMessage = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
+                $response = sendLineMessage($manager['e_user_id'], $message, $access_token);
+                error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
 
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $notifyMessage = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-            }
-
-            if ($matsumotoUserId) {
-                $messageData = [
-                    'to'       => $matsumotoUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $notifyMessage,
-                        ],
-                    ],
-                ];
-
-                $jsonData = json_encode($messageData);
-
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $result = curl_exec($ch);
-
-                if (curl_error($ch)) {
-                    echo 'Error: ' . curl_error($ch);
+                if (isset($response['message'])) {
+                    error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
                 } else {
-                    $responseData = json_decode($result, true);
-                    if (isset($responseData['message'])) {
-                        echo "Error message (Matsumoto): " . $responseData['message'] . "\n";
-                    } else {
-                        echo "Message sent to Matsumoto successfully\n";
-                    }
+                    error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
+                    $notifiedList[] = [
+                        'name'     => $manager['e_name'],
+                        'username' => $manager['e_username'],
+                        'level'    => $manager['e_level'],
+                    ];
                 }
-                curl_close($ch);
-            }
-        } elseif ($userName == 'Chaikorn') {
-            // แจ้งเตือนผู้ที่มีระดับ GM
-            $stmt = $conn->prepare("SELECT e_user_id, e_username FROM employees WHERE e_level = 'GM'");
-            $stmt->execute();
-            $gmUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $notifyMessage = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $notifyMessage = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-            }
-
-            foreach ($gmUsers as $gmUser) {
-                $gmUserId   = $gmUser['e_user_id'];
-                $gmUsername = $gmUser['e_username'];
-
-                if (! $gmUserId) {
-                    echo "ไม่พบ User ID สำหรับ GM: " . $gmUsername . "<br>";
-                    continue;
-                }
-
-                $messageData = [
-                    'to'       => $gmUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $notifyMessage,
-                        ],
-                    ],
-                ];
-
-                $jsonData = json_encode($messageData);
-
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $result = curl_exec($ch);
-
-                if (curl_error($ch)) {
-                    echo 'Error: ' . curl_error($ch) . "<br>";
-                } else {
-                    $responseData = json_decode($result, true);
-                    if (isset($responseData['message'])) {
-                        echo "GM User: " . $gmUsername . " - Error: " . $responseData['message'] . "<br>";
-                    } else {
-                        echo "Message sent to GM: " . $gmUsername . " successfully<br>";
-                    }
-                }
-                curl_close($ch);
             }
         }
     }
-} else if ($status == 9) {
-    $sql = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName, l_reason3 = :reasonNoProve
-            WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':status', $status);
-    $stmt->bindParam(':appDate', $appDate);
-    $stmt->bindParam(':userName', $userName);
-    $stmt->bindParam(':userCode', $userCode);
-    $stmt->bindParam(':createDate', $createDate);
-    $stmt->bindParam(':reasonNoProve', $reasonNoProve); // Binding l_reason
+    // กรณีอนุมัติ (status = 2) ให้ดำเนินการตามเงื่อนไขเดิม
+    else if ($status == '8') {
+        // ดึงข้อมูลสถานะการอนุมัติปัจจุบัน
+        $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3
+                                FROM leave_list
+                                WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+        $stmt = $conn->prepare($sqlGetApproveStatus);
+        $stmt->execute([
+            ':userCode'   => $userCode,
+            ':createDate' => $createDate,
+        ]);
+        $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($stmt->execute()) {
-        $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_usercode = :usercode");
-        $stmt->bindParam(':usercode', $userCode);
-        $stmt->execute();
-        $userId = $stmt->fetchColumn(); // เปลี่ยนชื่อตัวแปรเพื่อความชัดเจน
-        $sURL   = 'https://lms.system-samt.com/';
+        $managers = [];
 
-        // ข้อความแจ้งเตือน
-        $message = "$proveName ไม่อนุมัติใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
+        if (empty($managers)) {
+            $sqlFindAdmins = "SELECT e_user_id, e_username, e_name, e_level
+                         FROM employees
+                         WHERE e_level = 'admin'
+                         AND e_workplace = :workplace";
 
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $message = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-        }
-
-        // แจ้งเตือนพนักงาน
-        if ($userId) {
-            // สร้าง message data
-            $messageData = [
-                'to'       => $userId,
-                'messages' => [
-                    [
-                        'type' => 'text',
-                        'text' => $message,
-                    ],
-                ],
-            ];
-
-            // แปลงข้อมูลเป็น JSON
-            $jsonData = json_encode($messageData);
-
-            // ส่งข้อความด้วย cURL
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $access_token,
+            $stmt = $conn->prepare($sqlFindAdmins);
+            $stmt->execute([
+                ':workplace' => $workplace,
             ]);
+            $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("พบ admin: " . count($managers) . " คน");
+        }
 
-            $result = curl_exec($ch);
+        // ส่งข้อความแจ้งเตือนไปยังผู้จัดการ/GM/admin
+        foreach ($managers as $manager) {
+            if (! empty($manager['e_user_id'])) {
+                // สร้างข้อความแจ้งเตือน
+                $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติใบลาของ $empName\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-            if (curl_error($ch)) {
-                echo 'Error: ' . curl_error($ch);
+                if ($leaveStatus == 'ยกเลิกใบลา') {
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                }
+
+                $response = sendLineMessage($manager['e_user_id'], $message, $access_token);
+                error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
+
+                if (isset($response['message'])) {
+                    error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
+                } else {
+                    error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
+                    // เพิ่มรายชื่อผู้ที่ได้รับแจ้งเตือนสำเร็จ
+                    $notifiedList[] = [
+                        'name'     => $manager['e_name'],
+                        'username' => $manager['e_username'],
+                        'level'    => $manager['e_level'],
+                    ];
+                }
             } else {
-                $responseData = json_decode($result, true);
-                if (isset($responseData['message'])) {
-                    echo "Error message: " . $responseData['message'] . "\n";
-                } else {
-                    echo "Message sent to employee successfully\n";
-                }
-            }
-            curl_close($ch);
-        }
-
-        // แจ้งเตือนตามเงื่อนไขของผู้อนุมัติ
-        if ($userName == 'Anchana') {
-            // แจ้งเตือน Pornsuk
-            $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_username = 'Pornsuk'");
-            $stmt->execute();
-            $pornsukUserId = $stmt->fetchColumn();
-
-            $notifyMessage = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $notifyMessage = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-            }
-
-            if ($pornsukUserId) {
-                $messageData = [
-                    'to'       => $pornsukUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $notifyMessage,
-                        ],
-                    ],
-                ];
-
-                $jsonData = json_encode($messageData);
-
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $result = curl_exec($ch);
-
-                if (curl_error($ch)) {
-                    echo 'Error: ' . curl_error($ch);
-                } else {
-                    $responseData = json_decode($result, true);
-                    if (isset($responseData['message'])) {
-                        echo "Error message (Pornsuk): " . $responseData['message'] . "\n";
-                    } else {
-                        echo "Message sent to Pornsuk successfully\n";
-                    }
-                }
-                curl_close($ch);
-            }
-        } else if ($userName == 'Horita') {
-            // แจ้งเตือน Matsumoto
-            $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_username = 'Matsumoto'");
-            $stmt->execute();
-            $matsumotoUserId = $stmt->fetchColumn();
-
-            $notifyMessage = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $notifyMessage = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-            }
-
-            if ($matsumotoUserId) {
-                $messageData = [
-                    'to'       => $matsumotoUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $notifyMessage,
-                        ],
-                    ],
-                ];
-
-                $jsonData = json_encode($messageData);
-
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $result = curl_exec($ch);
-
-                if (curl_error($ch)) {
-                    echo 'Error: ' . curl_error($ch);
-                } else {
-                    $responseData = json_decode($result, true);
-                    if (isset($responseData['message'])) {
-                        echo "Error message (Matsumoto): " . $responseData['message'] . "\n";
-                    } else {
-                        echo "Message sent to Matsumoto successfully\n";
-                    }
-                }
-                curl_close($ch);
-            }
-        } elseif ($userName == 'Chaikorn') {
-            // แจ้งเตือนผู้ที่มีระดับ GM
-            $stmt = $conn->prepare("SELECT e_user_id, e_username FROM employees WHERE e_level = 'GM'");
-            $stmt->execute();
-            $gmUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $notifyMessage = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $notifyMessage = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate";
-            }
-
-            foreach ($gmUsers as $gmUser) {
-                $gmUserId   = $gmUser['e_user_id'];
-                $gmUsername = $gmUser['e_username'];
-
-                if (! $gmUserId) {
-                    echo "ไม่พบ User ID สำหรับ GM: " . $gmUsername . "<br>";
-                    continue;
-                }
-
-                $messageData = [
-                    'to'       => $gmUserId,
-                    'messages' => [
-                        [
-                            'type' => 'text',
-                            'text' => $notifyMessage,
-                        ],
-                    ],
-                ];
-
-                $jsonData = json_encode($messageData);
-
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Authorization: Bearer ' . $access_token,
-                ]);
-
-                $result = curl_exec($ch);
-
-                if (curl_error($ch)) {
-                    echo 'Error: ' . curl_error($ch) . "<br>";
-                } else {
-                    $responseData = json_decode($result, true);
-                    if (isset($responseData['message'])) {
-                        echo "GM User: " . $gmUsername . " - Error: " . $responseData['message'] . "<br>";
-                    } else {
-                        echo "Message sent to GM: " . $gmUsername . " successfully<br>";
-                    }
-                }
-                curl_close($ch);
+                error_log("ไม่พบ user_id สำหรับ " . $manager['e_username']);
             }
         }
-    } else {
-        echo 'อัปเดตสถานะผ่านไม่สำเร็จ';
     }
-} else {
-    echo "ไม่มีสถานะนี้";
+
+    $conn->commit();
+    echo json_encode(['status' => 'success', 'notified' => $notifiedList]);
+
+} catch (Exception $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+    error_log("เกิดข้อผิดพลาด: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+}
+
+function sendLineMessage($userId, $message, $access_token)
+{
+    if (empty($userId) || empty($message) || empty($access_token)) {
+        error_log("ข้อมูลสำหรับส่งแจ้งเตือนไม่ครบถ้วน: userId=" . (empty($userId) ? "ไม่มี" : "มี") .
+            ", message=" . (empty($message) ? "ไม่มี" : "มี") .
+            ", access_token=" . (empty($access_token) ? "ไม่มี" : "มี"));
+        return ['status' => 'error', 'message' => 'ข้อมูลไม่ครบถ้วน'];
+    }
+
+    $messageData = [
+        'to'       => $userId,
+        'messages' => [['type' => 'text', 'text' => $message]],
+    ];
+
+    $jsonData = json_encode($messageData);
+    $ch       = curl_init('https://api.line.me/v2/bot/message/push');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $access_token,
+    ]);
+
+    $result    = curl_exec($ch);
+    $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+
+    if ($curlError) {
+        error_log("cURL Error: " . $curlError);
+    }
+
+    error_log("LINE API Response Code: " . $httpCode);
+    error_log("LINE API Response: " . $result);
+
+    curl_close($ch);
+
+    return json_decode($result, true);
 }
 
 // ปิดการเชื่อมต่อกับฐานข้อมูล

@@ -240,12 +240,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $result['e_sub_department5'],
             ];
 
-            $level = $result['e_level'];
+            $levelApprover = $result['e_level'];
 
             $leaderChiefDepartments = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
             $managerDepartments     = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
 
-            if (in_array($level, ['leader', 'chief'])) {
+            if (in_array($levelApprover, ['leader', 'chief'])) {
                 if (in_array('Office', $departments)) {
                     $proveStatus = 6;
                 }
@@ -255,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $proveStatus2 = 1;
                 }
                 $proveStatus3 = 7;
-            } elseif (in_array($level, ['manager', 'manager2', 'assisManager'])) {
+            } elseif (in_array($levelApprover, ['manager', 'manager2', 'assisManager'])) {
                 $proveStatus = 6;
                 if (in_array('Sales', $departments) || in_array('QC', $departments)) {
                     $proveStatus2 = 6;
@@ -263,11 +263,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $proveStatus2 = 1;
                 }
                 $proveStatus3 = 7;
-            } elseif ($level === 'GM') {
+            } elseif ($levelApprover === 'GM') {
                 $proveStatus  = 6;
                 $proveStatus2 = 6;
                 $proveStatus3 = 7;
-            } elseif ($level === 'admin') {
+            } elseif ($levelApprover === 'admin') {
                 $proveStatus  = 6;
                 $proveStatus2 = 6;
                 $proveStatus3 = 6;
@@ -328,12 +328,12 @@ VALUES (
                         $sURL = 'https://lms.system-samt.com/';
 
                         foreach ($userList as $user) {
-                            $userId   = $user['e_user_id'];
-                            $userName = $user['e_username'];
+                            $userId    = $user['e_user_id'];
+                            $proveName = $user['e_username'];
 
-                            $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\n" .
+                            $sMessage = "K." . $proveName . "\n\nมีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\n" .
                                 "วันเวลาที่ลา : $leaveDateStart $leaveTimeStartLine ถึง $leaveDateEnd $leaveTimeEndLine\n" .
-                                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL\nถึง: $userName";
+                                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
 
                             $data = [
                                 'to'       => $userId,
@@ -345,8 +345,8 @@ VALUES (
                                 ],
                             ];
 
-                            // ส่ง cURL request
                             $ch = curl_init('https://api.line.me/v2/bot/message/push');
+                            curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
                             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                             curl_setopt($ch, CURLOPT_POST, true);
                             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -355,25 +355,22 @@ VALUES (
                                 'Authorization: Bearer ' . $access_token,
                             ]);
 
-                            $response  = curl_exec($ch);
-                            $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                            $curlError = curl_error($ch);
+                            $response = curl_exec($ch);
                             curl_close($ch);
 
-                            if ($response === false || $httpCode !== 200) {
-                                error_log("Error sending Line message to $userId: " . ($curlError ?: "HTTP Code $httpCode"));
+                            if ($response === false) {
+                                echo "Warning: ไม่สามารถส่งข้อความ Line ได้ " . curl_error($ch);
                             }
                         }
                     }
                 } catch (Exception $e) {
-                    error_log("Error in Line Notification: " . $e->getMessage());
+                    echo "Warning: เกิดข้อผิดพลาดในการส่ง Line Notification: " . $e->getMessage();
                 }
 
-                echo "success"; // ส่งสถานะกลับไปยัง AJAX
+                echo "success"; // ส่งสถานะการทำงานกลับไปยัง AJAX
             } else {
                 echo "Error: " . $stmt->errorInfo()[2];
             }
-
         } catch (PDOException $e) {
             echo "Database Error: " . $e->getMessage();
         }

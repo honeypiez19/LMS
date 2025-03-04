@@ -30,7 +30,11 @@ $subDepart3     = isset($_POST['subDepart3']) ? $_POST['subDepart3'] : '';
 $subDepart4     = isset($_POST['subDepart4']) ? $_POST['subDepart4'] : '';
 $subDepart5     = isset($_POST['subDepart5']) ? $_POST['subDepart5'] : '';
 
+// URL ของระบบ
+$sURL = 'https://lms.system-samt.com/';
+
 try {
+    // เริ่ม transaction
     $conn->beginTransaction();
 
     // อัปเดตสถานะการลาในฐานข้อมูล
@@ -46,201 +50,181 @@ try {
         ':reasonNoProve' => $reasonNoProve,
     ]);
 
-    // ตรวจสอบว่าการอัปเดตสำเร็จหรือไม่
-    if (! $result) {
-        error_log("ไม่สามารถอัปเดตสถานะการลาได้: " . print_r($stmt->errorInfo(), true));
-        throw new Exception("ไม่สามารถอัปเดตสถานะการลาได้");
-    }
-
-    $rowsAffected = $stmt->rowCount();
-    error_log("จำนวนแถวที่ถูกอัปเดต: $rowsAffected");
-
-    // ดึงข้อมูลสถานะการอนุมัติปัจจุบัน
-    $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3
-                            FROM leave_list
-                            WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
-    $stmt = $conn->prepare($sqlGetApproveStatus);
-    $stmt->execute([
-        ':userCode'   => $userCode,
-        ':createDate' => $createDate,
-    ]);
-    $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    error_log("สถานะการอนุมัติ: " . print_r($approveStatus, true));
-
-    // สร้างข้อความแจ้งเตือน
-    $sURL = 'https://lms.system-samt.com/';
-    if ($status == '4') {
-        $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        }
-    } elseif ($status == '5') {
-        $message = "$proveName ไม่อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $message = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        }
-    }
-
-    // ตัวแปรเก็บผู้ที่ได้รับแจ้งเตือน
     $notifiedList = [];
-    $managers     = [];
 
-    // เงื่อนไขที่ 1: ถ้า l_approve_status2 = 1 ให้ส่งแจ้งเตือนหาระดับผู้จัดการ
-    if (isset($approveStatus['l_approve_status2']) && $approveStatus['l_approve_status2'] == 1) {
-        error_log("เงื่อนไข: l_approve_status2 = 1 - ส่งแจ้งเตือนหาระดับผู้จัดการ");
-        echo "<div class='alert alert-info'>เงื่อนไข: ส่งแจ้งเตือนหาระดับผู้จัดการ เนื่องจาก l_approve_status2 = 1</div>";
-
-        // ค้นหาผู้จัดการที่ต้องแจ้งเตือน
-        $sqlFindManagers = "SELECT e_user_id, e_username, e_name, e_level
-                           FROM employees
-                           WHERE e_level IN ('manager', 'manager2', 'assisManager')
-                           AND (
-                            (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
-                            OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
-                            OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
-                            OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
-                            OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
-                           )
-                           AND e_workplace = :workplace";
-
-        $stmt = $conn->prepare($sqlFindManagers);
+    // กรณีไม่อนุมัติ (status = 3) ให้แจ้งเตือนกลับไปยังพนักงานเจ้าของใบลา
+    // กรณีไม่อนุมัติ (status = 5) ให้แจ้งเตือนกลับไปยังพนักงานเจ้าของใบลา
+    if ($status == '5') {
+        // ต้องดึงข้อมูลสถานะการอนุมัติก่อน
+        $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3,
+                                  l_approve_name, l_approve_name2, l_username
+                           FROM leave_list
+                           WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+        $stmt = $conn->prepare($sqlGetApproveStatus);
         $stmt->execute([
-            ':workplace'  => $workplace,
-            ':depart'     => $depart,
-            ':subDepart'  => $subDepart,
-            ':subDepart2' => $subDepart2,
-            ':subDepart3' => $subDepart3,
-            ':subDepart4' => $subDepart4,
-            ':subDepart5' => $subDepart5,
+            ':userCode'   => $userCode,
+            ':createDate' => $createDate,
         ]);
-        $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        error_log("พบผู้จัดการ: " . count($managers) . " คน");
-    }
+        $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // เงื่อนไขที่ 2: ถ้า l_approve_status3 = 7 ให้ส่งแจ้งเตือนหาระดับ GM
-    else if (isset($approveStatus['l_approve_status3']) && $approveStatus['l_approve_status3'] == 7) {
-        error_log("เงื่อนไข: l_approve_status3 = 7 - ส่งแจ้งเตือนหาระดับ GM");
-        echo "<div class='alert alert-info'>เงื่อนไข: ส่งแจ้งเตือนหาระดับ GM เนื่องจาก l_approve_status3 = 7</div>";
+        $managers = []; // Initialize the managers array
 
-        // ค้นหา GM ที่ต้องแจ้งเตือน
-        $sqlFindGM = "SELECT e_user_id, e_username, e_name, e_level
-                      FROM employees
-                      WHERE e_level = 'GM'
-                      AND e_workplace = :workplace";
+        // 1. ส่งแจ้งเตือนไปยังหัวหน้าก่อนหน้า (l_approve_name)
+        if (! empty($approveStatus['l_approve_name'])) {
+            $sqlFindPrevManager = "SELECT e_user_id, e_username, e_name, e_level
+                              FROM employees
+                              WHERE e_username = :username";
+            $stmt = $conn->prepare($sqlFindPrevManager);
+            $stmt->execute([
+                ':username' => $approveStatus['l_approve_name'],
+            ]);
+            $prevManager = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $stmt = $conn->prepare($sqlFindGM);
-        $stmt->execute([
-            ':workplace' => $workplace,
-        ]);
-        $gms = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // รวม GM เข้ากับรายชื่อผู้จัดการ (ถ้ามี)
-        foreach ($gms as $gm) {
-            $managers[] = $gm;
+            if ($prevManager && ! empty($prevManager['e_user_id'])) {
+                $managers[] = $prevManager;
+                error_log("พบหัวหน้าก่อนหน้า: " . $prevManager['e_username']);
+            }
         }
-        error_log("พบ GM: " . count($gms) . " คน");
+
+        // 2. ส่งแจ้งเตือนกลับไปยังพนักงานที่ขอลา
+        if (! empty($approveStatus['l_username'])) {
+            $sqlFindEmployee = "SELECT e_user_id, e_username, e_name, e_level
+                           FROM employees
+                           WHERE e_username = :username";
+            $stmt = $conn->prepare($sqlFindEmployee);
+            $stmt->execute([
+                ':username' => $approveStatus['l_username'],
+            ]);
+            $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($employee && ! empty($employee['e_user_id'])) {
+                $managers[] = $employee;
+                error_log("พบพนักงานที่ขอลา: " . $employee['e_username']);
+            }
+        }
+
+        // ส่งข้อความแจ้งเตือน
+        foreach ($managers as $manager) {
+            if (! empty($manager['e_user_id'])) {
+                // ข้อความแจ้งเตือนขึ้นอยู่กับผู้รับ
+                if ($manager['e_username'] == $approveStatus['l_approve_name']) {
+                    // ข้อความสำหรับหัวหน้าก่อนหน้า
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    if ($leaveStatus == 'ยกเลิกใบลา') {
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    }
+                } else if ($manager['e_username'] == $approveStatus['l_username']) {
+                    // ข้อความสำหรับพนักงานที่ขอลา
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    if ($leaveStatus == 'ยกเลิกใบลา') {
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติการยกเลิกใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    }
+                }
+
+                $response = sendLineMessage($manager['e_user_id'], $message, $access_token);
+                error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
+
+                if (isset($response['message'])) {
+                    error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
+                } else {
+                    error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
+                    $notifiedList[] = [
+                        'name'     => $manager['e_name'],
+                        'username' => $manager['e_username'],
+                        'level'    => $manager['e_level'],
+                    ];
+                }
+            }
+        }
     }
+    // กรณีอนุมัติ (status = 2) ให้ดำเนินการตามเงื่อนไขเดิม
+    else if ($status == '4') {
+        // ดึงข้อมูลสถานะการอนุมัติปัจจุบัน
+        $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3
+                                FROM leave_list
+                                WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+        $stmt = $conn->prepare($sqlGetApproveStatus);
+        $stmt->execute([
+            ':userCode'   => $userCode,
+            ':createDate' => $createDate,
+        ]);
+        $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // ถ้าไม่เข้าเงื่อนไขใดเลย ให้ค้นหาผู้รับในระดับถัดไป
-    else if (empty($managers)) {
-        error_log("ไม่เข้าเงื่อนไขพิเศษ: ค้นหาผู้รับในระดับถัดไป");
-        echo "<div class='alert alert-info'>เงื่อนไข: ค้นหาผู้รับในระดับถัดไป</div>";
-
-        $sqlFindManagers = "SELECT e_user_id, e_username, e_name, e_level
+        $managers = [];
+        // เงื่อนไขที่ 2: ถ้า l_approve_status3 = 7 ให้ส่งแจ้งเตือนหาระดับ GM
+        if (isset($approveStatus['l_approve_status3']) && $approveStatus['l_approve_status3'] == 7) {
+            // ค้นหา GM ที่ต้องแจ้งเตือน
+            $sqlFindGM = "SELECT e_user_id, e_username, e_name, e_level
                           FROM employees
-                          WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
-                          AND e_level <> :level
-                          AND (
-                           (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
-                           OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
-                           OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
-                           OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
-                           OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
-                          )
+                          WHERE e_level = 'GM'
                           AND e_workplace = :workplace";
 
-        $stmt = $conn->prepare($sqlFindManagers);
-        $stmt->execute([
-            ':level'      => $level,
-            ':workplace'  => $workplace,
-            ':depart'     => $depart,
-            ':subDepart'  => $subDepart,
-            ':subDepart2' => $subDepart2,
-            ':subDepart3' => $subDepart3,
-            ':subDepart4' => $subDepart4,
-            ':subDepart5' => $subDepart5,
-        ]);
-        $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        error_log("พบผู้รับในระดับถัดไป: " . count($managers) . " คน");
-    }
+            $stmt = $conn->prepare($sqlFindGM);
+            $stmt->execute([
+                ':workplace' => $workplace,
+            ]);
+            $gms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // ตรวจสอบว่าพบผู้รับแจ้งเตือนหรือไม่
-    if (empty($managers)) {
-        error_log("ไม่พบผู้รับแจ้งเตือน");
-        echo "<div class='alert alert-warning'>ไม่พบผู้รับแจ้งเตือน</div>";
-        $conn->commit();
-        echo "<div class='alert alert-success'>อัปเดตสถานะการลาเรียบร้อยแล้ว</div>";
-        exit;
-    }
-
-    // แสดงรายชื่อผู้รับแจ้งเตือน
-    echo "<div class='alert alert-info'>";
-    echo "<h4>ผู้รับแจ้งเตือน:</h4>";
-    echo "<ul class='list-group'>";
-    foreach ($managers as $manager) {
-        echo "<li class='list-group-item'>{$manager['e_name']} ({$manager['e_username']}) - ตำแหน่ง: {$manager['e_level']}</li>";
-    }
-    echo "</ul>";
-    echo "</div>";
-
-    // ส่งข้อความแจ้งเตือน
-    foreach ($managers as $manager) {
-        if (! empty($manager['e_user_id'])) {
-            $personalMessage = "$proveName " . ($status == '4' ? 'อนุมัติ' : 'ไม่อนุมัติ') . "ใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL\n\nข้อความนี้ส่งถึง: " . $manager['e_username'];
-            // $personalMessage = "$proveName " . ($status == '2' ? 'อนุมัติ' : 'ไม่อนุมัติ') . "ใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-
-            $response = sendLineMessage($manager['e_user_id'], $personalMessage, $access_token);
-            error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
-
-            if (isset($response['message'])) {
-                error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
-            } else {
-                error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
-                // เพิ่มรายชื่อผู้ที่ได้รับแจ้งเตือนสำเร็จ
-                $notifiedList[] = [
-                    'name'     => $manager['e_name'],
-                    'username' => $manager['e_username'],
-                    'level'    => $manager['e_level'],
-                ];
+            // รวม GM เข้ากับรายชื่อผู้จัดการ (ถ้ามี)
+            foreach ($gms as $gm) {
+                $managers[] = $gm;
             }
-        } else {
-            error_log("ไม่พบ user_id สำหรับ " . $manager['e_username']);
+            error_log("พบ GM: " . count($gms) . " คน");
+        }
+        // ถ้าไม่เข้าเงื่อนไขใดเลย ให้แจ้งเตือนไป admin
+        else if (empty($managers)) {
+            $sqlFindAdmins = "SELECT e_user_id, e_username, e_name, e_level
+                         FROM employees
+                         WHERE e_level = 'admin'
+                         AND e_workplace = :workplace";
+
+            $stmt = $conn->prepare($sqlFindAdmins);
+            $stmt->execute([
+                ':workplace' => $workplace,
+            ]);
+            $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("พบ admin: " . count($managers) . " คน");
+        }
+
+        // ส่งข้อความแจ้งเตือนไปยังผู้จัดการ/GM/admin
+        foreach ($managers as $manager) {
+            if (! empty($manager['e_user_id'])) {
+                // สร้างข้อความแจ้งเตือน
+                $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติใบลาของ $empName\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+                if ($leaveStatus == 'ยกเลิกใบลา') {
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                }
+
+                $response = sendLineMessage($manager['e_user_id'], $message, $access_token);
+                error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
+
+                if (isset($response['message'])) {
+                    error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
+                } else {
+                    error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
+                    // เพิ่มรายชื่อผู้ที่ได้รับแจ้งเตือนสำเร็จ
+                    $notifiedList[] = [
+                        'name'     => $manager['e_name'],
+                        'username' => $manager['e_username'],
+                        'level'    => $manager['e_level'],
+                    ];
+                }
+            } else {
+                error_log("ไม่พบ user_id สำหรับ " . $manager['e_username']);
+            }
         }
     }
 
     $conn->commit();
-
-    // แสดงผลการส่งแจ้งเตือน
-    echo "<div class='alert alert-success mt-3'>";
-    echo "<h4>ผลการส่งแจ้งเตือน:</h4>";
-    if (! empty($notifiedList)) {
-        echo "<ul class='list-group'>";
-        foreach ($notifiedList as $notified) {
-            echo "<li class='list-group-item'><i class='fas fa-check-circle text-success'></i> {$notified['name']} ({$notified['username']}) - ตำแหน่ง: {$notified['level']}</li>";
-        }
-        echo "</ul>";
-    } else {
-        echo "<p>ไม่มีผู้ได้รับแจ้งเตือนสำเร็จ</p>";
-    }
-    echo "</div>";
-
-    echo "<div class='alert alert-success'>อัปเดตสถานะการลาเรียบร้อยแล้ว</div>";
+    echo json_encode(['status' => 'success', 'notified' => $notifiedList]);
 
 } catch (Exception $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
     error_log("เกิดข้อผิดพลาด: " . $e->getMessage());
-    $conn->rollBack();
-    echo "<div class='alert alert-danger'>เกิดข้อผิดพลาด: " . $e->getMessage() . "</div>";
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
 
 function sendLineMessage($userId, $message, $access_token)
