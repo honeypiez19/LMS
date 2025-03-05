@@ -35,6 +35,19 @@
     <!-- <script src="https://kit.fontawesome.com/84c1327080.js" crossorigin="anonymous"></script> -->
 
     <script src="../js/fontawesome.js"></script>
+
+    <style>
+    .filter-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .filter-card.active {
+        border-color: #007bff;
+        /* Bootstrap primary blue */
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    }
+    </style>
 </head>
 
 <body>
@@ -1333,26 +1346,623 @@ AND l_leave_status = 1";
 
     </div>
     <script>
-    $(document).ready(function() {
+    // ฟังก์ชันสำหรับตั้งค่าปุ่มตรวจสอบ
+    function setupLeaveCheckButtons() {
+        $(".leaveChk").off('click').on('click', function() {
+            var rowData = $(this).closest("tr").find("td");
+            var modalContent =
+                '<table class="table table-bordered">' +
+                '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[5]).text() + '</td></tr>' +
+                '<tr><th>ชื่อ - นามสกุล</th><td>' + $(rowData[1]).text() + '</td></tr>' +
+                '<tr><th>แผนก</th><td>' + $(rowData[2]).text() + '</td></tr>' +
+                '<tr><th>วันที่ยื่นใบลา</th><td>' + $(rowData[7]).text() + '</td></tr>' +
+                '<tr><th>ประเภทการลา</th><td>' + $(rowData[0]).text() + '</td></tr>' +
+                '<tr><th>เหตุผลการลา</th><td>' + $(rowData[3]).text() + '</td></tr>' +
+                '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[9]).text() + ' ถึง ' +
+                $(rowData[10]).text() + '</td></tr>' +
+                '<tr><th>สถานะใบลา</th><td>' + $(rowData[12]).html() + '</td></tr>' +
+                '</table>';
+
+            $('#leaveModal .modal-body').html(modalContent);
+
+            // ล้าง backdrop ที่อาจค้างอยู่จากครั้งก่อน แต่ไม่ลบคลาส modal-open เพื่อให้พื้นหลังยังเป็นสีมืด
+            if ($('.modal-backdrop').length > 1) {
+                $('.modal-backdrop:not(:last)').remove();
+            }
+
+            $('#leaveModal').modal('show');
+
+            // แก้ไขที่ 2: ปุ่มอนุมัติ - ใช้ AJAX แบบไม่รีโหลดหน้า
+            $('.modal-footer .btn-success').off('click').on('click', function() {
+                var modalData = {
+                    createDate: $(rowData[7]).text(),
+                    userCode: $(rowData[5]).text(),
+                    userName: '<?php echo $userName; ?>',
+                    leaveType: $(rowData[0]).text(),
+                    leaveReason: $(rowData[3]).text(),
+                    leaveStartDate: $(rowData[9]).text(),
+                    leaveEndDate: $(rowData[10]).text(),
+                    depart: $(rowData[2]).text(),
+                    checkFirm: '1', // ผ่าน
+                    empName: $(rowData[1]).text(),
+                    leaveStatus: $(rowData[12]).text()
+                };
+
+                let isProcessing = false; // ตัวแปรตรวจสอบสถานะการประมวลผล
+
+                $.ajax({
+                    url: 'a_ajax_upd_status.php',
+                    method: 'POST',
+                    data: modalData,
+                    beforeSend: function() {
+                        // ถ้ายังไม่ได้ประมวลผลให้แสดง SweetAlert กำลังโหลด
+                        if (isProcessing) {
+                            return false; // ไม่ให้ส่งคำขอใหม่ถ้ายังประมวลผลอยู่
+                        }
+                        isProcessing = true;
+
+                        Swal.fire({
+                            title: 'กำลังโหลด...',
+                            text: 'กรุณารอสักครู่',
+                            icon: 'info',
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading(); // แสดงการโหลด
+                            }
+                        });
+                    },
+                    success: function(response) {
+                        // เมื่อเสร็จสิ้นการประมวลผลให้ซ่อน SweetAlert
+                        Swal.close();
+
+                        Swal.fire({
+                            title: 'สำเร็จ!',
+                            text: 'ตรวจสอบผ่านสำเร็จ',
+                            icon: 'success',
+                            showConfirmButton: true, // แสดงปุ่มตกลง
+                            allowOutsideClick: false, // ห้ามคลิกที่บริเวณอื่น
+                            confirmButtonText: 'ตกลง', // ปรับข้อความปุ่ม
+                        }).then(() => {
+                            // ซ่อน Modal แต่ไม่ลบ backdrop ทั้งหมด
+                            $('#leaveModal').modal('hide');
+
+                            // แก้ไขที่ 3: แทนที่จะใช้ location.reload() ให้เรียกใช้ refreshTableData แทน
+                            refreshTableData();
+
+                            // รีเซ็ตสถานะการประมวลผล
+                            isProcessing = false; // ปลดล็อกการคลิก
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error);
+                        isProcessing = false; // ถ้าเกิดข้อผิดพลาดปลดล็อกการประมวลผล
+                        Swal.close(); // ซ่อน SweetAlert
+
+                        // แสดงข้อความแจ้งเตือนเมื่อเกิดข้อผิดพลาด
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาด',
+                            text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง'
+                        });
+                    }
+                });
+            });
+
+            // แก้ไขที่ 4: ปุ่มไม่อนุมัติ
+            $('.modal-footer .btn-danger').off('click').on('click', function() {
+                // ซ่อน Modal หลักชั่วคราว (แต่รักษาสถานะ backdrop)
+                $('#leaveModal').modal('hide');
+
+                Swal.fire({
+                    title: 'ระบุเหตุผลที่ไม่อนุมัติ',
+                    input: 'textarea',
+                    inputPlaceholder: 'กรุณาระบุเหตุผล...',
+                    inputAttributes: {
+                        'aria-label': 'กรุณาระบุเหตุผล',
+                        'required': true
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    inputValidator: (value) => {
+                        if (!value || value.trim() === '') {
+                            return 'กรุณาระบุเหตุผลที่ไม่อนุมัติ';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var rejectReason = result.value;
+                        var userCode = $(rowData[5]).text(); // รหัสพนักงาน
+                        var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
+                        var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                        var empName = $(rowData[1]).text(); // ชื่อพนักงาน
+                        var depart = $(rowData[2]).text(); // แผนก
+                        var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
+                        var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
+                        var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+                        var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+
+                        var checkFirm = '2'; // ไม่ผ่าน
+                        var userName = '<?php echo $userName; ?>';
+
+                        $.ajax({
+                            url: 'a_ajax_upd_status.php',
+                            method: 'POST',
+                            data: {
+                                createDate: createDate,
+                                userCode: userCode,
+                                userName: userName,
+                                leaveType: leaveType,
+                                leaveReason: leaveReason,
+                                leaveStartDate: leaveStartDate,
+                                leaveEndDate: leaveEndDate,
+                                depart: depart,
+                                checkFirm: checkFirm,
+                                empName: empName,
+                                leaveStatus: leaveStatus,
+                                rejectReason: rejectReason // เพิ่มเหตุผลการไม่อนุมัติ
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'สำเร็จ!',
+                                    text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                                    icon: 'success',
+                                    confirmButtonText: 'ตกลง'
+                                }).then(() => {
+                                    // แก้ไขที่ 5: เรียกใช้ refreshTableData แทน location.reload()
+                                    refreshTableData();
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(error);
+                                Swal.fire({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: 'ไม่สามารถบันทึกข้อมูลได้',
+                                    icon: 'error',
+                                    confirmButtonText: 'ตกลง'
+                                });
+                            }
+                        });
+                    } else {
+                        // กรณีกดยกเลิก ให้แสดง Modal กลับมา
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open').css('padding-right', '');
+                        $('#leaveModal').modal('show');
+                    }
+                });
+            });
+        });
+    }
+
+    // ฟังก์ชันสำหรับตั้งค่าปุ่มแก้ไข
+    function setupEditButtons() {
+        $('.edit-btn').click(function() {
+            // Get data attributes from the button
+            var createDateTime = $(this).data('createdatetime');
+            var userCode = $(this).data('usercode');
+
+            // Send AJAX request to fetch data from the server
+            $.ajax({
+                url: 'a_ajax_get_leave.php', // Replace with your PHP file to fetch data
+                method: 'POST',
+                data: {
+                    createDateTime: createDateTime,
+                    userCode: userCode,
+                },
+                dataType: 'json', // Expect JSON response
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Populate modal fields with the fetched data
+                        $('.editLeaveType').val(response.l_leave_id);
+                        $('#editCreateDateTime').val(response
+                            .l_create_datetime);
+                        $('#editUserCode').val(response.l_usercode);
+                        $('#editLeaveReason').val(response.l_leave_reason);
+                        $('#editName').val(response.l_name);
+
+                        var startDate = response.l_leave_start_date;
+                        var endDate = response.l_leave_end_date;
+
+                        var dateParts = startDate.split('-'); // แยกวันที่
+                        var dateParts2 = endDate.split('-'); // แยกวันที่
+
+                        var formattedDate = dateParts[2] + '-' + dateParts[1] +
+                            '-' +
+                            dateParts[0]; // แปลงเป็น d-m-y
+                        var formattedDate2 = dateParts2[2] + '-' + dateParts2[
+                                1] + '-' +
+                            dateParts2[0]; // แปลงเป็น d-m-y
+
+                        $('#editLeaveStartDate').val(formattedDate);
+                        $('#editLeaveEndDate').val(formattedDate2);
+
+                        // เวลาที่เริ่มต้น
+                        const leaveStartTimeMap = {
+                            "08:30:00": ["08:10:00",
+                                "08:15:00"
+                            ],
+                            "09:00:00": [
+                                "08:45:00"
+                            ],
+                            "09:30:00": ["09:10:00",
+                                "09:15:00"
+                            ],
+                            "10:00:00": [
+                                "09:45:00"
+                            ],
+                            "10:30:00": ["10:10:00",
+                                "10:15:00"
+                            ],
+                            "11:00:00": [
+                                "10:45:00"
+                            ],
+                            "11:30:00": ["11:10:00",
+                                "11:15:00"
+                            ],
+                            "12:00:00": [
+                                "11:45:00"
+                            ],
+                            "13:00:00": [
+                                "12:45:00"
+                            ],
+                            "13:30:00": ["13:10:00",
+                                "13:15:00"
+                            ],
+                            "14:00:00": ["13:40:00",
+                                "13:45:00"
+                            ],
+                            "14:30:00": ["14:10:00",
+                                "14:15:00"
+                            ],
+                            "15:00:00": ["14:40:00",
+                                "14:45:00"
+                            ],
+                            "15:30:00": ["15:10:00",
+                                "15:15:00"
+                            ],
+                            "16:00:00": ["15:40:00",
+                                "15:45:00"
+                            ],
+                            "16:30:00": ["16:10:00",
+                                "16:15:00"
+                            ],
+                            "17:00:00": [
+                                "16:40:00"
+                            ]
+                        };
+
+                        if (leaveStartTimeMap[response
+                                .l_leave_start_time]
+                            ?.includes(response
+                                .l_remark)) {
+                            $('#editLeaveStartTime2')
+                                .val(response.l_remark);
+                        } else if (response
+                            .l_leave_start_time ===
+                            "13:00:00") {
+                            $('#editLeaveStartTime2')
+                                .val(
+                                    "12:45:00"
+                                );
+                        } else if (response
+                            .l_leave_start_time ===
+                            "17:00:00") {
+                            $('#editLeaveStartTime2')
+                                .val(
+                                    "16:40:00"
+                                );
+                        } else {
+                            $('#editLeaveStartTime2')
+                                .val(response
+                                    .l_leave_start_time
+                                );
+                        }
+
+                        // เวลาที่สิ้นสุด
+                        const leaveEndTimeMap = {
+                            "08:30:00": ["08:10:00",
+                                "08:15:00"
+                            ],
+                            "09:00:00": [
+                                "08:45:00"
+                            ],
+                            "09:30:00": ["09:10:00",
+                                "09:15:00"
+                            ],
+                            "10:00:00": [
+                                "09:45:00"
+                            ],
+                            "10:30:00": ["10:10:00",
+                                "10:15:00"
+                            ],
+                            "11:00:00": [
+                                "10:45:00"
+                            ],
+                            "11:30:00": ["11:10:00",
+                                "11:15:00"
+                            ],
+                            "12:00:00": [
+                                "11:45:00"
+                            ],
+                            "13:00:00": [
+                                "12:45:00"
+                            ],
+                            "13:30:00": ["13:10:00",
+                                "13:15:00"
+                            ],
+                            "14:00:00": ["13:40:00",
+                                "13:45:00"
+                            ],
+                            "14:30:00": ["14:10:00",
+                                "14:15:00"
+                            ],
+                            "15:00:00": ["14:40:00",
+                                "14:45:00"
+                            ],
+                            "15:30:00": ["15:10:00",
+                                "15:15:00"
+                            ],
+                            "16:00:00": ["15:40:00",
+                                "15:45:00"
+                            ],
+                            "16:30:00": ["16:10:00",
+                                "16:15:00"
+                            ],
+                            "17:00:00": [
+                                "16:40:00"
+                            ]
+                        };
+
+                        if (leaveEndTimeMap[response
+                                .l_leave_end_time]
+                            ?.includes(response
+                                .l_remark)) {
+                            $('#editLeaveEndTime2')
+                                .val(response.l_remark);
+                        } else if (response
+                            .l_leave_end_time ===
+                            "13:00:00") {
+                            $('#editLeaveEndTime2')
+                                .val(
+                                    "12:45:00"
+                                );
+                        } else if (response
+                            .l_leave_end_time ===
+                            "17:00:00") {
+                            $('#editLeaveEndTime2')
+                                .val(
+                                    "16:40:00"
+                                );
+                        } else {
+                            $('#editLeaveEndTime2')
+                                .val(response
+                                    .l_leave_end_time
+                                );
+                        }
+
+                        // Show the modal
+                        $('#editModal').modal('show');
+                    } else {
+                        // Show error message from response
+                        alert(response.message || 'ไม่พบข้อมูล');
+                    }
+                },
+                error: function() {
+                    alert('เกิดข้อผิดพลาดในการดึงข้อมูล');
+                },
+            });
+        });
+
+        $('#editForm').submit(function(e) {
+            e.preventDefault();
+
+            var editCreateDateTime = $('#editCreateDateTime').val();
+            var editUserCode = $('#editUserCode').val();
+            var editLeaveType = $('#editLeaveType').val();
+            var editLeaveReason = $('#editLeaveReason').val();
+            var editLeaveStartDate = $('#editLeaveStartDate').val();
+            var editLeaveEndDate = $('#editLeaveEndDate').val();
+            var editLeaveStartTime = $('#editLeaveStartTime').val();
+            var editLeaveEndTime = $('#editLeaveEndTime').val();
+
+            if (editLeaveStartDate > editLeaveEndDate) {
+                Swal.fire({
+                    title: 'ไม่สามารถลาได้',
+                    text: 'กรุณาเลือกวันที่เริ่มต้นลาใหม่',
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง'
+                })
+            } else if (editLeaveStartTime > editLeaveEndTime) {
+                Swal.fire({
+                    title: 'ไม่สามารถลาได้',
+                    text: 'กรุณาเลือกเวลาเริ่มต้นใหม่',
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง'
+                })
+            } else {
+                $.ajax({
+                    url: 'a_ajax_upd_leave.php',
+                    method: 'POST',
+                    data: {
+                        editCreateDateTime: editCreateDateTime,
+                        editUserCode: editUserCode,
+                        editLeaveType: editLeaveType,
+                        editLeaveReason: editLeaveReason,
+                        editLeaveStartDate: editLeaveStartDate,
+                        editLeaveEndDate: editLeaveEndDate,
+                        editLeaveStartTime: editLeaveStartTime,
+                        editLeaveEndTime: editLeaveEndTime
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'แก้ไขสำเร็จ',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+
+                        $('#editModal').modal('hide');
+                    },
+                    error: function() {
+                        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                    }
+                });
+            }
+        });
+
+        $('.cancel-btn').click(function() {
+            var createDateTime = $(this).data('createdatetime'); // ดึงค่า createDateTime
+            var userCode = $(this).data('usercode'); // ดึงค่า userCode
+            var nameCan = "<?php echo $userName; ?>";
+
+            var rowData = $(this).closest('tr').find('td');
+
+            var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
+            var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
+            var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+
+            // alert(leaveType)
+            Swal.fire({
+                title: 'ยืนยันการยกเลิก?',
+                text: "คุณต้องการยกเลิกรายการนี้หรือไม่?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่',
+                cancelButtonText: 'ไม่'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'a_ajax_delete_leave.php',
+                        type: 'POST',
+                        data: {
+                            createDateTime: createDateTime,
+                            userCode: userCode,
+                            nameCan: nameCan,
+                            leaveType: leaveType,
+                            leaveReason: leaveReason,
+                            leaveStartDate: leaveStartDate,
+                            leaveEndDate: leaveEndDate
+                        },
+                        success: function(response) {
+                            if (response === 'success') {
+                                Swal.fire(
+                                    'สำเร็จ!',
+                                    'ยกเลิกรายการเรียบร้อยแล้ว',
+                                    'success'
+                                ).then(() => {
+                                    location
+                                        .reload(); //
+                                });
+                            } else {
+                                Swal.fire(
+                                    'ผิดพลาด!',
+                                    'ไม่สามารถยกเลิกรายการได้',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'ผิดพลาด!',
+                                'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    // ฟังก์ชันรีเฟรชข้อมูลตาราง
+    function refreshTableData() {
+        var codeSearch = $("#codeSearch").val().toLowerCase();
+        var page = "<?php echo $currentPage; ?>";
+        var selectedMonth = "<?php echo $selectedMonth; ?>";
+        var selectedYear = "<?php echo $selectedYear; ?>";
+
+        // แสดง loading indicator
+        $("tbody").html(
+            '<tr><td colspan="27" class="text-center"><i class="fa fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</td></tr>'
+        );
+
         $.ajax({
-            url: 'a_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
+            url: "a_ajax_get_data_usercode.php",
+            type: "GET",
+            data: {
+                page: page,
+                month: selectedMonth,
+                year: selectedYear,
+                codeSearch: codeSearch
+            },
+            success: function(response) {
+                $("tbody").html(response);
+
+                // สำคัญ: ต้องตั้งค่า event handlers ใหม่หลังจาก DOM เปลี่ยนแปลง
+                setupLeaveCheckButtons();
+                setupEditButtons();
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+                $("tbody").html(
+                    '<tr><td colspan="27" class="text-danger text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง</td></tr>'
+                );
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        if ($('.modal:visible').length === 0) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css('padding-right', '');
+        }
+
+        setupLeaveCheckButtons();
+        setupEditButtons();
+
+        $.ajax({
+            url: 'a_ajax_get_holiday.php',
             type: 'GET',
             dataType: 'json',
             success: function(response) {
-                var today = new Date(); // วันที่ปัจจุบัน
+                // ต้องตรวจสอบว่า response.holidays มีค่าและเป็น array หรือไม่
+                var disableDates = [];
 
+                if (response && response.holidays && Array.isArray(response.holidays)) {
+                    disableDates = response.holidays;
+                }
+
+                // สร้าง flatpickr สำหรับวันที่เริ่มต้น (ลบ locale ออก)
                 flatpickr("#editLeaveStartDate", {
-                    dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
-                    // defaultDate: today, // กำหนดวันที่เริ่มต้นเป็นวันที่ปัจจุบัน
-                    disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    dateFormat: "d-m-Y",
+                    disable: disableDates // ใช้ค่าที่ตรวจสอบแล้ว
+                });
+
+                // สร้าง flatpickr สำหรับวันที่สิ้นสุด (ลบ locale ออก)
+                flatpickr("#editLeaveEndDate", {
+                    dateFormat: "d-m-Y",
+                    disable: disableDates // ใช้ค่าที่ตรวจสอบแล้ว
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("ไม่สามารถโหลดวันหยุดได้:", error);
+
+                // ถ้าเกิดข้อผิดพลาด ให้สร้าง flatpickr โดยไม่มีการปิดวันที่
+                flatpickr("#editLeaveStartDate", {
+                    dateFormat: "d-m-Y"
                 });
 
                 flatpickr("#editLeaveEndDate", {
-                    dateFormat: "d-m-Y", // ตั้งค่าเป็น วัน/เดือน/ปี
-                    // defaultDate: today, // กำหนดวันที่สิ้นสุดเป็นวันที่ปัจจุบัน
-                    disable: response.holidays // ปิดวันที่ที่เป็นวันหยุด
+                    dateFormat: "d-m-Y"
                 });
-
             }
         });
 
@@ -1653,10 +2263,15 @@ AND l_leave_status = 1";
         });
 
         $(".filter-card").click(function() {
+            var $currentFilterCard = $(this);
             var status = $(this).data("status");
             var selectedMonth = $("#selectedMonth").val();
             var selectedYear = $("#selectedYear").val();
 
+            $(".filter-card").removeClass("active");
+
+            // Add active class to the clicked filter card
+            $(this).addClass("active");
             // เพิ่มการแสดง loading
             $("tbody").html(
                 '<tr><td colspan="27" class="text-center"><i class="fa fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</td></tr>'
@@ -2426,8 +3041,10 @@ AND l_leave_status = 1";
                                                 icon: 'success',
                                                 confirmButtonText: 'ตกลง'
                                             }).then(() => {
-                                                location
-                                                    .reload();
+                                                $(".filter-card.active")
+                                                    .trigger(
+                                                        'click'
+                                                    );
                                             });
                                         },
                                         error: function(xhr, status,
@@ -2544,8 +3161,10 @@ AND l_leave_status = 1";
                                                         })
                                                         .then(
                                                             () => {
-                                                                location
-                                                                    .reload(); // รีโหลดหน้าหลังจากกดยืนยัน
+                                                                $(".filter-card.active")
+                                                                    .trigger(
+                                                                        'click'
+                                                                    );
                                                             }
                                                         );
                                                 },
@@ -3027,6 +3646,8 @@ AND l_leave_status = 1";
                                 }
                             });
                         });
+                        $(".filter-card").removeClass("active");
+                        $currentFilterCard.addClass("active");
                     }
                 },
                 error: function(xhr, status, error) {
@@ -3081,1095 +3702,12 @@ AND l_leave_status = 1";
                     // แทนที่เนื้อหาตารางด้วยข้อมูลใหม่ที่ได้จาก response
                     $("tbody").html(response);
 
-                    // เปิด modal และกำหนดเนื้อหา
-                    $(".leaveChk").click(function() {
-                        var rowData = $(this).closest("tr").find("td");
-                        var modalContent =
-                            '<table class="table table-bordered">' +
-                            '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[
-                                5])
-                            .text() +
-                            '</td></tr>' +
-                            '<tr><th>ชื่อ - นามสกุล</th><td>' + $(
-                                rowData[1])
-                            .text() +
-                            '</td></tr>' +
-                            '<tr><th>แผนก</th><td>' + $(rowData[2])
-                            .text() +
-                            '</td></tr>' +
-                            '<tr><th>วันที่ยื่นใบลา</th><td>' + $(
-                                rowData[7])
-                            .text() +
-                            '</td></tr>' +
-                            '<tr><th>ประเภทการลา</th><td>' + $(rowData[
-                                0])
-                            .text() +
-                            '</td></tr>' +
-                            '<tr><th>เหตุผลการลา</th><td>' + $(rowData[
-                                3])
-                            .text() +
-                            '</td></tr>' +
-                            '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[
-                                9])
-                            .text() +
-                            ' ถึง ' +
-                            $(rowData[10]).text() + '</td></tr>' +
-                            '<tr><th>สถานะใบลา</th><td>' + $(rowData[
-                                12])
-                            .html() +
-                            '</td></tr>' +
-                            '</table>';
-
-                        $('#leaveModal .modal-body').html(modalContent);
-
-                        $('.modal-footer .btn-success').off('click').on('click',
-                            function() {
-                                var modalData = {
-                                    createDate: $(rowData[7]).text(),
-                                    userCode: $(rowData[5]).text(),
-                                    userName: '<?php echo $userName; ?>',
-                                    leaveType: $(rowData[0]).text(),
-                                    leaveReason: $(rowData[3]).text(),
-                                    leaveStartDate: $(rowData[9])
-                                        .text(),
-                                    leaveEndDate: $(rowData[10]).text(),
-                                    depart: $(rowData[2]).text(),
-                                    checkFirm: '1', // ผ่าน
-                                    empName: $(rowData[1]).text(),
-                                    leaveStatus: $(rowData[12]).text()
-                                };
-
-                                let isProcessing =
-                                    false; // ตัวแปรตรวจสอบสถานะการประมวลผล
-
-                                $.ajax({
-                                    url: 'a_ajax_upd_status.php',
-                                    method: 'POST',
-                                    data: modalData,
-                                    beforeSend: function() {
-                                        // ถ้ายังไม่ได้ประมวลผลให้แสดง SweetAlert กำลังโหลด
-                                        if (isProcessing) {
-                                            return false; // ไม่ให้ส่งคำขอใหม่ถ้ายังประมวลผลอยู่
-                                        }
-                                        isProcessing = true;
-
-                                        Swal.fire({
-                                            title: 'กำลังโหลด...',
-                                            text: 'กรุณารอสักครู่',
-                                            icon: 'info',
-                                            showConfirmButton: false,
-                                            willOpen: () => {
-                                                Swal
-                                                    .showLoading(); // แสดงการโหลด
-                                            }
-                                        });
-                                    },
-                                    success: function(response) {
-                                        // เมื่อเสร็จสิ้นการประมวลผลให้ซ่อน SweetAlert
-                                        Swal.close();
-
-                                        Swal.fire({
-                                            title: 'สำเร็จ!',
-                                            text: 'ตรวจสอบผ่านสำเร็จ',
-                                            icon: 'success',
-                                            showConfirmButton: true, // แสดงปุ่มตกลง
-                                            allowOutsideClick: false, // ห้ามคลิกที่บริเวณอื่น
-                                            confirmButtonText: 'ตกลง', // ปรับข้อความปุ่ม
-                                        }).then(() => {
-                                            // ซ่อน Modal และล้าง Backdrop
-                                            $('#leaveModal')
-                                                .modal(
-                                                    'hide'
-                                                );
-                                            $('.modal-backdrop')
-                                                .remove();
-                                            $('body')
-                                                .removeClass(
-                                                    'modal-open'
-                                                ).css(
-                                                    'padding-right',
-                                                    '');
-
-                                            loadNextRowData
-                                                ();
-
-                                            // รีเซ็ต Modal
-                                            $('#leaveModal')
-                                                .on('hidden.bs.modal',
-                                                    function() {
-                                                        $(this)
-                                                            .find(
-                                                                'form'
-                                                            )[
-                                                                0
-                                                            ]
-                                                            .reset(); // รีเซ็ตฟอร์ม
-                                                        // ลบ event listener เท่านั้นเมื่อแน่ใจว่าไม่จำเป็น
-                                                        // $(this).off('hidden.bs.modal'); // ลบการลบ Event Listener นี้ออก
-                                                    });
-
-
-                                            // รีเซ็ตสถานะการประมวลผล
-                                            isProcessing
-                                                =
-                                                false; // ปลดล็อกการคลิก
-                                        });
-
-                                        // ใช้ AJAX เพื่อโหลดข้อมูลหน้าปัจจุบัน
-                                        var codeSearch = $(
-                                                "#codeSearch")
-                                            .val()
-                                            .toLowerCase();
-                                        var page =
-                                            "<?php echo $currentPage; ?>";
-                                        var selectedMonth =
-                                            "<?php echo $selectedMonth; ?>";
-                                        var selectedYear =
-                                            "<?php echo $selectedYear; ?>";
-
-                                        $.ajax({
-                                            url: "a_ajax_get_data_usercode.php",
-                                            type: "GET",
-                                            data: {
-                                                page: page,
-                                                month: selectedMonth,
-                                                year: selectedYear,
-                                                codeSearch: codeSearch
-                                            },
-                                            success: function(
-                                                response
-                                            ) {
-                                                $('#leaveTable tbody')
-                                                    .html(
-                                                        response
-                                                    );
-                                            },
-                                            error: function(
-                                                xhr,
-                                                status,
-                                                error
-                                            ) {
-                                                console
-                                                    .error(
-                                                        "Error:",
-                                                        error
-                                                    );
-                                            }
-                                        });
-                                    },
-                                    error: function(xhr, status,
-                                        error) {
-                                        console.error("Error:",
-                                            error);
-                                        isProcessing =
-                                            false; // ถ้าเกิดข้อผิดพลาดปลดล็อกการประมวลผล
-                                        Swal
-                                            .close(); // ซ่อน SweetAlert
-                                    }
-                                });
-                            });
-
-                        $('.modal-footer .btn-danger').off('click').on('click',
-                            function() {
-                                // ซ่อน Modal หลักชั่วคราว
-                                $('#leaveModal').modal('hide');
-
-                                Swal.fire({
-                                    title: 'ระบุเหตุผลที่ไม่อนุมัติ',
-                                    input: 'textarea',
-                                    inputPlaceholder: 'กรุณาระบุเหตุผล...',
-                                    inputAttributes: {
-                                        'aria-label': 'กรุณาระบุเหตุผล',
-                                        'required': true
-                                    },
-                                    showCancelButton: true,
-                                    confirmButtonText: 'ยืนยัน',
-                                    cancelButtonText: 'ยกเลิก',
-                                    inputValidator: (value) => {
-                                        if (!value || value
-                                            .trim() === '') {
-                                            return 'กรุณาระบุเหตุผลที่ไม่อนุมัติ';
-                                        }
-                                    }
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        var rejectReason = result.value;
-                                        var userCode = $(rowData[5])
-                                            .text(); // รหัสพนักงาน
-                                        var createDate = $(rowData[7])
-                                            .text(); // วันที่ยื่นใบลา
-                                        var leaveType = $(rowData[0])
-                                            .text(); // ประเภทการลา
-                                        var empName = $(rowData[1])
-                                            .text(); // ชื่อพนักงาน
-                                        var depart = $(rowData[2])
-                                            .text(); // แผนก
-                                        var leaveReason = $(rowData[3])
-                                            .text(); // เหตุผลการลา
-                                        var leaveStartDate = $(rowData[
-                                                9])
-                                            .text(); // วันเวลาที่ลาเริ่มต้น
-                                        var leaveEndDate = $(rowData[
-                                                10])
-                                            .text(); // วันเวลาที่ลาสิ้นสุด
-                                        var leaveStatus = $(rowData[12])
-                                            .text(); // สถานะใบลา
-
-                                        var checkFirm = '2'; // ไม่ผ่าน
-                                        var userName =
-                                            '<?php echo $userName; ?>';
-
-                                        $.ajax({
-                                            url: 'a_ajax_upd_status.php',
-                                            method: 'POST',
-                                            data: {
-                                                createDate: createDate,
-                                                userCode: userCode,
-                                                userName: userName,
-                                                leaveType: leaveType,
-                                                leaveReason: leaveReason,
-                                                leaveStartDate: leaveStartDate,
-                                                leaveEndDate: leaveEndDate,
-                                                depart: depart,
-                                                checkFirm: checkFirm,
-                                                empName: empName,
-                                                leaveStatus: leaveStatus,
-                                                rejectReason: rejectReason // เพิ่มเหตุผลการไม่อนุมัติ
-                                            },
-                                            success: function(
-                                                response) {
-                                                Swal.fire({
-                                                    title: 'สำเร็จ!',
-                                                    text: 'ตรวจสอบไม่ผ่านสำเร็จ',
-                                                    icon: 'success',
-                                                    confirmButtonText: 'ตกลง'
-                                                }).then(
-                                                    () => {
-                                                        location
-                                                            .reload(); // รีโหลดหน้าหลังจากกดยืนยัน
-                                                    });
-                                            },
-                                            error: function(xhr,
-                                                status,
-                                                error) {
-                                                console
-                                                    .error(
-                                                        error
-                                                    );
-                                                Swal.fire({
-                                                    title: 'เกิดข้อผิดพลาด',
-                                                    text: 'ไม่สามารถบันทึกข้อมูลได้',
-                                                    icon: 'error',
-                                                    confirmButtonText: 'ตกลง'
-                                                }).then(
-                                                    () => {
-                                                        $('#leaveModal')
-                                                            .modal(
-                                                                'show'
-                                                            ); // แสดง Modal กลับมาเมื่อมีข้อผิดพลาด
-                                                    });
-                                            }
-                                        });
-                                    } else {
-                                        // กรณีกดยกเลิก ให้แสดง Modal กลับมา
-                                        $('#leaveModal').modal('show');
-                                    }
-                                });
-                            });
-                    });
-
-                    $('.edit-btn').click(function() {
-                        // Get data attributes from the button
-                        var createDateTime = $(this).data(
-                            'createdatetime');
-                        var userCode = $(this).data('usercode');
-
-                        // Send AJAX request to fetch data from the server
-                        $.ajax({
-                            url: 'a_ajax_get_leave.php', // Replace with your PHP file to fetch data
-                            method: 'POST',
-                            data: {
-                                createDateTime: createDateTime,
-                                userCode: userCode,
-                            },
-                            dataType: 'json', // Expect JSON response
-                            success: function(response) {
-                                if (response.status ===
-                                    'success') {
-                                    // Populate modal fields with the fetched data
-                                    $('.editLeaveType').val(
-                                        response
-                                        .l_leave_id);
-                                    $('#editCreateDateTime')
-                                        .val(
-                                            response
-                                            .l_create_datetime
-                                        );
-                                    $('#editUserCode').val(
-                                        response
-                                        .l_usercode);
-                                    $('#editLeaveReason')
-                                        .val(response
-                                            .l_leave_reason
-                                        );
-                                    $('#editName').val(
-                                        response.l_name);
-
-                                    var startDate = response
-                                        .l_leave_start_date;
-                                    var endDate = response
-                                        .l_leave_end_date;
-
-                                    var dateParts =
-                                        startDate.split(
-                                            '-'
-                                        ); // แยกวันที่
-                                    var dateParts2 = endDate
-                                        .split(
-                                            '-'
-                                        ); // แยกวันที่
-
-                                    var formattedDate =
-                                        dateParts[2] +
-                                        '-' + dateParts[1] +
-                                        '-' +
-                                        dateParts[
-                                            0
-                                        ]; // แปลงเป็น d-m-y
-                                    var formattedDate2 =
-                                        dateParts2[2] +
-                                        '-' + dateParts2[
-                                            1] + '-' +
-                                        dateParts2[
-                                            0
-                                        ]; // แปลงเป็น d-m-y
-
-                                    $('#editLeaveStartDate')
-                                        .val(
-                                            formattedDate);
-                                    $('#editLeaveEndDate')
-                                        .val(
-                                            formattedDate2);
-
-                                    // เวลาที่เริ่มต้น
-                                    // 08:10
-                                    if (response
-                                        .l_leave_start_time ===
-                                        "08:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "08:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 08:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "08:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "08:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 08:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "09:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "08:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 09:10
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "09:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "09:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 09:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "09:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "09:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 09:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "10:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "09:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 10:10
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "10:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "10:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 10:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "10:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "10:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 10:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "11:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "10:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 11:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "12:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "11:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 12:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "13:00:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                '12:45:00'
-                                            ); // กำหนดค่าใหม่
-                                    }
-                                    // 13:10
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "13:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 13:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "13:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 13:40
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "14:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:40:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 13:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "14:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:10
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "14:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "14:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:40
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "15:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:40:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "15:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:10
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "15:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "15:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:40
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "16:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:40:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:45
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "16:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:45:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 16:10
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "16:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "16:10:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 16:15
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "16:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "16:15:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 16:40
-                                    else if (response
-                                        .l_leave_start_time ===
-                                        "17:00:00") {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                '16:40:00');
-                                    } else {
-                                        $('#editLeaveStartTime2')
-                                            .val(
-                                                response
-                                                .l_leave_start_time
-                                            );
-                                    }
-
-                                    // เวลาที่สิ้นสุด
-                                    // 08:10
-                                    if (response
-                                        .l_leave_end_time ===
-                                        "08:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "08:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 08:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "08:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "08:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 08:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "09:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "08:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 09:10
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "09:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "09:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 09:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "09:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "09:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 09:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "10:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "09:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 10:10
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "10:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "10:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 10:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "10:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "10:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 10:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "11:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "10:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 11:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "12:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "11:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 12:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "13:00:00"
-                                    ) {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                '12:45:00'
-                                            ); // กำหนดค่าใหม่
-                                    }
-                                    // 13:10
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "13:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 13:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "13:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 13:40
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "14:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:40:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 13:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "14:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "13:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:10
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "14:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "14:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:40
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "15:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:40:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 14:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "15:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "14:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:10
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "15:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "15:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:40
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "16:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:40:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 15:45
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "16:00:00" &&
-                                        response
-                                        .l_remark ===
-                                        "15:45:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 16:10
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "16:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "16:10:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 16:15
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "16:30:00" &&
-                                        response
-                                        .l_remark ===
-                                        "16:15:00") {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_remark);
-                                    }
-                                    // 16:40
-                                    else if (response
-                                        .l_leave_end_time ===
-                                        "17:00:00"
-                                    ) {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                '16:40:00');
-                                    } else {
-                                        $('#editLeaveEndTime2')
-                                            .val(
-                                                response
-                                                .l_leave_end_time
-                                            );
-                                    }
-
-                                    // Show the modal
-                                    $('#editModal').modal(
-                                        'show');
-                                } else {
-                                    // Show error message from response
-                                    alert(response
-                                        .message ||
-                                        'ไม่พบข้อมูล');
-                                }
-                            },
-                            error: function() {
-                                alert(
-                                    'เกิดข้อผิดพลาดในการดึงข้อมูล'
-                                );
-                            },
-                        });
-                    });
-
-                    $('#editForm').submit(function(e) {
-                        e.preventDefault();
-
-                        var editCreateDateTime = $(
-                            '#editCreateDateTime').val();
-                        var editUserCode = $('#editUserCode').val();
-                        var editLeaveType = $('#editLeaveType').val();
-                        var editLeaveReason = $('#editLeaveReason')
-                            .val();
-                        var editLeaveStartDate = $(
-                            '#editLeaveStartDate').val();
-                        var editLeaveEndDate = $('#editLeaveEndDate')
-                            .val();
-                        var editLeaveStartTime = $(
-                            '#editLeaveStartTime').val();
-                        var editLeaveEndTime = $('#editLeaveEndTime')
-                            .val();
-
-                        if (editLeaveStartDate > editLeaveEndDate) {
-                            Swal.fire({
-                                title: 'ไม่สามารถลาได้',
-                                text: 'กรุณาเลือกวันที่เริ่มต้นลาใหม่',
-                                icon: 'error',
-                                confirmButtonText: 'ตกลง'
-                            })
-                        } else if (editLeaveStartTime >
-                            editLeaveEndTime) {
-                            Swal.fire({
-                                title: 'ไม่สามารถลาได้',
-                                text: 'กรุณาเลือกเวลาเริ่มต้นใหม่',
-                                icon: 'error',
-                                confirmButtonText: 'ตกลง'
-                            })
-                        } else {
-                            $.ajax({
-                                url: 'a_ajax_upd_leave.php',
-                                method: 'POST',
-                                data: {
-                                    editCreateDateTime: editCreateDateTime,
-                                    editUserCode: editUserCode,
-                                    editLeaveType: editLeaveType,
-                                    editLeaveReason: editLeaveReason,
-                                    editLeaveStartDate: editLeaveStartDate,
-                                    editLeaveEndDate: editLeaveEndDate,
-                                    editLeaveStartTime: editLeaveStartTime,
-                                    editLeaveEndTime: editLeaveEndTime
-                                },
-                                success: function(response) {
-                                    Swal.fire({
-                                        title: 'แก้ไขสำเร็จ',
-                                        icon: 'success',
-                                        confirmButtonText: 'ตกลง'
-                                    }).then((
-                                        result) => {
-                                        if (result
-                                            .isConfirmed
-                                        ) {
-                                            location
-                                                .reload();
-                                        }
-                                    });
-
-                                    $('#editModal').modal(
-                                        'hide');
-                                },
-                                error: function() {
-                                    alert(
-                                        'เกิดข้อผิดพลาดในการบันทึกข้อมูล'
-                                    );
-                                }
-                            });
-                        }
-                    });
+                    // ต้องรีเซ็ต event handlers หลังจาก DOM เปลี่ยนแปลง
+                    setupLeaveCheckButtons();
+                    setupEditButtons();
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
                 }
             });
         });
@@ -4517,6 +4055,26 @@ AND l_leave_status = 1";
                 }
             });
         });
+
+        $('#leaveModal').on('hidden.bs.modal', function(e) {
+            // ตรวจสอบว่ามีการเปิด modal อื่นหรือไม่
+            if ($('.modal:visible').length === 0) {
+                // ถ้าไม่มี modal อื่นแสดงอยู่ ให้ลบ backdrop
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+            }
+        });
+
+        // แก้ไขที่ 9: เมื่อ modal แสดง ให้ตรวจสอบการแสดงผล backdrop
+        $('#leaveModal').on('show.bs.modal', function() {
+            // ให้มี backdrop แค่อันเดียว (ป้องกันการซ้อนทับกันของ backdrop)
+            if ($('.modal-backdrop').length > 1) {
+                $('.modal-backdrop:not(:last)').remove();
+            }
+
+            // เพิ่มความเข้มของพื้นหลัง (ถ้าต้องการให้มืดกว่าค่าเริ่มต้น)
+            $('.modal-backdrop').css('opacity', '0.7'); // ปรับค่า opacity ได้ตามต้องการ
+        });
     });
 
     function changePage(page, selectedMonth, searchCode) {
@@ -4526,40 +4084,10 @@ AND l_leave_status = 1";
         window.location.href = newUrl; // รีเฟรชหน้าโดยการโหลด URL ใหม่
     }
 
-    function loadNextRowData() {
-        // ค้นหาแถวถัดไป (ตัวอย่างนี้หาจาก rowData เดิม)
-        var nextRow = $(".leaveChk").closest("tr").next("tr");
-        if (nextRow.length > 0) {
-            var rowData = nextRow.find("td");
-            var modalContent =
-                '<table class="table table-bordered">' +
-                '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[5]).text() + '</td></tr>' +
-                '<tr><th>ชื่อ - นามสกุล</th><td>' + $(rowData[1]).text() + '</td></tr>' +
-                '<tr><th>แผนก</th><td>' + $(rowData[2]).text() + '</td></tr>' +
-                '<tr><th>วันที่ยื่นใบลา</th><td>' + $(rowData[7]).text() + '</td></tr>' +
-                '<tr><th>ประเภทการลา</th><td>' + $(rowData[0]).text() + '</td></tr>' +
-                '<tr><th>เหตุผลการลา</th><td>' + $(rowData[3]).text() + '</td></tr>' +
-                '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10]).text() +
-                '</td></tr>' +
-                '<tr><th>สถานะใบลา</th><td>' + $(rowData[12]).html() + '</td></tr>' +
-                '</table>';
-
-            $('#leaveModal .modal-body').html(modalContent);
-            $('#leaveModal').modal('show'); // เปิด modal อีกรอบ
-        } else {
-            Swal.fire({
-                title: 'ไม่มีรายการถัดไป!',
-                text: 'คุณได้ตรวจสอบรายการทั้งหมดแล้ว',
-                icon: 'info',
-                confirmButtonText: 'ตกลง',
-            });
-        }
-    }
-
     document.getElementById('page-input').addEventListener('input', function() {
         const page = this.value;
         const month = '<?php echo urlencode($selectedMonth); ?>';
-        if (page >= 1 && page <=                                 <?php echo $totalPages; ?>) {
+        if (page >= 1 && page <= <?php echo $totalPages; ?>) {
             window.location.href = `?page=${page}&month=${month}`;
         }
     });

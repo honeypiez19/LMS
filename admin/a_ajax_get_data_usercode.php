@@ -5,15 +5,15 @@ include '../session_lang.php';
 
 $itemsPerPage = 15;
 
-if (!isset($_GET['page'])) {
+if (! isset($_GET['page'])) {
     $currentPage = 1;
 } else {
     $currentPage = $_GET['page'];
 }
 
-$selectedYear = isset($_GET['year']) ? $_GET['year'] : date("Y"); // ถ้าไม่มีส่งปีมาให้ใช้ปีปัจจุบัน
-$searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : ''; // รับค่า codeSearch จาก AJAX
-$selectedMonth = isset($_GET['month']) ? $_GET['month'] : 'All'; // รับค่า selectedMonth จาก AJAX
+$selectedYear  = isset($_GET['year']) ? $_GET['year'] : date("Y");      // ถ้าไม่มีส่งปีมาให้ใช้ปีปัจจุบัน
+$searchCode    = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : ''; // รับค่า codeSearch จาก AJAX
+$selectedMonth = isset($_GET['month']) ? $_GET['month'] : 'All';        // รับค่า selectedMonth จาก AJAX
 
 $sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
 AND l_usercode LIKE '%" . $searchCode . "%'";
@@ -33,7 +33,7 @@ $sql .= " AND (
 ORDER BY l_create_datetime DESC";
 
 // คำนวณผลลัพธ์ที่จะแสดง
-$result = $conn->query($sql);
+$result    = $conn->query($sql);
 $totalRows = $result->rowCount();
 
 // คำนวณหน้าทั้งหมด
@@ -94,7 +94,7 @@ if ($result->rowCount() > 0) {
         // 5
         echo '<td>' . $row['l_usercode'] . '</td>';
 
-        // 6
+                                                                                                                                                // 6
         echo '<td>' . '<span class="text-primary">' . $row['l_name'] . '</span>' . '<br>' . 'แผนก : ' . $row['l_department'] . '</td>'; // คอลัมน์ 2 ชื่อพนักงาน + แผนก
 
         // 7
@@ -253,25 +253,25 @@ if ($result->rowCount() > 0) {
         $holiday_stmt->execute();
 
         // Fetch the holiday count
-        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+        $holiday_data  = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
         $holiday_count = $holiday_data['holiday_count'];
         // คำนวณระยะเวลาการลา
         $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-        $l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-        $interval = $l_leave_start_date->diff($l_leave_end_date);
+        $l_leave_end_date   = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+        $interval           = $l_leave_start_date->diff($l_leave_end_date);
 
         // คำนวณจำนวนวันลา
         $leave_days = $interval->days - $holiday_count;
 
         // คำนวณจำนวนชั่วโมงและนาทีลา
-        $leave_hours = $interval->h;
+        $leave_hours   = $interval->h;
         $leave_minutes = $interval->i;
 
         // ตรวจสอบช่วงเวลาและหักชั่วโมงตามเงื่อนไข
         $start_hour = (int) $l_leave_start_date->format('H');
-        $end_hour = (int) $l_leave_end_date->format('H');
+        $end_hour   = (int) $l_leave_end_date->format('H');
 
-        if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+        if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
             (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
             // ถ้าไม่อยู่ในช่วงที่กำหนด ให้หัก 1 ชั่วโมง
             $leave_hours -= 1;
@@ -297,7 +297,7 @@ if ($result->rowCount() > 0) {
 
         // 12
         echo '</td>';
-        if (!empty($row['l_file'])) {
+        if (! empty($row['l_file'])) {
             echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
         } else {
             echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
@@ -505,7 +505,7 @@ if ($currentPage > 1) {
 }
 
 $startPage = max(1, $currentPage - 2);
-$endPage = min($totalPages, $currentPage + 2);
+$endPage   = min($totalPages, $currentPage + 2);
 
 for ($i = $startPage; $i <= $endPage; $i++) {
     if ($i == $currentPage) {

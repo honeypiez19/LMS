@@ -40,7 +40,7 @@
 <body>
     <?php include 'gm_navbar.php'?>
 
-    <!--                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?>
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?>
 <?php echo $subDepart2; ?>
 <?php echo $userName; ?> -->
 
@@ -398,8 +398,7 @@ AND li.l_approve_status3 = 9
         FROM
             leave_list li
         WHERE
-            li.l_department <> 'RD'
-            AND li.l_leave_id NOT IN (6, 7)
+             li.l_leave_id NOT IN (6, 7)
             AND li.l_approve_status IN (2,6)
             AND li.l_approve_status2 IN (4,6)
             AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')

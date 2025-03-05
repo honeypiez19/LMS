@@ -35,12 +35,44 @@
     <!-- <script src="https://kit.fontawesome.com/84c1327080.js" crossorigin="anonymous"></script> -->
 
     <script src="../js/fontawesome.js"></script>
+
+    <style>
+    .table-responsive {
+        overflow-x: auto;
+        position: relative;
+    }
+
+    #leaveTable th:nth-last-child(2),
+    #leaveTable td:nth-last-child(2) {
+        position: sticky;
+        right: 40px;
+        /* ระยะห่างจากขอบขวา */
+        background-color: #fff;
+        /* พื้นหลังเพื่อไม่ให้เห็นข้อมูลด้านหลัง */
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #leaveTable th:last-child,
+    #leaveTable td:last-child {
+        position: sticky;
+        right: 0;
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* เมื่อ hover ให้เปลี่ยนสีพื้นหลังเพื่อให้เห็นชัดว่าสามารถกดได้ */
+    #leaveTable td:nth-last-child(2):hover {
+        background-color: #f8f9fa;
+    }
+    </style>
 </head>
 
 <body>
     <?php require 'manager_navbar.php'; ?>
 
-    <!--                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -489,7 +521,6 @@ WHERE
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
         <div class="table-responsive">
-
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
@@ -1087,8 +1118,8 @@ WHERE
                                 echo '<td>' . $row['l_remark2'] . '</td>';
 
                                 // 28
-                                if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
+                                if ($row['l_approve_status2'] == 4 || $row['l_approve_status2'] == 5) {
+                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'disabled>$btnCheck</button></td>";
                                 } else {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
                                 }
@@ -1405,12 +1436,12 @@ WHERE
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();
-        var depart = <?php echo json_encode($depart); ?>;
-        var subDepart = <?php echo json_encode($subDepart); ?>;
-        var subDepart2 = <?php echo json_encode($subDepart2); ?>;
-        var subDepart3 = <?php echo json_encode($subDepart3); ?>;
-        var subDepart4 = <?php echo json_encode($subDepart4); ?>;
-        var subDepart5 = <?php echo json_encode($subDepart5); ?>;
+        var depart =                     <?php echo json_encode($depart); ?>;
+        var subDepart =                        <?php echo json_encode($subDepart); ?>;
+        var subDepart2 =                         <?php echo json_encode($subDepart2); ?>;
+        var subDepart3 =                         <?php echo json_encode($subDepart3); ?>;
+        var subDepart4 =                         <?php echo json_encode($subDepart4); ?>;
+        var subDepart5 =                         <?php echo json_encode($subDepart5); ?>;
 
 
         $.ajax({

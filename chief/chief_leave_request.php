@@ -40,7 +40,7 @@
 <body>
     <?php require 'chief_navbar.php'; ?>
 
-    <!--                                                                                                                                         <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                 <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -998,7 +998,7 @@ ORDER BY li.l_create_datetime DESC";
 
                                 // 28
                                 if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
+                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
                                 } else {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
                                 }
@@ -1315,8 +1315,8 @@ ORDER BY li.l_create_datetime DESC";
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();
-        var depart =                     <?php echo json_encode($depart); ?>;
-        var subDepart =                        <?php echo json_encode($subDepart); ?>;
+        var depart = <?php echo json_encode($depart); ?>;
+        var subDepart = <?php echo json_encode($subDepart); ?>;
         var subDepart2 = "<?php echo $subDepart2 ?>";
         var subDepart3 = "<?php echo $subDepart3 ?>";
         var subDepart4 = "<?php echo $subDepart4 ?>";

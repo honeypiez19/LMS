@@ -186,44 +186,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT * FROM employees WHERE e_name = :urgentApprover";
+    $chkApprover = "SELECT e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5, e_level FROM employees WHERE e_name = :approver";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
+    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $proveStatus  = null;
-    $proveStatus2 = null;
-    $proveStatus3 = null;
+// กำหนดค่าเริ่มต้น
+    $proveStatus  = 0;
+    $proveStatus2 = 0;
+    $proveStatus3 = 0;
 
     if ($result) {
-        $subDepartment = $result['e_sub_department'];
+        $departments = [
+            $result['e_sub_department'],
+            $result['e_sub_department2'],
+            $result['e_sub_department3'],
+            $result['e_sub_department4'],
+            $result['e_sub_department5'],
+        ];
+
         $levelApprover = $result['e_level'];
-        $workplace     = $result['e_workplace'];
 
-        $departments = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'MC', 'FN', 'PC', 'QC'];
-        $leaders     = ['leader', 'subLeader', 'chief'];
-        $managers    = ['manager', 'manager2', 'assisManager'];
-        $workplaceAt = ['Bang Phli', 'Korat'];
+        $leaderChiefDepartments = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
+        $managerDepartments     = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
 
-        if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
-            $proveStatus  = 0;
-            $proveStatus2 = 1;
-            $proveStatus3 = 6;
-        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments) && in_array($workplace, $workplaceAt)) {
-            $proveStatus  = 6;
-            $proveStatus2 = 1;
-            $proveStatus3 = 6;
-        } elseif ($levelApprover == 'GM' && in_array($workplace, $workplaceAt)) {
+        if (in_array($levelApprover, ['leader', 'chief'])) {
+            if (in_array('Office', $departments)) {
+                $proveStatus = 6;
+            }
+            if (in_array('QC', $departments) || in_array('Sales', $departments)) {
+                $proveStatus2 = 6;
+            } else {
+                $proveStatus2 = 1;
+            }
+            $proveStatus3 = 7;
+        } elseif (in_array($levelApprover, ['manager', 'manager2', 'assisManager'])) {
+            $proveStatus = 6;
+            if (in_array('Sales', $departments) || in_array('QC', $departments)) {
+                $proveStatus2 = 6;
+            } else {
+                $proveStatus2 = 1;
+            }
+            $proveStatus3 = 7;
+        } elseif ($levelApprover === 'GM') {
             $proveStatus  = 6;
             $proveStatus2 = 6;
             $proveStatus3 = 7;
-        } elseif ($levelApprover == 'admin' && in_array($workplace, $workplaceAt)) {
+        } elseif ($levelApprover === 'admin') {
             $proveStatus  = 6;
             $proveStatus2 = 6;
             $proveStatus3 = 6;
-        } else {
-            echo "ไม่พบแผนกหรือสถานที่";
         }
     }
 
@@ -261,20 +274,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':timeRemark2', $timeRemark2);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_name = :urgentApprover AND e_workplace = :workplace";
+        // Change the SQL query to fetch both user_id AND username
+        $sql  = "SELECT e_user_id, e_username FROM employees WHERE e_name = :urgentApprover AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':urgentApprover', $urgentApprover);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
 
-        if ($userIds) {
-            $sURL     = 'https://lms.system-samt.com/';
-            $sMessage = "มีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
-                "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
-                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        if ($users) {
+            $sURL = 'https://lms.system-samt.com/';
 
-            foreach ($userIds as $userId) {
+            foreach ($users as $user) {
+                $userId    = $user['e_user_id'];
+                $proveName = $user['e_username'];
+
+                $sMessage = "K." . $proveName . "\n\nมีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
+                    "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
+                    "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+
                 $data = [
                     'to'       => $userId,
                     'messages' => [
@@ -299,13 +317,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 curl_close($ch);
 
                 if ($response === false) {
-                    echo "Error: " . curl_error($ch);
+                    echo "Warning: ไม่สามารถส่งข้อความ Line ได้ " . curl_error($ch);
                 }
             }
-        } else {
-            echo "ไม่พบผู้รับข้อความ";
         }
-
     } else {
         echo "Error: " . $stmt->errorInfo()[2] . "<br>";
     }
