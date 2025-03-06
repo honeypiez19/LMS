@@ -35,12 +35,39 @@
     <!-- <script src="https://kit.fontawesome.com/84c1327080.js" crossorigin="anonymous"></script> -->
 
     <script src="../js/fontawesome.js"></script>
+
+    <style>
+    #leaveTable th:nth-last-child(2),
+    #leaveTable td:nth-last-child(2) {
+        position: sticky;
+        right: 40px;
+        /* ระยะห่างจากขอบขวา */
+        background-color: #fff;
+        /* พื้นหลังเพื่อไม่ให้เห็นข้อมูลด้านหลัง */
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #leaveTable th:last-child,
+    #leaveTable td:last-child {
+        position: sticky;
+        right: 0;
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* เมื่อ hover ให้เปลี่ยนสีพื้นหลังเพื่อให้เห็นชัดว่าสามารถกดได้ */
+    #leaveTable td:nth-last-child(2):hover {
+        background-color: #f8f9fa;
+    }
+    </style>
 </head>
 
 <body>
     <?php require 'leader_navbar.php'; ?>
 
-    <!--                                                                                                 <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -211,7 +238,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 0
+    li.l_approve_status = 1
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
     AND (
@@ -233,7 +260,6 @@ WHERE
         OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
         OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )";
-
                                 $stmt = $conn->prepare($sql);
 
                                                                       // Bind parameters
@@ -244,7 +270,6 @@ WHERE
                                 $stmt->bindParam(':subDepart4', $subDepart4);
                                 $stmt->bindParam(':subDepart5', $subDepart5);
                                 $stmt->bindParam(':selectedYear', $selectedYear);
-
                                 if ($selectedMonth != "All") {
                                     $stmt->bindParam(':selectedMonth', $selectedMonth);
                                 }
@@ -270,42 +295,38 @@ WHERE
                     </div>
                 </div>
             </div>
+
+            <!-- อนุมัติ -->
             <div class="col-3 filter-card" data-status="2">
                 <div class="card text-bg-success mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-                                $sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    li.l_approve_status = 2
-    AND li.l_level IN ('user')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
+                                $sql = "SELECT COUNT(li.l_list_id) AS totalLeaveItems,
+em.*, li.*
+            FROM leave_list li
+            INNER JOIN employees em ON li.l_usercode = em.e_usercode
+            WHERE li.l_approve_status = 2
+              AND li.l_level IN ('user')
+              AND li.l_leave_id NOT IN (6, 7)
+AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
-
                                 if ($selectedMonth != "All") {
                                     $sql .= " AND (
         Month(li.l_create_datetime) = :selectedMonth
-        OR Month(li.l_leave_end_date) = :selectedMonth
-    ) ";
+        OR Month(li.l_leave_end_date) = :selectedMonth)";
                                 }
 
                                 $sql .= " AND (
-        (em.e_sub_department = :subDepart AND li.l_department = :depart)
-        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
-        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
-        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
-        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
-    )";
+                (em.e_sub_department = :subDepart AND li.l_department = :depart) OR
+                (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart) OR
+                (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart) OR
+                (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart) OR
+                (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
+              )";
                                 $stmt = $conn->prepare($sql);
 
                                                                       // Bind parameters
@@ -341,6 +362,8 @@ WHERE
                     </div>
                 </div>
             </div>
+
+            <!-- ไม่อนุมัติ -->
             <div class="col-3 filter-card" data-status="3">
                 <div class="card text-bg-danger mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
@@ -368,6 +391,7 @@ WHERE
         Month(li.l_create_datetime) = :selectedMonth
         OR Month(li.l_leave_end_date) = :selectedMonth
     ) ";
+
                                 }
 
                                 $sql .= " AND (
@@ -476,7 +500,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (0, 1, 2, 3, 6)
+    li.l_approve_status IN (0, 2,3, 6)
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
     AND (
@@ -998,7 +1022,7 @@ ORDER BY li.l_create_datetime DESC";
                                 echo '<td>' . $row['l_remark2'] . '</td>';
 
                                 // 28
-                                if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 5) {
+                                if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
                                 } else {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";

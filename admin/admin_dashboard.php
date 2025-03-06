@@ -37,15 +37,41 @@
     <script src="../js/fontawesome.js"></script>
 
     <style>
-    .filter-card {
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
+    /* Make both the check button and cancel button columns sticky */
+    #leaveTable th:nth-last-child(3),
+    #leaveTable td:nth-last-child(3) {
+        position: sticky;
+        right: 80px;
+        /* Distance from right edge - adjust as needed */
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     }
 
-    .filter-card.active {
-        border-color: #007bff;
-        /* Bootstrap primary blue */
-        box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    #leaveTable th:nth-last-child(2),
+    #leaveTable td:nth-last-child(2) {
+        position: sticky;
+        right: 40px;
+        /* Distance from right edge */
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #leaveTable th:last-child,
+    #leaveTable td:last-child {
+        position: sticky;
+        right: 0;
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Hover effect for all sticky buttons */
+    #leaveTable td:nth-last-child(3):hover,
+    #leaveTable td:nth-last-child(2):hover,
+    #leaveTable td:last-child:hover {
+        background-color: #f8f9fa;
     }
     </style>
 </head>
@@ -2268,10 +2294,6 @@ AND l_leave_status = 1";
             var selectedMonth = $("#selectedMonth").val();
             var selectedYear = $("#selectedYear").val();
 
-            $(".filter-card").removeClass("active");
-
-            // Add active class to the clicked filter card
-            $(this).addClass("active");
             // เพิ่มการแสดง loading
             $("tbody").html(
                 '<tr><td colspan="27" class="text-center"><i class="fa fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</td></tr>'

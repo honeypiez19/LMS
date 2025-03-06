@@ -35,12 +35,44 @@
     <!-- <script src="https://kit.fontawesome.com/84c1327080.js" crossorigin="anonymous"></script> -->
 
     <script src="../js/fontawesome.js"></script>
+
+    <style>
+    .table-responsive {
+        overflow-x: auto;
+        position: relative;
+    }
+
+    #leaveTable th:nth-last-child(2),
+    #leaveTable td:nth-last-child(2) {
+        position: sticky;
+        right: 40px;
+        /* ระยะห่างจากขอบขวา /
+        background-color: #fff;
+        / พื้นหลังเพื่อไม่ให้เห็นข้อมูลด้านหลัง */
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #leaveTable th:last-child,
+    #leaveTable td:last-child {
+        position: sticky;
+        right: 0;
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* เมื่อ hover ให้เปลี่ยนสีพื้นหลังเพื่อให้เห็นชัดว่าสามารถกดได้ */
+    #leaveTable td:nth-last-child(2):hover {
+        background-color: #f8f9fa;
+    }
+    </style>
 </head>
 
 <body>
     <?php include 'gm_navbar.php'?>
 
-    <!--                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?>
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?>
 <?php echo $subDepart2; ?>
 <?php echo $userName; ?> -->
 
@@ -130,18 +162,17 @@
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-                                // เตรียมคำสั่ง SQL
                                 $sql = "SELECT
     COUNT(li.l_list_id) AS leave_count,
     li.l_name
 FROM
 leave_list li
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_id NOT IN (6, 7)
-AND li.l_approve_status2 = 4
+li.l_leave_id NOT IN (6, 7)
+AND li.l_approve_status IN (2,6)
+AND li.l_approve_status2 IN (4,6)
 AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
-    AND (
+AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
@@ -190,12 +221,12 @@ AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','s
 FROM
 leave_list li
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_id NOT IN (6, 7)
+li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
 AND li.l_approve_status3 = 7
-AND li.l_approve_status2 = 4
- AND (
+AND li.l_approve_status IN (2,6)
+AND li.l_approve_status2 IN (4,6)
+AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
@@ -243,12 +274,12 @@ AND li.l_approve_status2 = 4
 FROM
 leave_list li
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_id NOT IN (6, 7)
+li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
 AND li.l_approve_status3 = 8
-AND li.l_approve_status2 = 4
- AND (
+AND li.l_approve_status IN (2,6)
+AND li.l_approve_status2 IN (4,6)
+AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
@@ -297,12 +328,12 @@ AND li.l_approve_status2 = 4
 FROM
 leave_list li
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_id NOT IN (6, 7)
-AND li.l_approve_status2 = 4
+li.l_leave_id NOT IN (6, 7)
 AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
 AND li.l_approve_status3 = 9
- AND (
+AND li.l_approve_status IN (2,6)
+AND li.l_approve_status2 IN (4,6)
+AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
@@ -899,8 +930,8 @@ AND li.l_approve_status3 = 9
                                 echo '<td>' . $row['l_remark2'] . '</td>';
 
                                 // 28
-                                if ($row['l_approve_status3'] == 8 || $row['l_approve_status3'] == 9) {
-                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >$btnCheck</button></td>";
+                                if ($row['l_approve_status3'] == 6 || $row['l_approve_status3'] == 8 || $row['l_approve_status3'] == 9) {
+                                    echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled >$btnCheck</button></td>";
                                 } else {
                                     echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
                                 }

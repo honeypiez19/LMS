@@ -18,7 +18,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=2.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ใบลาของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
@@ -37,11 +37,6 @@
     <script src="../js/fontawesome.js"></script>
 
     <style>
-    .table-responsive {
-        overflow-x: auto;
-        position: relative;
-    }
-
     #leaveTable th:nth-last-child(2),
     #leaveTable td:nth-last-child(2) {
         position: sticky;
@@ -72,7 +67,7 @@
 <body>
     <?php require 'manager_navbar.php'; ?>
 
-    <!--                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -180,8 +175,8 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (2,3,6)
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
+    li.l_approve_status IN (2,6)
+    AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
     AND (
         YEAR(li.l_create_datetime) = :selectedYear
@@ -255,7 +250,7 @@ WHERE
             </div>
 
             <!-- รายการลาที่รออนุมัติ -->
-            <div class="col-3 filter-card" data-status="0">
+            <div class="col-3 filter-card" data-status="1">
                 <div class="card text-bg-warning mb-3">
                     <div class="card-body">
                         <h5 class="card-title">
@@ -275,10 +270,10 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (2,3,6)
-    AND li.l_approve_status2 = 1
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
+    li.l_approve_status IN (2,6)
+    AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
+    AND li.l_approve_status2 = 1
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
@@ -350,7 +345,9 @@ WHERE
                     </div>
                 </div>
             </div>
-            <div class="col-3 filter-card" data-status="2">
+
+            <!-- รายการลาที่อนุมัติ -->
+            <div class="col-3 filter-card" data-status="4">
                 <div class="card text-bg-success mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
@@ -358,16 +355,24 @@ WHERE
                             <?php
                                 $sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 2
-    AND li.l_level IN ('user')
+    li.l_approve_status IN (2,6)
+    AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
-    AND (
+    AND li.l_approve_status2 = 4
+ AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
@@ -379,25 +384,40 @@ WHERE
     ) ";
                                 }
 
-                                $sql .= " AND (
-        (em.e_sub_department = :subDepart)
-        OR (em.e_sub_department2 = :subDepart2)
-        OR (em.e_sub_department3 = :subDepart3)
-        OR (em.e_sub_department4 = :subDepart4)
-        OR (em.e_sub_department5 = :subDepart5)
+                                if ($subDepart === "Office" || $subDepart2 === "Management") {
+                                    $sql .= " AND (
+        em.e_department = :subDepart AND li.l_department = :subDepart
+        OR li.l_department = :subDepart
+        OR li.l_department = :subDepart2
+        AND em.e_sub_department = 'AC'
     )";
-                                $stmt = $conn->prepare($sql);
+                                } else {
+                                    $sql .= " AND (
+           (em.e_department = :subDepart AND li.l_department = :subDepart)
+            OR (li.l_department = :subDepart2)
+            OR (li.l_department = :subDepart3)
+            OR (li.l_department = :subDepart4)
+            OR (li.l_department = :subDepart5)
+        )";
+                                }
 
-                                                                      // Bind parameters
-                                $stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
-                                $stmt->bindParam(':subDepart', $subDepart);
-                                $stmt->bindParam(':subDepart2', $subDepart2);
-                                $stmt->bindParam(':subDepart3', $subDepart3);
-                                $stmt->bindParam(':subDepart4', $subDepart4);
-                                $stmt->bindParam(':subDepart5', $subDepart5);
+                                $stmt = $conn->prepare($sql);
                                 $stmt->bindParam(':selectedYear', $selectedYear);
                                 if ($selectedMonth != "All") {
                                     $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                                }
+                                if ($subDepart === "Office") {
+                                    $stmt->bindParam(':subDepart', $subDepart);
+                                    $stmt->bindParam(':subDepart2', $subDepart2);
+                                    // $stmt->bindParam(':checkSubDepart3', $checkSubDepart3);
+                                    // $stmt->bindParam(':checkSubDepart4', $checkSubDepart4);
+                                    // $stmt->bindParam(':checkSubDepart5', $checkSubDepart5);
+                                } else {
+                                    $stmt->bindParam(':subDepart', $subDepart);
+                                    $stmt->bindParam(':subDepart2', $subDepart2);
+                                    $stmt->bindParam(':subDepart3', $subDepart3);
+                                    $stmt->bindParam(':subDepart4', $subDepart4);
+                                    $stmt->bindParam(':subDepart5', $subDepart5);
                                 }
                                 // Execute and check for errors
                                 if ($stmt->execute()) {
@@ -408,6 +428,7 @@ WHERE
                                     echo "SQL Error: " . $errorInfo[2];
                                     $totalLeaveItems = 0;
                                 }
+
                             ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -421,7 +442,7 @@ WHERE
                     </div>
                 </div>
             </div>
-            <div class="col-3 filter-card" data-status="3">
+            <div class="col-3 filter-card" data-status="5">
                 <div class="card text-bg-danger mb-3">
                     <!-- <div class="card-header">รายการลาทั้งหมด</div> -->
                     <div class="card-body">
@@ -442,10 +463,11 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (2,3,6)
-    AND li.l_approve_status2 = 5
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
+    li.l_approve_status IN (2,3)
+    AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
+        AND li.l_approve_status2 = 5
+
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
         OR YEAR(li.l_leave_end_date) = :selectedYear
@@ -1126,7 +1148,7 @@ WHERE
 
                                 // 29
                                 echo '<td>
-        <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
+                                 <button type="button" class="btn btn-primary btn-sm view-history" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-clock-rotate-left"></i></button></td>';
 
                                 echo '</tr>';
                                 $rowNumber--;
@@ -1436,14 +1458,14 @@ WHERE
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();
-        var depart =                     <?php echo json_encode($depart); ?>;
-        var subDepart =                        <?php echo json_encode($subDepart); ?>;
-        var subDepart2 =                         <?php echo json_encode($subDepart2); ?>;
-        var subDepart3 =                         <?php echo json_encode($subDepart3); ?>;
-        var subDepart4 =                         <?php echo json_encode($subDepart4); ?>;
-        var subDepart5 =                         <?php echo json_encode($subDepart5); ?>;
+        var depart = <?php echo json_encode($depart); ?>;
+        var subDepart = <?php echo json_encode($subDepart); ?>;
+        var subDepart2 = <?php echo json_encode($subDepart2); ?>;
+        var subDepart3 = <?php echo json_encode($subDepart3); ?>;
+        var subDepart4 = <?php echo json_encode($subDepart4); ?>;
+        var subDepart5 = <?php echo json_encode($subDepart5); ?>;
 
-
+        // alert(status)
         $.ajax({
             url: 'm_ajax_get_leave_data.php',
             method: 'GET',

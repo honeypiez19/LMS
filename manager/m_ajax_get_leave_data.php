@@ -2,15 +2,15 @@
 // Include the database connection file
 include '../connect.php';
 
-$status = $_GET['status'];
+$status        = $_GET['status'];
 $selectedMonth = $_GET['selectedMonth'];
-$selectedYear = $_GET['selectedYear'];
-$depart = $_GET['depart'];
-$subDepart = $_GET['subDepart'];
-$subDepart2 = $_GET['subDepart2'];
-$subDepart3 = $_GET['subDepart3'];
-$subDepart4 = $_GET['subDepart4'];
-$subDepart5 = $_GET['subDepart5'];
+$selectedYear  = $_GET['selectedYear'];
+$depart        = $_GET['depart'];
+$subDepart     = $_GET['subDepart'];
+$subDepart2    = $_GET['subDepart2'];
+$subDepart3    = $_GET['subDepart3'];
+$subDepart4    = $_GET['subDepart4'];
+$subDepart5    = $_GET['subDepart5'];
 
 $sql = "SELECT
     li.*,
@@ -19,8 +19,8 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (2,3,6)
-    AND li.l_level IN ('user', 'chief', 'leader','admin')
+    li.l_approve_status IN (2,6)
+    AND li.l_level IN ('user', 'chief', 'leader')
     AND li.l_leave_id NOT IN (6, 7)
  AND (
         YEAR(li.l_create_datetime) = :selectedYear
@@ -53,7 +53,7 @@ if ($subDepart === "Office" || $subDepart2 === "Management") {
 
 // Add status filter if not 'all'
 if ($status !== 'all') {
-    $sql .= " AND li.l_approve_status IN (2,3,6) AND li.l_approve_status2 = :status";
+    $sql .= " AND li.l_approve_status2 = :status";
 }
 
 // Add order by clause
@@ -94,23 +94,23 @@ try {
         $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
         $holiday_stmt->execute();
 
-        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
+        $holiday_data  = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
         $holiday_count = $holiday_data['holiday_count'] ?? 0;
 
         // Calculate leave duration
         $start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-        $end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-        $interval = $start_date->diff($end_date);
+        $end_date   = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+        $interval   = $start_date->diff($end_date);
 
-        $leave_days = $interval->days - $holiday_count;
-        $leave_hours = $interval->h;
+        $leave_days    = $interval->days - $holiday_count;
+        $leave_hours   = $interval->h;
         $leave_minutes = $interval->i;
 
         // Adjust hours for out-of-range times
         $start_hour = (int) $start_date->format('H');
-        $end_hour = (int) $end_date->format('H');
+        $end_hour   = (int) $end_date->format('H');
 
-        if (!((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
+        if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
             (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
             $leave_hours -= 1;
         }
@@ -125,8 +125,8 @@ try {
         }
 
         $row['calculated_leave'] = [
-            'days' => $leave_days,
-            'hours' => $leave_hours,
+            'days'    => $leave_days,
+            'hours'   => $leave_hours,
             'minutes' => $leave_minutes,
         ];
     }

@@ -12,11 +12,11 @@ $sql = "SELECT
 FROM
     leave_list li
 WHERE
-    li.l_department <> 'RD'
-    AND li.l_leave_id NOT IN (6, 7)
+    li.l_leave_id NOT IN (6, 7)
+    AND li.l_approve_status IN (2,6)
     AND li.l_approve_status2 IN (4,6)
-            AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
- AND (
+    AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+    AND (
         YEAR(li.l_create_datetime) = :year
         OR YEAR(li.l_leave_end_date) = :year
     )";

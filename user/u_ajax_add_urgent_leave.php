@@ -186,9 +186,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5, e_level FROM employees WHERE e_name = :approver";
+    $chkApprover = "SELECT e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5, e_level FROM employees WHERE e_name = :urgentApprover";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 

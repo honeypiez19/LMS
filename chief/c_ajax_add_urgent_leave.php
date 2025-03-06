@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentLeaveType   = $_POST['urgentLeaveType'];
     $urgentLeaveReason = $_POST['urgentLeaveReason'];
 
-    $approver = $_POST['urgentApprover'];
+    $urgentApprover = $_POST['urgentApprover'];
 
     // ตรวจสอบประเภทการลา
     $leaveTypes = [
@@ -186,14 +186,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_name = :approver";
+    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_name = :urgentApprover";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $proveStatus  = null;
-    $proveStatus2 = null;
+    $proveStatus  = 0;
+    $proveStatus2 = null0;
     $proveStatus3 = null;
 
     if ($result) {

@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentLeaveType   = $_POST['urgentLeaveType'];
     $urgentLeaveReason = $_POST['urgentLeaveReason'];
 
-    $approver = $_POST['urgentApprover'];
+    $urgentApprover = $_POST['urgentApprover'];
 
     // ตรวจสอบประเภทการลา
     $leaveTypes = [
@@ -189,50 +189,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_name = :approver";
+    $chkApprover = "SELECT e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5, e_level FROM employees WHERE e_name = :urgentApprover";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $proveStatus  = null;
-    $proveStatus2 = null;
-    $proveStatus3 = null;
+// กำหนดค่าเริ่มต้น
+    $proveStatus  = 0;
+    $proveStatus2 = 0;
+    $proveStatus3 = 0;
 
     if ($result) {
-        $subDepartment = $result['e_sub_department'];
+        $departments = [
+            $result['e_sub_department'],
+            $result['e_sub_department2'],
+            $result['e_sub_department3'],
+            $result['e_sub_department4'],
+            $result['e_sub_department5'],
+        ];
+
         $levelApprover = $result['e_level'];
 
-        $departments  = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'QC'];
-        $specialDepts = ['MC', 'FN', 'PC'];
-        $leaders      = ['leader', 'subLeader', 'chief'];
-        $managers     = ['manager', 'manager2', 'assisManager'];
+        $leaderChiefDepartments = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
+        $managerDepartments     = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
 
-        // เช็คแผนกพิเศษก่อน (MC, PC, FN)
-        if (in_array($subDepartment, $specialDepts)) {
-            $proveStatus  = 0;
+        if (in_array($levelApprover, ['leader', 'chief'])) {
+            if (in_array('Office', $departments)) {
+                $proveStatus = 2;
+            }
+            if (in_array('QC', $departments) || in_array('Sales', $departments)) {
+                $proveStatus2 = 6;
+            } else {
+                $proveStatus2 = 1;
+            }
+            $proveStatus3 = 7;
+        } elseif (in_array($levelApprover, ['manager', 'manager2', 'assisManager'])) {
+            $proveStatus = 2;
+            if (in_array('Sales', $departments) || in_array('QC', $departments)) {
+                $proveStatus2 = 6;
+            } else {
+                $proveStatus2 = 1;
+            }
+            $proveStatus3 = 7;
+        } elseif ($levelApprover === 'GM') {
+            $proveStatus  = 2;
             $proveStatus2 = 6;
             $proveStatus3 = 7;
-        }
-        // เช็คแผนกทั่วไปและระดับตำแหน่ง
-        elseif (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
-            $proveStatus  = 2;
-            $proveStatus2 = 1;
-            $proveStatus3 = ($subDepartment !== 'RD') ? 7 : 6;
-        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
-            $proveStatus  = 2;
-            $proveStatus2 = 1;
-            $proveStatus3 = ($subDepartment !== 'RD') ? 7 : 6;
-        } elseif ($levelApprover == 'GM') {
-            $proveStatus  = 2;
-            $proveStatus2 = 6;
-            $proveStatus3 = 7;
-        } elseif ($levelApprover == 'admin') {
+        } elseif ($levelApprover === 'admin') {
             $proveStatus  = 2;
             $proveStatus2 = 6;
             $proveStatus3 = 6;
-        } else {
-            echo "ไม่พบแผนก";
         }
     }
 
@@ -274,20 +281,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveDate', $proveDate);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
+        // Change the query to fetch both user_id AND username
+        $sql  = "SELECT e_user_id, e_username FROM employees WHERE e_name = :urgentApprover AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':urgentApprover', $urgentApprover);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userList = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
 
-        if ($userIds) {
-            $sURL     = 'https://lms.system-samt.com/';
-            $sMessage = "มีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
-                "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
-                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        if ($userList) {
+            $sURL = 'https://lms.system-samt.com/';
 
-            foreach ($userIds as $userId) {
+            foreach ($userList as $user) {
+                $userId     = $user['e_user_id'];
+                $proveNamee = $user['e_username'];
+
+                $sMessage = "K." . $proveNamee . "\n\nมีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
+                    "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
+                    "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+
                 $data = [
                     'to'       => $userId,
                     'messages' => [
@@ -298,8 +310,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     ],
                 ];
 
+                // ส่ง cURL request
                 $ch = curl_init('https://api.line.me/v2/bot/message/push');
-                curl_setopt($ch, CURLOPT_URL, 'https://api.line.me/v2/bot/message/push');
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -308,17 +320,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     'Authorization: Bearer ' . $access_token,
                 ]);
 
-                $response = curl_exec($ch);
+                $response  = curl_exec($ch);
+                $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($ch);
                 curl_close($ch);
 
-                if ($response === false) {
-                    echo "Error: " . curl_error($ch);
+                if ($response === false || $httpCode !== 200) {
+                    error_log("Error sending Line message to $userId: " . ($curlError ?: "HTTP Code $httpCode"));
                 }
             }
         } else {
             echo "ไม่พบผู้รับข้อความ";
         }
-
     } else {
         echo "Error: " . $stmt->errorInfo()[2] . "<br>";
     }

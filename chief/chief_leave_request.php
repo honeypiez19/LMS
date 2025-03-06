@@ -18,7 +18,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=2.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ใบลาของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
@@ -35,12 +35,39 @@
     <!-- <script src="https://kit.fontawesome.com/84c1327080.js" crossorigin="anonymous"></script> -->
 
     <script src="../js/fontawesome.js"></script>
+
+    <style>
+    #leaveTable th:nth-last-child(2),
+    #leaveTable td:nth-last-child(2) {
+        position: sticky;
+        right: 40px;
+        /* ระยะห่างจากขอบขวา */
+        background-color: #fff;
+        /* พื้นหลังเพื่อไม่ให้เห็นข้อมูลด้านหลัง */
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #leaveTable th:last-child,
+    #leaveTable td:last-child {
+        position: sticky;
+        right: 0;
+        background-color: #fff;
+        z-index: 2;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* เมื่อ hover ให้เปลี่ยนสีพื้นหลังเพื่อให้เห็นชัดว่าสามารถกดได้ */
+    #leaveTable td:nth-last-child(2):hover {
+        background-color: #f8f9fa;
+    }
+    </style>
 </head>
 
 <body>
     <?php require 'chief_navbar.php'; ?>
 
-    <!--                                                                                                                                                 <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                         <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -141,7 +168,8 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_level IN ('user')
+    li.l_approve_status IN (0, 2, 3, 6)
+    AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
     AND (
         YEAR(li.l_create_datetime) = :selectedYear
@@ -211,7 +239,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status = 1
+    li.l_approve_status = 0
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
     AND (
@@ -474,7 +502,7 @@ FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_approve_status IN (0, 1, 2, 3, 6)
+    li.l_approve_status IN (0, 2, 3, 6)
     AND li.l_level IN ('user')
     AND li.l_leave_id NOT IN (6, 7)
     AND (
