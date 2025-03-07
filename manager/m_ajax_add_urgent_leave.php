@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentLeaveType   = $_POST['urgentLeaveType'];
     $urgentLeaveReason = $_POST['urgentLeaveReason'];
 
-    $approver = $_POST['urgentApprover'];
+    $urgentApprover = $_POST['urgentApprover'];
 
     // ตรวจสอบประเภทการลา
     $leaveTypes = [
@@ -189,49 +189,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_name = :approver";
+    $chkApprover = "SELECT e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5, e_level FROM employees WHERE e_name = :urgentApprover";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $proveStatus  = null;
-    $proveStatus2 = null;
-    $proveStatus3 = null;
+// กำหนดค่าเริ่มต้น
+    $proveStatus  = 0;
+    $proveStatus2 = 0;
+    $proveStatus3 = 0;
 
     if ($result) {
-        $subDepartment = $result['e_sub_department'];
+        $departments = [
+            $result['e_sub_department'],
+            $result['e_sub_department2'],
+            $result['e_sub_department3'],
+            $result['e_sub_department4'],
+            $result['e_sub_department5'],
+        ];
+
         $levelApprover = $result['e_level'];
 
-        $departments  = ['RD', 'CAD1', 'CAD2', 'CAM', 'Modeling', 'Design', 'Office', 'AC', 'Sales', 'Store', 'QC'];
-        $specialDepts = ['MC', 'FN', 'PC'];
-        $leaders      = ['leader', 'subLeader', 'chief'];
-        $managers     = ['manager', 'manager2', 'assisManager'];
+        $leaderChiefDepartments = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
+        $managerDepartments     = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
 
-        if (in_array($subDepartment, $specialDepts)) {
+        if (in_array($levelApprover, ['leader', 'chief'])) {
+            if (in_array('Office', $departments)) {
+                $proveStatus = 6;
+            }
+            if (in_array('QC', $departments) || in_array('Sales', $departments)) {
+                $proveStatus2 = 6;
+            } else {
+                $proveStatus2 = 4;
+            }
+            $proveStatus3 = 7;
+        } elseif (in_array($levelApprover, ['manager', 'manager2', 'assisManager'])) {
+            $proveStatus = 6;
+            if (in_array('Sales', $departments) || in_array('QC', $departments)) {
+                $proveStatus2 = 6;
+            } else {
+                $proveStatus2 = 4;
+            }
+            $proveStatus3 = 7;
+        } elseif ($levelApprover === 'GM') {
             $proveStatus  = 6;
             $proveStatus2 = 4;
             $proveStatus3 = 7;
-        } else if (in_array($levelApprover, $leaders) && in_array($subDepartment, $departments)) {
+        } elseif ($levelApprover === 'admin') {
             $proveStatus  = 6;
             $proveStatus2 = 4;
             $proveStatus3 = 6;
-        } elseif (in_array($levelApprover, $managers) && in_array($subDepartment, $departments)) {
-            $proveStatus  = 6;
-            $proveStatus2 = 4;
-            $proveStatus3 = 6;
-        } elseif ($levelApprover == 'GM') {
-            $proveStatus  = 6;
-            $proveStatus2 = 4;
-            $proveStatus3 = 7;
-        } elseif ($levelApprover == 'admin') {
-            $proveStatus  = 6;
-            $proveStatus2 = 4;
-            $proveStatus3 = 6;
-        } else {
-            echo "ไม่พบแผนก";
         }
-
     }
 
     $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
@@ -256,8 +265,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':urgentEndTime', $urgentEndTime);
     $stmt->bindParam(':formattedDate', $formattedDate);
     $stmt->bindParam(':filename', $filename);
-    $stmt->bindParam(':filename2', $filename2); // เพิ่มพารามิเตอร์ใหม่
-    $stmt->bindParam(':filename3', $filename3); // เพิ่มพารามิเตอร์ใหม่
+    $stmt->bindParam(':filename2', $filename2);
+    $stmt->bindParam(':filename3', $filename3);
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
@@ -272,20 +281,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveDate2', $proveDate2);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
+        $sql  = "SELECT e_user_id, e_username FROM employees WHERE e_name = :urgentApprover AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':urgentApprover', $urgentApprover);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userList = $stmt->fetchAll(PDO::FETCH_ASSOC); // ดึงข้อมูลเป็น associative array
 
-        if ($userIds) {
-            $sURL     = 'https://lms.system-samt.com/';
-            $sMessage = "มีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
-                "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
-                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        if ($userList) {
+            $sURL = 'https://lms.system-samt.com/';
 
-            foreach ($userIds as $userId) {
+            foreach ($userList as $user) {
+                $userId     = $user['e_user_id'];
+                $proveNamee = $user['e_username'];
+
+                $sMessage = "K." . $proveNamee . "\n\nมีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
+                    "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
+                    "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+
                 $data = [
                     'to'       => $userId,
                     'messages' => [

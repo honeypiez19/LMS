@@ -67,7 +67,7 @@
 <body>
     <?php require 'chief_navbar.php'; ?>
 
-    <!--                                                                                                                                                                                                                                         <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -1146,7 +1146,11 @@ ORDER BY li.l_create_datetime DESC";
             '<td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10]).text() + '</td>' +
             '</tr>' +
             '<tr>' +
-            '<th>สถานะใบลา</th>' +
+            '<th>จำนวนวันลา</th>' +
+            '<td>' + $(rowData[11]).text() + '</td>' +
+            '</tr>' +
+            '<tr>' +
+            '<th>สถานะรายการ</th>' +
             '<td>' + $(rowData[13]).html() + '</td>' +
             '</tr>' +
             '</table>'
@@ -1765,7 +1769,8 @@ ORDER BY li.l_create_datetime DESC";
 
                             //28
                             '<td>';
-                        if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
+                        if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3 ||
+                            row['l_approve_status'] == 6) {
                             newRow +=
                                 '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck ?></button>';
                         } else {
@@ -1821,7 +1826,11 @@ ORDER BY li.l_create_datetime DESC";
                             .text() + '</td>' +
                             '</tr>' +
                             '<tr>' +
-                            '<th>สถานะใบลา</th>' +
+                            '<th>จำนวนวันลา</th>' +
+                            '<td>' + $(rowData[11]).text() + '</td>' +
+                            '</tr>' +
+                            '<tr>' +
+                            '<th>สถานะรายการ</th>' +
                             '<td>' + $(rowData[13]).html() + '</td>' +
                             '</tr>' +
                             '</table>'

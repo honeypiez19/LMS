@@ -67,7 +67,7 @@
 <body>
     <?php require 'manager_navbar.php'; ?>
 
-    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -767,7 +767,6 @@ WHERE
 
                                 // 9
                                 // 08:45
-                                // 08:45
                                 if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
                                     echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
                                 }
@@ -1261,7 +1260,11 @@ WHERE
             '<td>' + $(rowData[9]).text() + ' ถึง ' + $(rowData[10]).text() + '</td>' +
             '</tr>' +
             '<tr>' +
-            '<th>สถานะใบลา</th>' +
+            '<th>จำนวนวันลา</th>' +
+            '<td>' + $(rowData[11]).text() + '</td>' +
+            '</tr>' +
+            '<tr>' +
+            '<th>สถานะรายการ</th>' +
             '<td>' + $(rowData[13]).html() + '</td>' +
             '</tr>' +
             '</table>'
@@ -1882,7 +1885,8 @@ WHERE
 
                             //28
                             '<td>';
-                        if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
+                        if (row['l_approve_status2'] == 4 || row['l_approve_status2'] ==
+                            5 || row['l_approve_status2'] == 6) {
                             newRow +=
                                 '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal" disabled><?php echo $btnCheck ?></button>';
                         } else {
@@ -1938,7 +1942,11 @@ WHERE
                             .text() + '</td>' +
                             '</tr>' +
                             '<tr>' +
-                            '<th>สถานะใบลา</th>' +
+                            '<th>จำนวนวันลา</th>' +
+                            '<td>' + $(rowData[11]).text() + '</td>' +
+                            '</tr>' +
+                            '<tr>' +
+                            '<th>สถานะรายการ</th>' +
                             '<td>' + $(rowData[13]).html() + '</td>' +
                             '</tr>' +
                             '</table>'

@@ -1917,49 +1917,40 @@ WHERE l_leave_id = :leave_id
                                     }
                                     echo '</td>';
 
-                                    // 19 - Edit button section (modified)
+                                    // 19 - Edit button section
                                     $leaveDate   = $row['l_leave_end_date'];
                                     $currentDate = date('Y-m-d');
-                                    // คำนวณวันที่สิ้นสุดลาบวก 2 วัน (calculate end date + 2 days)
+                                    // คำนวณวันที่สิ้นสุดลาบวก 2 วัน
                                     $endDatePlus2 = date('Y-m-d', strtotime($leaveDate . ' +2 days'));
 
-                                    // echo $endDatePlus2;
-                                    if ($endDatePlus2 < $currentDate) {
-                                        // ถ้าเกินวันที่ลา+2วันแล้ว ไม่ให้กดปุ่มแก้ไข
+                                    // เช็คเงื่อนไขสองกรณี: เกิน 2 วัน หรือ มีการยกเลิก
+                                    $disableEditButton = ($endDatePlus2 < $currentDate || $row['l_leave_status'] == 1);
+
+                                    // ถ้าเข้าเงื่อนไข disable ปุ่ม
+                                    if ($disableEditButton) {
                                         echo '<td>';
                                         echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
                                         echo '</td>';
                                     } else {
-                                        // ถ้ายังไม่เกินวันที่ลา+2วัน ให้แสดงปุ่มแก้ไขได้ปกติ
+                                        // ถ้าไม่เข้าเงื่อนไข แสดงปุ่มแก้ไขปกติ
                                         echo '<td>';
                                         echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
                                         echo '</td>';
                                     }
 
                                     // 20 - Cancel button section
-                                    $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
-                                    $dateNow  = date('Y-m-d');
-                                    // ใช้ $endDatePlus2 ที่คำนวณไว้แล้วจากส่วนก่อนหน้า
-
-                                    // เปลี่ยนเงื่อนไขการ disable ปุ่มยกเลิก
-                                    $disabledCancalCheck = (
-                                        ($row['l_approve_status'] != 0
-                                            && $row['l_approve_status2'] != 1
-                                            && $endDatePlus2 < $dateNow)
-                                        ||
-                                        ($endDatePlus2 < $dateNow
-                                            && $row['l_approve_status'] == 0
-                                            && $row['l_approve_status2'] == 1)
-                                    ) ? 'disabled' : '';
-
+                                    // ใช้เงื่อนไขเหมือนกันกับปุ่มแก้ไข เพื่อให้ปุ่มยกเลิกก็ไม่สามารถกดได้เมื่อเกิน 2 วัน
+                                    $disableCancelButton  = ($endDatePlus2 < $currentDate || $row['l_leave_status'] == 1);
                                     $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
 
                                     if ($row['l_leave_id'] == 6) {
                                         echo '<td></td>';
                                     } else if ($row['l_leave_id'] == 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+                                        $disabledLate = $disableCancelButton ? 'disabled' : $disabledConfirmCheck;
+                                        echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabledLate . '>ยืนยันรายการ</button></td>';
                                     } else if ($row['l_leave_id'] != 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+                                        $disabledCancel = $disableCancelButton ? 'disabled' : '';
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabledCancel . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     } else {
                                         echo '<td></td>';
                                     }
@@ -3227,15 +3218,16 @@ ${fileInfo}
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                // var leaveStatus = $(rowData[13]).text();
                 var workplace = "<?php echo $workplace ?>";
+                var level = "<?php echo $level ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
                 var subDepart3 = "<?php echo $subDepart3 ?>";
                 var subDepart4 = "<?php echo $subDepart4 ?>";
                 var subDepart5 = "<?php echo $subDepart5 ?>";
 
-                // alert(endDate)
+                // alert(leaveStatus)
                 Swal.fire({
                     title: "ต้องการยกเลิกรายการ ?",
                     icon: "question",
@@ -3260,13 +3252,14 @@ ${fileInfo}
                                 startDate: startDate,
                                 endDate: endDate,
                                 depart: depart,
-                                leaveStatus: leaveStatus,
+                                // leaveStatus: leaveStatus,
                                 workplace: workplace,
                                 subDepart: subDepart,
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5
+                                subDepart5: subDepart5,
+                                level: level
 
                             },
                             success: function(response) {

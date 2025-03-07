@@ -268,7 +268,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':approver', $approver);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $userList = $stmt->fetchAll(PDO::FETCH_ASSOC); // ดึงข้อมูลเป็น associative array
+        $userList = $stmt->fetchAll(PDO::FETCH_ASSOC); 
 
         if ($userList) {
             $sURL = 'https://lms.system-samt.com/';

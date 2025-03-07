@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $urgentLeaveType   = $_POST['urgentLeaveType'];
     $urgentLeaveReason = $_POST['urgentLeaveReason'];
 
-    $approver = $_POST['urgentApprover'];
+    $urgentApprover = $_POST['urgentApprover'];
 
     // ตรวจสอบประเภทการลา
     $leaveTypes = [
@@ -76,41 +76,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $urgentStartTimeLine = $urgentStartTime;
     }
 
-    $timeMapping2 = [
-    '08:10' => ['08:10', '08:30', '08:10:00'],
-    '08:15' => ['08:15', '08:30', '08:15:00'],
-    '08:45' => ['08:45', '09:00', '08:45:00'],
-    '09:10' => ['09:10', '09:30', '09:10:00'],
-    '09:15' => ['09:15', '09:30', '09:15:00'],
-    '09:45' => ['09:45', '10:00', '09:45:00'],
-    '10:10' => ['10:10', '10:30', '10:10:00'],
-    '10:15' => ['10:15', '10:30', '10:15:00'],
-    '10:45' => ['10:45', '11:00', '10:45:00'],
-    '11:10' => ['11:10', '11:30', '11:10:00'],
-    '11:15' => ['11:15', '11:30', '11:15:00'],
-    '11:45' => ['11:45', '12:00', null],
-    '12:00' => ['11:45', '12:00', null],
-    '13:00' => ['12:45', '13:00', null],
-    '13:10' => ['13:10', '13:30', '13:10:00'],
-    '13:15' => ['13:15', '13:30', '13:15:00'],
-    '13:40' => ['13:40', '14:00', '13:40:00'],
-    '13:45' => ['13:45', '14:00', '13:45:00'],
-    '14:10' => ['14:10', '14:30', '14:10:00'],
-    '14:15' => ['14:15', '14:30', '14:15:00'],
-    '14:40' => ['14:40', '15:00', '14:40:00'],
-    '14:45' => ['14:45', '15:00', '14:45:00'],
-    '15:10' => ['15:10', '15:30', '15:10:00'],
-    '15:15' => ['15:15', '15:30', '15:15:00'],
-    '15:40' => ['15:40', '16:00', '15:40:00'],
-    '15:45' => ['15:45', '16:00', '15:45:00'],
-    '16:10' => ['16:10', '16:30', '16:10:00'],
-    '16:15' => ['16:15', '16:30', '16:15:00'],
-    '17:00' => ['16:40', '17:00', null],
-];
-
-
-    if (isset($timeMapping2[$urgentEndTime])) {
-        [$urgentEndTimeLine, $urgentEndTime, $timeRemark2] = $timeMapping2[$urgentEndTime];
+    // Using the same timeMapping array for end time - removed duplicate array
+    if (isset($timeMapping[$urgentEndTime])) {
+        [$urgentEndTimeLine, $urgentEndTime, $timeRemark2] = $timeMapping[$urgentEndTime];
     } else {
         $urgentEndTimeLine = $urgentEndTime;
     }
@@ -190,9 +158,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $chkApprover = "SELECT e_sub_department, e_level FROM employees WHERE e_name = :approver";
+    $chkApprover = "SELECT * FROM employees WHERE e_name = :urgentApprover";
     $stmt        = $conn->prepare($chkApprover);
-    $stmt->bindParam(':approver', $approver, PDO::PARAM_STR);
+    $stmt->bindParam(':urgentApprover', $urgentApprover, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -267,20 +235,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bindParam(':proveDate3', $proveDate3);
 
     if ($stmt->execute()) {
-        $sql  = "SELECT e_user_id FROM employees WHERE e_name = :approver AND e_workplace = :workplace";
+        $sql  = "SELECT e_user_id, e_username FROM employees WHERE e_name = :urgentApprover AND e_workplace = :workplace";
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':approver', $approver);
+        $stmt->bindParam(':urgentApprover', $urgentApprover);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
-        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($userIds) {
-            $sURL     = 'https://lms.system-samt.com/';
-            $sMessage = "มีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
-                "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
-                "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        if ($userList) {
+            $sURL = 'https://lms.system-samt.com/';
 
-            foreach ($userIds as $userId) {
+            foreach ($userList as $user) {
+                $userId     = $user['e_user_id'];
+                $proveNamee = $user['e_username'];
+
+                $sMessage = "K." . $proveNamee . "\n\nมีใบลาฉุกเฉินของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\n" .
+                    "วันเวลาที่ลา : $urgentStartDate $urgentStartTimeLine ถึง $urgentEndDate $urgentEndTimeLine\n" .
+                    "สถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+
                 $data = [
                     'to'       => $userId,
                     'messages' => [

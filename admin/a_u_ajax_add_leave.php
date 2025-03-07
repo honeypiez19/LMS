@@ -245,7 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $leaderChiefDepartments = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
             $managerDepartments     = ['Store', 'AC', 'Office', 'CAD1 Design Modeling', 'CAD2', 'CAM', 'Sales', 'MC', 'FN', 'PC', 'QC', 'RD'];
 
-            if (in_array($levelApporve, ['leader', 'chief'])) {
+            if (in_array($levelApporve, ['leader', 'chief', 'subLeader'])) {
                 if (in_array('Office', $departments)) {
                     $proveStatus = 6;
                 }
