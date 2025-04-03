@@ -24,8 +24,15 @@
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background-color: #f5f4f2;
-        background-image: linear-gradient(315deg, #f5f4f2 20%, #ff4081 90%);
+        background: hsla(217, 100%, 50%, 1);
+
+        background: linear-gradient(90deg, hsla(217, 100%, 50%, 1) 0%, hsla(186, 100%, 69%, 1) 100%);
+
+        background: -moz-linear-gradient(90deg, hsla(217, 100%, 50%, 1) 0%, hsla(186, 100%, 69%, 1) 100%);
+
+        background: -webkit-linear-gradient(90deg, hsla(217, 100%, 50%, 1) 0%, hsla(186, 100%, 69%, 1) 100%);
+
+        filter: progid: DXImageTransform.Microsoft.gradient(startColorstr="#0061FF", endColorstr="#60EFFF", GradientType=1);
     }
 
     .login-form {
@@ -433,7 +440,7 @@
         if (currentDate >= startSnowfallDate || currentDate <= endSnowfallDate) {
             const maxFlakes = 100; // เพิ่มจำนวนหิมะเป็น 100
             const flakes = [];
-            const snowflakeCharacters = ['❤️', '🤍', '🩷', '♡', 'ꕤ', '🌹'];
+            const snowflakeCharacters = ['♫', '○', '♡', 'ꕤ', '×'];
 
             setInterval(() => {
                 if (flakes.length < maxFlakes) {

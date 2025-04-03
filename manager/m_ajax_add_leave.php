@@ -95,8 +95,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:45' => ['10:45', '11:00', '10:45:00'],
         '11:10' => ['11:10', '11:30', '11:10:00'],
         '11:15' => ['11:15', '11:30', '11:15:00'],
-        '11:45' => ['11:45', '12:00', null],
-        '12:45' => ['12:45', '13:00', null],
+        '11:45' => ['11:45', '12:00', '11:45:00'],
+        '12:45' => ['12:45', '13:00', '12:45:00'],
+        '13:00' => ['12:45', '13:00', '12:45:00'],
         '13:10' => ['13:10', '13:30', '13:10:00'],
         '13:15' => ['13:15', '13:30', '13:15:00'],
         '13:40' => ['13:40', '14:00', '13:40:00'],
@@ -111,12 +112,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '15:45' => ['15:45', '16:00', '15:45:00'],
         '16:10' => ['16:10', '16:30', '16:10:00'],
         '16:15' => ['16:15', '16:30', '16:15:00'],
-        '16:40' => ['16:40', '17:00', null],
+        '16:40' => ['16:40', '17:00', '16:40:00'],
+        '17:00' => ['16:40', '17:00', '16:40:00'],
     ];
 
-    // กำหนดค่าเริ่มต้นสำหรับตัวแปร time_remark
-    $timeRemark         = null;
-    $timeRemark2        = null;
+    $timeRemark         = $leaveTimeStart . ':00'; // เพิ่ม :00 ต่อท้ายเวลาเริ่มต้น
+    $timeRemark2        = $leaveTimeEnd . ':00';   // เพิ่ม :00 ต่อท้ายเวลาสิ้นสุด
     $leaveTimeStartLine = $leaveTimeStart;
     $leaveTimeEndLine   = $leaveTimeEnd;
 
@@ -124,9 +125,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($timeMappings[$leaveTimeStart])) {
         $leaveTimeStartLine = $timeMappings[$leaveTimeStart][0];
         $leaveTimeStart     = $timeMappings[$leaveTimeStart][1] . ':00';
-        $timeRemark         = $timeMappings[$leaveTimeStart][2];
+        // กำหนดค่า timeRemark เฉพาะเมื่อค่าในตารางไม่ใช่ null
+        if ($timeMappings[$leaveTimeStart][2] !== null) {
+            $timeRemark = $timeMappings[$leaveTimeStart][2];
+        }
     } else {
-        // เพิ่มเวลาในรูปแบบที่ถูกต้องถ้าไม่พบในการ mapping
         $leaveTimeStart = $leaveTimeStart . ':00';
     }
 
@@ -134,9 +137,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($timeMappings[$leaveTimeEnd])) {
         $leaveTimeEndLine = $timeMappings[$leaveTimeEnd][0];
         $leaveTimeEnd     = $timeMappings[$leaveTimeEnd][1] . ':00';
-        $timeRemark2      = $timeMappings[$leaveTimeEnd][2];
+
+        // กรณีพิเศษสำหรับเวลา 17:00 ให้ remark เป็น 16:40:00 เสมอ
+        if ($leaveTimeEnd === '17:00:00') {
+            $timeRemark2 = '16:40:00';
+        }
+        // กำหนดค่า timeRemark2 เฉพาะเมื่อค่าในตารางไม่ใช่ null
+        else if ($timeMappings[$leaveTimeEnd][2] !== null) {
+            $timeRemark2 = $timeMappings[$leaveTimeEnd][2];
+        }
     } else {
-        // เพิ่มเวลาในรูปแบบที่ถูกต้องถ้าไม่พบในการ mapping
         $leaveTimeEnd = $leaveTimeEnd . ':00';
     }
 
@@ -286,7 +296,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
 l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime,
 l_file, l_file2, l_file3, l_leave_status, l_hr_status, l_approve_status,
-l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_remark2,l_approve_name2,l_approve_datetime2)
+l_level, l_approve_status2, l_workplace, l_time_remark, l_approve_status3, l_time_remark2,l_approve_name2,l_approve_datetime2)
 VALUES (
 :userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason,
 :leaveDateStart, :leaveTimeStart, :leaveDateEnd, :leaveTimeEnd, :formattedDate,

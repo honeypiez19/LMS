@@ -1,0 +1,21 @@
+[28-Mar-2025 11:46:27 Asia/Bangkok] ข้อมูลที่ได้รับจาก AJAX: {"createDate":"20-01-2025 10:01:38","userCode":"6608418","userName":"Natnicha","leaveType":"\u0e25\u0e32\u0e1e\u0e31\u0e01\u0e23\u0e49\u0e2d\u0e19","leaveReason":"Technician came to repair the air conditioner","leaveStartDate":"21-01-2025 08:00:00","leaveEndDate":"21-01-2025 11:45:00","depart":"RD","checkFirm":"1","empName":"Kanyapa Saetiew","leaveStatus":"\u0e1b\u0e01\u0e15\u0e34"}
+[28-Mar-2025 11:46:27 Asia/Bangkok] วันที่หลังแปลงรูปแบบ: 20-01-2025 10:01:38 -> 2025-01-20 10:01:38
+[28-Mar-2025 11:46:27 Asia/Bangkok] เริ่ม transaction - checkFirm: 1, leaveStatus: ปกติ
+[28-Mar-2025 11:46:27 Asia/Bangkok] Executing SQL (approve): UPDATE leave_list SET l_hr_status = :pass, l_hr_datetime = :firmDate, l_hr_name = :userName
+                WHERE l_usercode = :userCode AND l_create_datetime = :createDate with params: {"pass":"1","firmDate":"2025-03-28 11:46:27","userName":"Natnicha","userCode":"6608418","createDate":"2025-01-20 10:01:38"}
+[28-Mar-2025 11:46:27 Asia/Bangkok] จำนวนแถวที่อัปเดต (อนุมัติ): 1
+[28-Mar-2025 11:46:27 Asia/Bangkok] Committed transaction
+[28-Mar-2025 11:46:28 Asia/Bangkok] LINE API Response Code: 200
+[28-Mar-2025 11:46:28 Asia/Bangkok] LINE API Response: {"sentMessages":[{"id":"554161317452710303","quoteToken":"J_TVnD4E1s8nysQXNo5xalIUqD5TFXWrxj8WIWG_QmbOzrbCAQtVNZYlbFXMqTU5EDxNAsPqjJcJ5SNJkeicgO2pQzxA3R_tXnI1YtD5FXccKQ-BbCWILmL3miQAMd1DwG_XuzUeM963Uf7202xQKg"}]}
+[28-Mar-2025 11:46:28 Asia/Bangkok] ผลการส่งแจ้งเตือนไปยัง Kanyapa Saetiew: {"sentMessages":[{"id":"554161317452710303","quoteToken":"J_TVnD4E1s8nysQXNo5xalIUqD5TFXWrxj8WIWG_QmbOzrbCAQtVNZYlbFXMqTU5EDxNAsPqjJcJ5SNJkeicgO2pQzxA3R_tXnI1YtD5FXccKQ-BbCWILmL3miQAMd1DwG_XuzUeM963Uf7202xQKg"}]}
+[28-Mar-2025 11:46:28 Asia/Bangkok] ส่งข้อความแจ้งเตือนสำเร็จ
+[29-Mar-2025 12:55:21 Asia/Bangkok] ข้อมูลที่ได้รับจาก AJAX: {"createDate":"04-02-2025 14:58:45","userCode":"6608418","userName":"Natnicha","leaveType":"\u0e25\u0e32\u0e1e\u0e31\u0e01\u0e23\u0e49\u0e2d\u0e19","leaveReason":"\u0e01\u0e25\u0e31\u0e1a\u0e15\u0e48\u0e32\u0e07\u0e08\u0e31\u0e07\u0e2b\u0e27\u0e31\u0e14 (Go to Mukdahan)","leaveStartDate":"21-02-2025 08:00:00","leaveEndDate":"24-02-2025 16:40:00","depart":"RD","checkFirm":"1","empName":"Kanyapa Saetiew","leaveStatus":"\u0e1b\u0e01\u0e15\u0e34"}
+[29-Mar-2025 12:55:21 Asia/Bangkok] เริ่ม transaction - checkFirm: 1, leaveStatus: ปกติ
+[29-Mar-2025 12:55:21 Asia/Bangkok] Executing SQL (approve): UPDATE leave_list SET l_hr_status = :pass, l_hr_datetime = :firmDate, l_hr_name = :userName
+                WHERE l_usercode = :userCode AND l_create_datetime = :createDate with params: {"pass":"1","firmDate":"2025-03-29 12:55:21","userName":"Natnicha","userCode":"6608418","createDate":"2025-02-04 14:58:45"}
+[29-Mar-2025 12:55:21 Asia/Bangkok] จำนวนแถวที่อัปเดต (อนุมัติ): 1
+[29-Mar-2025 12:55:21 Asia/Bangkok] Committed transaction
+[29-Mar-2025 12:55:21 Asia/Bangkok] LINE API Response Code: 200
+[29-Mar-2025 12:55:21 Asia/Bangkok] LINE API Response: {"sentMessages":[{"id":"554313204642087216","quoteToken":"zmlSQXelTBC7YIbBtzUS0d9a4RkmuVArB_wYNVfGggXZt_O_TGGBz1csbGvGHhEc3MTBdeasxfpbgSOFlDKrE73QsT33pikvZMZ2fcwdDUgYGC-mCATJx61X3-jUnZ58679py-V_kaEEKgSgrT830w"}]}
+[29-Mar-2025 12:55:21 Asia/Bangkok] ผลการส่งแจ้งเตือนไปยัง Kanyapa Saetiew: {"sentMessages":[{"id":"554313204642087216","quoteToken":"zmlSQXelTBC7YIbBtzUS0d9a4RkmuVArB_wYNVfGggXZt_O_TGGBz1csbGvGHhEc3MTBdeasxfpbgSOFlDKrE73QsT33pikvZMZ2fcwdDUgYGC-mCATJx61X3-jUnZ58679py-V_kaEEKgSgrT830w"}]}
+[29-Mar-2025 12:55:21 Asia/Bangkok] ส่งข้อความแจ้งเตือนสำเร็จ

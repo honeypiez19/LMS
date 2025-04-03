@@ -27,6 +27,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ];
     $leaveName = $leaveTypes[$urgentLeaveType] ?? 'ไม่พบประเภทการลา';
 
+    // เงื่อนไขลาพักร้อนฉุกเฉิน
+    $leaveCondition = isset($_POST['leaveCondition']) ? $_POST['leaveCondition'] : null;
+
 // วันที่ + เวลาเริ่มต้น
     $urgentStartDate = date('Y-m-d', strtotime($_POST['urgentStartDate']));
     $urgentStartTime = $_POST['urgentStartTime'];
@@ -50,9 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:45' => ['10:45', '11:00', '10:45:00'],
         '11:10' => ['11:10', '11:30', '11:10:00'],
         '11:15' => ['11:15', '11:30', '11:15:00'],
-        '11:45' => ['11:45', '12:00', null],
-        '12:00' => ['11:45', '12:00', null],
-        '13:00' => ['12:45', '13:00', null],
+        '11:45' => ['11:45', '12:00', '11:45:00'],
+        '12:45' => ['12:45', '13:00', '12:45:00'],
+        '13:00' => ['12:45', '13:00', '12:45:00'],
         '13:10' => ['13:10', '13:30', '13:10:00'],
         '13:15' => ['13:15', '13:30', '13:15:00'],
         '13:40' => ['13:40', '14:00', '13:40:00'],
@@ -67,7 +70,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '15:45' => ['15:45', '16:00', '15:45:00'],
         '16:10' => ['16:10', '16:30', '16:10:00'],
         '16:15' => ['16:15', '16:30', '16:15:00'],
-        '17:00' => ['16:40', '17:00', null],
+        '16:40' => ['16:40', '17:00', '16:40:00'],
+        '17:00' => ['16:40', '17:00', '16:40:00'],
     ];
 
     if (isset($timeMapping[$urgentStartTime])) {
@@ -88,9 +92,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '10:45' => ['10:45', '11:00', '10:45:00'],
         '11:10' => ['11:10', '11:30', '11:10:00'],
         '11:15' => ['11:15', '11:30', '11:15:00'],
-        '11:45' => ['11:45', '12:00', null],
-        '12:00' => ['11:45', '12:00', null],
-        '13:00' => ['12:45', '13:00', null],
+        '11:45' => ['11:45', '12:00', '11:45:00'],
+        '12:45' => ['12:45', '13:00', '12:45:00'],
+        '13:00' => ['12:45', '13:00', '12:45:00'],
         '13:10' => ['13:10', '13:30', '13:10:00'],
         '13:15' => ['13:15', '13:30', '13:15:00'],
         '13:40' => ['13:40', '14:00', '13:40:00'],
@@ -105,7 +109,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         '15:45' => ['15:45', '16:00', '15:45:00'],
         '16:10' => ['16:10', '16:30', '16:10:00'],
         '16:15' => ['16:15', '16:30', '16:15:00'],
-        '17:00' => ['16:40', '17:00', null],
+        '16:40' => ['16:40', '17:00', '16:40:00'],
+        '17:00' => ['16:40', '17:00', '16:40:00'],
     ];
 
     if (isset($timeMapping2[$urgentEndTime])) {
@@ -243,7 +248,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
+    if ($urgentLeaveType == 5 && $leaveCondition) {
+        $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
+        l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
+        l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_time_remark, l_time_remark2
+        , l_approve_name, l_approve_datetime, l_file2, l_file3, l_leave_id2)
+        VALUES (:userCode, :userName, :name, :depart, :telPhone, :urgentLeaveType, :urgentLeaveReason, :urgentStartDate, :urgentStartTime,
+        :urgentEndDate, :urgentEndTime, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
+        :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3, :timeRemark, :timeRemark2, :proveName, :proveDate
+        ,:filename2 ,:filename3,:leaveCondition)");
+
+        // Bind เพิ่ม parameter leaveCondition
+        $stmt->bindParam(':leaveCondition', $leaveCondition);
+    } else {
+        $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
         l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status,
         l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace, l_remark, l_approve_status3, l_time_remark, l_time_remark2
         , l_approve_name, l_approve_datetime, l_file2, l_file3)
@@ -251,7 +269,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         :urgentEndDate, :urgentEndTime, :formattedDate, :filename, :leaveStatus, :comfirmStatus,
         :proveStatus, :level, :proveStatus2, :workplace, :remark, :proveStatus3, :timeRemark, :timeRemark2, :proveName, :proveDate
         ,:filename2 ,:filename3)");
-
+    }
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
     $stmt->bindParam(':name', $name);

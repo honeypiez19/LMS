@@ -3,20 +3,57 @@ session_start();
 include '../connect.php';
 include '../access_token_channel.php'; // สมมติว่าไฟล์นี้มีตัวแปร $access_token สำหรับ LINE Message API
 
+// เพิ่ม error reporting เพื่อช่วยในการ debug
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', '../error_log.txt');
+
 date_default_timezone_set('Asia/Bangkok'); // เวลาไทย
 
-$leaveType      = $_POST['leaveType'];
-$empName        = $_POST['empName'];
-$depart         = $_POST['depart'];
-$leaveReason    = $_POST['leaveReason'];
-$userCode       = $_POST['userCode'];
-$createDate     = $_POST['createDate'];
-$leaveStartDate = $_POST['leaveStartDate'];
-$leaveEndDate   = $_POST['leaveEndDate'];
-$checkFirm      = $_POST['checkFirm'];
-$userName       = $_POST['userName'];
-$leaveStatus    = $_POST['leaveStatus'];
-$rejectReason   = $_POST['rejectReason'];
+// รับค่าจาก AJAX
+$leaveType      = isset($_POST['leaveType']) ? $_POST['leaveType'] : '';
+$empName        = isset($_POST['empName']) ? $_POST['empName'] : '';
+$depart         = isset($_POST['depart']) ? $_POST['depart'] : '';
+$leaveReason    = isset($_POST['leaveReason']) ? $_POST['leaveReason'] : '';
+$userCode       = isset($_POST['userCode']) ? $_POST['userCode'] : '';
+$createDate     = isset($_POST['createDate']) ? $_POST['createDate'] : '';
+$leaveStartDate = isset($_POST['leaveStartDate']) ? $_POST['leaveStartDate'] : '';
+$leaveEndDate   = isset($_POST['leaveEndDate']) ? $_POST['leaveEndDate'] : '';
+$checkFirm      = isset($_POST['checkFirm']) ? $_POST['checkFirm'] : '';
+$userName       = isset($_POST['userName']) ? $_POST['userName'] : '';
+$leaveStatus    = isset($_POST['leaveStatus']) ? $_POST['leaveStatus'] : '';
+$rejectReason   = isset($_POST['rejectReason']) ? $_POST['rejectReason'] : '';
+
+// บันทึกข้อมูลที่ได้รับเพื่อตรวจสอบ
+error_log("ข้อมูลที่ได้รับจาก AJAX: " . json_encode($_POST));
+
+// แปลงรูปแบบวันที่ createDate เป็น Y-m-d H:i:s
+$formattedCreateDate = $createDate;
+if (! empty($createDate)) {
+    // ตรวจสอบรูปแบบวันที่
+    $datePatterns = [
+        '/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/', // dd/mm/yyyy HH:MM:SS
+        '/^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2}):(\d{2})$/',   // dd-mm-yyyy HH:MM:SS
+        '/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/',   // yyyy-mm-dd HH:MM:SS
+    ];
+
+    foreach ($datePatterns as $pattern) {
+        if (preg_match($pattern, $createDate, $matches)) {
+            if (count($matches) >= 7) {
+                if ($pattern == $datePatterns[0]) { // dd/mm/yyyy
+                    $formattedCreateDate = $matches[3] . '-' . $matches[2] . '-' . $matches[1] . ' ' .
+                        $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                } else if ($pattern == $datePatterns[1]) { // dd-mm-yyyy
+                    $formattedCreateDate = $matches[3] . '-' . $matches[2] . '-' . $matches[1] . ' ' .
+                        $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                }
+                // yyyy-mm-dd ไม่ต้องแปลง
+            }
+            break;
+        }
+    }
+}
 
 $firmDate = date("Y-m-d H:i:s");
 $pass     = '1';
@@ -25,47 +62,106 @@ $passNo   = '2';
 try {
     $conn->beginTransaction();
 
+    // Log transaction start
+    error_log("เริ่ม transaction - checkFirm: $checkFirm, leaveStatus: $leaveStatus");
+
     if ($checkFirm == '1') {
-        // Update leave status
-        $sql = "UPDATE leave_list SET l_hr_status = :pass, l_hr_datetime = :firmDate, l_hr_name = :userName
+        if ($leaveStatus == 'ยกเลิก') {
+            // อัปเดตสถานะตามที่ต้องการโดยไม่ต้องแจ้งเตือน GM หรือ admin
+            $sqlUpdateCancelStatus = "UPDATE leave_list SET l_hr_status = :pass, l_hr_datetime = :firmDate, l_hr_name = :userName
                 WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':pass', $pass);
-        $stmt->bindParam(':firmDate', $firmDate);
-        $stmt->bindParam(':userName', $userName);
-        $stmt->bindParam(':userCode', $userCode);
-        $stmt->bindParam(':createDate', $createDate);
 
-        if ($stmt->execute()) {
-            $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_usercode = :userCode");
+            $stmt = $conn->prepare($sqlUpdateCancelStatus);
+            $stmt->bindParam(':pass', $pass);
+            $stmt->bindParam(':firmDate', $firmDate);
+            $stmt->bindParam(':userName', $userName);
             $stmt->bindParam(':userCode', $userCode);
+            $stmt->bindParam(':createDate', $formattedCreateDate);
+
+            // Log query execution
+            error_log("Executing SQL (cancel): $sqlUpdateCancelStatus with params: " .
+                json_encode(['pass' => $pass, 'firmDate'       => $firmDate, 'userName' => $userName,
+                    'userCode'          => $userCode, 'createDate' => $formattedCreateDate]));
+
             $stmt->execute();
-            $userId = $stmt->fetchColumn();
+            $affectedRows = $stmt->rowCount();
+            error_log("จำนวนแถวที่อัปเดต (ยกเลิก): $affectedRows");
 
-            $sURL     = 'https://lms.system-samt.com/';
-            $sMessage = "K." . $empName . "\n\nHR ตรวจสอบใบลาผ่านเรียบร้อย\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-
-            if ($leaveStatus == 'ยกเลิกใบลา') {
-                $sMessage = "K." . $empName . "\n\nHR ตรวจสอบยกเลิกใบลาผ่านเรียบร้อย\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-            }
-
-            if ($userId) {
-                $response = sendLineMessage($userId, $sMessage, $access_token);
-                error_log("ผลการส่งแจ้งเตือนไปยัง " . $empName . ": " . print_r($response, true));
-
-                if (isset($response['message'])) {
-                    error_log("แจ้งเตือนล้มเหลว: " . $response['message']);
-                    echo json_encode(['status' => 'warning', 'message' => 'อัปเดตสถานะสำเร็จ แต่การส่งแจ้งเตือนล้มเหลว']);
-                } else {
-                    error_log("ส่งข้อความแจ้งเตือนสำเร็จ");
-                    echo json_encode(['status' => 'success', 'message' => 'อัปเดตสถานะผ่านสำเร็จและส่งแจ้งเตือนแล้ว']);
-                }
+            if ($affectedRows > 0) {
+                $conn->commit();
+                echo json_encode(['status' => 'success', 'message' => 'อัปเดตสถานะยกเลิกสำเร็จ', 'affected' => $affectedRows]);
             } else {
-                error_log("ไม่พบ user_id สำหรับพนักงาน " . $empName);
-                echo json_encode(['status' => 'warning', 'message' => 'อัปเดตสถานะสำเร็จ แต่ไม่พบ LINE ID ของพนักงาน']);
+                $conn->rollBack();
+                echo json_encode(['status' => 'error', 'message' => 'ไม่พบข้อมูลที่ต้องการอัปเดต', 'affected' => 0]);
             }
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'อัปเดตสถานะผ่านไม่สำเร็จ']);
+            // Update leave status for non-cancel case
+            $sql = "UPDATE leave_list SET l_hr_status = :pass, l_hr_datetime = :firmDate, l_hr_name = :userName
+                WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':pass', $pass);
+            $stmt->bindParam(':firmDate', $firmDate);
+            $stmt->bindParam(':userName', $userName);
+            $stmt->bindParam(':userCode', $userCode);
+            $stmt->bindParam(':createDate', $formattedCreateDate);
+
+            // Log query execution
+            error_log("Executing SQL (approve): $sql with params: " .
+                json_encode(['pass' => $pass, 'firmDate'       => $firmDate, 'userName' => $userName,
+                    'userCode'          => $userCode, 'createDate' => $formattedCreateDate]));
+
+            $stmt->execute();
+            $affectedRows = $stmt->rowCount();
+            error_log("จำนวนแถวที่อัปเดต (อนุมัติ): $affectedRows");
+
+            if ($affectedRows > 0) {
+                $stmt = $conn->prepare("SELECT e_user_id FROM employees WHERE e_usercode = :userCode");
+                $stmt->bindParam(':userCode', $userCode);
+                $stmt->execute();
+                $userId = $stmt->fetchColumn();
+
+                $sURL     = 'https://lms.system-samt.com/';
+                $sMessage = "K." . $empName . "\n\nHR ตรวจสอบใบลาผ่านเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+                if ($leaveStatus == 'ยกเลิก') {
+                    $sMessage = "K." . $empName . "\n\nHR ตรวจสอบยกเลิกใบลาผ่านเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                }
+
+                $conn->commit();
+                error_log("Committed transaction");
+
+                // แยกการส่งแจ้งเตือนออกจากการอัปเดตข้อมูล
+                $notificationStatus  = 'success';
+                $notificationMessage = '';
+
+                if ($userId) {
+                    $response = sendLineMessage($userId, $sMessage, $access_token);
+                    error_log("ผลการส่งแจ้งเตือนไปยัง " . $empName . ": " . json_encode($response));
+
+                    if (isset($response['message'])) {
+                        error_log("แจ้งเตือนล้มเหลว: " . $response['message']);
+                        $notificationStatus  = 'warning';
+                        $notificationMessage = 'อัปเดตสถานะสำเร็จ แต่การส่งแจ้งเตือนล้มเหลว';
+                    } else {
+                        error_log("ส่งข้อความแจ้งเตือนสำเร็จ");
+                        $notificationMessage = 'อัปเดตสถานะผ่านสำเร็จและส่งแจ้งเตือนแล้ว';
+                    }
+                } else {
+                    error_log("ไม่พบ user_id สำหรับพนักงาน " . $empName);
+                    $notificationStatus  = 'warning';
+                    $notificationMessage = 'อัปเดตสถานะสำเร็จ แต่ไม่พบ LINE ID ของพนักงาน';
+                }
+
+                echo json_encode([
+                    'status'   => $notificationStatus,
+                    'message'  => $notificationMessage,
+                    'affected' => $affectedRows,
+                ]);
+            } else {
+                $conn->rollBack();
+                error_log("Rolled back transaction - no rows affected");
+                echo json_encode(['status' => 'error', 'message' => 'ไม่พบข้อมูลที่ต้องการอัปเดต', 'affected' => 0]);
+            }
         }
     } else {
         // ถ้า checkFirm = 2 (ไม่ผ่าน)
@@ -77,10 +173,19 @@ try {
         $stmt->bindParam(':firmDate', $firmDate);
         $stmt->bindParam(':userName', $userName);
         $stmt->bindParam(':userCode', $userCode);
-        $stmt->bindParam(':createDate', $createDate);
+        $stmt->bindParam(':createDate', $formattedCreateDate); // แก้ไขให้ใช้ตัวแปรที่ถูกต้อง
         $stmt->bindParam(':rejectReason', $rejectReason);
 
-        if ($stmt->execute()) {
+        // Log query execution
+        error_log("Executing SQL (reject): $sql with params: " .
+            json_encode(['passNo' => $passNo, 'firmDate'     => $firmDate, 'userName'                => $userName,
+                'userCode'            => $userCode, 'createDate' => $formattedCreateDate, 'rejectReason' => $rejectReason]));
+
+        $stmt->execute();
+        $affectedRows = $stmt->rowCount();
+        error_log("จำนวนแถวที่อัปเดต (ไม่ผ่าน): $affectedRows");
+
+        if ($affectedRows > 0) {
             // รายชื่อผู้ที่ต้องแจ้งเตือน
             $notifyList = [];
 
@@ -90,7 +195,7 @@ try {
                                WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
             $stmt = $conn->prepare($sqlGetLeaveInfo);
             $stmt->bindParam(':userCode', $userCode);
-            $stmt->bindParam(':createDate', $createDate);
+            $stmt->bindParam(':createDate', $formattedCreateDate); // แก้ไขให้ใช้ตัวแปรที่ถูกต้อง
             $stmt->execute();
             $leaveInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -146,16 +251,16 @@ try {
 
                     // สร้างข้อความแจ้งเตือนแตกต่างกันตามบทบาท
                     if ($recipient['role'] == 'employee') {
-                        $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบใบลาไม่ผ่านเรียบร้อย\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบใบลาไม่ผ่านเรียบร้อย\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-                        if ($leaveStatus == 'ยกเลิกใบลา') {
-                            $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบยกเลิกใบลาไม่ผ่านเรียบร้อย\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        if ($leaveStatus == 'ยกเลิก') {
+                            $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบยกเลิกใบลาไม่ผ่านเรียบร้อย\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา: $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                         }
                     } else { // approver1, approver2, approver3
-                        $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบใบลาของ $empName ที่คุณได้อนุมัติไปแล้วไม่ผ่าน\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบใบลาของ $empName ที่คุณได้อนุมัติไปแล้วไม่ผ่าน\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา  : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-                        if ($leaveStatus == 'ยกเลิกใบลา') {
-                            $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้วไม่ผ่าน\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        if ($leaveStatus == 'ยกเลิก') {
+                            $sMessage = "K." . $recipient['username'] . "\n\nHR ตรวจสอบยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้วไม่ผ่าน\nเหตุผลที่ไม่ผ่าน : $rejectReason\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                         }
                     }
 
@@ -175,6 +280,9 @@ try {
                 }
             }
 
+            $conn->commit();
+            error_log("Committed transaction (reject case)");
+
             // สรุปผลการส่งแจ้งเตือน
             if ($successCount > 0 && $failCount == 0 && $skipCount == 0) {
                 echo json_encode(['status' => 'success', 'message' => 'อัปเดตสถานะไม่ผ่านสำเร็จและส่งแจ้งเตือนครบทุกคน']);
@@ -191,11 +299,11 @@ try {
                 echo json_encode(['status' => 'warning', 'message' => 'อัปเดตสถานะไม่ผ่านสำเร็จ แต่การส่งแจ้งเตือนล้มเหลวทั้งหมด']);
             }
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'อัปเดตสถานะไม่ผ่านไม่สำเร็จ']);
+            $conn->rollBack();
+            error_log("Rolled back transaction (reject case) - no rows affected");
+            echo json_encode(['status' => 'error', 'message' => 'ไม่พบข้อมูลที่ต้องการอัปเดต', 'affected' => 0]);
         }
     }
-
-    $conn->commit();
 } catch (Exception $e) {
     $conn->rollBack();
     error_log("เกิดข้อผิดพลาด: " . $e->getMessage());

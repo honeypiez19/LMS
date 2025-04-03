@@ -43,15 +43,47 @@
             max-width: 100%;
         }
     }
+
+    #imagePreview {
+        transition: transform 0.3s ease;
+    }
+
+    #imagePreview:hover {
+        transform: scale(3.0);
+        /* ขยายขนาดรูป 1.5 เท่า */
+        cursor: pointer;
+        /* แสดงเคอร์เซอร์เป็น pointer เมื่อวางเมาส์ที่รูป */
+    }
     </style>
 </head>
 
 <body>
-    <?php include 'admin_navbar.php'?>
 
     <?php
-        // echo $depart;
-        // echo $subDepart;
+        include 'admin_navbar.php';
+
+        $currentYear = date('Y'); // ปีปัจจุบัน
+
+        if (isset($_POST['year'])) {
+            $selectedYear = $_POST['year'];
+        } elseif (isset($_GET['year'])) {
+            $selectedYear = $_GET['year'];
+        } else {
+            $selectedYear = $currentYear;
+        }
+
+        if (isset($_POST['month'])) {
+            $selectedMonth = $_POST['month'];
+        } elseif (isset($_GET['month'])) {
+            $selectedMonth = $_GET['month'];
+        } else {
+            $selectedMonth = 'All';
+        }
+
+        // กำหนดช่วงวันที่เป็น 1 ม.ค. ถึง 31 ธ.ค. ของปีที่เลือก
+        $startDate = date("Y-m-d", strtotime($selectedYear . "-01-01"));
+        $endDate   = date("Y-m-d", strtotime($selectedYear . "-12-31"));
+
         // มาสาย --------------------------------------------------------------------------------------------
         $sql_check_late = "SELECT l_leave_start_date, l_leave_start_time, l_leave_end_time
 FROM leave_list
@@ -82,36 +114,15 @@ AND l_leave_id = 7";
         }
     ?>
     <div class="mt-3 container-fluid">
-        <!-- <button type="button" class="btn btn-primary rounded-circle position-fixed bottom-0 start-0 m-3 btn-sm"
-            data-bs-toggle="tooltip" data-bs-placement="top" style="width: 30px;" title="
-        <strong>ความหมายของ :</strong> <code>ตัวอย่าง 1(3.5)</code><br>
-        <ul>
-            <li><strong>ตัวอักษรแรก (1)</strong> = จำนวนวัน</li>
-            <li><strong>ตัวอักษรที่สอง (3)</strong> = จำนวนชั่วโมง</li>
-            <li><strong>ตัวอักษรที่สาม (5)</strong> = จำนวนนาที</li>
-        </ul>">
-            <i class="fa-solid fa-exclamation"></i>
-        </button> -->
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
                 <form class="mt-3 mb-3 row" method="post" id="yearMonthForm">
                     <label for="" class="mt-2 col-auto">เลือกปี</label>
                     <div class="col-auto">
                         <?php
-                            $currentYear = date('Y'); // ปีปัจจุบัน
-
-                            if (isset($_POST['year'])) {
-                                $selectedYear = $_POST['year'];
-
-                                $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
-                                $endDate   = date("Y-m-d", strtotime($selectedYear . "-11-30"));
-                            } else {
-                                $selectedYear = $currentYear;
-                            }
 
                             echo "<select class='form-select' name='year' id='selectedYear' onchange='document.getElementById(\"yearMonthForm\").submit();'>";
 
-                            // เพิ่มตัวเลือกของปีหน้า
                             $nextYear = $currentYear + 1;
                             echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
 
@@ -163,7 +174,6 @@ AND l_leave_id = 7";
                     </div>
                 </form>
 
-
                 <!-- ปุ่มระเบียบการลา -->
                 <button type="button" class="button-shadow btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#leaveRule">
@@ -209,6 +219,7 @@ AND l_leave_id = 7";
                                                 </tr>
                                             </tbody>
                                         </table>
+
                                         <h5><b>- ลาป่วย</b></h5>
                                         <p>พนักงานมีสิทธิ์ลาได้ 30 วัน <span
                                                 class="red-text">(มีผลเรื่องการหักโบนัส)</span>
@@ -307,7 +318,7 @@ AND l_leave_id = 7";
     <div class="container">
         <div class="row">
             <span class="text-danger">** 0(0.0) = วัน(ชั่วโมง.นาที)</span>
-            <span class="text-danger">*** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
+            <span class="text-danger">** จำนวนวันลาที่ใช้จะแสดงเมื่อการอนุมัติสำเร็จเรียบร้อยแล้ว</span>
             <?php
                 $leave_types = [
                     1 => 'ลากิจได้รับค่าจ้าง',
@@ -356,16 +367,32 @@ FROM leave_list
 JOIN employees ON employees.e_usercode = leave_list.l_usercode
 WHERE l_leave_id = :leave_id
   AND l_usercode = :userCode
-  AND YEAR(l_leave_end_date) = :selectedYear
-  AND l_leave_status = 0
-  AND l_approve_status IN (2,6)
-  AND l_approve_status2 IN (4,6)
-    AND l_approve_status3 IN (8,6)";
+AND (
+            YEAR(l_create_datetime) = :selectedYear
+            OR YEAR(l_leave_end_date) = :selectedYear
+        )";
+
+                    if ($selectedMonth != "All") {
+                        $sql_leave_personal .= " AND (
+            MONTH(l_create_datetime) = :selectedMonth
+            OR MONTH(l_leave_end_date) = :selectedMonth
+        )";
+                    }
+
+                    $sql_leave_personal .= " AND l_leave_status = 0
+        AND l_approve_status IN (2,6)
+        AND l_approve_status2 IN (4,6)
+        AND l_approve_status3 IN (8,6)";
 
                     $stmt_leave_personal = $conn->prepare($sql_leave_personal);
-                    $stmt_leave_personal->bindParam(':leave_id', $leave_id, PDO::PARAM_INT); // Bind the leave_id
+                    $stmt_leave_personal->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
                     $stmt_leave_personal->bindParam(':userCode', $userCode);
                     $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+                    if ($selectedMonth != "All") {
+                        $stmt_leave_personal->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                    }
+
                     $stmt_leave_personal->execute();
                     $result_leave = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -572,6 +599,7 @@ WHERE l_leave_id = :leave_id
             ?>
 
         </div>
+
         <!-- Modal -->
         <div class="modal fade" id="leaveDetailsModal" tabindex="-1" aria-labelledby="leaveDetailsModalLabel"
             aria-hidden="true">
@@ -586,6 +614,7 @@ WHERE l_leave_id = :leave_id
                 </div>
             </div>
         </div>
+
         <div class="container-fluid">
             <div class="row">
                 <div class="mb-3 d-flex justify-content-end">
@@ -611,7 +640,8 @@ WHERE l_leave_id = :leave_id
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="leaveForm" method="POST" enctype="multipart/form-data">
+                            <form id="leaveForm" method="POST" enctype="multipart/form-data"
+                                action="user_dashboard.php">
                                 <div class="row">
                                     <div class="col-24 alert alert-danger d-none" role="alert" name="alertCheckDays">
                                         ไม่สามารถลาได้ คุณได้ใช้สิทธิ์ครบกำหนดแล้ว
@@ -751,6 +781,7 @@ WHERE l_leave_id = :leave_id
                                         </label>
                                         <span id="leaveDuration" class="form-label text-primary"></span>
                                     </div>
+
                                 </div>
                                 <div class="mt-2 row">
                                     <div class="col-6">
@@ -759,54 +790,87 @@ WHERE l_leave_id = :leave_id
                                             $specialUsers = ['Pornsuk'];
                                             if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
                                                 $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
+                                            } else if (in_array($subDepart, ['Office', 'Store', 'AC'])) {
+                                                $specialUsers[] = 'Anchana';
                                             }
 
-                                            // SQL query
-                                            $sql = "SELECT *
-        FROM employees
-        WHERE (
-            e_sub_department = :subDepart
-            OR e_sub_department2 = :subDepart2
-            OR e_sub_department3 = :subDepart3
-            OR e_sub_department4 = :subDepart4
-            OR e_sub_department5 = :subDepart5
-            OR e_username IN (:specialUser1, :specialUser2)
-        )
-        AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
-        AND e_workplace = :workplace
-        ORDER BY e_username ASC";
+                                            // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
+                                            $specialUserRecords = [];
+                                            foreach ($specialUsers as $specialUserss) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :specialUserss AND e_workplace = :workplace";
+                                                $stmt       = $conn->prepare($sqlSpecial);
+                                                $stmt->bindParam(':specialUserss', $specialUserss);
+                                                $stmt->bindParam(':workplace', $workplace);
+                                                $stmt->execute();
+                                                $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                                            $stmt = $conn->prepare($sql);
-                                            $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
-                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
-
-                                            // ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
-                                            $specialUser1 = $specialUsers[0] ?? null;
-                                            $specialUser2 = $specialUsers[1] ?? null;
-                                            $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
-                                            $stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
-
-                                            $stmt->execute();
-                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                            // แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
-                                            $specialOptions  = [];
-                                            $filteredResults = [];
-                                            foreach ($results as $row) {
-                                                if (in_array($row['e_username'], $specialUsers)) {
-                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
-                                                } else {
-                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
+                                                if ($specialUser) {
+                                                    $specialUserRecords[] = $specialUser;
                                                 }
                                             }
-                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
-                                            $filteredResults = array_merge($filteredResults, $specialOptions);
 
-                                            // ตั้งค่า default approver
+                                            // ดึงข้อมูลหัวหน้างานและผู้จัดการตามเงื่อนไขเดิม
+                                            $sql = "SELECT *
+    FROM employees
+    WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
+    AND e_level <> :level
+    AND (
+        (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+        OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+        OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+        OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+        OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+        OR (
+            e_level = 'GM'
+            AND (
+                e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR (
+                    e_sub_department IS NULL
+                    AND e_sub_department2 IS NULL
+                    AND e_sub_department3 IS NULL
+                    AND e_sub_department4 IS NULL
+                    AND e_sub_department5 IS NULL
+                )
+            )
+        )
+    )
+    AND e_workplace = :workplace";
+
+                                            $stmt = $conn->prepare($sql);
+                                            $stmt->bindParam(':subDepart', $subDepart);
+                                            $stmt->bindParam(':subDepart2', $subDepart2);
+                                            $stmt->bindParam(':subDepart3', $subDepart3);
+                                            $stmt->bindParam(':subDepart4', $subDepart4);
+                                            $stmt->bindParam(':subDepart5', $subDepart5);
+                                            $stmt->bindParam(':depart', $depart);
+                                            $stmt->bindParam(':workplace', $workplace);
+                                            $stmt->bindParam(':level', $level);
+                                            // ลบ $stmt->bindParam(':userCode', $userCode); ออกเพราะไม่มีในคำสั่ง SQL
+
+                                            $stmt->execute();
+                                            $regularResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                            // กรอง regularResults ไม่ให้มีรายชื่อผู้ใช้พิเศษที่ซ้ำกัน
+                                            $filteredResults = [];
+                                            foreach ($regularResults as $row) {
+                                                if (! in_array($row['e_username'], $specialUsers)) {
+                                                    $filteredResults[] = $row;
+                                                }
+                                            }
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            usort($specialUserRecords, function ($a, $b) {
+                                                return strcmp($a['e_username'], $b['e_username']);
+                                            });
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            $filteredResults = array_merge($filteredResults, $specialUserRecords);
+
+                                            // ตั้งค่า default approver (ไม่ต้องเปลี่ยน)
                                             $defaultApprover = '';
                                             if ($subDepart === 'RD') {
                                                 foreach ($filteredResults as $row) {
@@ -817,7 +881,7 @@ WHERE l_leave_id = :leave_id
                                                 }
                                             } else {
                                                 foreach ($filteredResults as $row) {
-                                                    if (in_array($row['e_level'], ['leader', 'chief', 'manager', 'assisManager', 'GM'])) {
+                                                    if (in_array($row['e_level'], ['chief', 'manager', 'assisManager', 'GM'])) {
                                                         $defaultApprover = $row['e_username'];
                                                         break;
                                                     }
@@ -838,7 +902,6 @@ WHERE l_leave_id = :leave_id
                                         </select>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="telPhone" class="form-label">เบอร์โทร</label>
@@ -866,7 +929,6 @@ WHERE l_leave_id = :leave_id
                                         <div id="filePreview" class="mt-2 d-flex flex-wrap gap-2"></div>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 d-flex justify-content-end">
                                     <button type="submit" class="btn btn-success" id="btnSubmitForm1" name="submit"
                                         style="white-space: nowrap;">บันทึก</button>
@@ -1039,54 +1101,88 @@ WHERE l_leave_id = :leave_id
                                             $specialUsers = ['Pornsuk'];
                                             if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
                                                 $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
+                                            } else if (in_array($subDepart, ['Office', 'Store', 'AC'])) {
+                                                $specialUsers[] = 'Anchana';
                                             }
 
-                                            // SQL query
-                                            $sql = "SELECT *
-        FROM employees
-        WHERE (
-            e_sub_department = :subDepart
-            OR e_sub_department2 = :subDepart2
-            OR e_sub_department3 = :subDepart3
-            OR e_sub_department4 = :subDepart4
-            OR e_sub_department5 = :subDepart5
-            OR e_username IN (:specialUser1, :specialUser2)
-        )
-        AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
-        AND e_workplace = :workplace
-        ORDER BY e_username ASC";
+                                            // ลองดึงข้อมูลผู้ใช้พิเศษก่อน
+                                            $specialUserRecords = [];
+                                            foreach ($specialUsers as $specialUserss) {
+                                                $sqlSpecial = "SELECT * FROM employees WHERE e_username = :specialUserss AND e_workplace = :workplace";
+                                                $stmt       = $conn->prepare($sqlSpecial);
+                                                $stmt->bindParam(':specialUserss', $specialUserss);
+                                                $stmt->bindParam(':workplace', $workplace);
+                                                $stmt->execute();
+                                                $specialUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                                            $stmt = $conn->prepare($sql);
-                                            $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
-                                            $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
-
-                                            // ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
-                                            $specialUser1 = $specialUsers[0] ?? null;
-                                            $specialUser2 = $specialUsers[1] ?? null;
-                                            $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
-                                            $stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
-
-                                            $stmt->execute();
-                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                            // แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
-                                            $specialOptions  = [];
-                                            $filteredResults = [];
-                                            foreach ($results as $row) {
-                                                if (in_array($row['e_username'], $specialUsers)) {
-                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
-                                                } else {
-                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
+                                                if ($specialUser) {
+                                                    $specialUserRecords[] = $specialUser;
                                                 }
                                             }
-                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
-                                            $filteredResults = array_merge($filteredResults, $specialOptions);
 
-                                            // ตั้งค่า default approver
+                                            // ดึงข้อมูลหัวหน้างานและผู้จัดการตามเงื่อนไขเดิม
+                                            $sql = "SELECT *
+    FROM employees
+    WHERE e_level IN ('leader', 'chief', 'assisManager', 'manager', 'manager2', 'GM', 'subLeader')
+    AND e_level <> :level
+    AND (
+        (e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department <> '')
+        OR (e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department2 <> '')
+        OR (e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department3 <> '')
+        OR (e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department4 <> '')
+        OR (e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5) AND e_sub_department5 <> '')
+        OR (
+            e_level = 'GM'
+            AND :depart <> 'RD'
+            AND (
+                e_sub_department IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department2 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department3 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department4 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR e_sub_department5 IN (:depart, :subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+                OR (
+                    e_sub_department IS NULL
+                    AND e_sub_department2 IS NULL
+                    AND e_sub_department3 IS NULL
+                    AND e_sub_department4 IS NULL
+                    AND e_sub_department5 IS NULL
+                )
+            )
+        )
+    )
+    AND e_workplace = :workplace";
+
+                                            $stmt = $conn->prepare($sql);
+                                            $stmt->bindParam(':subDepart', $subDepart);
+                                            $stmt->bindParam(':subDepart2', $subDepart2);
+                                            $stmt->bindParam(':subDepart3', $subDepart3);
+                                            $stmt->bindParam(':subDepart4', $subDepart4);
+                                            $stmt->bindParam(':subDepart5', $subDepart5);
+                                            $stmt->bindParam(':depart', $depart);
+                                            $stmt->bindParam(':workplace', $workplace);
+                                            $stmt->bindParam(':level', $level);
+                                            // ลบ $stmt->bindParam(':userCode', $userCode); ออกเพราะไม่มีในคำสั่ง SQL
+
+                                            $stmt->execute();
+                                            $regularResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                            // กรอง regularResults ไม่ให้มีรายชื่อผู้ใช้พิเศษที่ซ้ำกัน
+                                            $filteredResults = [];
+                                            foreach ($regularResults as $row) {
+                                                if (! in_array($row['e_username'], $specialUsers)) {
+                                                    $filteredResults[] = $row;
+                                                }
+                                            }
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            usort($specialUserRecords, function ($a, $b) {
+                                                return strcmp($a['e_username'], $b['e_username']);
+                                            });
+
+                                            // รวมรายชื่อปกติกับผู้ใช้พิเศษ (ผู้ใช้พิเศษอยู่ท้ายสุด)
+                                            $filteredResults = array_merge($filteredResults, $specialUserRecords);
+
+                                            // ตั้งค่า default approver (ไม่ต้องเปลี่ยน)
                                             $defaultApprover = '';
                                             if ($subDepart === 'RD') {
                                                 foreach ($filteredResults as $row) {
@@ -1097,7 +1193,7 @@ WHERE l_leave_id = :leave_id
                                                 }
                                             } else {
                                                 foreach ($filteredResults as $row) {
-                                                    if (in_array($row['e_level'], ['leader', 'chief', 'manager', 'assisManager', 'GM'])) {
+                                                    if (in_array($row['e_level'], ['chief', 'manager', 'assisManager', 'GM'])) {
                                                         $defaultApprover = $row['e_username'];
                                                         break;
                                                     }
@@ -1105,6 +1201,7 @@ WHERE l_leave_id = :leave_id
                                             }
 
                                         ?>
+
                                         <label for="labelApprover" class="form-label">หัวหน้าอนุมัติ</label>
                                         <span style="color: red;">* </span>
                                         <select class="form-select" id="urgentApprover" name="urgentApprover">
@@ -1134,6 +1231,7 @@ WHERE l_leave_id = :leave_id
                                         ?>
                                     </div>
                                 </div>
+
                                 <div class="mt-3 row">
                                     <div class="col-12">
                                         <label for="urgentFile" class="form-label">ไฟล์แนบ (PNG , JPG, JPEG)</label>
@@ -1144,7 +1242,6 @@ WHERE l_leave_id = :leave_id
                                         <div id="urgentFilePreview" class="mt-2 d-flex flex-wrap gap-2"></div>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 d-flex justify-content-end">
                                     <button type="submit" class="btn btn-success" id="btnSubmitForm2" name="submit"
                                         style="white-space: nowrap;">บันทึก</button>
@@ -1182,8 +1279,8 @@ WHERE l_leave_id = :leave_id
                     </thead>
                     <tbody>
                         <?php
-                            // กำหนดจำนวนรายการต่อหน้า
-                            $itemsPerPage = 10;
+                                                                                               // กำหนดจำนวนรายการต่อหน้า
+                            $itemsPerPage = isset($_GET['items']) ? (int) $_GET['items'] : 10; // default = 10
 
                             // คำนวณหน้าปัจจุบัน
                             if (! isset($_GET['page'])) {
@@ -1192,37 +1289,71 @@ WHERE l_leave_id = :leave_id
                                 $currentPage = $_GET['page'];
                             }
 
-                            // สร้างคำสั่ง SQL
-                            $sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
+                            $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode";
 
                             if ($selectedMonth != "All") {
-                                $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+                                $sql .= " AND Month(l_leave_end_date) = :selectedMonth";
                             }
 
-                            $sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
+                            $sql .= " AND Year(l_leave_end_date) = :selectedYear ORDER BY l_create_datetime DESC ";
 
-                            // หาจำนวนรายการทั้งหมด
-                            $result    = $conn->query($sql);
-                            $totalRows = $result->rowCount();
+                            // Prepare the statement for counting total rows
+                            $stmt = $conn->prepare($sql);
 
-                            // คำนวณหน้าทั้งหมด
+                            // Bind parameters for the count query
+                            $stmt->bindParam(':userCode', $userCode);
+                            $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+                            if ($selectedMonth != "All") {
+                                $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                            }
+
+                            // Execute the query to get the total number of rows
+                            $stmt->execute();
+                            $totalRows = $stmt->rowCount();
+
+                            // Calculate total pages
                             $totalPages = ceil($totalRows / $itemsPerPage);
+                            if ($totalPages < 1) {
+                                $totalPages = 1;
+                            }
+                            // กรณีไม่มีข้อมูล ให้มี 1 หน้า
 
-                            // คำนวณ offset สำหรับ pagination
+                            // ตรวจสอบว่าหน้าปัจจุบันไม่เกินจำนวนหน้าทั้งหมด
+                            if ($currentPage > $totalPages) {
+                                $currentPage = $totalPages;
+                            }
+
+                            // Calculate offset for pagination
                             $offset = ($currentPage - 1) * $itemsPerPage;
 
-                            // เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-                            $sql .= " LIMIT $itemsPerPage OFFSET $offset";
+                            // Add LIMIT and OFFSET to the SQL statement for pagination
+                            $sqlWithPagination = $sql . " LIMIT :limit OFFSET :offset";
 
-                            // ประมวลผลคำสั่ง SQL
-                            $result = $conn->query($sql);
+                            // Prepare the final query with pagination
+                            $stmt = $conn->prepare($sqlWithPagination);
 
-                                                                                          // แสดงผลลำดับของแถว
-                            $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+                            // Bind parameters for the paginated query
+                            $stmt->bindParam(':userCode', $userCode);
+                            $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+                            if ($selectedMonth != "All") {
+                                $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+                            }
+
+                            // Bind the limit and offset parameters
+                            $stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+                            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+                            // Execute the paginated query
+                            $stmt->execute();
+
+                            // Display row number starting from the correct count
+                            $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
                             // แสดงข้อมูลในตาราง
-                            if ($result->rowCount() > 0) {
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                            if ($stmt->rowCount() > 0) {
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     echo '<tr class="text-center align-middle">';
 
                                     // 0
@@ -1514,10 +1645,10 @@ WHERE l_leave_id = :leave_id
                                     echo '<td>';
                                     // Query to check holidays in the leave period
                                     $holiday_query = "SELECT COUNT(*) as holiday_count
-                                FROM holiday
-                                WHERE h_start_date BETWEEN :start_date AND :end_date
-                                AND h_holiday_status = 'วันหยุด'
-                                AND h_status = 0";
+                  FROM holiday
+                  WHERE h_start_date BETWEEN :start_date AND :end_date
+                  AND h_holiday_status = 'วันหยุด'
+                  AND h_status = 0";
 
                                     // Prepare the query
                                     $holiday_stmt = $conn->prepare($holiday_query);
@@ -1830,54 +1961,49 @@ WHERE l_leave_id = :leave_id
                                             echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
                                         } elseif ($row['l_hr_status'] == 1) {
                                         echo '<span class="text-success"><b>ผ่าน</b></span>';
-                                    } else {
+                                    } elseif ($row['l_hr_status'] == 2) {
                                         echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
+                                    } elseif ($row['l_hr_status'] == 3) {
+                                        echo '';
+                                    } else {
+                                        echo '';
                                     }
                                     echo '</td>';
 
-                                    // 19 - Edit button section (modified)
+                                    // 19 - Edit button section
                                     $leaveDate   = $row['l_leave_end_date'];
                                     $currentDate = date('Y-m-d');
-                                    // คำนวณวันที่สิ้นสุดลาบวก 2 วัน (calculate end date + 2 days)
+                                    // คำนวณวันที่สิ้นสุดลาบวก 2 วัน
                                     $endDatePlus2 = date('Y-m-d', strtotime($leaveDate . ' +2 days'));
 
-                                    // echo $endDatePlus2;
-                                    if ($endDatePlus2 < $currentDate) {
-                                        // ถ้าเกินวันที่ลา+2วันแล้ว ไม่ให้กดปุ่มแก้ไข
+                                    // เช็คเงื่อนไขสองกรณี: เกิน 2 วัน หรือ มีการยกเลิก
+                                    $disableEditButton = ($endDatePlus2 < $currentDate || $row['l_leave_status'] == 1);
+
+                                    // ถ้าเข้าเงื่อนไข disable ปุ่ม
+                                    if ($disableEditButton) {
                                         echo '<td>';
                                         echo '<button type="button" class="button-shadow btn btn-warning edit-btn" disabled><i class="fa-solid fa-pen"></i> แก้ไข</button>';
                                         echo '</td>';
                                     } else {
-                                        // ถ้ายังไม่เกินวันที่ลา+2วัน ให้แสดงปุ่มแก้ไขได้ปกติ
+                                        // ถ้าไม่เข้าเงื่อนไข แสดงปุ่มแก้ไขปกติ
                                         echo '<td>';
                                         echo '<button type="button" class="button-shadow btn btn-warning edit-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" data-bs-toggle="modal" data-bs-target="#editLeaveModal"><i class="fa-solid fa-pen"></i> แก้ไข</button>';
                                         echo '</td>';
                                     }
 
                                     // 20 - Cancel button section
-                                    $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
-                                    $dateNow  = date('Y-m-d');
-                                    // ใช้ $endDatePlus2 ที่คำนวณไว้แล้วจากส่วนก่อนหน้า
-
-                                    // เปลี่ยนเงื่อนไขการ disable ปุ่มยกเลิก
-                                    $disabledCancalCheck = (
-                                        ($row['l_approve_status'] != 0
-                                            && $row['l_approve_status2'] != 1
-                                            && $endDatePlus2 < $dateNow)
-                                        ||
-                                        ($endDatePlus2 < $dateNow
-                                            && $row['l_approve_status'] == 0
-                                            && $row['l_approve_status2'] == 1)
-                                    ) ? 'disabled' : '';
-
+                                    // ใช้เงื่อนไขเหมือนกันกับปุ่มแก้ไข เพื่อให้ปุ่มยกเลิกก็ไม่สามารถกดได้เมื่อเกิน 2 วัน
+                                    $disableCancelButton  = ($endDatePlus2 < $currentDate || $row['l_leave_status'] == 1);
                                     $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
 
                                     if ($row['l_leave_id'] == 6) {
                                         echo '<td></td>';
                                     } else if ($row['l_leave_id'] == 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+                                        $disabledLate = $disableCancelButton ? 'disabled' : $disabledConfirmCheck;
+                                        echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabledLate . '>ยืนยันรายการ</button></td>';
                                     } else if ($row['l_leave_id'] != 7) {
-                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+                                        $disabledCancel = $disableCancelButton ? 'disabled' : '';
+                                        echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabledCancel . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
                                     } else {
                                         echo '<td></td>';
                                     }
@@ -1896,34 +2022,133 @@ WHERE l_leave_id = :leave_id
                     </tbody>
                 </table>
             </div>
-            <?php
-                echo '<div class="pagination">';
-                echo '<ul class="pagination">';
+            <!-- Pagination -->
+            <div class="container-fluid mt-3">
+                <div class="row align-items-center">
+                    <!-- ปุ่มเลื่อนหน้าด้านซ้าย พร้อมตัวเลือกจำนวนรายการต่อหน้า -->
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <nav aria-label="Page navigation" class="me-3">
+                                <ul class="pagination mb-0">
+                                    <?php if ($currentPage > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=1&year=<?php echo $selectedYear; ?>&month=<?php echo $selectedMonth; ?>&items=<?php echo $itemsPerPage; ?>"
+                                            aria-label="First">
+                                            <span aria-hidden="true">&laquo;&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=<?php echo $currentPage - 1; ?>&year=<?php echo $selectedYear; ?>&month=<?php echo $selectedMonth; ?>&items=<?php echo $itemsPerPage; ?>"
+                                            aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <?php endif; ?>
 
-                // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
-                if ($currentPage > 1) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
-                }
+                                    <?php
+                                                          // แสดงปุ่มทีละ 5 ปุ่ม
+                                        $pagesToShow = 5; // จำนวนปุ่มที่ต้องการแสดง
 
-                // สร้างลิงก์สำหรับแต่ละหน้า
-                for ($i = 1; $i <= $totalPages; $i++) {
-                    if ($i == $currentPage) {
-                        echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-                    } else {
-                        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
-                    }
-                }
+                                        // คำนวณหน้าเริ่มต้นและหน้าสุดท้ายที่จะแสดง
+                                        if ($currentPage >= 5) {
+                                            // กรณีที่หน้าปัจจุบันมากกว่าหรือเท่ากับ 5 ให้แสดงแบบย้อนกลับ
+                                            $startPage = min($currentPage + 2, $totalPages);
+                                            $endPage   = max($startPage - 4, 1);
 
-                // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
-                if ($currentPage < $totalPages) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
-                }
-                echo '</ul>';
-                echo '</div>';
+                                            // แสดงปุ่มแบบย้อนกลับ จากมากไปน้อย
+                                            for ($i = $startPage; $i >= $endPage; $i--):
+                                                $activeClass = ($i == $currentPage) ? ' active' : '';
+                                            ?>
+	                                    <li class="page-item<?php echo $activeClass; ?>">
+	                                        <a class="page-link"
+	                                            href="?page=<?php echo $i; ?>&year=<?php echo $selectedYear; ?>&month=<?php echo $selectedMonth; ?>&items=<?php echo $itemsPerPage; ?>"><?php echo $i; ?></a>
+	                                    </li>
+	                                    <?php endfor;
+                                            } else {
+                                                // กรณีหน้าปัจจุบันน้อยกว่า 5 ให้แสดงแบบปกติ
+                                                $endPage = min($pagesToShow, $totalPages);
 
-            ?>
+                                                // แสดงปุ่มแบบปกติ จากน้อยไปมาก
+                                                for ($i = 1; $i <= $endPage; $i++):
+                                                    $activeClass = ($i == $currentPage) ? ' active' : '';
+                                                ?>
+	                                    <li class="page-item<?php echo $activeClass; ?>">
+	                                        <a class="page-link"
+	                                            href="?page=<?php echo $i; ?>&year=<?php echo $selectedYear; ?>&month=<?php echo $selectedMonth; ?>&items=<?php echo $itemsPerPage; ?>"><?php echo $i; ?></a>
+	                                    </li>
+	                                    <?php endfor;
+                                            }
+                                        ?>
+
+                                    <?php if ($currentPage < $totalPages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=<?php echo $currentPage + 1; ?>&year=<?php echo $selectedYear; ?>&month=<?php echo $selectedMonth; ?>&items=<?php echo $itemsPerPage; ?>"
+                                            aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=<?php echo $totalPages; ?>&year=<?php echo $selectedYear; ?>&month=<?php echo $selectedMonth; ?>&items=<?php echo $itemsPerPage; ?>"
+                                            aria-label="Last">
+                                            <span aria-hidden="true">&raquo;&raquo;</span>
+                                        </a>
+                                    </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
+
+                            <!-- ฟอร์มสำหรับกระโดดไปยังหน้าที่ต้องการ -->
+                            <div class="d-flex align-items-center me-3">
+                                <form action="" method="GET" class="d-flex flex-wrap align-items-center"
+                                    onsubmit="return validateJumpToPage()">
+                                    <input type="hidden" name="year" value="<?php echo $selectedYear; ?>">
+                                    <input type="hidden" name="month" value="<?php echo $selectedMonth; ?>">
+                                    <input type="hidden" name="items" value="<?php echo $itemsPerPage; ?>">
+                                    <label for="jumpToPage" class="me-2">ไปที่หน้า:</label>
+                                    <div class="d-flex flex-grow-1">
+                                        <input type="number" id="jumpToPage" name="page"
+                                            class="form-control form-control-md" min="1"
+                                            max="<?php echo $totalPages; ?>" style="width: 70px;">
+                                        <button type="submit" class="btn btn-sm btn-primary ms-2">ไป</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- แสดงรายการต่อหน้าอยู่ถัดจากปุ่มเลข -->
+                            <div class="d-flex align-items-center">
+                                <label for="perPage" class="me-2">จำนวนรายการ :</label>
+                                <select id="perPage" class="form-select form-select-md" style="width: 70px;"
+                                    onchange="changeItemsPerPage(this.value)">
+                                    <option value="10"                                                       <?php echo $itemsPerPage == 10 ? 'selected' : ''; ?>>10
+                                    </option>
+                                    <option value="25"                                                       <?php echo $itemsPerPage == 25 ? 'selected' : ''; ?>>25
+                                    </option>
+                                    <option value="50"                                                       <?php echo $itemsPerPage == 50 ? 'selected' : ''; ?>>50
+                                    </option>
+                                    <option value="100"                                                        <?php echo $itemsPerPage == 100 ? 'selected' : ''; ?>>100
+                                    </option>
+                                </select>
+                                <span class="ms-2">รายการต่อหน้า</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ข้อความแสดงรายการอยู่ด้านขวา -->
+                    <div class="col-md-6 text-end">
+                        <div class="pagination-info">
+                            <?php if ($totalRows > 0): ?>
+                            แสดงรายการที่&nbsp;<?php echo($currentPage - 1) * $itemsPerPage + 1; ?>&nbsp;-&nbsp;<?php echo min($currentPage * $itemsPerPage, $totalRows); ?>&nbsp;จากทั้งหมด&nbsp;<?php echo $totalRows; ?>&nbsp;รายการ
+                            <?php else: ?>
+                            ไม่พบรายการ
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="modal fade" id="imageModal<?php echo $rowNumber ?>" tabindex="-1"
                 aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -1977,7 +2202,6 @@ WHERE l_leave_id = :leave_id
                                             placeholder="กรุณาระบุเหตุผล"></textarea>
                                     </div>
                                 </div>
-
                                 <div class="mt-3 row">
                                     <div class="col-6">
                                         <label for="editLeaveStartDate" class="form-label">วันที่เริ่มต้น</label>
@@ -1986,47 +2210,12 @@ WHERE l_leave_id = :leave_id
                                     </div>
                                     <div class=" col-6">
                                         <label for="editLeaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
-                                        <span style="color: red;">* (<input class="form-label" id="editLeaveStartTime2"
+                                        <!-- <span style="color: red;">* (<input class="form-label" id="editLeaveStartTime2"
                                                 value="" style="border: none; width: 70px;  color: red;">เวลาเดิม)
-                                        </span>
+                                        </span> -->
                                         <select class="form-select" id="editLeaveStartTime" name="editLeaveStartTime"
                                             required>
-                                            <option value="08:00" selected>08:00</option>
-                                            <option value="08:10">08:10</option>
-                                            <option value="08:15">08:15</option>
-                                            <option value="08:30">08:30</option>
-                                            <option value="08:45">08:45</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="09:10">09:10</option>
-                                            <option value="09:15">09:15</option>
-                                            <option value="09:30">09:30</option>
-                                            <option value="09:45">09:45</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="10:10">10:10</option>
-                                            <option value="10:15">10:15</option>
-                                            <option value="10:30">10:30</option>
-                                            <option value="10:45">10:45</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="11:10">11:10</option>
-                                            <option value="11:15">11:15</option>
-                                            <option value="11:30">11:30</option>
-                                            <option value="12:00">11:45</option>
-                                            <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:15">13:15</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:15">14:15</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:15">15:15</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:10">16:10</option>
-                                            <option value="16:15">16:15</option>
-                                            <option value="17:00">16:40</option>
+
                                         </select>
                                     </div>
                                 </div>
@@ -2038,131 +2227,12 @@ WHERE l_leave_id = :leave_id
                                     </div>
                                     <div class="col-6">
                                         <label for="editleaveEndTime" class="form-label">เวลาที่สิ้นสุด</label>
-                                        <span style="color: red;">* (<input class="form-label" id="editLeaveEndTime2"
+                                        <!-- <span style="color: red;">* (<input class="form-label" id="editLeaveEndTime2"
                                                 value="" style="border: none; width: 70px; color: red;">เวลาเดิม)
-                                        </span><select class="form-select" id="editLeaveEndTime" name="editLeaveEndTime"
+                                        </span> -->
+                                        <select class="form-select" id="editLeaveEndTime" name="editLeaveEndTime"
                                             required>
-                                            <option value="08:00">08:00</option>
-                                            <option value="08:10">08:10</option>
-                                            <option value="08:15">08:15</option>
-                                            <option value="08:30">08:30</option>
-                                            <option value="08:45">08:45</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="09:10">09:10</option>
-                                            <option value="09:15">09:15</option>
-                                            <option value="09:30">09:30</option>
-                                            <option value="09:45">09:45</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="10:10">10:10</option>
-                                            <option value="10:15">10:15</option>
-                                            <option value="10:30">10:30</option>
-                                            <option value="10:45">10:45</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="11:10">11:10</option>
-                                            <option value="11:15">11:15</option>
-                                            <option value="11:30">11:30</option>
-                                            <option value="12:00">11:45</option>
-                                            <option value="13:00">12:45</option>
-                                            <option value="13:10">13:10</option>
-                                            <option value="13:15">13:15</option>
-                                            <option value="13:40">13:40</option>
-                                            <option value="13:45">13:45</option>
-                                            <option value="14:10">14:10</option>
-                                            <option value="14:15">14:15</option>
-                                            <option value="14:40">14:40</option>
-                                            <option value="14:45">14:45</option>
-                                            <option value="15:10">15:10</option>
-                                            <option value="15:15">15:15</option>
-                                            <option value="15:40">15:40</option>
-                                            <option value="15:45">15:45</option>
-                                            <option value="16:10">16:10</option>
-                                            <option value="16:15">16:15</option>
-                                            <option value="17:00" selected>16:40</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mt-2 row" hidden>
-                                    <div class="col-6">
-                                        <?php
-                                            // กำหนดตัวแปรสำหรับผู้ใช้งานพิเศษ
-                                            $specialUsers = ['Pornsuk'];
-                                            if (in_array($subDepart, ['CAD1', 'CAD2', 'CAM', 'Modeling', 'Design'])) {
-                                                $specialUsers[] = 'Chaikorn'; // เพิ่ม Chaikorn เฉพาะกรณีแผนกที่กำหนด
-                                            }
 
-                                            // SQL query
-                                            $sql = "SELECT *
-        FROM employees
-        WHERE (
-            e_sub_department = :subDepart
-            OR e_sub_department2 = :subDepart2
-            OR e_sub_department3 = :subDepart3
-            OR e_sub_department4 = :subDepart4
-            OR e_sub_department5 = :subDepart5
-            OR e_username IN (:specialUser1, :specialUser2)
-        )
-        AND e_level IN ('leader', 'chief', 'manager', 'assisManager', 'GM')
-        ORDER BY e_username ASC";
-
-                                            $stmt = $conn->prepare($sql);
-                                            $stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
-                                            $stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
-
-                                            // ตรวจสอบว่ามีผู้ใช้งานพิเศษ 2 คนหรือไม่
-                                            $specialUser1 = $specialUsers[0] ?? null;
-                                            $specialUser2 = $specialUsers[1] ?? null;
-                                            $stmt->bindParam(':specialUser1', $specialUser1, PDO::PARAM_STR);
-                                            $stmt->bindParam(':specialUser2', $specialUser2, PDO::PARAM_STR);
-
-                                            $stmt->execute();
-                                            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                            // แยกตัวเลือกผู้ใช้งานพิเศษออกจากผลลัพธ์
-                                            $specialOptions  = [];
-                                            $filteredResults = [];
-                                            foreach ($results as $row) {
-                                                if (in_array($row['e_username'], $specialUsers)) {
-                                                    $specialOptions[] = $row; // เก็บผู้ใช้งานพิเศษ
-                                                } else {
-                                                    $filteredResults[] = $row; // เก็บรายการทั่วไป
-                                                }
-                                            }
-                                            // รวมผู้ใช้งานพิเศษไว้ท้ายสุด
-                                            $filteredResults = array_merge($filteredResults, $specialOptions);
-
-                                            // ตั้งค่า default approver
-                                            $defaultApprover = '';
-                                            if ($subDepart === 'RD') {
-                                                foreach ($filteredResults as $row) {
-                                                    if ($row['e_level'] == 'leader' || $row['e_level'] == 'manager' || $row['e_level'] == 'GM') {
-                                                        $defaultApprover = $row['e_username'];
-                                                        break;
-                                                    }
-                                                }
-                                            } else {
-                                                foreach ($filteredResults as $row) {
-                                                    if (in_array($row['e_level'], ['leader', 'chief', 'manager', 'assisManager', 'GM'])) {
-                                                        $defaultApprover = $row['e_username'];
-                                                        break;
-                                                    }
-                                                }
-                                            }
-
-                                        ?>
-
-                                        <label for="labelApprover" class="form-label">ผู้อนุมัติ</label>
-                                        <span style="color: red;">* </span>
-                                        <select class="form-select" id="editApprover" name="editApprover">
-                                            <option value="">เลือกผู้อนุมัติ</option>
-                                            <?php foreach ($filteredResults as $row): ?>
-                                            <option value="<?php echo htmlspecialchars($row['e_username']) ?>"
-                                                <?php echo $defaultApprover === $row['e_username'] ? 'selected' : '' ?>>
-                                                <?php echo htmlspecialchars($row['e_username']) ?>
-                                            </option>
-                                            <?php endforeach; ?>
                                         </select>
                                     </div>
                                 </div>
@@ -2172,24 +2242,19 @@ WHERE l_leave_id = :leave_id
                                         <input type="text" class="form-control" id="editTelPhone">
                                     </div>
                                 </div>
-                                <div class=" mt-3 row">
+                                <div class="mt-3 row">
                                     <div class="col-12">
-                                        <label for="editFile" class="form-label">ไฟล์แนบ (PNG, JPG, JPEG)</label>
-                                        <input class="form-control" type="file" id="editFile" name="editFile" />
-                                        <!-- แสดงชื่อไฟล์เดิม -->
-                                        <small id="currentFile" class="form-text text-muted">
-                                            <!-- ชื่อไฟล์เดิมจะแสดงที่นี่ -->
-                                        </small>
-                                        <!-- Preview รูป -->
-                                        <div class="mt-3"
-                                            style="display: flex; justify-content: center; align-items: center;">
-                                            <img id="imagePreview" src="#" alt="Preview Image"
-                                                style="max-width: 100%; display: none; width: 200px; height: 200px;" />
-                                        </div>
+                                        <label for="file" class="form-label">ไฟล์แนบ (สูงสุด 3 ไฟล์: PNG, JPG, JPEG,
+                                            PDF)</label>
+                                        <input class="form-control" type="file" id="editFile" name="editFile" multiple
+                                            accept="image/png, image/jpeg, image/jpg, application/pdf" />
+                                        <small class="text-muted">เลือกไฟล์รูปภาพหรือ PDF ได้สูงสุด 3 ไฟล์</small>
+                                        <div id="editFilePreview" class="mt-2 d-flex flex-wrap gap-2"></div>
                                     </div>
                                 </div>
                                 <div class="mt-3 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+                                    <button type="submit" class="btn btn-success" id="btnSubmitForm3" name="submit"
+                                        style="white-space: nowrap;">บันทึก</button>
                                 </div>
                             </form>
                         </div>
@@ -2205,31 +2270,16 @@ WHERE l_leave_id = :leave_id
                 html: true // ใช้ HTML ใน tooltip
             })
         })
+        // เมื่อ urgentLeaveModal เปิด
+        // $('#urgentLeaveModal').on('show.bs.modal', function() {
+        //     var totalDaysAlert = $('[name="totalDays"]');
+        //     $('#urgentLeaveType').val('0'); // รีเซ็ตค่า select
+        //     totalDaysAlert.text('คงเหลือ ' + '-' + ' วัน')
+        //     $('*[name="alertCheckDays"]').addClass('d-none'); // ซ่อนข้อความ
+
+        // });
 
         $(document).ready(function() {
-            document.getElementById("editFile").addEventListener("change", function(event) {
-                const fileInput = event.target;
-                const file = fileInput.files[0]; // ไฟล์ที่อัปโหลด
-                const preview = document.getElementById("imagePreview");
-                const currentFile = document.getElementById("currentFile");
-
-                if (file) {
-                    // แสดงชื่อไฟล์
-                    currentFile.textContent = `ชื่อไฟล์: ${file.name}`;
-
-                    // แสดงพรีวิวรูปภาพ
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        preview.src = e.target.result; // ตั้งค่า src ให้ preview
-                        preview.style.display = "block"; // แสดง img
-                    };
-                    reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL
-                } else {
-                    currentFile.textContent = "ยังไม่มีไฟล์ที่เลือก";
-                    preview.src = "#";
-                    preview.style.display = "none"; // ซ่อน img
-                }
-            });
             $('.filter-card').click(function() {
                 var leaveType = $(this).data('leave-id'); // Get leave ID dynamically
                 var userCode = '<?php echo $userCode; ?>';
@@ -2384,7 +2434,6 @@ WHERE l_leave_id = :leave_id
                 }
             });
 
-            // เพิ่มส่วนนี้ 28/02/68
             $('#urgentFile').change(function() {
                 const urgentFileInput = this;
                 const urgentFilePreview = $('#urgentFilePreview');
@@ -2444,13 +2493,71 @@ WHERE l_leave_id = :leave_id
                 }
             });
 
-            // ยื่นใบลา
+            $('#editFile').change(function() {
+                const editFileInput = this;
+                const editFilePreview = $('#editFilePreview');
+                editFilePreview.empty();
+
+                // ตรวจสอบว่ามีไฟล์เกิน 3 ไฟล์หรือไม่
+                if (editFileInput.files.length > 3) {
+                    Swal.fire({
+                        title: "จำนวนไฟล์เกินกำหนด",
+                        text: "กรุณาเลือกไฟล์ไม่เกิน 3 ไฟล์สำหรับการลาฉุกเฉิน",
+                        icon: "warning"
+                    });
+                    editFileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                    return;
+                }
+
+                // แสดงตัวอย่างไฟล์
+                for (let i = 0; i < editFileInput.files.length; i++) {
+                    const file = editFileInput.files[i];
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        if (file.type.match('image.*')) {
+                            // แสดงตัวอย่างรูปภาพ
+                            editFilePreview.append(`
+                    <div class="position-relative">
+                        <img src="${e.target.result}" class="img-thumbnail" style="height: 100px;">
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                        } else if (file.type === 'application/pdf') {
+                            // แสดงตัวอย่างไฟล์ PDF
+                            editFilePreview.append(`
+                    <div class="position-relative">
+                        <div class="img-thumbnail d-flex flex-column align-items-center justify-content-center" style="height: 100px; width: 100px;">
+                            <i class="fa fa-file-pdf text-danger" style="font-size: 40px;"></i>
+                            <small class="text-center text-truncate" style="max-width: 90px;">${file.name}</small>
+                        </div>
+                        <span class="position-absolute top-0 end-0 badge bg-primary">${i+1}</span>
+                    </div>
+                `);
+                        } else {
+                            // ไฟล์ประเภทที่ไม่รองรับ
+                            Swal.fire({
+                                title: "รูปแบบไฟล์ไม่ถูกต้อง",
+
+                                text: "กรุณาแนบไฟล์ที่เป็นรูปภาพ (PNG, JPG, JPEG) หรือ PDF เท่านั้น",
+                                icon: "error"
+                            });
+                            editFileInput.value = ''; // ล้างค่าไฟล์ที่เลือก
+                            editFilePreview.empty();
+                            return;
+                        }
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // แก้ไขส่วนการส่งแบบฟอร์ม
             $('#leaveForm').submit(function(e) {
-                e.preventDefault(); // ป้องกันฟอร์มจากการส่งอย่างปกติ
+                e.preventDefault();
 
                 var fd = new FormData(this);
 
-                // เพิ่มข้อมูลจาก PHP variables
                 fd.append('userCode', '<?php echo $userCode; ?>');
                 fd.append('userName', '<?php echo $userName; ?>');
                 fd.append('name', '<?php echo $name; ?>');
@@ -2464,7 +2571,6 @@ WHERE l_leave_id = :leave_id
                 fd.append('subDepart4', '<?php echo $subDepart4; ?>');
                 fd.append('subDepart5', '<?php echo $subDepart5; ?>');
 
-                // ดึงค่าจากฟอร์ม
                 var leaveType = $('#leaveType').val();
                 var leaveReason = $('#leaveReason').val();
                 var startDate = $('#startDate').val();
@@ -2474,7 +2580,6 @@ WHERE l_leave_id = :leave_id
                 var files = $('#file')[0].files;
                 var approver = $('#approver').val();
 
-                // เพิ่มข้อมูลจากฟอร์มลงใน FormData object
                 fd.append('leaveType', leaveType);
                 fd.append('leaveReason', leaveReason);
                 fd.append('startDate', startDate);
@@ -2483,6 +2588,7 @@ WHERE l_leave_id = :leave_id
                 fd.append('endTime', endTime);
                 fd.append('approver', approver);
 
+                // เก็บไฟล์ทั้ง 3 ไฟล์แยกกัน (หากมี)
                 if (files.length > 0) {
                     for (let i = 0; i < Math.min(files.length, 3); i++) {
                         fd.append('file' + (i + 1), files[i]);
@@ -2502,7 +2608,6 @@ WHERE l_leave_id = :leave_id
                         userCode: '<?php echo $userCode; ?>'
                     },
                     success: function(response) {
-                        // console.log(response);
                         if (response === 'double') {
                             Swal.fire({
                                 title: "ไม่สามารถลาได้",
@@ -2513,7 +2618,6 @@ WHERE l_leave_id = :leave_id
                                 return false;
                             });
                         } else {
-                            // submitLeaveForm(fd);
                             var createDate = new Date();
                             createDate.setHours(createDate.getHours() +
                                 7); // Adjust to Thai timezone (UTC+7)
@@ -2521,16 +2625,6 @@ WHERE l_leave_id = :leave_id
                                 .replace('T', ' ');
                             fd.append('formattedDate', formattedDate);
                             // alert(formattedDate);
-
-                            // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
-                            if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
-                                Swal.fire({
-                                    title: "ไม่สามารถลาได้",
-                                    text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
-                                    icon: "error"
-                                });
-                                return false; // หยุดการส่งฟอร์ม
-                            }
 
                             // ตรวจสอบข้อมูลก่อนการส่ง
                             if (leaveType == 'เลือกประเภทการลา') {
@@ -2561,6 +2655,7 @@ WHERE l_leave_id = :leave_id
                                 var origEndDate = $('#endDate').val(); // รูปแบบ dd-mm-yyyy
                                 var startTime = $('#startTime').val(); // รูปแบบ hh:mm
                                 var endTime = $('#endTime').val(); // รูปแบบ hh:mm
+
 
                                 // ตรวจสอบว่าค่าวันที่และเวลามีครบหรือไม่
                                 if (!origStartDate || !origEndDate || !startTime || !
@@ -2692,16 +2787,6 @@ WHERE l_leave_id = :leave_id
                                         });
                                         return false; // หยุดการส่งแบบฟอร์ม
                                     }
-
-                                    // เช็คว่าถ้าลาวันพรุ่งนี้หรือมากกว่าต้องเตือน
-                                    // if (leaveStartDate >= tomorrow) {
-                                    //     Swal.fire({
-                                    //         title: "ไม่สามารถลาได้",
-                                    //         text: "กรุณายื่นลาล่วงหน้าก่อน 1 วัน",
-                                    //         icon: "error"
-                                    //     });
-                                    //     return false; // หยุดการส่งแบบฟอร์ม
-                                    // }
                                 }
 
                                 var checkStartDate = $('#startDate').val();
@@ -2718,10 +2803,6 @@ WHERE l_leave_id = :leave_id
                                 var endDate = new Date(endDateParts[2], endDateParts[1] - 1,
                                     endDateParts[
                                         0]); // ปี, เดือน (0-based), วัน
-
-                                // แสดงข้อมูลวันที่ที่ถูกแปลงแล้ว (ตรวจสอบได้)
-                                // alert("Start Date:" + startDate);
-                                // alert("End Date:" + endDate);
 
                                 // ตรวจสอบวันที่
                                 if (endDate < startDate) {
@@ -2748,14 +2829,14 @@ WHERE l_leave_id = :leave_id
                                         '-' + endParts[
                                             0];
 
-                                    // console.log("Formatted Start Date: " + formattedStartDate);
-                                    // console.log("Formatted End Date: " + formattedEndDate);
-
                                     if (startTime === '12:00') {
                                         startTime = '11:45';
                                     } else if (startTime === '13:00') {
                                         startTime = '12:45';
-                                    } else if (endTime === '12:00') {
+                                    }
+
+
+                                    if (endTime === '12:00') {
                                         endTime = '11:45';
                                     } else if (endTime === '13:00') {
                                         endTime = '12:45';
@@ -2763,6 +2844,8 @@ WHERE l_leave_id = :leave_id
                                         endTime = '16:40';
                                     }
 
+                                    // alert("endTime" + endTime)
+                                    // เพิ่มส่วนนี้ 28/02/68
                                     let fileInfo = '';
                                     if (files.length > 0) {
                                         fileInfo = `<br>ไฟล์แนบ: ${files.length} ไฟล์`;
@@ -2781,20 +2864,19 @@ ${fileInfo}
 
                                     Swal.fire({
                                         title: "ยืนยันการยื่นใบลา",
-                                        html: details, // ใช้ HTML ในการแสดงข้อความ
+                                        html: details,
                                         icon: "question",
                                         showCancelButton: true,
                                         confirmButtonText: "ยืนยัน",
                                         cancelButtonText: "ยกเลิก"
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            // ปิดการใช้งานปุ่มส่งข้อมูลและแสดงสถานะการโหลด
                                             $('#btnSubmitForm1').prop('disabled',
-                                                true).html(
-                                                '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
-                                            );
+                                                    true)
+                                                .html(
+                                                    '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
+                                                );
 
-                                            // ส่งข้อมูลแบบ AJAX
                                             $.ajax({
                                                 url: 'a_u_ajax_add_leave.php',
                                                 type: 'POST',
@@ -2826,8 +2908,7 @@ ${fileInfo}
                                                             'disabled',
                                                             false)
                                                         .html(
-                                                            'ยื่นใบลา'
-                                                        );
+                                                            'ยื่นใบลา');
                                                 }
                                             });
                                         } else {
@@ -2888,6 +2969,8 @@ ${fileInfo}
                 fd.append('urgentEndTime', urgentEndTime);
                 fd.append('urgentApprover', urgentApprover);
 
+                // เพิ่มส่วนนี้ 28/02/68
+                // Handle up to 3 files
                 if (urgentFiles.length > 0) {
                     for (var i = 0; i < Math.min(urgentFiles.length, 3); i++) {
                         fd.append('file' + (i + 1), urgentFiles[i]);
@@ -2917,19 +3000,11 @@ ${fileInfo}
                         } else {
                             var createDate = new Date();
                             createDate.setHours(createDate.getHours() +
-                                7);
+                                7); // Adjust to Thai timezone (UTC+7)
                             var formattedDate = createDate.toISOString().slice(0, 19)
                                 .replace('T', ' ');
                             fd.append('formattedDate', formattedDate);
 
-                            if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {
-                                Swal.fire({
-                                    title: "ไม่สามารถลาได้",
-                                    text: "ใช้สิทธิ์หมดแล้ว กรุณาเปลี่ยนประเภทการลา",
-                                    icon: "error"
-                                });
-                                return false; // หยุดการส่งฟอร์ม
-                            }
 
                             if (urgentLeaveType == 'เลือกประเภทการลา') {
                                 Swal.fire({
@@ -3056,17 +3131,20 @@ ${fileInfo}
                                         return false;
                                     }
                                 }
-
-                                var checkStartDate = $('#urgentStartDate').val();
+                                var checkStartDate = $('#urgentStartDate')
+                                    .val();
                                 var checkEndDate = $('#urgentEndDate').val();
 
                                 var startDateParts = checkStartDate.split("-");
                                 var endDateParts = checkEndDate.split("-");
 
-                                var startDate = new Date(startDateParts[2], startDateParts[
-                                    1] - 1, startDateParts[
-                                    0]);
-                                var endDate = new Date(endDateParts[2], endDateParts[1] - 1,
+                                var startDate = new Date(startDateParts[2],
+                                    startDateParts[
+                                        1] - 1, startDateParts[
+                                        0]);
+                                var endDate = new Date(endDateParts[2],
+                                    endDateParts[
+                                        1] - 1,
                                     endDateParts[
                                         0]);
 
@@ -3089,10 +3167,13 @@ ${fileInfo}
                                     var endParts = endDate.split('-');
 
                                     // dd-mm-yyyy
-                                    var formattedStartDate = startParts[2] + '-' +
+                                    var formattedStartDate = startParts[2] +
+                                        '-' +
                                         startParts[1] + '-' + startParts[
                                             0];
-                                    var formattedEndDate = endParts[2] + '-' + endParts[1] +
+                                    var formattedEndDate = endParts[2] + '-' +
+                                        endParts[
+                                            1] +
                                         '-' + endParts[
                                             0];
 
@@ -3111,6 +3192,7 @@ ${fileInfo}
                                         endTime = '16:40';
                                     }
 
+                                    // เพิ่มส่วนนี้ 28/02/68
                                     let fileInfo = '';
                                     if (urgentFiles.length > 0) {
                                         fileInfo =
@@ -3136,26 +3218,31 @@ ${fileInfo}
                                         cancelButtonText: "ยกเลิก"
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            $('#btnSubmitForm2').prop('disabled',
+                                            $('#btnSubmitForm2').prop(
+                                                'disabled',
                                                 true).html(
                                                 '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span role="status">Loading...</span>'
                                             );
                                             $.ajax({
-                                                url: 'a_u_ajax_add_urgent_leave.php',
+                                                url: 'u_ajax_add_urgent_leave.php',
                                                 type: 'POST',
                                                 data: fd,
                                                 contentType: false,
                                                 processData: false,
                                                 success: function(
-                                                    response) {
+                                                    response
+                                                ) {
                                                     Swal.fire({
-                                                        title: "บันทึกสำเร็จ",
-                                                        text: "บันทึกลาฉุกเฉินสำเร็จ",
-                                                        icon: "success"
-                                                    }).then(() => {
-                                                        location
-                                                            .reload();
-                                                    });
+                                                            title: "บันทึกสำเร็จ",
+                                                            text: "บันทึกลาฉุกเฉินสำเร็จ",
+                                                            icon: "success"
+                                                        })
+                                                        .then(
+                                                            () => {
+                                                                location
+                                                                    .reload();
+                                                            }
+                                                        );
                                                 },
                                                 error: function() {
                                                     Swal.fire({
@@ -3168,7 +3255,8 @@ ${fileInfo}
                                                     $('#btnSubmitForm2')
                                                         .prop(
                                                             'disabled',
-                                                            false)
+                                                            false
+                                                        )
                                                         .html(
                                                             'ยื่นใบลา'
                                                         );
@@ -3200,15 +3288,16 @@ ${fileInfo}
                 var leaveReason = $(rowData[2]).text();
                 var startDate = $(rowData[9]).text();
                 var endDate = $(rowData[10]).text();
-                var leaveStatus = 'ยกเลิก';
+                var leaveStatus = $(rowData[13]).text();
                 var workplace = "<?php echo $workplace ?>";
+                var level = "<?php echo $level ?>";
                 var subDepart = "<?php echo $subDepart ?>";
                 var subDepart2 = "<?php echo $subDepart2 ?>";
                 var subDepart3 = "<?php echo $subDepart3 ?>";
                 var subDepart4 = "<?php echo $subDepart4 ?>";
                 var subDepart5 = "<?php echo $subDepart5 ?>";
 
-                // alert(endDate)
+                // alert(leaveStatus)
                 Swal.fire({
                     title: "ต้องการยกเลิกรายการ ?",
                     icon: "question",
@@ -3239,7 +3328,8 @@ ${fileInfo}
                                 subDepart2: subDepart2,
                                 subDepart3: subDepart3,
                                 subDepart4: subDepart4,
-                                subDepart5: subDepart5
+                                subDepart5: subDepart5,
+                                level: level
 
                             },
                             success: function(response) {
@@ -3321,25 +3411,68 @@ ${fileInfo}
             });
 
             $('.edit-btn').click(function() {
-                var createDatetime = $(this).data('createdatetime'); // ดึงค่า createDatetime
+                var createDatetime = $(this).data('createdatetime');
                 var userCode = $(this).data('usercode');
 
                 // ตั้งค่า createDatetime ให้กับฟอร์ม
                 $('#editLeaveForm').data('createdatetime', createDatetime);
 
+                // สร้าง options สำหรับเวลา
+                var timeOptions = `
+        <option value="08:00">08:00</option>
+        <option value="08:10">08:10</option>
+        <option value="08:15">08:15</option>
+        <option value="08:30">08:30</option>
+        <option value="08:45">08:45</option>
+        <option value="09:00">09:00</option>
+        <option value="09:10">09:10</option>
+        <option value="09:15">09:15</option>
+        <option value="09:30">09:30</option>
+        <option value="09:45">09:45</option>
+        <option value="10:00">10:00</option>
+        <option value="10:10">10:10</option>
+        <option value="10:15">10:15</option>
+        <option value="10:30">10:30</option>
+        <option value="10:45">10:45</option>
+        <option value="11:00">11:00</option>
+        <option value="11:10">11:10</option>
+        <option value="11:15">11:15</option>
+        <option value="11:30">11:30</option>
+        <option value="11:45">11:45</option>
+        <option value="12:45">12:45</option>
+        <option value="13:10">13:10</option>
+        <option value="13:15">13:15</option>
+        <option value="13:40">13:40</option>
+        <option value="13:45">13:45</option>
+        <option value="14:10">14:10</option>
+        <option value="14:15">14:15</option>
+        <option value="14:40">14:40</option>
+        <option value="14:45">14:45</option>
+        <option value="15:10">15:10</option>
+        <option value="15:15">15:15</option>
+        <option value="15:40">15:40</option>
+        <option value="15:45">15:45</option>
+        <option value="16:10">16:10</option>
+        <option value="16:15">16:15</option>
+        <option value="16:40">16:40</option>
+    `;
+
+                // ใส่ options เข้าไปใน dropdown
+                $('#editLeaveStartTime').html(timeOptions);
+                $('#editLeaveEndTime').html(timeOptions);
+
                 $.ajax({
-                    url: 'a_u_ajax_get_leave.php', // ไฟล์ PHP ที่ดึงข้อมูล
+                    url: 'a_u_ajax_get_leave.php',
                     type: 'POST',
                     data: {
                         createDatetime: createDatetime,
                         userCode: userCode
                     },
-                    dataType: 'json', // แจ้งว่าเราคาดหวังผลลัพธ์เป็น JSON
+                    dataType: 'json',
                     success: function(response) {
                         if (response.error) {
-                            alert(response.error); // แสดงข้อความข้อผิดพลาด
+                            alert(response.error);
                         } else {
-
                             // ใส่ข้อมูลในฟอร์ม Modal
                             $('.editLeaveType').val(response.l_leave_id);
                             $('#editLeaveReason').val(response.l_leave_reason);
@@ -3347,366 +3480,140 @@ ${fileInfo}
                             $('#editLeaveEndDate').val(response.l_leave_end_date);
                             $('#editTelPhone').val(response.l_phone);
 
+                            // กำหนดค่า select สำหรับเวลาเริ่มต้น - ให้ความสำคัญกับ l_time_remark เป็นอันดับแรก
+                            var startTimeValue = "08:00"; // ค่าเริ่มต้น
+
+                            if (response.l_time_remark && response.l_time_remark.trim() !==
+                                "") {
+                                // ใช้ค่า l_time_remark เป็นหลัก ถ้ามี
+                                startTimeValue = response.l_time_remark.substring(0, 5);
+                            } else {
+                                // ถ้าไม่มี l_time_remark ให้แปลงจาก l_leave_start_time
+                                if (response.l_leave_start_time === "12:00:00") {
+                                    startTimeValue = "11:45";
+                                } else if (response.l_leave_start_time === "13:00:00") {
+                                    startTimeValue = "12:45";
+                                } else if (response.l_leave_start_time === "17:00:00") {
+                                    startTimeValue = "16:40";
+                                } else if (response.l_leave_start_time) {
+                                    startTimeValue = response.l_leave_start_time.substring(
+                                        0, 5);
+                                }
+                            }
+
+                            // เลือก option ที่มีค่าตรงกับ startTimeValue
+                            $('#editLeaveStartTime').val(startTimeValue);
+                            $('#editLeaveStartTime2').val(
+                                startTimeValue); // แสดงในช่องเวลาเดิม
+
+                            // กำหนดค่า select สำหรับเวลาสิ้นสุด - ให้ความสำคัญกับ l_time_remark2 เป็นอันดับแรก
+                            var endTimeValue = "17:00"; // ค่าเริ่มต้น
+
+                            if (response.l_time_remark2 && response.l_time_remark2
+                                .trim() !== "") {
+                                // ใช้ค่า l_time_remark2 เป็นหลัก ถ้ามี
+                                endTimeValue = response.l_time_remark2.substring(0, 5);
+                            } else {
+                                // ถ้าไม่มี l_time_remark2 ให้แปลงจาก l_leave_end_time
+                                if (response.l_leave_end_time === "12:00:00") {
+                                    endTimeValue = "11:45";
+                                } else if (response.l_leave_end_time === "13:00:00") {
+                                    endTimeValue = "12:45";
+                                } else if (response.l_leave_end_time === "17:00:00") {
+                                    endTimeValue = "16:40";
+                                } else if (response.l_leave_end_time) {
+                                    endTimeValue = response.l_leave_end_time.substring(0,
+                                        5);
+                                }
+                            }
+
+                            // เลือก option ที่มีค่าตรงกับ endTimeValue
+                            $('#editLeaveEndTime').val(endTimeValue);
+                            $('#editLeaveEndTime2').val(endTimeValue); // แสดงในช่องเวลาเดิม
+
+                            // จัดการไฟล์เดิม
                             var existingFile = response.l_file;
-
-                            // ถ้ามีไฟล์เดิม ให้แสดงชื่อไฟล์และพรีวิว
                             if (existingFile && existingFile.trim() !== "") {
-                                // แสดงชื่อไฟล์
-                                $('#currentFile').text('ไฟล์เดิม: ' + existingFile);
-
-                                // สร้าง URL สำหรับไฟล์พรีวิว
-                                var fileUrl = '../upload/' +
-                                    existingFile; // เปลี่ยนเป็นเส้นทางของไฟล์ที่ถูกต้องในเซิร์ฟเวอร์
-
-                                // แสดงรูปพรีวิว
-                                var previewImage = $(
-                                    '#imagePreview'); // สมมติว่ามี <img id="imagePreview">
-                                previewImage.attr('src',
-                                    fileUrl); // ตั้งค่า src ของรูปให้เป็น URL ของไฟล์
-                                previewImage.show(); // แสดงรูปพรีวิว
+                                var fileUrl = '../upload/' + existingFile;
+                                var previewImage = $('#imagePreview');
+                                previewImage.attr('src', fileUrl);
+                                previewImage.show();
                             } else {
-                                // ถ้าไม่มีไฟล์ ให้เคลียร์ชื่อไฟล์และซ่อนรูปพรีวิว
-                                $('#currentFile').text('');
-                                $('#imagePreview').hide(); // ซ่อนรูปพรีวิวเมื่อไม่มีไฟล์
-                            }
-
-                            // เวลาที่เริ่มต้น
-                            // 08:10
-                            if (response.l_leave_start_time === "08:30:00" &&
-                                response
-                                .l_time_remark === "08:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 08:15
-                            else if (response.l_leave_start_time === "08:30:00" &&
-                                response
-                                .l_time_remark === "08:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 08:45
-                            else if (response.l_leave_start_time === "09:00:00" &&
-                                response
-                                .l_time_remark === "08:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 09:10
-                            else if (response.l_leave_start_time === "09:30:00" &&
-                                response
-                                .l_time_remark === "09:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 09:15
-                            else if (response.l_leave_start_time === "09:30:00" &&
-                                response
-                                .l_time_remark === "09:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 09:45
-                            else if (response.l_leave_start_time === "10:00:00" &&
-                                response
-                                .l_time_remark === "09:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 10:10
-                            else if (response.l_leave_start_time === "10:30:00" &&
-                                response
-                                .l_time_remark === "10:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 10:15
-                            else if (response.l_leave_start_time === "10:30:00" &&
-                                response
-                                .l_time_remark === "10:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 10:45
-                            else if (response.l_leave_start_time === "11:00:00" &&
-                                response
-                                .l_time_remark === "10:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 11:45
-                            else if (response.l_leave_start_time === "12:00:00" &&
-                                response
-                                .l_time_remark === "11:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 12:45
-                            else if (response.l_leave_start_time === "13:00:00") {
-                                $('#editLeaveStartTime2').val(
-                                    '12:45:00'); // กำหนดค่าใหม่
-                            }
-                            // 13:10
-                            else if (response.l_leave_start_time === "13:30:00" &&
-                                response
-                                .l_time_remark === "13:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 13:15
-                            else if (response.l_leave_start_time === "13:30:00" &&
-                                response
-                                .l_time_remark === "13:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 13:40
-                            else if (response.l_leave_start_time === "14:00:00" &&
-                                response
-                                .l_time_remark === "13:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 13:45
-                            else if (response.l_leave_start_time === "14:00:00" &&
-                                response
-                                .l_time_remark === "13:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 14:10
-                            else if (response.l_leave_start_time === "14:30:00" &&
-                                response
-                                .l_time_remark === "14:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 14:15
-                            else if (response.l_leave_start_time === "14:30:00" &&
-                                response
-                                .l_time_remark === "14:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 14:40
-                            else if (response.l_leave_start_time === "15:00:00" &&
-                                response
-                                .l_time_remark === "14:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 14:45
-                            else if (response.l_leave_start_time === "15:00:00" &&
-                                response
-                                .l_time_remark === "14:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 15:10
-                            else if (response.l_leave_start_time === "15:30:00" &&
-                                response
-                                .l_time_remark === "15:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 15:15
-                            else if (response.l_leave_start_time === "15:30:00" &&
-                                response
-                                .l_time_remark === "15:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 15:40
-                            else if (response.l_leave_start_time === "16:00:00" &&
-                                response
-                                .l_time_remark === "15:40:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 15:45
-                            else if (response.l_leave_start_time === "16:00:00" &&
-                                response
-                                .l_time_remark === "15:45:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 16:10
-                            else if (response.l_leave_start_time === "16:30:00" &&
-                                response
-                                .l_time_remark === "16:10:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 16:15
-                            else if (response.l_leave_start_time === "16:30:00" &&
-                                response
-                                .l_time_remark === "16:15:00") {
-                                $('#editLeaveStartTime2').val(response.l_time_remark);
-                            }
-                            // 16:40
-                            else if (response.l_leave_start_time === "17:00:00") {
-                                $('#editLeaveStartTime2').val('16:40:00');
-                            } else {
-                                $('#editLeaveStartTime2').val(response
-                                    .l_leave_start_time);
-                            }
-
-                            // เวลาที่สิ้นสุด
-                            // 08:10
-                            if (response.l_leave_end_time === "08:30:00" && response
-                                .l_time_remark2 === "08:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 08:15
-                            else if (response.l_leave_end_time === "08:30:00" &&
-                                response
-                                .l_time_remark2 === "08:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 08:45
-                            else if (response.l_leave_end_time === "09:00:00" &&
-                                response
-                                .l_time_remark2 === "08:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 09:10
-                            else if (response.l_leave_end_time === "09:30:00" &&
-                                response
-                                .l_time_remark2 === "09:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 09:15
-                            else if (response.l_leave_end_time === "09:30:00" &&
-                                response
-                                .l_time_remark2 === "09:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 09:45
-                            else if (response.l_leave_end_time === "10:00:00" &&
-                                response
-                                .l_time_remark2 === "09:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 10:10
-                            else if (response.l_leave_end_time === "10:30:00" &&
-                                response
-                                .l_time_remark2 === "10:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 10:15
-                            else if (response.l_leave_end_time === "10:30:00" &&
-                                response
-                                .l_time_remark2 === "10:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 10:45
-                            else if (response.l_leave_end_time === "11:00:00" &&
-                                response
-                                .l_time_remark2 === "10:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 11:45
-                            else if (response.l_leave_end_time === "12:00:00" &&
-                                response
-                                .l_time_remark2 === "11:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 12:45
-                            else if (response.l_leave_end_time === "13:00:00") {
-                                $('#editLeaveEndTime2').val(
-                                    '12:45:00'); // กำหนดค่าใหม่
-                            }
-                            // 13:10
-                            else if (response.l_leave_end_time === "13:30:00" &&
-                                response
-                                .l_time_remark2 === "13:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 13:15
-                            else if (response.l_leave_end_time === "13:30:00" &&
-                                response
-                                .l_time_remark2 === "13:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 13:40
-                            else if (response.l_leave_end_time === "14:00:00" &&
-                                response
-                                .l_time_remark2 === "13:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 13:45
-                            else if (response.l_leave_end_time === "14:00:00" &&
-                                response
-                                .l_time_remark2 === "13:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 14:10
-                            else if (response.l_leave_end_time === "14:30:00" &&
-                                response
-                                .l_time_remark2 === "14:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 14:15
-                            else if (response.l_leave_end_time === "14:30:00" &&
-                                response
-                                .l_time_remark2 === "14:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 14:40
-                            else if (response.l_leave_end_time === "15:00:00" &&
-                                response
-                                .l_time_remark2 === "14:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 14:45
-                            else if (response.l_leave_end_time === "15:00:00" &&
-                                response
-                                .l_time_remark2 === "14:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 15:10
-                            else if (response.l_leave_end_time === "15:30:00" &&
-                                response
-                                .l_time_remark2 === "15:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 15:15
-                            else if (response.l_leave_end_time === "15:30:00" &&
-                                response
-                                .l_time_remark2 === "15:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 15:40
-                            else if (response.l_leave_end_time === "16:00:00" &&
-                                response
-                                .l_time_remark2 === "15:40:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 15:45
-                            else if (response.l_leave_end_time === "16:00:00" &&
-                                response
-                                .l_time_remark2 === "15:45:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 16:10
-                            else if (response.l_leave_end_time === "16:30:00" &&
-                                response
-                                .l_time_remark2 === "16:10:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 16:15
-                            else if (response.l_leave_end_time === "16:30:00" &&
-                                response
-                                .l_time_remark2 === "16:15:00") {
-                                $('#editLeaveEndTime2').val(response.l_time_remark2);
-                            }
-                            // 16:40
-                            else if (response.l_leave_end_time === "17:00:00") {
-                                $('#editLeaveEndTime2').val('16:40:00');
-                            } else {
-                                $('#editLeaveEndTime2').val(response
-                                    .l_leave_end_time);
+                                $('#imagePreview').hide();
                             }
                         }
                     },
                     error: function(xhr, status, error) {
                         alert('ไม่สามารถดึงข้อมูลการลาได้');
-                        console.log(xhr
-                            .responseText); // ดูข้อความข้อผิดพลาดจากเซิร์ฟเวอร์
+                        console.log(xhr.responseText);
                     }
                 });
             });
 
+            // ฟังก์ชันสำหรับตั้งค่า dropdown ตามเวลาที่ได้รับ
+            function setTimeDropdown(selector, timeValue) {
+                // ตัดส่วน :00 ด้านหลังออก
+                var timeStr = timeValue.substring(0, 5);
+
+                // สร้าง mapping ของเวลาใน response กับ value ใน dropdown
+                var timeMapping = {
+                    "08:30": "08:30",
+                    "09:00": "09:00",
+                    "09:30": "09:30",
+                    "10:00": "10:00",
+                    "10:30": "10:30",
+                    "11:00": "11:00",
+                    "12:00": "12:00",
+                    "13:00": "13:00",
+                    "13:30": "13:30",
+                    "14:00": "14:00",
+                    "14:30": "14:30",
+                    "15:00": "15:00",
+                    "15:30": "15:30",
+                    "16:00": "16:00",
+                    "16:30": "16:30",
+                    "17:00": "17:00"
+                };
+
+                // ถ้าเวลาที่ได้มาอยู่ใน mapping ให้ใช้ค่านั้น
+                var valueToSelect = timeMapping[timeStr] || timeStr;
+
+                // ตั้งค่า dropdown
+                $(selector).val(valueToSelect);
+
+                // ถ้าไม่พบค่าที่ตรงกัน (val ไม่ทำงาน) ให้หาและตั้งค่า selected ด้วย attr
+                if ($(selector).val() !== valueToSelect) {
+                    $(selector + ' option').each(function() {
+                        if ($(this).val() === valueToSelect) {
+                            $(this).prop('selected', true);
+                            return false; // หยุด loop เมื่อเจอค่าที่ต้องการ
+                        }
+                    });
+                }
+            }
 
             $('#editLeaveForm').on('submit', function(e) {
                 e.preventDefault();
 
                 var formData = new FormData();
-                var editFile = $('#editFile')[0].files[0]; // ดึงไฟล์จาก input
-                var currentFile = $('#currentFile').val(); // ไฟล์เดิมที่เก็บไว้ใน hidden field
+                var startDate = new Date($('#editLeaveStartDate').val());
+                var endDate = new Date($('#editLeaveEndDate').val());
+                var files = $('#editFile')[0].files;
 
-                // ตรวจสอบว่าได้เลือกไฟล์ใหม่หรือไม่
-                if (editFile) {
-                    formData.append('file', editFile); // เพิ่มไฟล์ใหม่ลงใน FormData
-                } else if (currentFile) {
-                    formData.append('currentFile', currentFile); // ส่งไฟล์เดิมถ้าไม่มีการเลือกไฟล์ใหม่
+                if (endDate < startDate) {
+                    Swal.fire({
+                        title: 'ไม่สามารถลาได้',
+                        text: 'กรุณาเลือกวันที่เริ่มต้นลาใหม่',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                    });
+                    return false;
+                }
+
+                if (files.length > 0) {
+                    for (let i = 0; i < Math.min(files.length, 3); i++) {
+                        formData.append('file' + (i + 1), files[i]);
+                    }
                 }
 
                 // เพิ่มค่าฟอร์มอื่นๆ
@@ -3716,6 +3623,11 @@ ${fileInfo}
                 formData.append('workplace', '<?php echo $workplace; ?>');
                 formData.append('depart', '<?php echo $depart; ?>');
                 formData.append('subDepart', '<?php echo $subDepart; ?>');
+                formData.append('subDepart2', '<?php echo $subDepart2; ?>');
+                formData.append('subDepart3', '<?php echo $subDepart3; ?>');
+                formData.append('subDepart4', '<?php echo $subDepart4; ?>');
+                formData.append('subDepart5', '<?php echo $subDepart5; ?>');
+                formData.append('level', '<?php echo $level; ?>');
                 formData.append('createDatetime', $(this).data('createdatetime'));
                 formData.append('editLeaveType', $('.editLeaveType').val());
                 formData.append('editLeaveReason', $('#editLeaveReason').val());
@@ -3748,7 +3660,8 @@ ${fileInfo}
                         } else {
                             Swal.fire({
                                 title: 'เกิดข้อผิดพลาด',
-                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
+                                text: response.message ||
+                                    'ไม่สามารถแก้ไขข้อมูลได้',
                                 icon: 'error',
                                 confirmButtonText: 'ตกลง',
                             });
@@ -3760,7 +3673,7 @@ ${fileInfo}
                             status: status,
                             error: error
                         });
-                        // console.log('Response text:', xhr.responseText);
+                        console.log('Response text:', xhr.responseText);
 
                         Swal.fire({
                             title: 'เกิดข้อผิดพลาด',
@@ -3773,6 +3686,7 @@ ${fileInfo}
             });
         });
 
+        // ฟังก์ชันสำหรับจัดรูปแบบวันที่
         function formatDate(date) {
             const parts = date.split('-');
             return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงเป็น yyyy-mm-dd
@@ -3982,8 +3896,12 @@ ${fileInfo}
             var leaveType = document.getElementById('leaveType').value;
             var urgentLeaveType = document.getElementById('urgentLeaveType').value;
             var selectedDate = isUrgent ? document.getElementById('urgentStartDate').value : document
-                .getElementById(
-                    'startDate').value;
+                .getElementById('startDate').value;
+
+            // เปิดปุ่มบันทึกเมื่อมีการเลือกวันที่เริ่มต้นและวันที่สิ้นสุด ไม่ว่าจะเลือกประเภทการลาหรือไม่
+            if (startDate && startTime && endDate && endTime) {
+                submitButton.disabled = false;
+            }
 
             if (selectedDate) {
                 var parts = selectedDate.split('-'); // แยกวันที่จากรูปแบบ DD-MM-YYYY
@@ -3996,13 +3914,9 @@ ${fileInfo}
                     return; // ป้องกันไม่ให้ทำงานต่อหากข้อมูลวันที่ไม่ถูกต้อง
                 }
 
-                // ตรวจสอบประเภทการลาตามฟอร์มที่กำลังใช้ - เฉพาะเมื่อกดปุ่มบันทึก
-                // กรณีเปิด Modal ใหม่หรือกำลังกรอกข้อมูล ไม่ต้องแสดง alert
-                if (currentLeaveType == 'เลือกประเภทการลา') {
-                    // ปิดการใช้งานปุ่มบันทึกเท่านั้น แต่ไม่แสดง alert เมื่อเพิ่งเปิด Modal
-                    submitButton.disabled = true; // ปิดปุ่มบันทึก
-                    return false;
-                } else {
+                // ตรวจสอบประเภทการลาตามฟอร์มที่กำลังใช้งาน
+                // ถ้ามีการเลือกประเภทการลาแล้ว จึงตรวจสอบวันลาคงเหลือ
+                if (currentLeaveType && currentLeaveType != 'เลือกประเภทการลา') {
                     // ส่งประเภทการลาตามฟอร์มที่กำลังใช้
                     const requestLeaveType = isUrgent ? urgentLeaveType : leaveType;
 
@@ -4148,12 +4062,13 @@ ${fileInfo}
                                         }
                                     }
 
-                                    // กำหนดให้ปุ่มบันทึกถูกปิดไว้ก่อน จนกว่าจะเลือกประเภทการลา
+                                    // แก้ไข: ไม่ต้อง disable ปุ่มบันทึกตั้งแต่เริ่มแล้ว
+                                    // เราจะเปิดปุ่มบันทึกไว้ก่อน
                                     const submitButton = document
                                         .getElementById(
                                             'btnSubmitForm2');
                                     if (submitButton) {
-                                        submitButton.disabled = true;
+                                        submitButton.disabled = false;
                                     }
                                 }, 200); // รอให้ Modal แสดงผลก่อน
                             }
@@ -4192,17 +4107,7 @@ ${fileInfo}
             if (urgentLeaveTypeSelect) {
                 urgentLeaveTypeSelect.addEventListener('change', function() {
                     // console.log('มีการเปลี่ยนประเภทการลาฉุกเฉิน');
-
-                    // ถ้าเลือกประเภทการลาแล้ว ให้เปิดปุ่มบันทึก
-                    if (this.value && this.value != 'เลือกประเภทการลา') {
-                        const submitButton = document.getElementById('btnSubmitForm2');
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                        }
-
-                        // คำนวณระยะเวลาการลาและตรวจสอบวันลาคงเหลือ
-                        calculateLeaveDuration();
-                    }
+                    calculateLeaveDuration(); // คำนวณระยะเวลาการลาและตรวจสอบวันลาคงเหลือ
                 });
             }
         });
@@ -4247,6 +4152,29 @@ ${fileInfo}
             } else {
                 urgentOtherReasonInput.classList.add('d-none');
             }
+        }
+
+        function changeItemsPerPage(items) {
+            let url = new URL(window.location.href);
+            url.searchParams.set('page', 1); // กลับไปหน้าแรกเมื่อเปลี่ยนจำนวนรายการ
+            url.searchParams.set('items', items);
+
+            // ไปยัง URL ใหม่
+            window.location.href = url.toString();
+        }
+
+        function validateJumpToPage() {
+            const pageInput = document.getElementById('jumpToPage');
+            if (!pageInput.value) {
+                Swal.fire({
+                    title: 'แจ้งเตือน',
+                    text: 'กรุณากรอกเลขหน้าที่ต้องการ',
+                    icon: 'warning',
+                    confirmButtonText: 'ตกลง'
+                });
+                return false;
+            }
+            return true;
         }
         </script>
         <script src="../js/popper.min.js"></script>

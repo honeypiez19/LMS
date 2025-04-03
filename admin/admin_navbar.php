@@ -1,152 +1,152 @@
 <?php
 
-    date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
+date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
 
-    include '../connect.php';
+include '../connect.php';
 
-    if (isset($_SESSION['s_usercode'])) {
-        $userCode = $_SESSION['s_usercode'];
-        $sql      = "SELECT * FROM session
+if (isset($_SESSION['s_usercode'])) {
+    $userCode = $_SESSION['s_usercode'];
+    $sql      = "SELECT * FROM session
             JOIN employees ON session.s_usercode = employees.e_usercode
             WHERE session.s_usercode = :userCode";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-        $stmt->execute();
-        $userName = "";
-        if ($stmt->rowCount() > 0) {
-            $row        = $stmt->fetch(PDO::FETCH_ASSOC);
-            $userName   = $row['e_username'];
-            $name       = $row['e_name'];
-            $telPhone   = $row['e_phone'];
-            $depart     = $row['e_department'];
-            $workDate   = $row['e_work_start_date'];
-            $level      = $row['e_level'];
-            $workplace  = $row['e_workplace'];
-            $subDepart  = $row['e_sub_department'];
-            $subDepart2 = $row['e_sub_department2'];
-            $subDepart3 = $row['e_sub_department3'];
-            $subDepart4 = $row['e_sub_department4'];
-            $subDepart5 = $row['e_sub_department5'];
-            $yearExp    = $row['e_yearexp'];
-            $imageUser  = ! empty($row['e_image']) ? $row['e_image'] : "default_img.png";
-        }
-    } else {
-        $userName   = "";
-        $name       = "";
-        $telPhone   = "";
-        $depart     = "";
-        $level      = "";
-        $workplace  = "";
-        $subDepart  = "";
-        $subDepart2 = "";
-        $subDepart3 = "";
-        $subDepart4 = "";
-        $subDepart5 = "";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+    $stmt->execute();
+    $userName = "";
+    if ($stmt->rowCount() > 0) {
+        $row        = $stmt->fetch(PDO::FETCH_ASSOC);
+        $userName   = $row['e_username'];
+        $name       = $row['e_name'];
+        $telPhone   = $row['e_phone'];
+        $depart     = $row['e_department'];
+        $workDate   = $row['e_work_start_date'];
+        $level      = $row['e_level'];
+        $workplace  = $row['e_workplace'];
+        $subDepart  = $row['e_sub_department'];
+        $subDepart2 = $row['e_sub_department2'];
+        $subDepart3 = $row['e_sub_department3'];
+        $subDepart4 = $row['e_sub_department4'];
+        $subDepart5 = $row['e_sub_department5'];
+        $yearExp    = $row['e_yearexp'];
+        $imageUser  = ! empty($row['e_image']) ? $row['e_image'] : "default_img.png";
     }
+} else {
+    $userName   = "";
+    $name       = "";
+    $telPhone   = "";
+    $depart     = "";
+    $level      = "";
+    $workplace  = "";
+    $subDepart  = "";
+    $subDepart2 = "";
+    $subDepart3 = "";
+    $subDepart4 = "";
+    $subDepart5 = "";
+}
 
-    // เมื่อมีการกดปุ่ม "ออกจากระบบ"
-    if (isset($_POST['logoutButton'])) {
-        $userCode   = $_SESSION['s_usercode'];
-        $logoutTime = date('Y-m-d H:i:s');
-        $statusLog  = 0; // กำหนดสถานะของ log
-        $sql        = "UPDATE session SET s_logout_datetime = :logoutTime, s_log_status = :statusLog WHERE s_usercode = :userCode";
-        $stmt       = $conn->prepare($sql);
-        $stmt->bindParam(':logoutTime', $logoutTime, PDO::PARAM_STR);
-        $stmt->bindParam(':statusLog', $statusLog, PDO::PARAM_INT);
-        $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-        $stmt->execute();
+// เมื่อมีการกดปุ่ม "ออกจากระบบ"
+if (isset($_POST['logoutButton'])) {
+    $userCode   = $_SESSION['s_usercode'];
+    $logoutTime = date('Y-m-d H:i:s');
+    $statusLog  = 0; // กำหนดสถานะของ log
+    $sql        = "UPDATE session SET s_logout_datetime = :logoutTime, s_log_status = :statusLog WHERE s_usercode = :userCode";
+    $stmt       = $conn->prepare($sql);
+    $stmt->bindParam(':logoutTime', $logoutTime, PDO::PARAM_STR);
+    $stmt->bindParam(':statusLog', $statusLog, PDO::PARAM_INT);
+    $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+    $stmt->execute();
 
-        session_unset();
-        session_destroy();
+    session_unset();
+    session_destroy();
 
-        header("Location: ../login.php");
+    header("Location: ../login.php");
+    exit;
+}
+
+/* อัปโหลดรูปโปรไฟล์ */
+if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0) {
+    // กำหนด path ที่จะบันทึกไฟล์
+    $uploadDir = '../img-profile/';
+    $userCode  = $_SESSION['s_usercode']; // ค่า userCode ที่ใช้เป็นชื่อไฟล์
+    $fileName  = $userCode . '.png';      // ตั้งชื่อไฟล์เป็น userCode.png
+    $filePath  = $uploadDir . $fileName;
+
+    // ตรวจสอบว่าไฟล์เป็นรูปภาพ
+    $fileType = mime_content_type($_FILES['profilePicture']['tmp_name']);
+    if (strpos($fileType, 'image') === false) {
+        echo "โปรดเลือกไฟล์รูปภาพเท่านั้น.";
         exit;
     }
 
-    /* อัปโหลดรูปโปรไฟล์ */
-    if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] == 0) {
-        // กำหนด path ที่จะบันทึกไฟล์
-        $uploadDir = '../img-profile/';
-        $userCode  = $_SESSION['s_usercode']; // ค่า userCode ที่ใช้เป็นชื่อไฟล์
-        $fileName  = $userCode . '.png';      // ตั้งชื่อไฟล์เป็น userCode.png
-        $filePath  = $uploadDir . $fileName;
+    // ใช้ GD เพื่อปรับขนาดภาพ
+    $maxWidth  = 300; // กำหนดความกว้างสูงสุด
+    $maxHeight = 300; // กำหนดความสูงสูงสุด
 
-        // ตรวจสอบว่าไฟล์เป็นรูปภาพ
-        $fileType = mime_content_type($_FILES['profilePicture']['tmp_name']);
-        if (strpos($fileType, 'image') === false) {
-            echo "โปรดเลือกไฟล์รูปภาพเท่านั้น.";
-            exit;
-        }
-
-                          // ใช้ GD เพื่อปรับขนาดภาพ
-        $maxWidth  = 300; // กำหนดความกว้างสูงสุด
-        $maxHeight = 300; // กำหนดความสูงสูงสุด
-
-        // สร้าง resource ของภาพจากไฟล์ที่อัปโหลด
-        $image = null;
-        if ($fileType == 'image/jpeg' || $fileType == 'image/jpg') {
-            $image = imagecreatefromjpeg($_FILES['profilePicture']['tmp_name']);
-        } elseif ($fileType == 'image/png') {
-            $image = imagecreatefrompng($_FILES['profilePicture']['tmp_name']);
-        } elseif ($fileType == 'image/gif') {
-            $image = imagecreatefromgif($_FILES['profilePicture']['tmp_name']);
-        }
-
-        if ($image) {
-            // หาขนาดเดิมของภาพ
-            $originalWidth  = imagesx($image);
-            $originalHeight = imagesy($image);
-
-            // คำนวณอัตราส่วนของภาพ
-            $ratio     = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
-            $newWidth  = floor($originalWidth * $ratio);
-            $newHeight = floor($originalHeight * $ratio);
-
-            // สร้างภาพใหม่ที่มีขนาดเล็กลง
-            $newImage = imagecreatetruecolor($newWidth, $newHeight);
-
-            // คัดลอกภาพต้นฉบับไปยังภาพใหม่ที่ขนาดเล็กลง
-            imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
-
-                                               // บันทึกไฟล์ภาพที่ลดขนาดแล้วลงในเซิร์ฟเวอร์
-                                               // บันทึกเป็นไฟล์ PNG
-            imagepng($newImage, $filePath, 7); // 7 คือค่าความคมชัดของ PNG (ค่าตั้งต้น: 0, สูงสุด: 9)
-
-            // ทำความสะอาด resource ของภาพ
-            imagedestroy($image);
-            imagedestroy($newImage);
-
-            // ต่อไปเป็นการอัพเดตชื่อไฟล์ในฐานข้อมูล
-            $sql = "UPDATE employees SET e_image = :fileName WHERE e_usercode = :userCode";
-
-            if ($stmt = $conn->prepare($sql)) {
-                $stmt->bindValue(':fileName', $fileName, PDO::PARAM_STR);
-                $stmt->bindValue(':userCode', $userCode, PDO::PARAM_INT);
-
-                if ($stmt->execute()) {
-                    echo "<script>
-                    alert('อัพโหลดรูปภาพสำเร็จ.');
-                    location.href = 'admin_user_dashboard.php';
-                </script>";
-                } else {
-                    //echo "เกิดข้อผิดพลาดในการบันทึกข้อมูลในฐานข้อมูล.";
-                }
-            }
-        } else {
-            //echo "ไม่สามารถเปิดไฟล์ภาพได้.";
-        }
+    // สร้าง resource ของภาพจากไฟล์ที่อัปโหลด
+    $image = null;
+    if ($fileType == 'image/jpeg' || $fileType == 'image/jpg') {
+        $image = imagecreatefromjpeg($_FILES['profilePicture']['tmp_name']);
+    } elseif ($fileType == 'image/png') {
+        $image = imagecreatefrompng($_FILES['profilePicture']['tmp_name']);
+    } elseif ($fileType == 'image/gif') {
+        $image = imagecreatefromgif($_FILES['profilePicture']['tmp_name']);
     }
+
+    if ($image) {
+        // หาขนาดเดิมของภาพ
+        $originalWidth  = imagesx($image);
+        $originalHeight = imagesy($image);
+
+        // คำนวณอัตราส่วนของภาพ
+        $ratio     = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
+        $newWidth  = floor($originalWidth * $ratio);
+        $newHeight = floor($originalHeight * $ratio);
+
+        // สร้างภาพใหม่ที่มีขนาดเล็กลง
+        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // คัดลอกภาพต้นฉบับไปยังภาพใหม่ที่ขนาดเล็กลง
+        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
+
+        // บันทึกไฟล์ภาพที่ลดขนาดแล้วลงในเซิร์ฟเวอร์
+        // บันทึกเป็นไฟล์ PNG
+        imagepng($newImage, $filePath, 7); // 7 คือค่าความคมชัดของ PNG (ค่าตั้งต้น: 0, สูงสุด: 9)
+
+        // ทำความสะอาด resource ของภาพ
+        imagedestroy($image);
+        imagedestroy($newImage);
+
+        // ต่อไปเป็นการอัพเดตชื่อไฟล์ในฐานข้อมูล
+        $sql = "UPDATE employees SET e_image = :fileName WHERE e_usercode = :userCode";
+
+        if ($stmt = $conn->prepare($sql)) {
+            $stmt->bindValue(':fileName', $fileName, PDO::PARAM_STR);
+            $stmt->bindValue(':userCode', $userCode, PDO::PARAM_INT);
+
+            if ($stmt->execute()) {
+                echo "<script>
+                    alert('อัพโหลดรูปภาพสำเร็จ.');
+                    location.href = 'user_dashboard.php';
+                </script>";
+            } else {
+                //echo "เกิดข้อผิดพลาดในการบันทึกข้อมูลในฐานข้อมูล.";
+            }
+        }
+    } else {
+        //echo "ไม่สามารถเปิดไฟล์ภาพได้.";
+    }
+}
 ?>
 
 <style>
-.navbar-toggler {
-    border-color: rgba(255, 255, 255, 0.5);
-    /* เปลี่ยนสีขอบของปุ่ม */
-}
+    .navbar-toggler {
+        border-color: rgba(255, 255, 255, 0.5);
+        /* เปลี่ยนสีขอบของปุ่ม */
+    }
 
-.navbar-toggler-icon {
-    background-image: url('data:image/svg+xml;charset=utf8,%3Csvg xmlns%3D"http://www.w3.org/2000/svg" viewBox%3D"0 0 30 30"%3E%3Cpath stroke%3D"rgba(255, 255, 255, 1)" stroke-width%3D"2" stroke-linecap%3D"round" stroke-miterlimit%3D"10" d%3D"M4 7h22M4 15h22M4 23h22"/%3E%3C/svg%3E');
-}
+    .navbar-toggler-icon {
+        background-image: url('data:image/svg+xml;charset=utf8,%3Csvg xmlns%3D"http://www.w3.org/2000/svg" viewBox%3D"0 0 30 30"%3E%3Cpath stroke%3D"rgba(255, 255, 255, 1)" stroke-width%3D"2" stroke-linecap%3D"round" stroke-miterlimit%3D"10" d%3D"M4 7h22M4 15h22M4 23h22"/%3E%3C/svg%3E');
+    }
 </style>
 <!-- edit by pim -->
 
@@ -156,31 +156,29 @@
   border: none;">
 
         <div class="container-fluid">
-            <!-- edit by pim -->
-            <!-- Button for toggling the navbar -->
-            <!-- ปุ่มกลับหน้าหลัก -->
-            <!-- ปุ่ม Toggle -->
             <button class="navbar-toggler" type="button" id="navbar-toggler">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <form method="post">
                 <ul class="nav d-lg-none d-xl-none d-xxl-none">
                     <?php if (! empty($userName)): ?>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <!-- เพิ่มรูปภาพในที่นี้ -->
-                            <img src="../img-profile/<?php echo $imageUser; ?>" alt="Profile Picture"
-                                class="rounded-circle" width="35" height="35">
-                            <?php echo '[' . $depart . '] ' . $userName; ?>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                    data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
-                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                    data-bs-target="#changePicModal">อัปโหลดรูปโปรไฟล์</a></li>
-                        </ul>
-                    </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <!-- เพิ่มรูปภาพในที่นี้ -->
+                                <img src="../img-profile/<?php echo $imageUser; ?>" alt="Profile Picture"
+                                    class="rounded-circle" width="35" height="35">
+                                <?php echo '[' . $depart . '] ' . $userName; ?>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#changeTelPhone">เปลี่ยนเบอร์โทรศัพท์</a></li>
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#changePicModal">อัปโหลดรูปโปรไฟล์</a></li>
+                            </ul>
+                        </li>
                     <?php endif; ?>
                 </ul>
             </form>
@@ -248,7 +246,8 @@
                             <li><a class="dropdown-item" href="admin_employee_leave_form.php">ใบลาย้อนหลังของพนักงาน
                                     (เฉพาะ HR ยื่นใบลาย้อนหลัง)</a>
                             <li><a class="dropdown-item" href="admin_employee.php">ข้อมูลของพนักงาน</a></li>
-                            <li><a class="dropdown-item" href="admin_employee_leave.php">สถิติการลาของพนักงาน</a></li>
+                            <li><a class="dropdown-item" href="admin_employee_leave.php">สถิติการลาของพนักงาน</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -263,36 +262,36 @@
                         </ul>
                     </li>
                 </ul>
-
-
                 <form method="post" class="d-flex">
                     <ul class="navbar-nav ms-auto">
                         <?php if (! empty($userName)): ?>
-                        <li class="nav-item dropdown d-none d-lg-flex d-xl-flex d-xxl-flex">
-                            <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <!-- เพิ่มรูปภาพในที่นี้ -->
-                                <img src="../img-profile/<?php echo $imageUser; ?>" alt="Profile Picture"
-                                    class="rounded-circle mx-2" width="35" height="35">
-                                <?php echo '[' . $depart . '] ' . $userName; ?>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                        data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                        data-bs-target="#changePicModal">อัปโหลดรูปโปรไฟล์</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item me-4">
-                            <a class="nav-link d-flex align-items-center text-white gap-2">
-                                <button type="button" class="btn btn-sm btn-light" data-bs-toggle="tooltip"
-                                    data-bs-placement="bottom"
-                                    data-bs-title="<?php echo 'อายุงาน : <br>' . $yearExp ?>">
-                                    <i class="fa-solid fa-briefcase fs-5"></i>
-                                </button>
-                                <span>
-                                    <strong>
-                                        <?php
+                            <li class="nav-item dropdown d-none d-lg-flex d-xl-flex d-xxl-flex">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <!-- เพิ่มรูปภาพในที่นี้ -->
+                                    <img src="../img-profile/<?php echo $imageUser; ?>" alt="Profile Picture"
+                                        class="rounded-circle mx-2" width="35" height="35">
+                                    <?php echo '[' . $depart . '] ' . $userName; ?>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#changeTelPhone">เปลี่ยนเบอร์โทรศัพท์</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#changePasswordModal">เปลี่ยนรหัสผ่าน</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                            data-bs-target="#changePicModal">อัปโหลดรูปโปรไฟล์</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item me-4">
+                                <a class="nav-link d-flex align-items-center text-white gap-2">
+                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-title="<?php echo 'อายุงาน : <br>' . $yearExp ?>">
+                                        <i class="fa-solid fa-briefcase fs-5"></i>
+                                    </button>
+                                    <span>
+                                        <strong>
+                                            <?php
                                             $dateNow = date("Y-m-d"); // วันที่ปัจจุบัน
 
                                             // สร้าง DateTime objects
@@ -304,11 +303,11 @@
 
                                             // แสดงผลลัพธ์
                                             echo $interval->y . "Y " . $interval->m . "M";
-                                        ?>
-                                    </strong>
-                                </span>
-                            </a>
-                        </li>
+                                            ?>
+                                        </strong>
+                                    </span>
+                                </a>
+                            </li>
                         <?php endif; ?>
                     </ul>
                     <!-- /* edit by pim */ -->
@@ -387,52 +386,116 @@
         </div>
     </div>
     <!-- /* edit by pim */ -->
+    <!-- Modal เปลี่ยนเบอร์โทรศัพท์ -->
+    <div class="modal fade" id="changeTelPhone" tabindex="-1" aria-labelledby="changeTelPhoneLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeTelPhoneLabel">เปลี่ยนเบอร์โทรศัพท์</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changeTelForm">
+                        <div class="mb-3">
+                            <label for="newPhone" class="form-label">เบอร์โทรศัพท์ใหม่</label>
+                            <span style="color: red;">Ex. XXX-XXXXXXX</span>
+                            <input type="text" class="form-control" id="newPhone" name="newPhone" required>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-    const navbarToggler = document.getElementById('navbar-toggler');
-    const navbarText = document.getElementById('navbarText');
+        const navbarToggler = document.getElementById('navbar-toggler');
+        const navbarText = document.getElementById('navbarText');
 
-    navbarToggler.addEventListener('click', () => {
-        navbarText.classList.toggle('show');
-    });
+        navbarToggler.addEventListener('click', () => {
+            navbarText.classList.toggle('show');
+        });
 
-    $(document).ready(function() {
-        $('#changePasswordForm').on('submit', function(e) {
-            e.preventDefault();
+        $(document).ready(function() {
+            $('#changePasswordForm').on('submit', function(e) {
+                e.preventDefault();
 
-            // รับข้อมูลจากฟอร์ม
-            var formData = $(this).serialize();
+                // รับข้อมูลจากฟอร์ม
+                var formData = $(this).serialize();
 
-            $.ajax({
-                type: 'POST',
-                url: 'a_change_password.php',
-                data: formData,
-                success: function(response) {
-                    $('#changePasswordMessage').html(
-                        response);
-                    if (response == 'เปลี่ยนรหัสผ่านใหม่สำเร็จ') {
-                        // $('#changePasswordModal').modal(
-                        //     'hide');
-                        // แสดง SweetAlert
+                $.ajax({
+                    type: 'POST',
+                    url: 'a_change_password.php',
+                    data: formData,
+                    success: function(response) {
+                        $('#changePasswordMessage').html(
+                            response);
+                        if (response == 'เปลี่ยนรหัสผ่านใหม่สำเร็จ') {
+                            // $('#changePasswordModal').modal(
+                            //     'hide');
+                            // แสดง SweetAlert
+                            Swal.fire({
+                                title: 'สำเร็จ !',
+                                text: 'เปลี่ยนรหัสผ่านสำเร็จ',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    location.reload();
+                                }
+                            });
+                        }
+                    },
+                    error: function() {
+                        $('#changePasswordMessage').html(
+                            '<div class="alert alert-danger">เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน</div>'
+                        );
+                    }
+                });
+            });
+
+            $("#changeTelForm").submit(function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    type: "POST",
+                    url: "a_change_telphone.php",
+                    data: formData,
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status == "success") {
+                            Swal.fire({
+                                title: 'สำเร็จ !',
+                                text: 'เปลี่ยนเบอร์โทรศัพท์สำเร็จ',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "เกิดข้อผิดพลาด",
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function() {
                         Swal.fire({
-                            title: 'สำเร็จ !',
-                            text: 'เปลี่ยนรหัสผ่านสำเร็จ',
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                location.reload();
-                            }
+                            icon: "error",
+                            title: "เกิดข้อผิดพลาด",
+                            text: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้"
                         });
                     }
-                },
-                error: function() {
-                    $('#changePasswordMessage').html(
-                        '<div class="alert alert-danger">เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน</div>'
-                    );
-                }
+                });
             });
         });
-    });
     </script>
 
     <!-- <script src="../js/popper.min.js"></script> -->

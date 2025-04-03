@@ -29,6 +29,8 @@ $subDepart2     = isset($_POST['subDepart2']) ? $_POST['subDepart2'] : '';
 $subDepart3     = isset($_POST['subDepart3']) ? $_POST['subDepart3'] : '';
 $subDepart4     = isset($_POST['subDepart4']) ? $_POST['subDepart4'] : '';
 $subDepart5     = isset($_POST['subDepart5']) ? $_POST['subDepart5'] : '';
+// เพิ่มการรับข้อความสอบถาม
+$inquiryMessage = isset($_POST['inquiryMessage']) ? $_POST['inquiryMessage'] : '';
 
 // URL ของระบบ
 $sURL = 'https://lms.system-samt.com/';
@@ -37,23 +39,82 @@ try {
     // เริ่ม transaction
     $conn->beginTransaction();
 
-    // อัปเดตสถานะการลาในฐานข้อมูล
-    $sqlUpdateLeave = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName, l_reason3 = :reasonNoProve
-                      WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
-    $stmt   = $conn->prepare($sqlUpdateLeave);
-    $result = $stmt->execute([
-        ':status'        => $status,
-        ':appDate'       => $appDate,
-        ':userName'      => $userName,
-        ':userCode'      => $userCode,
-        ':createDate'    => $createDate,
-        ':reasonNoProve' => $reasonNoProve,
-    ]);
-
     $notifiedList = [];
 
-    // กรณีไม่อนุมัติ (status = 3) ให้แจ้งเตือนกลับไปยังพนักงานเจ้าของใบลา
-    if ($status == '9') {
+    // กรณีสอบถามเพิ่มเติม (status = 10)
+    if ($status == '10') {
+        // อัปเดตสถานะและบันทึกข้อความสอบถาม
+        $sqlUpdateInquiry = "UPDATE leave_list
+                          SET l_inquiry_status = :status,
+                             l_inquiry_datetime = :appDate,
+                             l_inquiry_by = :userName,
+                             l_inquiry_name = :proveName,
+                             l_inquiry_message = :inquiryMessage
+                          WHERE l_usercode = :userCode
+                          AND l_create_datetime = :createDate";
+
+        $stmt = $conn->prepare($sqlUpdateInquiry);
+        $stmt->execute([
+            ':status'         => $status,
+            ':appDate'        => $appDate,
+            ':userName'       => $userName,
+            ':proveName'      => $proveName,
+            ':inquiryMessage' => $inquiryMessage,
+            ':userCode'       => $userCode,
+            ':createDate'     => $createDate,
+        ]);
+
+        // ดึงข้อมูล LINE ID ของพนักงาน
+        $sqlGetEmployeeLineId = "SELECT e_user_id
+                               FROM employees
+                               WHERE e_usercode = :userCode";
+        $stmt = $conn->prepare($sqlGetEmployeeLineId);
+        $stmt->execute([':userCode' => $userCode]);
+        $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($employee && ! empty($employee['e_user_id'])) {
+            // สร้างข้อความสำหรับพนักงาน
+            $message = "K.$empName\n\nมีข้อสอบถามเกี่ยวกับใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันที่ลา: $leaveStartDate ถึง $leaveEndDate\n\nข้อความจาก K.$userName\n\"$inquiryMessage\"";
+
+            $response = sendLineMessage($employee['e_user_id'], $message, $access_token);
+            error_log("ผลการส่งแจ้งเตือนไปยังพนักงาน: " . print_r($response, true));
+
+            if (! isset($response['message'])) {
+                $notifiedList[] = [
+                    'name'     => $empName,
+                    'username' => $userCode,
+                    'level'    => 'employee',
+                ];
+            }
+        }
+    }
+    // กรณีไม่อนุมัติ (status = 9) ให้แจ้งเตือนกลับไปยังพนักงานเจ้าของใบลา
+    else if ($status == '9') {
+        // อัปเดตสถานะการลาในฐานข้อมูล
+        $sqlUpdateLeave = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName, l_reason3 = :reasonNoProve
+                          WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+        $stmt   = $conn->prepare($sqlUpdateLeave);
+        $result = $stmt->execute([
+            ':status'        => $status,
+            ':appDate'       => $appDate,
+            ':userName'      => $userName,
+            ':userCode'      => $userCode,
+            ':createDate'    => $createDate,
+            ':reasonNoProve' => $reasonNoProve,
+        ]);
+
+        // อัปเดตสถานะตามที่ต้องการโดยไม่ต้องแจ้งเตือน GM หรือ admin
+        $sqlUpdateCancelStatus = "UPDATE leave_list
+                                 SET l_hr_status = 3
+                                 WHERE l_usercode = :userCode
+                                 AND l_create_datetime = :createDate";
+
+        $stmt = $conn->prepare($sqlUpdateCancelStatus);
+        $stmt->execute([
+            ':userCode'   => $userCode,
+            ':createDate' => $createDate,
+        ]);
+
         // ต้องดึงข้อมูลสถานะการอนุมัติก่อน
         $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3,
                               l_approve_name, l_approve_name2, l_username
@@ -125,21 +186,21 @@ try {
                 // ข้อความแจ้งเตือนขึ้นอยู่กับผู้รับ
                 if ($manager['e_username'] == $approveStatus['l_approve_name']) {
                     // ข้อความสำหรับหัวหน้าระดับแรก
-                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nเหตุผลที่ไม่อนุมัติ : $reasonNoProve\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     if ($leaveStatus == 'ยกเลิกใบลา') {
-                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nเหตุผลที่ไม่อนุมัติ : $reasonNoProve\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     }
                 } else if ($manager['e_username'] == $approveStatus['l_approve_name2']) {
                     // ข้อความสำหรับหัวหน้าระดับสอง
-                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nเหตุผลที่ไม่อนุมัติ : $reasonNoProve\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     if ($leaveStatus == 'ยกเลิกใบลา') {
-                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName ที่คุณได้อนุมัติไปแล้ว\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nเหตุผลที่ไม่อนุมัติ : $reasonNoProve\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     }
                 } else if ($manager['e_username'] == $approveStatus['l_username']) {
                     // ข้อความสำหรับพนักงานที่ขอลา
-                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติใบลาของคุณ\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nเหตุผลที่ไม่อนุมัติ : $reasonNoProve\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     if ($leaveStatus == 'ยกเลิกใบลา') {
-                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติการยกเลิกใบลาของคุณ\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nเหตุผลที่ไม่อนุมัติ: $reasonNoProve\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName ไม่อนุมัติการยกเลิกใบลาของคุณ\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nเหตุผลที่ไม่อนุมัติ : $reasonNoProve\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
                     }
                 }
 
@@ -159,61 +220,90 @@ try {
             }
         }
     }
-    // กรณีอนุมัติ (status = 2) ให้ดำเนินการตามเงื่อนไขเดิม
+    // กรณีอนุมัติ (status = 8) ให้ดำเนินการตามเงื่อนไขเดิม
     else if ($status == '8') {
-        // ดึงข้อมูลสถานะการอนุมัติปัจจุบัน
-        $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3
+        // อัปเดตสถานะการลาในฐานข้อมูล
+        $sqlUpdateLeave = "UPDATE leave_list SET l_approve_status3 = :status, l_approve_datetime3 = :appDate, l_approve_name3 = :userName, l_reason3 = :reasonNoProve
+                          WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+        $stmt   = $conn->prepare($sqlUpdateLeave);
+        $result = $stmt->execute([
+            ':status'        => $status,
+            ':appDate'       => $appDate,
+            ':userName'      => $userName,
+            ':userCode'      => $userCode,
+            ':createDate'    => $createDate,
+            ':reasonNoProve' => $reasonNoProve,
+        ]);
+
+        if ($leaveStatus == 'ยกเลิก') {
+            // อัปเดตสถานะตามที่ต้องการโดยไม่ต้องแจ้งเตือน GM หรือ admin
+            $sqlUpdateCancelStatus = "UPDATE leave_list
+                                     SET l_hr_status = 3
+                                     WHERE l_usercode = :userCode
+                                     AND l_create_datetime = :createDate";
+
+            $stmt = $conn->prepare($sqlUpdateCancelStatus);
+            $stmt->execute([
+                ':userCode'   => $userCode,
+                ':createDate' => $createDate,
+            ]);
+
+            error_log("อัปเดตสถานะสำหรับใบลาที่ถูกยกเลิก: userCode=" . $userCode . ", createDate=" . $createDate);
+        } else {
+            // ดึงข้อมูลสถานะการอนุมัติปัจจุบัน
+            $sqlGetApproveStatus = "SELECT l_approve_status, l_approve_status2, l_approve_status3
                                 FROM leave_list
                                 WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
-        $stmt = $conn->prepare($sqlGetApproveStatus);
-        $stmt->execute([
-            ':userCode'   => $userCode,
-            ':createDate' => $createDate,
-        ]);
-        $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $conn->prepare($sqlGetApproveStatus);
+            $stmt->execute([
+                ':userCode'   => $userCode,
+                ':createDate' => $createDate,
+            ]);
+            $approveStatus = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $managers = [];
+            $managers = [];
 
-        if (empty($managers)) {
-            $sqlFindAdmins = "SELECT e_user_id, e_username, e_name, e_level
+            if (empty($managers)) {
+                $sqlFindAdmins = "SELECT e_user_id, e_username, e_name, e_level
                          FROM employees
                          WHERE e_level = 'admin'
                          AND e_workplace = :workplace";
 
-            $stmt = $conn->prepare($sqlFindAdmins);
-            $stmt->execute([
-                ':workplace' => $workplace,
-            ]);
-            $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("พบ admin: " . count($managers) . " คน");
-        }
+                $stmt = $conn->prepare($sqlFindAdmins);
+                $stmt->execute([
+                    ':workplace' => $workplace,
+                ]);
+                $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                error_log("พบ admin: " . count($managers) . " คน");
+            }
 
-        // ส่งข้อความแจ้งเตือนไปยังผู้จัดการ/GM/admin
-        foreach ($managers as $manager) {
-            if (! empty($manager['e_user_id'])) {
-                // สร้างข้อความแจ้งเตือน
-                $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติใบลาของ $empName\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            // ส่งข้อความแจ้งเตือนไปยังผู้จัดการ/GM/admin
+            foreach ($managers as $manager) {
+                if (! empty($manager['e_user_id'])) {
+                    // สร้างข้อความแจ้งเตือน
+                    $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-                if ($leaveStatus == 'ยกเลิกใบลา') {
-                    $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา: $leaveType\nเหตุผลการลา: $leaveReason\nวันเวลาที่ลา: $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-                }
+                    if ($leaveStatus == 'ยกเลิกใบลา') {
+                        $message = "K." . $manager['e_username'] . "\n\n$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nสถานะใบลา : $leaveStatus\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+                    }
 
-                $response = sendLineMessage($manager['e_user_id'], $message, $access_token);
-                error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
+                    $response = sendLineMessage($manager['e_user_id'], $message, $access_token);
+                    error_log("ผลการส่งแจ้งเตือนไปยัง " . $manager['e_username'] . ": " . print_r($response, true));
 
-                if (isset($response['message'])) {
-                    error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
+                    if (isset($response['message'])) {
+                        error_log("แจ้งเตือนล้มเหลวสำหรับ " . $manager['e_username'] . " - " . $response['message']);
+                    } else {
+                        error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
+                        // เพิ่มรายชื่อผู้ที่ได้รับแจ้งเตือนสำเร็จ
+                        $notifiedList[] = [
+                            'name'     => $manager['e_name'],
+                            'username' => $manager['e_username'],
+                            'level'    => $manager['e_level'],
+                        ];
+                    }
                 } else {
-                    error_log("ส่งข้อความแจ้งเตือนสำเร็จถึง " . $manager['e_username']);
-                    // เพิ่มรายชื่อผู้ที่ได้รับแจ้งเตือนสำเร็จ
-                    $notifiedList[] = [
-                        'name'     => $manager['e_name'],
-                        'username' => $manager['e_username'],
-                        'level'    => $manager['e_level'],
-                    ];
+                    error_log("ไม่พบ user_id สำหรับ " . $manager['e_username']);
                 }
-            } else {
-                error_log("ไม่พบ user_id สำหรับ " . $manager['e_username']);
             }
         }
     }

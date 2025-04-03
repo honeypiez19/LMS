@@ -1,4 +1,5 @@
 <?php
+    header('Content-Type: text/html; charset=utf-8');
     session_start();
     date_default_timezone_set('Asia/Bangkok');
 
@@ -32,12 +33,14 @@
 
     <script src="../js/fontawesome.js"></script>
 
-    <script src="../js/html2canvas.js"></script>
-    <script src="../js/html2canvas.min.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
-    <script src="../js/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
+    body {
+        font-family: 'THSarabunNew', sans-serif;
+    }
+
     .my-table {
         /* width: 100%; */
         border-collapse: collapse;
@@ -45,6 +48,8 @@
 
     .my-table th,
     .my-table td {
+        font-family: 'THSarabunNew', sans-serif;
+
         border: 1px solid #ddd;
         padding: 8px;
     }
@@ -57,7 +62,37 @@
 </head>
 
 <body>
-    <?php require 'admin_navbar.php'?>
+    <?php include 'admin_navbar.php';
+
+        // Date range selection section
+        $currentYear = date('Y');
+        $lastYear    = $currentYear - 1;
+
+        // Set default date range: Dec 31 of last year to Nov 30 of current year
+        $defaultStartDate = date('Y-m-d', strtotime($lastYear . '-12-01'));
+        $defaultEndDate   = date('Y-m-d', strtotime($currentYear . '-11-30'));
+
+        // Format for display
+        $defaultStartDateFormatted = date('d-m-Y', strtotime($defaultStartDate));
+        $defaultEndDateFormatted   = date('d-m-Y', strtotime($defaultEndDate));
+
+        // Get dates from POST if submitted
+        if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
+            $startDateFormatted = $_POST['start_date'];
+            $endDateFormatted   = $_POST['end_date'];
+
+            // Convert to Y-m-d format for database queries
+            $startDate = DateTime::createFromFormat('d-m-Y', $startDateFormatted)->format('Y-m-d');
+            $endDate   = DateTime::createFromFormat('d-m-Y', $endDateFormatted)->format('Y-m-d');
+        } else {
+            // Use defaults
+            $startDate          = $defaultStartDate;
+            $endDate            = $defaultEndDate;
+            $startDateFormatted = $defaultStartDateFormatted;
+            $endDateFormatted   = $defaultEndDateFormatted;
+        }
+
+    ?>
 
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
@@ -71,7 +106,6 @@
             </div>
         </div>
     </nav>
-    <div></div>
     <div class="mt-3 container">
         <div class="row">
             <div class="col-3">
@@ -135,25 +169,11 @@
             </div>
         </div>
     </div>
+
     <div class="container-fluid">
         <form class="mt-4 mb-3 row" method="post" id="dateForm">
             <label for="startDate" class="mt-2 col-auto">เลือกช่วงเวลา :</label>
             <div class="col-auto">
-                <?php
-                    $startDate          = date('Y', strtotime('-1 year')) . "-12-01"; // 1 ธันวาคม ปีที่แล้ว
-                    $startDateFormatted = date('d-m-Y', strtotime($startDate));
-
-                    $endDate          = date('Y' . "-11-30"); // 30 พฤศจิกายน ปีปัจจุบัน
-                    $endDateFormatted = date('d-m-Y', strtotime($endDate));
-
-                    if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
-                        $startDate          = DateTime::createFromFormat('d-m-Y', $_POST['start_date'])->format('Y-m-d');
-                        $startDateFormatted = $_POST['start_date'];
-
-                        $endDate          = DateTime::createFromFormat('d-m-Y', $_POST['end_date'])->format('Y-m-d');
-                        $endDateFormatted = $_POST['end_date'];
-                    }
-                ?>
                 <input type="text" name="start_date" class="form-control" id="startDate"
                     value="<?php echo $startDateFormatted; ?>">
             </div>
@@ -163,7 +183,7 @@
             </div>
             <div class="col-auto">
                 <button type="button" class="btn btn-secondary" id="resetButton" data-bs-toggle="tooltip"
-                    title="01-12-ปีที่แล้ว ถึง 30-11-ปีปัจจุบัน">
+                    title="31-12-ปีที่แล้ว ถึง 30-11-ปีปัจจุบัน">
                     ค่าเริ่มต้น
                 </button>
             </div>
@@ -171,40 +191,10 @@
 
         <!-- แสดงช่วงวันที่ที่เลือก -->
         <div>
-            <p>ช่วงวันที่ : <strong id="startDateText">
-                    <?php
-                        echo $startDateFormatted;
-                    ?>
-                </strong> ถึง <strong id="endDateText">
-                    <?php
-                        echo $endDateFormatted;
-                    ?>
-                </strong>
+            <p>ช่วงวันที่ : <strong id="startDateText"><?php echo $startDateFormatted; ?></strong>
+                ถึง <strong id="endDateText"><?php echo $endDateFormatted; ?></strong>
             </p>
         </div>
-        <!-- เลือกปี -->
-        <!-- <form class="mt-3 mb-3 row" method="post" id="yearForm">
-            <label for="" class="mt-2 col-auto">เลือกปี</label>
-            <div class="col-auto">
-                <?php
-                    $selectedYear = date('Y'); // ปีปัจจุบัน
-                    if (isset($_POST['year'])) {
-                        $selectedYear = $_POST['year'];
-                        $startDate    = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
-                        $endDate      = date("Y-m-d", strtotime($selectedYear . "-11-30"));
-
-                        echo $startDate;
-                        echo $endDate;
-                    }
-                    echo "<select class='form-select' name='year' id='selectYear'>";
-                    for ($i = -1; $i <= 2; $i++) {
-                        $year = date('Y', strtotime("last day of -$i year"));
-                        echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
-                    }
-                    echo "</select>";
-                ?>
-            </div>
-        </form> -->
     </div>
 
     <!-- ตารางข้อมูลพนักงาน -->
@@ -212,6 +202,7 @@
         <div class="table-responsive">
             <table class="mt-3 my-table" id="leaveEmpTable">
                 <thead>
+                    <!-- Table headers remain unchanged -->
                     <tr class="text-center align-middle">
                         <th rowspan="3">ลำดับ</th>
                         <th rowspan="3">รหัสพนักงาน</th>
@@ -225,14 +216,12 @@
                     </tr>
                     <tr class="text-center align-middle">
                         <th colspan="3">ลากิจได้รับค่าจ้าง</th>
-                        <th colspan="3">
-                            ลากิจไม่ได้รับค่าจ้าง</th>
+                        <th colspan="3">ลากิจไม่ได้รับค่าจ้าง</th>
                         <th colspan="3">ลาป่วย</th>
                         <th colspan="3">ลาป่วยจากงาน</th>
                         <th colspan="3">ลาพักร้อน</th>
                         <th colspan="3">อื่น ๆ</th>
                         <th colspan="1" rowspan="3">มาสาย</th>
-                        <!-- <th colspan="1" rowspan="3">ขาดงาน</th> -->
                     </tr>
                     <tr class="text-center align-middle">
                         <th>จำนวนวันที่ได้</th>
@@ -257,423 +246,497 @@
                 </thead>
                 <tbody class="text-center my-table">
                     <?php
-                    $sql = "SELECT * FROM employees
-                        WHERE e_status <> '1'";
+                        // Define leave types once
+                        $leave_types = [
+                            1 => 'ลากิจได้รับค่าจ้าง',
+                            2 => 'ลากิจไม่ได้รับค่าจ้าง',
+                            3 => 'ลาป่วย',
+                            4 => 'ลาป่วยจากงาน',
+                            5 => 'ลาพักร้อน',
+                            7 => 'มาสาย',
+                            6 => 'ขาดงาน',
+                            8 => 'อื่น ๆ',
+                        ];
 
-                    $stmt = $conn->prepare($sql);
+                        // Mapping leave types to employee field names
+                        $leave_field_mapping = [
+                            1 => 'e_leave_personal',
+                            2 => 'e_leave_personal_no',
+                            3 => 'e_leave_sick',
+                            4 => 'e_leave_sick_work',
+                            5 => 'e_leave_annual',
+                            8 => 'e_other',
+                        ];
 
-                    $stmt->execute();
+                        // Fetch employees
+                        $sql = "SELECT * FROM employees
+            WHERE e_status <> '1'
+            AND e_workplace = :workplace
+            ORDER BY e_usercode ASC";
 
-                    $rowNumber = 1;
+                        $stmt = $conn->prepare($sql);
+                        $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
 
-                    $leave_types = [
-                        1 => 'ลากิจได้รับค่าจ้าง',
-                        2 => 'ลากิจไม่ได้รับค่าจ้าง',
-                        3 => 'ลาป่วย',
-                        4 => 'ลาป่วยจากงาน',
-                        5 => 'ลาพักร้อน',
-                        7 => 'มาสาย',
-                        6 => 'ขาดงาน',
-                        8 => 'อื่น ๆ',
-                    ];
+                        $stmt->execute();
 
-                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        echo '<tr>';
-                        echo '<td>' . $rowNumber . '</td>';
-                        echo '<td>' . $row['e_usercode'] . '</td>';
-                        echo '<td>' . $row['e_name'] . '</td>';
-                        echo '<td>' . $row['e_department'] . '</td>';
-                        echo '<td>' . $row['e_yearexp'] . '</td>';
-                        echo '<td>' . $row['e_level'] . '</td>';
-                        echo '<td>' . $row['e_workplace'] . '</td>';
+                        $rowNumber = 1;
 
-                        $all_total_days    = 0;
-                        $all_total_hours   = 0;
-                        $all_total_minutes = 0;
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo '<tr>';
+                            echo '<td>' . $rowNumber . '</td>';
+                            echo '<td>' . $row['e_usercode'] . '</td>';
+                            echo '<td>' . $row['e_name'] . '</td>';
+                            echo '<td>' . $row['e_department'] . '</td>';
+                            echo '<td>' . $row['e_yearexp'] . '</td>';
+                            echo '<td>' . $row['e_level'] . '</td>';
+                            echo '<td>' . $row['e_workplace'] . '</td>';
 
-                        foreach ($leave_types as $leave_id => $leave_name) {
-                            $sql_leave = "SELECT
-                        SUM(
-                            DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
-                            - (SELECT COUNT(1)
-                                FROM holiday
-                                WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
-                                    AND h_holiday_status = 'วันหยุด'
-                                    AND h_status = 0)
-                        ) AS total_leave_days,
-                        SUM(
-                            HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24
-                        ) -
-                        SUM(
-                            CASE
-                                WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
-                                    AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
-                                THEN 1
-                                ELSE 0
-                            END
-                        ) AS total_leave_hours,
-                        SUM(
-                            MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))
-                        ) AS total_leave_minutes,
-                        (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal,
-                        (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode) AS total_personal_no,
-                        (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode) AS total_sick,
-                        (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode) AS total_sick_work,
-                        (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode) AS total_annual,
-                        (SELECT e_other FROM employees WHERE e_usercode = :userCode) AS total_other,
-                        (SELECT COUNT(l_list_id) FROM leave_list WHERE l_leave_id = 7 AND l_usercode = :userCode) AS late_count
-                        -- (SELECT l_list_id, l_username FROM leave_list WHERE l_leave_id = 6 AND l_usercode = :userCode) AS stop_work_count
-                        FROM leave_list
-                        JOIN employees ON employees.e_usercode = leave_list.l_usercode
-                        WHERE l_leave_id = :leave_id
-                        AND l_usercode = :userCode
-                        AND l_leave_status = 0
-                        AND l_approve_status IN (2, 6)
-                        AND l_approve_status2 IN (4, 6)
-                        AND l_approve_status3 IN (8, 6)
-                        AND (l_leave_end_date BETWEEN :startDate AND :endDate)";
+                            $all_total_days    = 0;
+                            $all_total_hours   = 0;
+                            $all_total_minutes = 0;
+                            $total_late        = 0;
 
-                            $stmt_leave = $conn->prepare($sql_leave);
-                            $stmt_leave->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
-                            $stmt_leave->bindParam(':userCode', $row['e_usercode']);
-                            $stmt_leave->bindParam(':startDate', $startDate);
-                            $stmt_leave->bindParam(':endDate', $endDate);
-                            $stmt_leave->execute();
+                            // Prepare the base SQL for leave calculation using date range
+                            $base_sql_leave = "SELECT
+SUM(
+    DATEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))
+    - (SELECT COUNT(1)
+       FROM holiday
+       WHERE h_start_date BETWEEN l_leave_start_date AND l_leave_end_date
+         AND h_holiday_status = 'วันหยุด'
+         AND h_status = 0)
+) AS total_leave_days,
+SUM(
+    HOUR(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time))) % 24
+) -
+SUM(
+    CASE
+        WHEN HOUR(CONCAT(l_leave_start_date, ' ', l_leave_start_time)) < 12
+             AND HOUR(CONCAT(l_leave_end_date, ' ', l_leave_end_time)) > 12
+        THEN 1
+        ELSE 0
+    END
+) AS total_leave_hours,
+SUM(
+    MINUTE(TIMEDIFF(CONCAT(l_leave_end_date, ' ', l_leave_end_time), CONCAT(l_leave_start_date, ' ', l_leave_start_time)))
+) AS total_leave_minutes,
+COUNT(CASE WHEN l_leave_id = 7 THEN 1 END) AS total_late
+FROM leave_list
+JOIN employees ON employees.e_usercode = leave_list.l_usercode
+WHERE l_leave_id = :leave_id
+  AND l_usercode = :userCode
+  AND l_leave_status = 0
+  AND (
+      -- Filter for leaves that overlap with the selected date range
+      (l_leave_start_date BETWEEN :startDate AND :endDate) OR
+      (l_leave_end_date BETWEEN :startDate AND :endDate) OR
+      (:startDate BETWEEN l_leave_start_date AND l_leave_end_date) OR
+      (:endDate BETWEEN l_leave_start_date AND l_leave_end_date)
+  )";
 
-                            $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
+                            // Process each leave type
+                            foreach ($leave_types as $leave_id => $leave_name) {
+                                // Create a copy of the base SQL
+                                $sql_leave = $base_sql_leave;
 
-                            if ($result_leave) {
-                                $days    = $result_leave['total_leave_days'] ?? 0;
-                                $hours   = $result_leave['total_leave_hours'] ?? 0;
-                                $minutes = $result_leave['total_leave_minutes'] ?? 0;
+                                $stmt_leave = $conn->prepare($sql_leave);
+                                $stmt_leave->bindParam(':leave_id', $leave_id, PDO::PARAM_INT);
+                                $stmt_leave->bindParam(':userCode', $row['e_usercode']);
+                                $stmt_leave->bindParam(':startDate', $startDate);
+                                $stmt_leave->bindParam(':endDate', $endDate);
 
-                                $total_personal    = $result_leave['total_personal'] ?? 0;
-                                $total_personal_no = $result_leave['total_personal_no'] ?? 0;
-                                $total_sick        = $result_leave['total_sick'] ?? 0;
-                                $total_sick_work   = $result_leave['total_sick_work'] ?? 0;
-                                $total_annual      = $result_leave['total_annual'] ?? 0;
-                                $total_other       = $result_leave['total_other'] ?? 0;
-                                $total_late        = $result_leave['late_count'] ?? 0;
-                                // $total_stop_work   = $result_leave['stop_work_count'] ?? 0;
+                                $stmt_leave->execute();
+                                $result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
 
-                                $days += floor($hours / 8);
-                                $hours = $hours % 8;
+                                // Initialize variables
+                                $days            = 0;
+                                $hours           = 0;
+                                $minutes         = 0;
+                                $display_minutes = 0;
 
-                                if ($minutes >= 60) {
-                                    $hours += floor($minutes / 60);
-                                    $minutes = $minutes % 60;
+                                // Get leave data if results exist
+                                if ($result_leave) {
+                                    $days    = $result_leave['total_leave_days'] ?? 0;
+                                    $hours   = $result_leave['total_leave_hours'] ?? 0;
+                                    $minutes = $result_leave['total_leave_minutes'] ?? 0;
+
+                                    if ($leave_id == 7) {
+                                        $total_late = $result_leave['total_late'] ?? 0;
+                                    }
+
+                                    // Convert hours to days if applicable
+                                    $days += floor($hours / 8);
+                                    $hours = $hours % 8;
+
+                                    // Adjust minutes - first convert any minutes >= 60 to hours
+                                    if ($minutes >= 60) {
+                                        $hours += floor($minutes / 60);
+                                        $minutes = $minutes % 60;
+                                    }
+
+                                    // Apply rounding rules for minutes
+                                    if ($minutes > 0) {
+                                        if ($minutes <= 30) {
+                                            // Less than or equal to 30 minutes rounds to 30 minutes
+                                            $minutes         = 30;
+                                            $display_minutes = 5; // Display as 5
+                                        } else {
+                                            // More than 30 minutes rounds to 1 hour
+                                            $hours += 1;
+                                            $minutes         = 0;
+                                            $display_minutes = 0;
+                                        }
+                                    }
+
+                                    // Convert any hours >= 8 to days
+                                    if ($hours >= 8) {
+                                        $days += floor($hours / 8);
+                                        $hours = $hours % 8;
+                                    }
                                 }
 
-                                if ($minutes > 0 && $minutes <= 30) {
-                                    $minutes = 30;
-                                } elseif ($minutes > 30) {
-                                    $minutes = 0;
-                                    $hours += 1;
-                                }
+                                // Process and display leave information for specific leave types
+                                if (in_array($leave_id, [1, 2, 3, 4, 5, 8])) {
+                                    $field_name      = $leave_field_mapping[$leave_id];
+                                    $total_available = $row[$field_name] ?? 0;
 
-                                // ลากิจได้รับค่าจ้าง
-                                if ($leave_id == 1) {
+                                    echo '<td>' . $total_available . '</td>';
+                                    echo '<td>' . $days . '(' . $hours . '.' . ($minutes > 0 ? $display_minutes : 0) . ')' . '</td>';
+
+                                    // Calculate remaining leave (using actual minutes, not display minutes)
                                     $total_minutes_used      = ($days * 8 * 60) + ($hours * 60) + $minutes;
-                                    $total_minutes           = $total_personal * 8 * 60;
-                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
-                                    $remaining_days          = floor($total_remaining_minutes / (8 * 60));
-                                    $remaining_hours         = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                    $remaining_minutes       = $total_remaining_minutes % 60;
-
-                                    if ($remaining_minutes == 30 && $minutes == 30) {
-                                        $remaining_minutes = 5;
-                                        $minutes           = 5;
-                                    } elseif ($remaining_minutes > 30) {
-                                        $remaining_minutes = 0;
-                                        $remaining_hours += 1;
-                                    }
-
-                                    echo '<td>' . $total_personal . '</td>';
-                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-                                }
-                                // ลากิจไม่ได้รับค่าจ้าง
-                                else if ($leave_id == 2) {
-                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                    $total_minutes = $total_personal_no * 8 * 60;
-
+                                    $total_minutes           = $total_available * 8 * 60;
                                     $total_remaining_minutes = $total_minutes - $total_minutes_used;
 
                                     $remaining_days    = floor($total_remaining_minutes / (8 * 60));
                                     $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
                                     $remaining_minutes = $total_remaining_minutes % 60;
 
-                                    if ($remaining_minutes == 30 && $minutes == 30) {
-                                        $remaining_minutes = 5;
-                                        $minutes           = 5;
-                                    } elseif ($remaining_minutes > 30) {
-                                        $remaining_minutes = 0;
-                                        $remaining_hours += 1;
+                                    // Apply same rounding rules to remaining minutes
+                                    $remaining_display_minutes = 0;
+                                    if ($remaining_minutes > 0) {
+                                        if ($remaining_minutes <= 30) {
+                                            $remaining_minutes         = 30;
+                                            $remaining_display_minutes = 5;
+                                        } else {
+                                            $remaining_hours += 1;
+                                            $remaining_minutes = 0;
+                                        }
                                     }
 
-                                    echo '<td>' . $total_personal_no . '</td>';
-                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-                                }
-                                // ลาป่วย
-                                else if ($leave_id == 3) {
+                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' .
+                                        ($remaining_minutes > 0 ? $remaining_display_minutes : 0) . ')' . '</td>';
 
-                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                    $total_minutes = $total_sick * 8 * 60;
-
-                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                    $remaining_minutes = $total_remaining_minutes % 60;
-
-                                    if ($remaining_minutes == 30 && $minutes == 30) {
-                                        $remaining_minutes = 5;
-                                        $minutes           = 5;
-                                    } elseif ($remaining_minutes > 30) {
-                                        $remaining_minutes = 0;
-                                        $remaining_hours += 1;
+                                    // Add to totals for types that should be included in the sum
+                                    if ($leave_id != 5 && $leave_id != 7 && $leave_id != 6) {
+                                        $all_total_days += $days;
+                                        $all_total_hours += $hours;
+                                        $all_total_minutes += $minutes;
                                     }
-
-                                    echo '<td>' . $total_sick . '</td>';
-                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                }
-                                // ลาป่วยจากงาน
-                                else if ($leave_id == 4) {
-
-                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                    $total_minutes = $total_sick_work * 8 * 60;
-
-                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                    $remaining_minutes = $total_remaining_minutes % 60;
-
-                                    if ($remaining_minutes == 30 && $minutes == 30) {
-                                        $remaining_minutes = 5;
-                                        $minutes           = 5;
-                                    } elseif ($remaining_minutes > 30) {
-                                        $remaining_minutes = 0;
-                                        $remaining_hours += 1;
-                                    }
-
-                                    echo '<td>' . $total_sick_work . '</td>';
-                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                }
-                                // ลาพักร้อน
-                                else if ($leave_id == 5) {
-
-                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                    $total_minutes = $total_annual * 8 * 60;
-
-                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                    $remaining_minutes = $total_remaining_minutes % 60;
-
-                                    if ($remaining_minutes == 30 && $minutes == 30) {
-                                        $remaining_minutes = 5;
-                                        $minutes           = 5;
-                                    } elseif ($remaining_minutes > 30) {
-                                        $remaining_minutes = 0;
-                                        $remaining_hours += 1;
-                                    }
-
-                                    echo '<td>' . $total_annual . '</td>';
-                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                }
-                                // อื่น ๆ
-                                else if ($leave_id == 8) {
-                                    $total_minutes_used = ($days * 8 * 60) + ($hours * 60) + $minutes;
-
-                                    $total_minutes = $total_other * 8 * 60;
-
-                                    $total_remaining_minutes = $total_minutes - $total_minutes_used;
-
-                                    $remaining_days    = floor($total_remaining_minutes / (8 * 60));
-                                    $remaining_hours   = floor(($total_remaining_minutes % (8 * 60)) / 60);
-                                    $remaining_minutes = $total_remaining_minutes % 60;
-
-                                    if ($remaining_minutes == 30 && $minutes == 30) {
-                                        $remaining_minutes = 5;
-                                        $minutes           = 5;
-                                    } elseif ($remaining_minutes > 30) {
-                                        $remaining_minutes = 0;
-                                        $remaining_hours += 1;
-                                    }
-
-                                    echo '<td>' . $total_other . '</td>';
-                                    echo '<td>' . $days . '(' . $hours . '.' . $minutes . ')' . '</td>';
-                                    echo '<td>' . $remaining_days . '(' . $remaining_hours . '.' . $remaining_minutes . ')' . '</td>';
-
-                                }
-
-                                // ไม่รวมพักร้อนกับมาสาย
-                                if ($leave_id != 5 && $leave_id != 7 && $leave_id != 6) {
-                                    $all_total_days += $days;
-                                    $all_total_hours += $hours;
-                                    $all_total_minutes += $minutes;
                                 }
                             }
+
+                            // Display late count
+                            echo '<td>' . $total_late . ' ครั้ง' . '</td>';
+
+                            // Adjust total time calculations
+                            if ($all_total_minutes >= 60) {
+                                $all_total_hours += floor($all_total_minutes / 60);
+                                $all_total_minutes = $all_total_minutes % 60;
+                            }
+
+                            // Apply rounding rules to total minutes
+                            $all_display_minutes = 0;
+                            if ($all_total_minutes > 0) {
+                                if ($all_total_minutes <= 30) {
+                                    $all_total_minutes   = 30;
+                                    $all_display_minutes = 5;
+                                } else {
+                                    $all_total_hours += 1;
+                                    $all_total_minutes = 0;
+                                }
+                            }
+
+                            if ($all_total_hours >= 8) {
+                                $all_total_days += floor($all_total_hours / 8);
+                                $all_total_hours = $all_total_hours % 8;
+                            }
+
+                            // Display total leave used
+                            echo '<td>' . $all_total_days . '(' . $all_total_hours . '.' .
+                                ($all_total_minutes > 0 ? $all_display_minutes : 0) . ')' . '</td>';
+                            echo '</tr>';
+
+                            $rowNumber++;
                         }
-
-                        echo '<td>' . $total_late . ' ครั้ง' . '</td>';
-                        // echo '<td>' . $days . ' วัน' . '</td>';
-
-                        // Display the total leave used, excluding annual leave
-                        echo '<td >' . $all_total_days . '(' . $all_total_hours . '.' . $all_total_minutes . ')' . '</td>';
-                        echo '</tr>';
-
-                        $rowNumber++;
-
-                    }
-                ?>
+                    ?>
                 </tbody>
             </table>
         </div>
-
     </div>
-
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const {
-            jsPDF
-        } = window.jspdf;
-
-        document.getElementById("generate-pdf").addEventListener("click", function() {
-            html2canvas(document.getElementById("leaveEmpTable")).then(canvas => {
-                var imgData = canvas.toDataURL('image/png');
-                var pdf = new jsPDF('landscape', 'pt', 'a4');
-                var imgWidth = 841.89 -
-                    40; // ความกว้างสำหรับ a4 แนวนอน ลบออก 40 pt เพื่อเว้นขอบซ้ายขวา
-                var pageHeight = 595.28;
-                var imgHeight = canvas.height * imgWidth / canvas.width;
-                var heightLeft = imgHeight;
-
-                var position = 20; // ระยะห่างจากขอบบน
-                var margin = 20; // ระยะห่างจากขอบซ้ายขวา
-
-                pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-                pdf.save("leaveData.pdf");
-            });
-        });
-    });
-
-    async function capture() {
-        const element = document.querySelector("#leaveEmpTable");
-        const canvas = await html2canvas(element);
-        const imgData = canvas.toDataURL('image/png');
-
-        const link = document.createElement('a');
-        link.href = imgData;
-        link.download = 'capture.png';
-        link.click();
-    }
-
-    $(document).ready(function() {
-        $("#nameSearch").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("tbody tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-            });
-        });
-        $("#codeSearch").on("keyup", function() {
-            var value2 = $(this).val().toLowerCase();
-            $("tbody tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
-            });
-        });
-        $("#depSearch").on("keyup", function() {
-            var value3 = $(this).val().toLowerCase();
-            $("tbody tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
-            });
-        });
-
-        document.getElementById('selectYear').addEventListener('change', function() {
-            document.getElementById('yearForm').submit();
-        });
-    });
-
-    function resetInput(inputId) {
-        document.getElementById(inputId).value = '';
-        var codeValue = document.getElementById("codeSearch").value.toLowerCase();
-        var nameValue = document.getElementById("nameSearch").value.toLowerCase();
-
-        $("tbody tr").each(function() {
-            var code = $(this).find("td:nth-child(2)").text().toLowerCase();
-            var name = $(this).find("td:nth-child(3)").text().toLowerCase();
-            if (code.includes(codeValue) && name.includes(nameValue)) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-    }
-
-    function resetFields() {
-        document.getElementById('codeSearch').value = '';
-        document.getElementById('nameSearch').value = '';
-        document.getElementById('depSearch').value = '';
-    }
-
-    // วันที่เริ่มต้น
-    flatpickr("#startDate", {
-        dateFormat: "d-m-Y",
-        defaultDate: "<?php echo $startDateFormatted; ?>",
-        onChange: function(selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-                document.getElementById("startDateText").textContent = instance.formatDate(
-                    selectedDates[0],
-                    "d-m-Y");
-                document.getElementById("dateForm").submit();
-            }
-        }
-    });
-
-    // วันที่สิ้นสุด
-    flatpickr("#endDate", {
-        dateFormat: "d-m-Y",
-        defaultDate: "<?php echo $endDateFormatted; ?>",
-        onChange: function(selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-                document.getElementById("endDateText").textContent = instance.formatDate(selectedDates[
-                        0],
-                    "d-m-Y");
-                document.getElementById("dateForm").submit();
-            }
-        }
-    });
-
-    // ปุ่ม reset ค่าเริ่มต้น 12-01-ปีที่แล้ว ถึง 11-30-ปีปัจจุบัน
-    document.getElementById('resetButton').addEventListener('click', function() {
-        const defaultStartDate = "<?php echo date('d-m-Y', strtotime((date('Y') - 1) . '-12-01')); ?>";
-        const defaultEndDate = "<?php echo date('d-m-Y', strtotime(date('Y') . '-11-30')); ?>";
-
-        document.getElementById('startDate').value = defaultStartDate;
-        document.getElementById('endDate').value = defaultEndDate;
-
-        document.getElementById("dateForm").submit();
-    });
-
     document.addEventListener('DOMContentLoaded', function() {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-            new bootstrap.Tooltip(tooltipTriggerEl);
+        // เพิ่ม event listener สำหรับปุ่ม "Export PDF"
+        document.getElementById('generate-pdf').addEventListener('click', exportToPDF);
+
+        // กำหนดค่า flatpickr สำหรับเลือกวันที่
+        flatpickr('#startDate', {
+            dateFormat: 'd-m-Y',
+            altFormat: 'd-m-Y',
+            onChange: function(selectedDates, dateStr) {
+                document.getElementById('startDateText').textContent = dateStr;
+                // ส่งฟอร์มอัตโนมัติเมื่อเลือกวันที่
+                setTimeout(function() {
+                    document.getElementById('dateForm').submit();
+                }, 100);
+            }
+        });
+
+        flatpickr('#endDate', {
+            dateFormat: 'd-m-Y',
+            altFormat: 'd-m-Y',
+            onChange: function(selectedDates, dateStr) {
+                document.getElementById('endDateText').textContent = dateStr;
+                // ส่งฟอร์มอัตโนมัติเมื่อเลือกวันที่
+                setTimeout(function() {
+                    document.getElementById('dateForm').submit();
+                }, 100);
+            }
+        });
+
+        // ฟังก์ชันรีเซ็ตฟิลเตอร์ในการค้นหา
+        window.resetFields = function() {
+            document.getElementById('codeSearch').value = '';
+            document.getElementById('nameSearch').value = '';
+            document.getElementById('depSearch').value = '';
+        };
+
+        // ฟังก์ชันค้นหาในตาราง
+        function filterTable() {
+            const codeSearch = document.getElementById('codeSearch').value.toLowerCase();
+            const nameSearch = document.getElementById('nameSearch').value.toLowerCase();
+            const depSearch = document.getElementById('depSearch').value.toLowerCase();
+
+            const table = document.getElementById('leaveEmpTable');
+            const rows = table.getElementsByTagName('tr');
+
+            // เริ่มจากแถวที่ 4 (ข้ามส่วนหัวตาราง)
+            for (let i = 3; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                if (cells.length > 0) {
+                    const codeCell = cells[1].textContent.toLowerCase();
+                    const nameCell = cells[2].textContent.toLowerCase();
+                    const depCell = cells[3].textContent.toLowerCase();
+
+                    const codeMatch = codeCell.includes(codeSearch);
+                    const nameMatch = nameCell.includes(nameSearch);
+                    const depMatch = depCell.includes(depSearch);
+
+                    if (codeMatch && nameMatch && depMatch) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        // เพิ่ม event listener สำหรับช่องค้นหา
+        document.getElementById('codeSearch').addEventListener('input', filterTable);
+        document.getElementById('nameSearch').addEventListener('input', filterTable);
+        document.getElementById('depSearch').addEventListener('input', filterTable);
+
+        // ปุ่มรีเซ็ตวันที่กลับไปเป็นค่าเริ่มต้น
+        document.getElementById('resetButton').addEventListener('click', function() {
+            // กำหนดค่าวันที่เริ่มต้น (1 ธ.ค. ปีที่แล้ว ถึง 30 พ.ย. ปีปัจจุบัน)
+            var lastYear = new Date().getFullYear() - 1;
+            var currentYear = new Date().getFullYear();
+
+            // รูปแบบวันที่ dd-mm-yyyy
+            var defaultStartDate = '01-12-' + lastYear;
+            var defaultEndDate = '30-11-' + currentYear;
+
+            // อัพเดตค่าในฟิลด์
+            document.getElementById('startDate').value = defaultStartDate;
+            document.getElementById('endDate').value = defaultEndDate;
+
+            // อัพเดตข้อความแสดงวันที่
+            document.getElementById('startDateText').textContent = defaultStartDate;
+            document.getElementById('endDateText').textContent = defaultEndDate;
+
+            // ส่งฟอร์มเพื่ออัพเดตข้อมูล
+            document.getElementById('dateForm').submit();
+        });
+
+        // อัพเดตข้อความวันที่เมื่อมีการเปลี่ยนแปลงในฟิลด์
+        document.getElementById('startDate').addEventListener('change', function() {
+            document.getElementById('startDateText').textContent = this.value;
+        });
+
+        document.getElementById('endDate').addEventListener('change', function() {
+            document.getElementById('endDateText').textContent = this.value;
         });
     });
+
+    // ฟังก์ชันสำหรับการ Export PDF
+    function exportToPDF() {
+        // แสดงการโหลดด้วย SweetAlert2
+        Swal.fire({
+            title: 'กำลังสร้างไฟล์ PDF',
+            text: 'กรุณารอสักครู่...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // ตรวจสอบการกรองข้อมูล
+        const codeSearch = document.getElementById('codeSearch').value;
+        const nameSearch = document.getElementById('nameSearch').value;
+        const depSearch = document.getElementById('depSearch').value;
+
+        let reportSubtitle = '';
+        if (codeSearch || nameSearch || depSearch) {
+            reportSubtitle = 'ข้อมูลที่กรอง: ';
+            if (codeSearch) reportSubtitle += `รหัส: ${codeSearch} `;
+            if (nameSearch) reportSubtitle += `ชื่อ: ${nameSearch} `;
+            if (depSearch) reportSubtitle += `แผนก: ${depSearch}`;
+        }
+
+        // กำหนดค่าสำหรับส่วนหัวของเอกสาร
+        const reportTitle = 'รายงานสถิติการลาของพนักงาน';
+        const startDate = document.getElementById('startDateText').textContent.trim();
+        const endDate = document.getElementById('endDateText').textContent.trim();
+        const dateRange = `ช่วงวันที่: ${startDate} ถึง ${endDate}`;
+        const today = new Date();
+        const currentDate = `วันที่พิมพ์: ${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+
+        // สร้างเอกสารใหม่สำหรับการพิมพ์
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('<html><head><title>สถิติการลาของพนักงาน</title>');
+
+        // เพิ่ม CSS สำหรับการพิมพ์
+        printWindow.document.write(`
+        <style>
+            @font-face {
+                font-family: 'THSarabunNew';
+                src: url('../fonts/THSarabunNew.ttf') format('truetype');
+            }
+            body {
+                font-family: 'THSarabunNew', sans-serif;
+                padding: 20px;
+            }
+            .report-header {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .report-title {
+                font-size: 24px;
+                font-weight: bold;
+            }
+            .report-subtitle {
+                font-size: 16px;
+                margin-top: 5px;
+            }
+            .report-date {
+                font-size: 16px;
+                margin-top: 10px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                border: 1px solid #000;
+                padding: 4px;
+                text-align: center;
+                font-size: 14px;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            @media print {
+                .no-print {
+                    display: none;
+                }
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                table {
+                    page-break-inside: auto;
+                }
+                tr {
+                    page-break-inside: avoid;
+                    page-break-after: auto;
+                }
+                thead {
+                    display: table-header-group;
+                }
+                tfoot {
+                    display: table-footer-group;
+                }
+            }
+        </style>
+    `);
+
+        printWindow.document.write('</head><body>');
+
+        // เพิ่มส่วนหัวรายงาน
+        printWindow.document.write(`
+        <div class="report-header">
+            <div class="report-title">${reportTitle}</div>
+            ${reportSubtitle ? `<div class="report-subtitle">${reportSubtitle}</div>` : ''}
+            <div class="report-date">${dateRange}</div>
+            <div class="report-date">${currentDate}</div>
+        </div>
+    `);
+
+        // คัดลอกตารางข้อมูลที่ถูกกรองแล้ว
+        const originalTable = document.getElementById('leaveEmpTable');
+        const clonedTable = originalTable.cloneNode(true);
+
+        // กรองแถวที่ถูกซ่อน
+        const rows = Array.from(clonedTable.querySelectorAll('tbody tr'));
+        rows.forEach(row => {
+            const originalRow = Array.from(originalTable.querySelectorAll('tbody tr')).find(
+                r => r.cells[1].textContent === row.cells[1].textContent
+            );
+            if (originalRow && originalRow.style.display === 'none') {
+                row.remove();
+            }
+        });
+
+        // ลำดับแถวใหม่
+        let rowNumber = 1;
+        rows.forEach(row => {
+            if (row.parentNode) { // ตรวจสอบว่าแถวยังคงอยู่ในตาราง
+                row.cells[0].textContent = rowNumber++;
+            }
+        });
+
+        printWindow.document.write(clonedTable.outerHTML);
+
+        // เพิ่มปุ่มพิมพ์
+        printWindow.document.write(`
+        <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print(); setTimeout(function() { window.close(); }, 500);" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">พิมพ์รายงาน</button>
+            <button onclick="window.close();" style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;">ปิด</button>
+        </div>
+    `);
+
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+
+        // เปิดหน้าต่างการพิมพ์หลังจากโหลดเนื้อหาเสร็จ
+        printWindow.onload = function() {
+            // ปิด SweetAlert
+            Swal.close();
+        };
+    }
     </script>
     <script src="../js/popper.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>

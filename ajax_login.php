@@ -4,11 +4,11 @@ date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
 
 include 'connect.php';
 
-$userCode = $_POST['userCode'];
-$passWord = $_POST['passWord'];
+$userCode  = $_POST['userCode'];
+$passWord  = $_POST['passWord'];
 $statusLog = 1;
 
-$sql = "SELECT * FROM session WHERE s_usercode ='$userCode' AND s_password='$passWord' ";
+$sql    = "SELECT * FROM session WHERE s_usercode ='$userCode' AND s_password='$passWord' ";
 $result = $conn->query($sql);
 
 if ($result->rowCount() > 0) {
@@ -19,6 +19,7 @@ if ($result->rowCount() > 0) {
 
     // กำหนด session สำหรับ usercode
     $_SESSION['s_usercode'] = $userCode;
+    // $_SESSION['s_username'] = $userName;
 
     // ตรวจสอบระดับการเข้าใช้งาน (admin/user)
     $row = $result->fetch(PDO::FETCH_ASSOC);

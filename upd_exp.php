@@ -14,8 +14,16 @@ try {
             // คำนวณอายุงาน
             $startDate   = new DateTime($e_work_start_date);
             $currentDate = new DateTime();
-            $diff        = $currentDate->diff($startDate);
 
+            // คำนวณปีปัจจุบัน
+            $currentYear = $currentDate->format('Y');
+
+            // คำนวณว่าในปีปัจจุบันพนักงานจะครบกี่ปี
+            $anniversaryDateThisYear = new DateTime($currentYear . '-' . $startDate->format('m-d'));
+            $yearsThisAnniversary    = $currentYear - $startDate->format('Y');
+
+            // คำนวณอายุงานปัจจุบัน (สำหรับการแสดงผลเท่านั้น)
+            $diff   = $currentDate->diff($startDate);
             $years  = $diff->y;
             $months = $diff->m;
             $days   = $diff->d;
@@ -23,31 +31,23 @@ try {
             // สร้างข้อความอายุงานในรูปแบบ ปี เดือน วัน
             $e_yearexp = "{$years}Y {$months}M {$days}D";
 
-            // กำหนดค่า e_leave_annual และ e_leave_personal ตามอายุงาน
-            if ($years >= 5) {
-                $e_leave_annual   = 10;
-                $e_leave_personal = 5;
-            } elseif ($years >= 4) {
-                $e_leave_annual   = 9;
-                $e_leave_personal = 5;
-            } elseif ($years >= 3) {
-                $e_leave_annual   = 8;
-                $e_leave_personal = 5;
-            } elseif ($years >= 2) {
-                $e_leave_annual   = 7;
-                $e_leave_personal = 5;
-            } elseif ($years >= 1) {
-                $e_leave_annual   = 6;
-                $e_leave_personal = 5;
+            // กำหนดค่า e_leave_annual ตามอายุงานที่จะครบในปีนี้ (ล่วงหน้า)
+            if ($yearsThisAnniversary >= 5) {
+                $e_leave_annual = 10;
+            } elseif ($yearsThisAnniversary >= 4) {
+                $e_leave_annual = 9;
+            } elseif ($yearsThisAnniversary >= 3) {
+                $e_leave_annual = 8;
+            } elseif ($yearsThisAnniversary >= 2) {
+                $e_leave_annual = 7;
+            } elseif ($yearsThisAnniversary >= 1) {
+                $e_leave_annual = 6;
             } else {
-                $e_leave_annual   = 0;
-                $e_leave_personal = 0;
+                $e_leave_annual = 0;
             }
 
-            // เพิ่มวันพักร้อน 1 วัน ถ้าอายุงานมากกว่า 1 ปี และไม่ถึง 10 วัน
-            if ($years >= 1 && $e_leave_annual < 10) {
-                $e_leave_annual += 1;
-            }
+            // วันลากิจ 5 วันเมื่อครบ 1 ปีขึ้นไป (ใช้อายุงานจริงในปัจจุบัน)
+            $e_leave_personal = ($years >= 1) ? 5 : 0;
 
             // อัปเดตข้อมูลในฐานข้อมูล
             $update_sql = "UPDATE employees

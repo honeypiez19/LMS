@@ -15,7 +15,7 @@ $selectedYear  = isset($_GET['year']) ? $_GET['year'] : date("Y");      // ถ�
 $searchCode    = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : ''; // รับค่า codeSearch จาก AJAX
 $selectedMonth = isset($_GET['month']) ? $_GET['month'] : 'All';        // รับค่า selectedMonth จาก AJAX
 
-$sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
+$sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7) AND l_hr_status <> 3
 AND l_usercode LIKE '%" . $searchCode . "%'";
 
 if ($selectedMonth != "All") {
@@ -300,7 +300,7 @@ if ($result->rowCount() > 0) {
         if (! empty($row['l_file'])) {
             echo '<td><button id="imgBtn" class="btn btn-primary" onclick="window.open(\'../upload/' . $row['l_file'] . '\', \'_blank\')"><i class="fa-solid fa-file"></i></button></td>';
         } else {
-            echo '<td><button id="imgNoBtn" class="btn btn-primary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
+            echo '<td><button id="imgNoBtn" class="btn btn-secondary" disabled><i class="fa-solid fa-file-excel"></i></button></td>';
         }
         echo '</td>';
 

@@ -4,6 +4,92 @@ include 'access_token_channel.php';
 
 date_default_timezone_set('Asia/Bangkok');
 
+// ดึงข้อมูลวันหยุดจากฐานข้อมูล
+function getHolidays($conn)
+{
+    try {
+        $query    = $conn->query("SELECT h_start_date, h_end_date FROM holiday");
+        $holidays = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        $holidayDates = [];
+        foreach ($holidays as $holiday) {
+            // เพิ่มวันที่เริ่มต้นเข้าไปในอาร์เรย์
+            $holidayDates[] = $holiday['h_start_date'];
+
+            // ถ้าวันที่สิ้นสุดไม่เท่ากับวันที่เริ่มต้น (ช่วงวันหยุด)
+            if ($holiday['h_end_date'] != $holiday['h_start_date']) {
+                $start     = new DateTime($holiday['h_start_date']);
+                $end       = new DateTime($holiday['h_end_date']);
+                $interval  = new DateInterval('P1D'); // 1 วัน
+                $dateRange = new DatePeriod($start, $interval, $end);
+
+                // เพิ่มทุกวันในช่วงเข้าไปในอาร์เรย์
+                foreach ($dateRange as $date) {
+                    if ($date->format('Y-m-d') != $holiday['h_start_date']) {
+                        $holidayDates[] = $date->format('Y-m-d');
+                    }
+                }
+
+                // เพิ่มวันสุดท้าย
+                $holidayDates[] = $holiday['h_end_date'];
+            }
+        }
+
+        return $holidayDates;
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+// ดึงวันหยุด
+$holidays = getHolidays($conn);
+
+// คำนวณวันทำงานถัดไปที่ไม่ใช่วันหยุด
+function getNextWorkingDay($date, $days, $holidays)
+{
+    $currentDate = new DateTime($date);
+    $daysAdded   = 0;
+
+    while ($daysAdded < $days) {
+        $currentDate->modify('+1 day');
+        $dateStr = $currentDate->format('Y-m-d');
+
+        // ถ้าไม่ใช่วันเสาร์อาทิตย์และไม่ใช่วันหยุด เพิ่มวันทำงาน
+        $weekDay = $currentDate->format('N');
+        if ($weekDay < 6 && ! in_array($dateStr, $holidays)) {
+            $daysAdded++;
+        }
+    }
+
+    return $currentDate->format('Y-m-d');
+}
+
+// คำนวณวันทำงานที่ผ่านมาที่ไม่ใช่วันหยุด
+function getPreviousWorkingDay($date, $days, $holidays)
+{
+    $currentDate    = new DateTime($date);
+    $daysSubtracted = 0;
+
+    while ($daysSubtracted < $days) {
+        $currentDate->modify('-1 day');
+        $dateStr = $currentDate->format('Y-m-d');
+
+        // ถ้าไม่ใช่วันเสาร์อาทิตย์และไม่ใช่วันหยุด เพิ่มวันทำงาน
+        $weekDay = $currentDate->format('N');
+        if ($weekDay < 6 && ! in_array($dateStr, $holidays)) {
+            $daysSubtracted++;
+        }
+    }
+
+    return $currentDate->format('Y-m-d');
+}
+
+// คำนวณวันที่ควรแจ้งเตือน (1 วันทำงานก่อนและหลัง)
+$today        = date('Y-m-d');
+$notifyBefore = getNextWorkingDay($today, 1, $holidays);
+$notifyAfter  = getPreviousWorkingDay($today, 1, $holidays);
+
+// ดึงข้อมูลรายการลาที่ยังไม่อนุมัติจากหัวหน้า
 $sql = "SELECT
     li.l_usercode,
     li.l_username,
@@ -23,44 +109,138 @@ $sql = "SELECT
     em.e_sub_department4,
     em.e_sub_department5,
     em.e_user_id,
-    em2.e_username AS gm_username
+    em.e_username AS employee_username
 FROM leave_list li
 INNER JOIN employees em ON li.l_usercode = em.e_usercode
-LEFT JOIN employees em2 ON (
-    em2.e_level = 'GM'
-    AND (
-        em.e_sub_department = em2.e_sub_department
-        OR em.e_sub_department = em2.e_sub_department2
-        OR em.e_sub_department = em2.e_sub_department3
-        OR em.e_sub_department = em2.e_sub_department4
-        OR em.e_sub_department = em2.e_sub_department5
-    )
-)
 WHERE
     li.l_leave_id NOT IN (6, 7)
     AND li.l_hr_status = 0
     AND (
-        -- แจ้งเตือนก่อนวันลา 1 วัน
-        li.l_leave_start_date = CURDATE() + INTERVAL 1 DAY
-        -- แจ้งเตือนหากวันลาเลยมา 1 วันแล้ว แต่ยังไม่มีการอนุมัติ
-        OR (li.l_leave_start_date = CURDATE() - INTERVAL 1 DAY AND li.l_hr_status = 0)
+        -- แจ้งเตือนล่วงหน้า 1 วันทำงาน (ไม่นับวันหยุด)
+        li.l_leave_start_date = :notifyBefore
+        -- แจ้งเตือนหากผ่านมา 1 วันทำงานแล้ว (ไม่นับวันหยุด) แต่ยังไม่มีการอนุมัติ
+        OR (li.l_leave_start_date = :notifyAfter AND li.l_hr_status = 0)
     )
-    AND li.l_level IN ('user','leader','chief','manager','manager2','assisManager','subLeader','GM')";
+    AND li.l_level IN ('user','leader','subLeader','chief','assisManager','manager','manager2','admin')";
 
-$stmt = $conn->prepare($sql);
-$stmt->execute();
+try {
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':notifyBefore', $notifyBefore);
+    $stmt->bindParam(':notifyAfter', $notifyAfter);
+    $stmt->execute();
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // ถ้าไม่มีข้อมูลก็ไม่ต้องทำอะไรต่อ
+    if (empty($results)) {
+        exit; // ไม่มีใบลาที่ต้องแจ้งเตือน
+    }
+} catch (PDOException $e) {
+    exit;
+}
 
 $line_api_url = "https://api.line.me/v2/bot/message/push";
+$mURL         = 'https://lms.system-samt.com/';
 
-foreach ($results as $row) {
+// ฟังก์ชันสำหรับหาหัวหน้าที่เกี่ยวข้องกับพนักงาน
+function getSupervisors($conn, $employee)
+{
+    $supervisor_sql = "SELECT e_user_id, e_username
+                        FROM employees
+                        WHERE e_level = 'admin'
+                        -- AND e_level <> :level
+                        AND e_workplace = :workplace";
 
-    $mURL    = 'https://lms.system-samt.com/';
-    $message = "ใบลาของ " . $row['l_name'] . " ยังไม่อนุมัติ" . "\nวันที่ลา : " . $row['l_leave_start_date'] . " " . $row['l_leave_start_time'] . " ถึง " . $row['l_leave_end_date'] . " " . $row['l_leave_end_time'] . "\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : " . $mURL;
+    try {
+        $supervisor_stmt = $conn->prepare($supervisor_sql);
+        $supervisor_stmt->execute([
+            // ':level'     => $employee['l_level'],
+            ':workplace' => $employee['l_workplace'],
+        ]);
 
+        $supervisors = $supervisor_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $supervisors;
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+// We no longer need this function as its functionality
+// has been integrated into the main loop
+
+// ตรวจสอบ access token
+if (empty($access_token)) {
+    exit;
+}
+
+// จัดเตรียมใบลาสำหรับแต่ละหัวหน้า
+$supervisorLeaves = [];
+
+// จัดกลุ่มใบลาตามหัวหน้า
+foreach ($results as $leave) {
+    // หาหัวหน้าที่เกี่ยวข้อง
+    $supervisors = getSupervisors($conn, $leave);
+
+    if (empty($supervisors)) {
+        continue;
+    }
+
+    // จัดกลุ่มใบลาตามหัวหน้า
+    foreach ($supervisors as $supervisor) {
+        $userId = $supervisor['e_user_id'];
+        if (! empty($userId)) {
+            if (! isset($supervisorLeaves[$userId])) {
+                $supervisorLeaves[$userId] = [
+                    'supervisor' => $supervisor,
+                    'leaves'     => [],
+                ];
+            }
+            $supervisorLeaves[$userId]['leaves'][] = $leave;
+        }
+    }
+}
+
+// ส่งข้อความแจ้งเตือนให้แต่ละหัวหน้า
+foreach ($supervisorLeaves as $userData) {
+    $supervisor = $userData['supervisor'];
+    $leaves     = $userData['leaves'];
+
+    // สร้างข้อความแจ้งเตือน
+    $message = "รายการใบลาที่รอการอนุมัติ\n\n";
+
+    foreach ($leaves as $index => $leave) {
+        $message .= ($index + 1) . ". " . $leave['l_name'] . " แผนก : " . $leave['l_department'] .
+            "\nวันที่ลา: " . $leave['l_leave_start_date'] . "\n\n";
+
+        // บันทึกประวัติการส่งข้อความ
+        try {
+            $insert_sql = "INSERT INTO notification_log
+                    (n_leave_id, n_name, n_department, n_leave_start_date, n_leave_start_time, n_leave_end_date, n_leave_end_time, n_send_name, n_workplace)
+                    VALUES
+                    (:leave_id, :name, :department, :leave_start_date, :leave_start_time, :leave_end_date, :leave_end_time, :send_name, :workplace)";
+
+            $insert_stmt = $conn->prepare($insert_sql);
+            $insert_stmt->execute([
+                ':leave_id'         => $leave['l_leave_id'],
+                ':name'             => $leave['l_name'],
+                ':department'       => $leave['l_department'],
+                ':leave_start_date' => $leave['l_leave_start_date'],
+                ':leave_start_time' => $leave['l_leave_start_time'],
+                ':leave_end_date'   => $leave['l_leave_end_date'],
+                ':leave_end_time'   => $leave['l_leave_end_time'],
+                ':send_name'        => $supervisor['e_username'],
+                ':workplace'        => $leave['l_workplace'],
+            ]);
+        } catch (PDOException $e) {
+            // Error handling
+        }
+    }
+
+    $message .= "กรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: " . $mURL;
+
+    // เตรียมข้อมูลสำหรับส่ง LINE
     $data = [
-        'to'       => $row['e_user_id'],
+        'to'       => $supervisor['e_user_id'],
         'messages' => [
             [
                 'type' => 'text',
@@ -74,30 +254,15 @@ foreach ($results as $row) {
         'Authorization: Bearer ' . $access_token,
     ];
 
+    // ส่งข้อความ
     $ch = curl_init($line_api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-    $response = curl_exec($ch);
+    $response  = curl_exec($ch);
+    $err       = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-
-    $insert_sql = "INSERT INTO notification_log
-            (n_leave_id, n_name, n_department, n_leave_start_date, n_leave_start_time, n_leave_end_date, n_leave_end_time, n_send_name, n_workplace)
-            VALUES
-            (:leave_id, :name, :department, :leave_start_date, :leave_start_time, :leave_end_date, :leave_end_time, :send_name, :workplace)";
-
-    $insert_stmt = $conn->prepare($insert_sql);
-    $insert_stmt->execute([
-        ':leave_id'         => $row['l_leave_id'],
-        ':name'             => $row['l_name'],
-        ':department'       => $row['l_department'],
-        ':leave_start_date' => $row['l_leave_start_date'],
-        ':leave_start_time' => $row['l_leave_start_time'],
-        ':leave_end_date'   => $row['l_leave_end_date'],
-        ':leave_end_time'   => $row['l_leave_end_time'],
-        ':send_name'        => $row['gm_username'],
-        ':workplace'        => $row['l_workplace'],
-    ]);
 }

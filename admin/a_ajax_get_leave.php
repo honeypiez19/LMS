@@ -1,43 +1,38 @@
 <?php
 // เชื่อมต่อฐานข้อมูล
-include '../connect.php'; // เชื่อมต่อไฟล์ฐานข้อมูล
+include '../connect.php';
 
 header('Content-Type: application/json; charset=UTF-8'); // ระบุว่าเราส่ง JSON
 
-// ตรวจสอบค่าที่ถูกส่งมาจาก AJAX
-if (isset($_POST['createDateTime']) && isset($_POST['userCode'])) {
-    // รับค่าจาก AJAX
-    $createDateTime = $_POST['createDateTime'];
-    $userCode = $_POST['userCode'];
+if (isset($_POST['createDatetime']) && isset($_POST['userCode'])) {
+    $createDatetime = $_POST['createDatetime'];
+    $userCode       = $_POST['userCode'];
 
     try {
-        // Query to fetch data
-        $sql = "SELECT * FROM leave_list WHERE l_create_datetime = :createDateTime AND l_usercode = :userCode";
+        // เตรียมคำสั่ง SQL
+        $sql  = "SELECT * FROM leave_list WHERE l_create_datetime = :createDatetime AND l_usercode = :userCode";
         $stmt = $conn->prepare($sql);
 
-        // Bind parameters
-        $stmt->bindParam(':createDateTime', $createDateTime);
-        $stmt->bindParam(':userCode', $userCode);
+        // ผูกค่าพารามิเตอร์
+        $stmt->bindParam(':createDatetime', $createDatetime, PDO::PARAM_STR);
+        $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
 
-        // Execute the query
+        // รันคำสั่ง SQL
         $stmt->execute();
 
-        // Check if any row is returned
+        // ตรวจสอบผลลัพธ์
         if ($stmt->rowCount() > 0) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // เพิ่มสถานะ success
-            $row['status'] = 'success';
+            $row                       = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row['l_leave_start_date'] = date('d-m-Y', strtotime($row['l_leave_start_date']));
+            $row['l_leave_end_date']   = date('d-m-Y', strtotime($row['l_leave_end_date']));
             echo json_encode($row); // ส่งข้อมูล JSON กลับไป
         } else {
-            // If no data found
-            echo json_encode(['status' => 'error', 'message' => 'ไม่พบข้อมูล']);
+            echo json_encode(['error' => 'ไม่พบข้อมูล']); // กรณีไม่พบข้อมูล
         }
-    } catch (PDOException $e) {
-        // Handle PDO errors
-        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()]);
+    } catch (Exception $e) {
+        // จัดการข้อผิดพลาด
+        echo json_encode(['error' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
     }
 } else {
-    // Handle case when parameters are missing
-    echo json_encode(['status' => 'error', 'message' => 'Missing parameters']);
+    echo json_encode(['error' => 'ข้อมูลไม่ครบ']);
 }

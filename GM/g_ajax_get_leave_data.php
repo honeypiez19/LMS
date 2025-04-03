@@ -1,66 +1,176 @@
 <?php
-// Include the database connection file
+session_start();
+date_default_timezone_set('Asia/Bangkok');
+
 include '../connect.php';
 
-$status = $_GET['status'];
-$month  = $_GET['month'];
-$year   = $_GET['year'];
+// รับค่าพารามิเตอร์จาก AJAX
+$page          = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$per_page      = isset($_GET['per_page']) ? intval($_GET['per_page']) : 10;
+$status        = isset($_GET['status']) ? $_GET['status'] : 'all';
+$selectedYear  = isset($_GET['year']) ? $_GET['year'] : date('Y');
+$selectedMonth = isset($_GET['month']) ? $_GET['month'] : 'All';
+$codeSearch    = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
+$nameSearch    = isset($_GET['nameSearch']) ? $_GET['nameSearch'] : '';
+$leaveSearch   = isset($_GET['leaveSearch']) ? $_GET['leaveSearch'] : '';
+$workplace     = isset($_GET['workplace']) ? $_GET['workplace'] : '';
 
-// Prepare a SQL query to select leave data based on the status
+// รับค่าแผนกและหน่วยงาน
+$depart     = isset($_GET['depart']) ? $_GET['depart'] : '';
+$subDepart  = isset($_GET['subDepart']) ? $_GET['subDepart'] : '';
+$subDepart2 = isset($_GET['subDepart2']) ? $_GET['subDepart2'] : '';
+$subDepart3 = isset($_GET['subDepart3']) ? $_GET['subDepart3'] : '';
+$subDepart4 = isset($_GET['subDepart4']) ? $_GET['subDepart4'] : '';
+$subDepart5 = isset($_GET['subDepart5']) ? $_GET['subDepart5'] : '';
+
+// คำนวณ offset สำหรับ pagination
+$offset = ($page - 1) * $per_page;
+
+// สร้าง SQL query พื้นฐาน
 $sql = "SELECT
-    li.*
-FROM
-    leave_list li
+    li.*,
+    em.*
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_leave_id NOT IN (6, 7)
-    AND li.l_approve_status IN (2,6)
+    li.l_approve_status IN (2,6)
     AND li.l_approve_status2 IN (4,6)
-    AND li.l_level IN ('user', 'chief', 'leader','admin','assisManager','manager','subLeader')
+    AND li.l_approve_status3 <> 6
+    AND li.l_leave_id NOT IN (6, 7)
     AND (
-        YEAR(li.l_create_datetime) = :year
-        OR YEAR(li.l_leave_end_date) = :year
+        YEAR(li.l_create_datetime) = :selectedYear
+        OR YEAR(li.l_leave_end_date) = :selectedYear
     )";
-if ($status == 'all') {
-    // No additional filters for 'all' status
-} else if ($status == 7) {
-    $sql .= " AND li.l_approve_status3 = 7";
-} else if ($status == 8) {
-    $sql .= " AND li.l_approve_status3 = 8";
-} else if ($status == 9) {
-    $sql .= " AND li.l_approve_status3 = 9";
-} else {
-    echo json_encode(['error' => 'ไม่พบสถานะ']);
-    exit;
+
+// เพิ่มเงื่อนไขสำหรับการกรองตามสถานะการอนุมัติ
+if ($status !== 'all') {
+    $sql .= " AND li.l_approve_status3 = :status";
 }
 
-if ($month != "All") {
+// เพิ่มเงื่อนไขสำหรับเดือน
+if ($selectedMonth != "All") {
     $sql .= " AND (
-        Month(li.l_create_datetime) = :month
-        OR Month(li.l_leave_end_date) = :month
-    ) ";
+        MONTH(li.l_create_datetime) = :selectedMonth
+        OR MONTH(li.l_leave_end_date) = :selectedMonth
+    )";
 }
 
+// เพิ่มเงื่อนไขสำหรับการค้นหาตามรหัสพนักงาน
+if (! empty($codeSearch)) {
+    $sql .= " AND (li.l_usercode LIKE :codeSearch)";
+}
+
+// เพิ่มเงื่อนไขสำหรับการค้นหาตามชื่อพนักงาน
+if (! empty($nameSearch)) {
+    $sql .= " AND (li.l_name LIKE :nameSearch)";
+}
+
+// เพิ่มเงื่อนไขสำหรับการค้นหาตามประเภทการลา
+if (! empty($leaveSearch)) {
+    $sql .= " AND (
+        (li.l_leave_id = 1 AND :leaveSearch LIKE '%ลากิจได้รับค่าจ้าง%') OR
+        (li.l_leave_id = 2 AND :leaveSearch LIKE '%ลากิจไม่ได้รับค่าจ้าง%') OR
+        (li.l_leave_id = 3 AND :leaveSearch LIKE '%ลาป่วย%') OR
+        (li.l_leave_id = 4 AND :leaveSearch LIKE '%ลาป่วยจากงาน%') OR
+        (li.l_leave_id = 5 AND :leaveSearch LIKE '%ลาพักร้อน%') OR
+        (li.l_leave_id = 8 AND :leaveSearch LIKE '%อื่น ๆ%')
+    )";
+}
+
+// เพิ่มเงื่อนไขสำหรับการกรองตามแผนก
+$sql .= " AND li.l_workplace = :workplace";
+
+// เพิ่มการเรียงลำดับ
 $sql .= " ORDER BY li.l_create_datetime DESC";
 
-$stmt = $conn->prepare($sql);
-$stmt->bindParam(':year', $year, PDO::PARAM_INT);
+// ใช้ SQL เดียวกันสำหรับนับจำนวนรายการทั้งหมดเพื่อทำ pagination
+$count_sql = $sql;
 
-if ($month != "All") {
-    $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+// เพิ่ม LIMIT และ OFFSET สำหรับแบ่งหน้า
+$sql .= " LIMIT :limit OFFSET :offset";
+
+// เตรียม statement สำหรับนับจำนวนรายการทั้งหมด
+$count_stmt = $conn->prepare($count_sql);
+
+// Bind parameters สำหรับ count_stmt
+$count_stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$count_stmt->bindParam(':workplace', $workplace);
+
+if ($status !== 'all') {
+    $count_stmt->bindParam(':status', $status);
 }
 
+if ($selectedMonth != "All") {
+    $count_stmt->bindParam(':selectedMonth', $selectedMonth);
+}
+
+if (! empty($codeSearch)) {
+    $codeSearchParam = '%' . $codeSearch . '%';
+    $count_stmt->bindParam(':codeSearch', $codeSearchParam);
+}
+
+if (! empty($nameSearch)) {
+    $nameSearchParam = '%' . $nameSearch . '%';
+    $count_stmt->bindParam(':nameSearch', $nameSearchParam);
+}
+
+if (! empty($leaveSearch)) {
+    $count_stmt->bindParam(':leaveSearch', $leaveSearch);
+}
+
+// Execute count query
+$count_stmt->execute();
+$total_rows = $count_stmt->rowCount();
+
+// เตรียม statement สำหรับดึงข้อมูล
+$stmt = $conn->prepare($sql);
+
+// Bind parameters
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':workplace', $workplace);
+
+$stmt->bindParam(':limit', $per_page, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+if ($status !== 'all') {
+    $stmt->bindParam(':status', $status);
+}
+
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
+}
+
+if (! empty($codeSearch)) {
+    $codeSearchParam = '%' . $codeSearch . '%';
+    $stmt->bindParam(':codeSearch', $codeSearchParam);
+}
+
+if (! empty($nameSearch)) {
+    $nameSearchParam = '%' . $nameSearch . '%';
+    $stmt->bindParam(':nameSearch', $nameSearchParam);
+}
+
+if (! empty($leaveSearch)) {
+    $stmt->bindParam(':leaveSearch', $leaveSearch);
+}
+
+// Execute query
 $stmt->execute();
+$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch the results as an associative array
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// คำนวณข้อมูลสำหรับ pagination
+$total_pages = ceil($total_rows / $per_page);
+$from        = ($total_rows == 0) ? 0 : (($page - 1) * $per_page) + 1;
+$to          = min($from + $per_page - 1, $total_rows);
 
-// Calculate holidays within leave period
-foreach ($results as &$row) {
+// เตรียมข้อมูลสำหรับคำนวณจำนวนวันลา
+foreach ($data as &$row) {
+    // คำนวณวันลาและชั่วโมง (โค้ดเดิมจาก PHP หลัก)
     $holiday_query = "SELECT COUNT(*) as holiday_count
-                      FROM holiday
-                      WHERE h_start_date BETWEEN :start_date AND :end_date
-                        AND h_holiday_status = 'วันหยุด'
-                        AND h_status = 0";
+        FROM holiday
+        WHERE h_start_date BETWEEN :start_date AND :end_date
+        AND h_holiday_status = 'วันหยุด'
+        AND h_status = 0";
 
     $holiday_stmt = $conn->prepare($holiday_query);
     $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
@@ -68,20 +178,18 @@ foreach ($results as &$row) {
     $holiday_stmt->execute();
 
     $holiday_data  = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
-    $holiday_count = $holiday_data['holiday_count'] ?? 0;
+    $holiday_count = $holiday_data['holiday_count'];
 
-    // Calculate leave duration
-    $start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
-    $end_date   = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-    $interval   = $start_date->diff($end_date);
+    $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
+    $l_leave_end_date   = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
+    $interval           = $l_leave_start_date->diff($l_leave_end_date);
 
     $leave_days    = $interval->days - $holiday_count;
     $leave_hours   = $interval->h;
     $leave_minutes = $interval->i;
 
-    // Adjust hours for out-of-range times
-    $start_hour = (int) $start_date->format('H');
-    $end_hour   = (int) $end_date->format('H');
+    $start_hour = (int) $l_leave_start_date->format('H');
+    $end_hour   = (int) $l_leave_end_date->format('H');
 
     if (! ((($start_hour >= 8 && $start_hour < 12) && ($end_hour <= 12)) ||
         (($start_hour >= 13 && $start_hour < 17) && ($end_hour <= 17)))) {
@@ -90,7 +198,7 @@ foreach ($results as &$row) {
 
     if ($leave_hours >= 8) {
         $leave_days += floor($leave_hours / 8);
-        $leave_hours %= 8;
+        $leave_hours = $leave_hours % 8;
     }
 
     if ($leave_minutes >= 30) {
@@ -103,6 +211,101 @@ foreach ($results as &$row) {
         'minutes' => $leave_minutes,
     ];
 }
-// Send the results as JSON
+
+// ดึงข้อมูลจำนวนรายการตามสถานะ (เพิ่มโค้ดส่วนนี้)
+$statuses      = ['all', '7', '8', '9'];
+$status_counts = [];
+
+foreach ($statuses as $stat) {
+    // สร้าง SQL base สำหรับนับจำนวนตามสถานะ
+    $status_sql = "SELECT COUNT(*) FROM leave_list li
+                   INNER JOIN employees em ON li.l_usercode = em.e_usercode
+                   WHERE li.l_approve_status IN (2,6)
+                   AND li.l_approve_status2 IN (4,6)
+                   AND li.l_approve_status3 <> 6
+                   AND li.l_leave_id NOT IN (6, 7)
+                   AND (
+                       YEAR(li.l_create_datetime) = :selectedYear
+                       OR YEAR(li.l_leave_end_date) = :selectedYear
+                   )
+                   AND li.l_workplace = :workplace";
+
+    // เพิ่มเงื่อนไขสำหรับเดือนที่เลือก
+    if ($selectedMonth != "All") {
+        $status_sql .= " AND (
+            MONTH(li.l_create_datetime) = :selectedMonth
+            OR MONTH(li.l_leave_end_date) = :selectedMonth
+        )";
+    }
+
+    // เพิ่มเงื่อนไขสำหรับการค้นหา
+    if (! empty($codeSearch)) {
+        $status_sql .= " AND (li.l_usercode LIKE :codeSearch)";
+    }
+
+    if (! empty($nameSearch)) {
+        $status_sql .= " AND (li.l_name LIKE :nameSearch)";
+    }
+
+    if (! empty($leaveSearch)) {
+        $status_sql .= " AND (
+            (li.l_leave_id = 1 AND :leaveSearch LIKE '%ลากิจได้รับค่าจ้าง%') OR
+            (li.l_leave_id = 2 AND :leaveSearch LIKE '%ลากิจไม่ได้รับค่าจ้าง%') OR
+            (li.l_leave_id = 3 AND :leaveSearch LIKE '%ลาป่วย%') OR
+            (li.l_leave_id = 4 AND :leaveSearch LIKE '%ลาป่วยจากงาน%') OR
+            (li.l_leave_id = 5 AND :leaveSearch LIKE '%ลาพักร้อน%') OR
+            (li.l_leave_id = 8 AND :leaveSearch LIKE '%อื่น ๆ%')
+        )";
+    }
+
+    // เพิ่มเงื่อนไขตามสถานะ
+    if ($stat !== 'all') {
+        $status_sql .= " AND li.l_approve_status3 = :status";
+    }
+
+    $status_stmt = $conn->prepare($status_sql);
+
+    // Bind parameters
+    $status_stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+    $status_stmt->bindParam(':workplace', $workplace);
+
+    if ($selectedMonth != "All") {
+        $status_stmt->bindParam(':selectedMonth', $selectedMonth);
+    }
+
+    if (! empty($codeSearch)) {
+        $status_stmt->bindParam(':codeSearch', $codeSearchParam);
+    }
+
+    if (! empty($nameSearch)) {
+        $status_stmt->bindParam(':nameSearch', $nameSearchParam);
+    }
+
+    if (! empty($leaveSearch)) {
+        $status_stmt->bindParam(':leaveSearch', $leaveSearch);
+    }
+
+    if ($stat !== 'all') {
+        $status_stmt->bindParam(':status', $stat);
+    }
+
+    $status_stmt->execute();
+    $status_counts[$stat] = $status_stmt->fetchColumn();
+}
+
+// ส่งกลับข้อมูลในรูปแบบ JSON
+$response = [
+    'data'          => $data,
+    'pagination'    => [
+        'current_page' => $page,
+        'total_pages'  => $total_pages,
+        'per_page'     => $per_page,
+        'total_rows'   => $total_rows,
+        'from'         => $from,
+        'to'           => $to,
+    ],
+    'status_counts' => $status_counts, // เพิ่มข้อมูลจำนวนรายการตามสถานะ
+];
+
 header('Content-Type: application/json');
-echo json_encode($results);
+echo json_encode($response);

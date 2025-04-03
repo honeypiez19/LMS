@@ -6,11 +6,11 @@ header('Content-Type: application/json; charset=UTF-8'); // ระบุว่�
 
 if (isset($_POST['createDatetime']) && isset($_POST['userCode'])) {
     $createDatetime = $_POST['createDatetime'];
-    $userCode = $_POST['userCode'];
+    $userCode       = $_POST['userCode'];
 
     try {
         // เตรียมคำสั่ง SQL
-        $sql = "SELECT * FROM leave_list WHERE l_create_datetime = :createDatetime AND l_usercode = :userCode";
+        $sql  = "SELECT * FROM leave_list WHERE l_create_datetime = :createDatetime AND l_usercode = :userCode";
         $stmt = $conn->prepare($sql);
 
         // ผูกค่าพารามิเตอร์

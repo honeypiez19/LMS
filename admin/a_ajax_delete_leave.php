@@ -1,22 +1,23 @@
 <?php
 
 include '../connect.php';
+include '../access_token_channel.php';
+
 date_default_timezone_set('Asia/Bangkok');
 
-// ตรวจสอบว่าข้อมูลถูกส่งมาด้วย POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $createDateTime = $_POST['createDateTime'] ?? '';
-    $userCode = $_POST['userCode'] ?? '';
-    $canDatetime = date('Y-m-d H:i:s');
-    $nameCan = $_POST['nameCan'] ?? '';
+    $userCode       = $_POST['userCode'] ?? '';
+    $canDatetime    = date('Y-m-d H:i:s');
+    $nameCan        = $_POST['nameCan'] ?? '';
 
-    $leaveType = $_POST['leaveType'] ?? '';
-    $leaveReason = $_POST['leaveReason'] ?? '';
+    $leaveType      = $_POST['leaveType'] ?? '';
+    $leaveReason    = $_POST['leaveReason'] ?? '';
     $leaveStartDate = $_POST['leaveStartDate'] ?? '';
-    $leaveEndDate = $_POST['leaveEndDate'] ?? '';
+    $leaveEndDate   = $_POST['leaveEndDate'] ?? '';
 
     // ตรวจสอบข้อมูล
-    if (!empty($createDateTime) && !empty($userCode)) {
+    if (! empty($createDateTime) && ! empty($userCode)) {
         try {
             // อัปเดตสถานะเป็น "canceled"
             $sql = "UPDATE leave_list
@@ -34,43 +35,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bindParam(':nameCan', $nameCan);
 
             if ($stmt->execute()) {
-                // ดึง e_token จากตาราง employees
-                $tokenQuery = "SELECT e_token FROM employees WHERE e_usercode = :userCode";
-                $stmtToken = $conn->prepare($tokenQuery);
-                $stmtToken->bindParam(':userCode', $userCode);
-                $stmtToken->execute();
-                $employee = $stmtToken->fetch(PDO::FETCH_ASSOC);
+                // ดึง e_user_id (LINE userId) จากตาราง employees
+                $userIdQuery = "SELECT e_user_id FROM employees WHERE e_usercode = :userCode";
+                $stmtUserId  = $conn->prepare($userIdQuery);
+                $stmtUserId->bindParam(':userCode', $userCode);
+                $stmtUserId->execute();
+                $employee = $stmtUserId->fetch(PDO::FETCH_ASSOC);
 
-                if ($employee && !empty($employee['e_token'])) {
-                    $sToken = $employee['e_token'];
-                    $url = 'https://lms.system-samt.com/';
-                    $sMessage = "HR ได้ยกเลิกใบลาของคุณเรียบร้อย\nประเภทการลา : $leaveType \nเหตุผลการลา : $leaveReason \nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate กรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $url";
+                if ($employee && ! empty($employee['e_user_id'])) {
+                    $userId  = $employee['e_user_id'];
+                    $url     = 'https://lms.system-samt.com/';
+                    $message = "HR ได้ยกเลิกใบลาของคุณเรียบร้อย\nประเภทการลา : $leaveType \nเหตุผลการลา : $leaveReason \nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate กรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $url";
 
-                    $chOne = curl_init();
-                    curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-                    curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-                    curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-                    curl_setopt($chOne, CURLOPT_POST, 1);
-                    curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($sMessage));
-                    $headers = array(
-                        'Content-type: application/x-www-form-urlencoded',
-                        'Authorization: Bearer ' . $sToken,
-                    );
-                    curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-                    curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-                    $result = curl_exec($chOne);
+                    // สร้าง payload สำหรับส่งข้อความ
+                    $data = [
+                        'to'       => $userId,
+                        'messages' => [
+                            [
+                                'type' => 'text',
+                                'text' => $message,
+                            ],
+                        ],
+                    ];
 
-                    if (curl_error($chOne)) {
-                        echo 'Error: ' . curl_error($chOne);
+                    $post = json_encode($data);
+
+                    $ch = curl_init("https://api.line.me/v2/bot/message/push");
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                        'Content-Type: application/json',
+                        'Authorization: Bearer ' . $access_token,
+                    ]);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    $result = curl_exec($ch);
+
+                    if (curl_error($ch)) {
+                        echo 'Error: ' . curl_error($ch);
                     } else {
-                        $result_ = json_decode($result, true);
-                        if ($result_['status'] == 200) {
-                            echo 'success';
+                        $response = json_decode($result, true);
+                        if (isset($response['message'])) {
+                            echo 'LINE Messaging API Error: ' . $response['message'];
                         } else {
-                            echo 'LINE Notify Error: ' . $result_['message'];
+                            echo 'success';
                         }
                     }
-                    curl_close($chOne);
+                    curl_close($ch);
                 } else {
                     echo 'success (no LINE notification)';
                 }

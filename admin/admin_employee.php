@@ -84,7 +84,7 @@
                 <input type="text" class="form-control" id="depSearch" list="depList">
                 <datalist id="depList">
                     <?php
-                        $sql    = "SELECT e_department FROM employees";
+                        $sql    = "SELECT Distinct e_department FROM employees";
                         $result = $conn->query($sql);
                         while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                             echo '<option value="' . $row['e_department'] . '">';
@@ -124,28 +124,70 @@
             </thead>
             <tbody>
                 <?php
-                    $itemsPerPage = 10;
+                    if (! isset($_GET['items'])) {
+                        $itemsPerPage = 10;
+                    } else {
+                        $itemsPerPage = (int) $_GET['items'];
+                        // ตรวจสอบว่าค่าที่รับมาตรงกับตัวเลือกที่กำหนดไว้
+                        if (! in_array($itemsPerPage, [10, 25, 50, 100])) {
+                            $itemsPerPage = 10; // ถ้าไม่ตรงให้ใช้ค่าเริ่มต้น
+                        }
+                    }
 
-                    $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+                    // รับค่าหน้าปัจจุบันจาก URL parameter
+                    if (! isset($_GET['page'])) {
+                        $currentPage = 1;
+                    } else {
+                        $currentPage = (int) $_GET['page'];
+                        if ($currentPage < 1) {
+                            $currentPage = 1;
+                        }
+                    }
 
                     $sql = "SELECT * FROM employees WHERE e_status <> 1
-                    ORDER BY e_usercode DESC";
+    AND e_workplace = :workplace
+    ORDER BY e_usercode DESC";
 
-                    $result    = $conn->query($sql);
-                    $totalRows = $result->rowCount();
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bindParam(':workplace', $workplace);
 
+                    $stmt->execute();
+                    $totalRows = $stmt->rowCount();
+
+                    // Calculate total pages
                     $totalPages = ceil($totalRows / $itemsPerPage);
+                    if ($totalPages < 1) {
+                        $totalPages = 1;
+                    }
+                    // กรณีไม่มีข้อมูล ให้มี 1 หน้า
 
+                    // ตรวจสอบว่าหน้าปัจจุบันไม่เกินจำนวนหน้าทั้งหมด
+                    if ($currentPage > $totalPages) {
+                        $currentPage = $totalPages;
+                    }
+
+                    // Calculate offset for pagination
                     $offset = ($currentPage - 1) * $itemsPerPage;
 
-                    $sql .= " LIMIT $itemsPerPage OFFSET $offset";
+                    // Add LIMIT and OFFSET to the SQL statement for pagination
+                    $sqlWithPagination = $sql . " LIMIT :limit OFFSET :offset";
 
-                    $result = $conn->query($sql);
+                    // Prepare the final query with pagination
+                    $stmt = $conn->prepare($sqlWithPagination);
+                    $stmt->bindParam(':workplace', $workplace);
 
+                    $stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+                    $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+                    // Execute the paginated query
+                    $stmt->execute();
+
+                    // Display row number starting from the correct count
                     $rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
 
-                    if ($result->rowCount() > 0) {
-                        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                    // แสดงข้อมูลในตาราง
+                    if ($stmt->rowCount() > 0) {
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                             echo '<tr class="text-center align-middle">';
                             echo '<td>' . $rowNumber . '</td>';
                             echo '<td>' . $row['e_usercode'] . '</td>';
@@ -174,35 +216,7 @@
                 ?>
             </tbody>
         </table>
-        <?php
-            echo '<div class="pagination">';
-            echo '<ul class="pagination">';
 
-            // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
-            if ($currentPage > 1) {
-                echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
-            }
-
-            // สร้างลิงก์สำหรับแต่ละหน้า
-            for ($i = 1; $i <= $totalPages; $i++) {
-                if ($i == $currentPage) {
-                    echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
-                } else {
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
-                }
-            }
-
-            // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
-            if ($currentPage < $totalPages) {
-                echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-                echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
-            }
-
-            echo '</ul>';
-            echo '</div>';
-
-        ?>
         <!-- Modal แก้ไข -->
         <div class="modal fade" id="empModal" tabindex="-1" aria-labelledby="empModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -222,7 +236,129 @@
             </div>
         </div>
     </div>
+    <!-- Pagination -->
+    <div class="container-fluid mt-3">
+        <div class="row align-items-center">
+            <!-- ปุ่มเลื่อนหน้าด้านซ้าย พร้อมตัวเลือกจำนวนรายการต่อหน้า -->
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <nav aria-label="Page navigation" class="me-3">
+                        <ul class="pagination mb-0">
+                            <?php if ($currentPage > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1&items=<?php echo $itemsPerPage; ?>"
+                                    aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="?page=<?php echo $currentPage - 1; ?>&items=<?php echo $itemsPerPage; ?>"
+                                    aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <?php endif; ?>
 
+                            <?php
+                                                  // แสดงปุ่มทีละ 5 ปุ่ม
+                                $pagesToShow = 5; // จำนวนปุ่มที่ต้องการแสดง
+
+                                // คำนวณหน้าเริ่มต้นและหน้าสุดท้ายที่จะแสดง
+                                if ($currentPage >= 5) {
+                                    // กรณีที่หน้าปัจจุบันมากกว่าหรือเท่ากับ 5 ให้แสดงแบบย้อนกลับ
+                                    $startPage = min($currentPage + 2, $totalPages);
+                                    $endPage   = max($startPage - 4, 1);
+
+                                    // แสดงปุ่มแบบย้อนกลับ จากมากไปน้อย
+                                    for ($i = $startPage; $i >= $endPage; $i--):
+                                        $activeClass = ($i == $currentPage) ? ' active' : '';
+                                    ?>
+                            <li class="page-item<?php echo $activeClass; ?>">
+                                <a class="page-link"
+                                    href="?page=<?php echo $i; ?>&items=<?php echo $itemsPerPage; ?>"><?php echo $i; ?></a>
+                            </li>
+                            <?php endfor;
+                                    } else {
+                                        // กรณีหน้าปัจจุบันน้อยกว่า 5 ให้แสดงแบบปกติ
+                                        $endPage = min($pagesToShow, $totalPages);
+
+                                        // แสดงปุ่มแบบปกติ จากน้อยไปมาก
+                                        for ($i = 1; $i <= $endPage; $i++):
+                                            $activeClass = ($i == $currentPage) ? ' active' : '';
+                                        ?>
+                            <li class="page-item<?php echo $activeClass; ?>">
+                                <a class="page-link"
+                                    href="?page=<?php echo $i; ?>&items=<?php echo $itemsPerPage; ?>"><?php echo $i; ?></a>
+                            </li>
+                            <?php endfor;
+                                    }
+                                ?>
+
+                            <?php if ($currentPage < $totalPages): ?>
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="?page=<?php echo $currentPage + 1; ?>&items=<?php echo $itemsPerPage; ?>"
+                                    aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link"
+                                    href="?page=<?php echo $totalPages; ?>&items=<?php echo $itemsPerPage; ?>"
+                                    aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+
+                    <!-- ฟอร์มสำหรับกระโดดไปยังหน้าที่ต้องการ -->
+                    <div class="d-flex align-items-center me-3">
+                        <form action="" method="GET" class="d-flex flex-wrap align-items-center"
+                            onsubmit="return validateJumpToPage()">
+                            <input type="hidden" name="items" value="<?php echo $itemsPerPage; ?>">
+                            <label for="jumpToPage" class="me-2">ไปที่หน้า:</label>
+                            <div class="d-flex flex-grow-1">
+                                <input type="number" id="jumpToPage" name="page" class="form-control form-control-md"
+                                    min="1" max="<?php echo $totalPages; ?>" style="width: 70px;">
+                                <button type="submit" class="btn btn-sm btn-primary ms-2">ไป</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- แสดงรายการต่อหน้าอยู่ถัดจากปุ่มเลข -->
+                    <div class="d-flex align-items-center">
+                        <label for="perPage" class="me-2">จำนวนรายการ :</label>
+                        <select id="perPage" class="form-select form-select-md" style="width: 70px;"
+                            onchange="changeItemsPerPage(this.value)">
+                            <option value="10" <?php echo $itemsPerPage == 10 ? 'selected' : ''; ?>>10
+                            </option>
+                            <option value="25" <?php echo $itemsPerPage == 25 ? 'selected' : ''; ?>>25
+                            </option>
+                            <option value="50" <?php echo $itemsPerPage == 50 ? 'selected' : ''; ?>>50
+                            </option>
+                            <option value="100" <?php echo $itemsPerPage == 100 ? 'selected' : ''; ?>>100
+                            </option>
+                        </select>
+                        <span class="ms-2">รายการต่อหน้า</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ข้อความแสดงรายการอยู่ด้านขวา -->
+            <div class="col-md-6 text-end">
+                <div class="pagination-info">
+                    <?php if ($totalRows > 0): ?>
+                    แสดงรายการที่&nbsp;<?php echo($currentPage - 1) * $itemsPerPage + 1; ?>&nbsp;-&nbsp;<?php echo min($currentPage * $itemsPerPage, $totalRows); ?>&nbsp;จากทั้งหมด&nbsp;<?php echo $totalRows; ?>&nbsp;รายการ
+                    <?php else: ?>
+                    ไม่พบรายการ
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="mt-3 container-fluid">
         <!-- ปุ่มเพิ่มพนักงาน -->
@@ -447,7 +583,7 @@
                             <div class="mt-3 row">
 
                                 <div class="col-6">
-                                    <label for="tokenLabel">Line token</label>
+                                    <label for="tokenLabel">User ID (แจ้งเตือนไลน์)</label>
                                     <span style="color: red;">*</span>
                                     <input class="form-control" type="text" id="add_token" name="add_token">
                                 </div>
@@ -673,27 +809,30 @@
             }
         });
     });
-    // ค้นหาชื่อ
-    $("#nameSearch").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+    // ฟังก์ชันค้นหาแบบรวม
+    function filterTable() {
+        var nameValue = $("#nameSearch").val().toLowerCase();
+        var codeValue = $("#codeSearch").val().toLowerCase();
+        var depValue = $("#depSearch").val().toLowerCase();
+
+        $("#empTable tbody tr").each(function() {
+            var codeCell = $(this).find("td:eq(1)").text().toLowerCase(); // คอลัมน์รหัสพนักงาน
+            var nameCell = $(this).find("td:eq(2)").text().toLowerCase(); // คอลัมน์ชื่อพนักงาน
+            var depCell = $(this).find("td:eq(3)").text().toLowerCase(); // คอลัมน์แผนก
+
+            var nameMatch = nameValue === "" || nameCell.indexOf(nameValue) > -1;
+            var codeMatch = codeValue === "" || codeCell.indexOf(codeValue) > -1;
+            var depMatch = depValue === "" || depCell.indexOf(depValue) > -1;
+
+            // แสดงแถวเฉพาะที่ตรงกับทุกเงื่อนไขที่กำหนด
+            $(this).toggle(nameMatch && codeMatch && depMatch);
         });
-    });
-    // ค้นหารหัสพนักงาน
-    $("#codeSearch").on("keyup", function() {
-        var value2 = $(this).val().toLowerCase();
-        $("#empTable tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
-        });
-    });
-    // แผนก
-    $("#depSearch").on("keyup", function() {
-        var value3 = $(this).val().toLowerCase();
-        $("#empTable tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
-        });
-    });
+    }
+
+    // ทำการค้นหาเมื่อมีการพิมพ์ในช่องค้นหาใดๆ
+    $("#nameSearch").on("keyup", filterTable);
+    $("#codeSearch").on("keyup", filterTable);
+    $("#depSearch").on("keyup", filterTable);
 
     var today = new Date();
     flatpickr("#add_work_start_date", {
@@ -730,24 +869,51 @@
         console.log("Years of Experience:", yearsOfExperience); // แสดงจำนวนปีที่ทำงาน
 
         if (yearsOfExperience >= 1 && yearsOfExperience < 2) {
+            personal.value = "5";
             annual.value = "6"; // ครบ 1 ปี แต่ไม่ถึง 2 ปี
         } else if (yearsOfExperience >= 2 && yearsOfExperience < 3) {
+            personal.value = "5";
             annual.value = "7"; // ครบ 2 ปี แต่ไม่ถึง 3 ปี
         } else if (yearsOfExperience >= 3 && yearsOfExperience < 4) {
+            personal.value = "5";
             annual.value = "8"; // ครบ 3 ปี แต่ไม่ถึง 4 ปี
         } else if (yearsOfExperience >= 4 && yearsOfExperience < 5) {
+            personal.value = "5";
             annual.value = "9"; // ครบ 4 ปี แต่ไม่ถึง 5 ปี
         } else if (yearsOfExperience >= 5) {
+            personal.value = "5";
             annual.value = "10"; // ครบ 5 ปีขึ้นไป
         } else {
+            personal.value = "0";
             annual.value = "0";
         }
-
-
     }
 
     window.onload = function() {
         calculateLeaveDays();
+    }
+
+    function changeItemsPerPage(items) {
+        let url = new URL(window.location.href);
+        url.searchParams.set('page', 1); // กลับไปหน้าแรกเมื่อเปลี่ยนจำนวนรายการ
+        url.searchParams.set('items', items);
+
+        // ไปยัง URL ใหม่
+        window.location.href = url.toString();
+    }
+
+    function validateJumpToPage() {
+        const pageInput = document.getElementById('jumpToPage');
+        if (!pageInput.value) {
+            Swal.fire({
+                title: 'แจ้งเตือน',
+                text: 'กรุณากรอกเลขหน้าที่ต้องการ',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง'
+            });
+            return false;
+        }
+        return true;
     }
     </script>
     <script src="../js/popper.min.js"></script>

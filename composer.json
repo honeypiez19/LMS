@@ -1,6 +1,10 @@
 {
     "require": {
         "tecnickcom/tc-lib-pdf": "^8.0",
-        "tecnickcom/tcpdf": "^6.6"
+        "tecnickcom/tcpdf": "^6.6",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.10"
     }
 }
