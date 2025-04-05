@@ -131,7 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ตรวจสอบและกำหนดค่าเวลาสิ้นสุด
-    if (isset($timeMappings[$leaveTimeEnd])) {
+     if (isset($timeMappings[$leaveTimeEnd])) {
         $leaveTimeEndLine = $timeMappings[$leaveTimeEnd][0];
         $leaveTimeEnd     = $timeMappings[$leaveTimeEnd][1] . ':00';
 

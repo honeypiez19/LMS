@@ -61,10 +61,6 @@ $level_name = [
     4 => 'assisManager',
     5 => 'manager',
     6 => 'manager2',
-    7 => 'GM',
-    8 => 'admin',
-    9 => 'subLeader',
-
 ];
 
 $add_level_name = $level_name[$add_level] ?? 'Unknown';

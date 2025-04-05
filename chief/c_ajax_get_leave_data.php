@@ -21,6 +21,7 @@ $subDepart2 = isset($_GET['subDepart2']) ? $_GET['subDepart2'] : '';
 $subDepart3 = isset($_GET['subDepart3']) ? $_GET['subDepart3'] : '';
 $subDepart4 = isset($_GET['subDepart4']) ? $_GET['subDepart4'] : '';
 $subDepart5 = isset($_GET['subDepart5']) ? $_GET['subDepart5'] : '';
+$workplace = isset($_GET['workplace']) ? $_GET['workplace'] : '';
 
 // คำนวณ offset สำหรับ pagination
 $offset = ($page - 1) * $per_page;
@@ -35,9 +36,9 @@ WHERE
     li.l_level IN ('user')
     AND li.l_approve_status <> 6
     AND li.l_leave_id NOT IN (6, 7)
+    AND li.l_workplace = :workplace
     AND (
-        YEAR(li.l_create_datetime) = :selectedYear
-        OR YEAR(li.l_leave_end_date) = :selectedYear
+        YEAR(li.l_leave_end_date) = :selectedYear
     )";
 
 // เพิ่มเงื่อนไขสำหรับการกรองตามสถานะการอนุมัติ
@@ -48,8 +49,7 @@ if ($status !== 'all') {
 // เพิ่มเงื่อนไขสำหรับเดือน
 if ($selectedMonth != "All") {
     $sql .= " AND (
-        MONTH(li.l_create_datetime) = :selectedMonth
-        OR MONTH(li.l_leave_end_date) = :selectedMonth
+        MONTH(li.l_leave_end_date) = :selectedMonth
     )";
 }
 
@@ -108,6 +108,7 @@ $count_stmt->bindParam(':subDepart2', $subDepart2);
 $count_stmt->bindParam(':subDepart3', $subDepart3);
 $count_stmt->bindParam(':subDepart4', $subDepart4);
 $count_stmt->bindParam(':subDepart5', $subDepart5);
+$count_stmt->bindParam(':workplace', $workplace);
 
 if ($status !== 'all') {
     $count_stmt->bindParam(':status', $status);
@@ -146,6 +147,8 @@ $stmt->bindParam(':subDepart2', $subDepart2);
 $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':workplace', $workplace);
+
 $stmt->bindParam(':limit', $per_page, PDO::PARAM_INT);
 $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
@@ -241,9 +244,9 @@ foreach ($statuses as $stat) {
                     li.l_level IN ('user')
                     AND li.l_approve_status <> 6
                     AND li.l_leave_id NOT IN (6, 7)
+                    AND li.l_workplace = :workplace
                     AND (
-                        YEAR(li.l_create_datetime) = :selectedYear
-                        OR YEAR(li.l_leave_end_date) = :selectedYear
+                        YEAR(li.l_leave_end_date) = :selectedYear
                     )";
 
     // เพิ่มเงื่อนไขสำหรับการกรองตามแผนก (เหมือนกับ query หลัก)
@@ -262,8 +265,7 @@ foreach ($statuses as $stat) {
     // เพิ่มเงื่อนไขสำหรับเดือนที่เลือก
     if ($selectedMonth != "All") {
         $status_sql .= " AND (
-            MONTH(li.l_create_datetime) = :selectedMonth
-            OR MONTH(li.l_leave_end_date) = :selectedMonth
+            MONTH(li.l_leave_end_date) = :selectedMonth
         )";
     }
 
@@ -302,6 +304,7 @@ foreach ($statuses as $stat) {
     $status_stmt->bindParam(':subDepart3', $subDepart3);
     $status_stmt->bindParam(':subDepart4', $subDepart4);
     $status_stmt->bindParam(':subDepart5', $subDepart5);
+    $status_stmt->bindParam(':workplace', $workplace);
 
     if ($selectedMonth != "All") {
         $status_stmt->bindParam(':selectedMonth', $selectedMonth);

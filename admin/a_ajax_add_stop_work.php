@@ -5,27 +5,27 @@ date_default_timezone_set('Asia/Bangkok');
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Retrieve data from the request
-        $userCode   = $_POST['userCodeS'];
-        $userName   = $_POST['userNameS'];
-        $name       = $_POST['nameS'];
+        $userCode = $_POST['userCodeS'];
+        $userName = $_POST['userNameS'];
+        $name = $_POST['nameS'];
         $department = $_POST['departmentS'];
-        $level      = $_POST['levelS'];
-        $telPhone   = $_POST['telPhoneS'];
-        $reason     = $_POST['reasonS'];
-        $startTime  = $_POST['startTimeS'];
-        $endTime    = $_POST['endTimeS'];
-        $addName    = $_POST['addNameS'];
-        $workplace  = $_POST['workplaceS'];
-        $subDepart  = $_POST['subDepartS'];
-
-        $startDate      = date('Y-m-d', strtotime($_POST['startDateS']));
-        $endDate        = date('Y-m-d', strtotime($_POST['endDateS']));
+        $level = $_POST['levelS'];
+        $telPhone = $_POST['telPhoneS'];
+        $reason = $_POST['reasonS'];
+        $startTime = $_POST['startTimeS'];
+        $endTime = $_POST['endTimeS'];
+        $addName = $_POST['addNameS'];
+        $workplace = $_POST['workplaceS'];
+        $subDepart = $_POST['subDepartS'];
+        
+        $startDate = date('Y-m-d', strtotime($_POST['startDateS']));
+        $endDate = date('Y-m-d', strtotime($_POST['endDateS']));
         $createDatetime = date('Y-m-d H:i:s');
 
         // Default values
-        $leaveType    = 6;
-        $leaveStatus  = 0;
-        $proveStatus  = 0;
+        $leaveType = 6;
+        $leaveStatus = 0;
+        $proveStatus = 0;
         $proveStatus2 = 1;
 
         // Insert late record
@@ -63,7 +63,7 @@ try {
 
         if ($stmt->execute()) {
             // Define notification message
-            $supervisorURL     = 'https://lms.system-samt.com/';
+            $supervisorURL = 'https://lms.system-samt.com/';
             $supervisorMessage = "$name หยุดงาน\nวันที่ : $startDate\nเวลา : $startTime ถึง $endTime\nสถานะรายการ : ปกติ\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $supervisorURL";
 
             // Prepare department-specific statement

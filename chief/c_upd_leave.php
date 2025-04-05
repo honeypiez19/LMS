@@ -34,6 +34,7 @@ $editLeaveStartTime = isset($_POST['editLeaveStartTime']) ? $_POST['editLeaveSta
 $editLeaveEndDate   = isset($_POST['editLeaveEndDate']) ? $_POST['editLeaveEndDate'] : '';
 $editLeaveEndTime   = isset($_POST['editLeaveEndTime']) ? $_POST['editLeaveEndTime'] : '';
 $editTelPhone       = isset($_POST['editTelPhone']) ? $_POST['editTelPhone'] : '';
+$editLeaveCondition = isset($_POST['editLeaveCondition']) ? $_POST['editLeaveCondition'] : '';
 
 $updDate = date('Y-m-d H:i:s');
 
@@ -183,6 +184,7 @@ try {
                  l_approve_name, l_approve_name2, l_approve_name3, l_hr_name
                  FROM leave_list
                  WHERE l_usercode = :userCode AND l_create_datetime = :createDatetime";
+
     $stmtCheck = $conn->prepare($sqlCheck);
     $stmtCheck->bindParam(':userCode', $userCode);
     $stmtCheck->bindParam(':createDatetime', $createDatetime);
@@ -456,12 +458,16 @@ try {
     // ตอนนี้มีรายชื่อผู้รับแจ้งเตือนแล้ว จึงทำการ UPDATE ข้อมูล
 
     // เตรียม SQL สำหรับการอัพเดต
-    $sql = "UPDATE leave_list SET l_leave_id = :editLeaveType, l_leave_reason = :editLeaveReason,
-            l_leave_start_date = :startDate, l_leave_start_time = :editLeaveStartTime,
-            l_leave_end_date = :endDate, l_leave_end_time = :editLeaveEndTime,
-            l_time_remark = :timeRemark,
-            l_time_remark2 = :timeRemark2,
-            l_upd_datetime = :updDate";
+    $sql = "UPDATE leave_list SET
+        l_leave_id = :editLeaveType,
+        l_leave_reason = :editLeaveReason,
+        l_leave_start_date = :startDate,
+        l_leave_start_time = :editLeaveStartTime,
+        l_leave_end_date = :endDate,
+        l_leave_end_time = :editLeaveEndTime,
+        l_time_remark = :timeRemark,
+        l_time_remark2 = :timeRemark2,
+        l_upd_datetime = :updDate";
 
     // เพิ่มเงื่อนไขการอัปเดตไฟล์เฉพาะเมื่อมีการอัปโหลดใหม่
     if ($filename1 !== null) {
@@ -473,7 +479,9 @@ try {
     if ($filename3 !== null) {
         $sql .= ", l_file3 = :file3";
     }
-
+    if (! empty($editLeaveCondition)) {
+        $sql .= ", l_leave_id2 = :editLeaveCondition";
+    }
     $sql .= " WHERE l_usercode = :userCode AND l_create_datetime = :createDatetime";
 
     $stmt = $conn->prepare($sql);
@@ -487,8 +495,11 @@ try {
     $stmt->bindParam(':timeRemark2', $timeRemark2);
     $stmt->bindParam(':updDate', $updDate);
 
-    if ($filename1 !== null) {
+    if (! empty($editLeaveCondition)) {
+        $stmt->bindParam(':editLeaveCondition', $editLeaveCondition);
+    }
 
+    if ($filename1 !== null) {
         $stmt->bindParam(':file1', $filename1);
     }
     if ($filename2 !== null) {

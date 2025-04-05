@@ -1161,10 +1161,10 @@ WHERE
                             <div class="d-flex align-items-center">
                                 <label for="perPage" class="me-2">จำนวนรายการ :</label>
                                 <select id="perPage" class="form-select form-select-md" style="width: 80px;">
-                                    <option value="10"                                                       <?php echo $itemsPerPage == 10 ? 'selected' : ''; ?>>10</option>
-                                    <option value="25"                                                       <?php echo $itemsPerPage == 25 ? 'selected' : ''; ?>>25</option>
-                                    <option value="50"                                                       <?php echo $itemsPerPage == 50 ? 'selected' : ''; ?>>50</option>
-                                    <option value="100"                                                        <?php echo $itemsPerPage == 100 ? 'selected' : ''; ?>>100
+                                    <option value="10" <?php echo $itemsPerPage == 10 ? 'selected' : ''; ?>>10</option>
+                                    <option value="25" <?php echo $itemsPerPage == 25 ? 'selected' : ''; ?>>25</option>
+                                    <option value="50" <?php echo $itemsPerPage == 50 ? 'selected' : ''; ?>>50</option>
+                                    <option value="100" <?php echo $itemsPerPage == 100 ? 'selected' : ''; ?>>100
                                     </option>
                                 </select>
                                 <span class="ms-2">รายการต่อหน้า</span>
@@ -1175,7 +1175,7 @@ WHERE
                     <!-- ข้อความแสดงรายการอยู่ด้านขวา -->
                     <div class="col-md-6 text-end">
                         <div class="pagination-info">
-                            แสดงรายการที่                                                                    <?php echo($currentPage - 1) * $itemsPerPage + 1; ?> -
+                            แสดงรายการที่ <?php echo($currentPage - 1) * $itemsPerPage + 1; ?> -
                             <?php echo min($currentPage * $itemsPerPage, $totalRows); ?>
                             จากทั้งหมด<?php echo $totalRows; ?> รายการ
                         </div>
@@ -1658,29 +1658,44 @@ WHERE
 
             // 8
             if (row['l_leave_id'] == 1) {
-                newRow += '<span class="text-primary">ลากิจได้รับค่าจ้าง</span><br>เหตุผล : ' + row[
-                    'l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">ลากิจได้รับค่าจ้าง</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 2) {
-                newRow += '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span><br>เหตุผล : ' + row[
-                    'l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 3) {
-                newRow += '<span class="text-primary">ลาป่วย</span><br>เหตุผล : ' + row['l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">ลาป่วย</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 4) {
-                newRow += '<span class="text-primary">ลาป่วยจากงาน</span><br>เหตุผล : ' + row['l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">ลาป่วยจากงาน</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 5) {
-                newRow += '<span class="text-primary">ลาพักร้อน</span>';
-                if (row['l_leave_id2']) {
-                    newRow += '<br><span class="text-primary">ฉุกเฉิน</span>';
-                }
-                newRow += '<br>เหตุผล : ' + row['l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">ลาพักร้อน</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 6) {
-                newRow += '<span class="text-primary">ขาดงาน</span><br>เหตุผล : ' + row['l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">ขาดงาน</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 7) {
-                newRow += '<span class="text-primary">มาสาย</span><br>เหตุผล : ' + row['l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">มาสาย</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else if (row['l_leave_id'] == 8) {
-                newRow += '<span class="text-primary">อื่น ๆ</span><br>เหตุผล : ' + row['l_leave_reason'];
+                newRow +=
+                    '<span class="text-primary">อื่น ๆ</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
+            } else if (row['l_leave_id'] == 9) {
+                newRow +=
+                    '<span class="text-primary">สลับวันหยุด</span><br>เหตุผล : ' +
+                    row['l_leave_reason'];
             } else {
-                newRow += '<span class="text-danger">ไม่พบประเภทการลาและเหตุผลการลา</span>';
+                newRow +=
+                    '<span class="text-danger">ไม่พบประเภทการลาและเหตุผลการลา</span>';
             }
             newRow += '</td>' +
                 // 9

@@ -333,34 +333,22 @@ function exportToExcel($stmt, $includeHeader, $startDate, $endDate)
 
         // ประเภทการลา - ปรับตามโครงสร้างข้อมูลจริง
         $leaveType = '';
-
-// ตรวจสอบว่าเป็น "ลาฉุกเฉิน" หรือไม่ (ใช้แค่ครั้งเดียว)
-        $isUrgent = isset($data['l_remark']) && $data['l_remark'] === 'ลาฉุกเฉิน';
-
         switch ($data['l_leave_id']) {
-            case 1:
-                $leaveType = 'ลากิจได้รับค่าจ้าง' . ($isUrgent ? 'ฉุกเฉิน' : '');
+            case 1:$leaveType = 'ลากิจได้รับค่าจ้าง';
                 break;
-            case 2:
-                $leaveType = 'ลากิจไม่ได้รับค่าจ้าง' . ($isUrgent ? 'ฉุกเฉิน' : '');
+            case 2:$leaveType = 'ลากิจไม่ได้รับค่าจ้าง';
                 break;
-            case 3:
-                $leaveType = 'ลาป่วย';
+            case 3:$leaveType = 'ลาป่วย';
                 break;
-            case 4:
-                $leaveType = 'ลาป่วยจากงาน';
+            case 4:$leaveType = 'ลาป่วยจากงาน';
                 break;
-            case 5:
-                $leaveType = 'ลาพักร้อน' . ($isUrgent ? 'ฉุกเฉิน' : '');
+            case 5:$leaveType = 'ลาพักร้อน';
                 break;
-            case 6:
-                $leaveType = 'ขาดงาน';
+            case 6:$leaveType = 'ขาดงาน';
                 break;
-            case 7:
-                $leaveType = 'มาสาย';
+            case 7:$leaveType = 'มาสาย';
                 break;
-            default:
-                $leaveType = 'อื่นๆ';
+            default:$leaveType = 'อื่นๆ';
         }
 
         $sheet->setCellValue('D' . $row, $leaveType);

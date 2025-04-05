@@ -67,7 +67,7 @@
 <body>
     <?php require 'leader_navbar.php'; ?>
 
-    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <?php echo $subDepart; ?> -->
+    <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <?php echo $subDepart; ?> -->
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -1023,7 +1023,7 @@ ORDER BY li.l_create_datetime DESC";
                                 echo '</td>';
 
                                 // 27
-                                echo '<td>' . $row['l_remark2'] . '</td>';
+                                echo '<td>' . $row['l_remark'] . '</td>';
 
                                 // 28
                                 if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
@@ -1230,7 +1230,9 @@ ORDER BY li.l_create_datetime DESC";
                 subDepart2: '<?php echo $subDepart2; ?>',
                 subDepart3: '<?php echo $subDepart3; ?>',
                 subDepart4: '<?php echo $subDepart4; ?>',
-                subDepart5: '<?php echo $subDepart5; ?>'
+                subDepart5: '<?php echo $subDepart5; ?>',
+                workplace: '<?php echo $workplace; ?>'
+
             },
             dataType: 'json',
             success: function(response) {
@@ -1473,13 +1475,15 @@ ORDER BY li.l_create_datetime DESC";
                 '<td>';
 
             // 8
+            let urgentText = (row['l_remark'] === 'ลาฉุกเฉิน') ? 'ฉุกเฉิน' : '';
+
             if (row['l_leave_id'] == 1) {
                 newRow +=
-                    '<span class="text-primary">ลากิจได้รับค่าจ้าง</span><br>เหตุผล : ' +
+                    '<span class="text-primary">ลากิจได้รับค่าจ้าง' + urgentText + '</span><br>เหตุผล : ' +
                     row['l_leave_reason'];
             } else if (row['l_leave_id'] == 2) {
                 newRow +=
-                    '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span><br>เหตุผล : ' +
+                    '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง' + urgentText + '</span><br>เหตุผล : ' +
                     row['l_leave_reason'];
             } else if (row['l_leave_id'] == 3) {
                 newRow +=
@@ -1491,7 +1495,7 @@ ORDER BY li.l_create_datetime DESC";
                     row['l_leave_reason'];
             } else if (row['l_leave_id'] == 5) {
                 newRow +=
-                    '<span class="text-primary">ลาพักร้อน</span><br>เหตุผล : ' +
+                    '<span class="text-primary">ลาพักร้อน' + urgentText + '</span><br>เหตุผล : ' +
                     row['l_leave_reason'];
             } else if (row['l_leave_id'] == 6) {
                 newRow +=
@@ -1509,6 +1513,7 @@ ORDER BY li.l_create_datetime DESC";
                 newRow +=
                     '<span class="text-danger">ไม่พบประเภทการลาและเหตุผลการลา</span>';
             }
+
             newRow += '</td>' +
                 // 9
                 '<td>' + (row['l_leave_start_date'] ? row[

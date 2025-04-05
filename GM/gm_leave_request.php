@@ -307,16 +307,10 @@ WHERE
     AND li.l_approve_status2 IN (4,6)
     AND li.l_approve_status3 <> 6
     AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        YEAR(li.l_create_datetime) = :selectedYear
-        OR YEAR(li.l_leave_end_date) = :selectedYear
-    )";
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
 
                         if ($selectedMonth != "All") {
-                            $sql .= " AND (
-        Month(li.l_create_datetime) = :selectedMonth
-        OR Month(li.l_leave_end_date) = :selectedMonth
-    )";
+                            $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
                         }
 
                         $sql .= " AND li.l_workplace = :workplace
@@ -1023,10 +1017,10 @@ WHERE
                             <div class="d-flex align-items-center">
                                 <label for="perPage" class="me-2">จำนวนรายการ :</label>
                                 <select id="perPage" class="form-select form-select-md" style="width: 80px;">
-                                    <option value="10"                                                       <?php echo $itemsPerPage == 10 ? 'selected' : ''; ?>>10</option>
-                                    <option value="25"                                                       <?php echo $itemsPerPage == 25 ? 'selected' : ''; ?>>25</option>
-                                    <option value="50"                                                       <?php echo $itemsPerPage == 50 ? 'selected' : ''; ?>>50</option>
-                                    <option value="100"                                                        <?php echo $itemsPerPage == 100 ? 'selected' : ''; ?>>100
+                                    <option value="10" <?php echo $itemsPerPage == 10 ? 'selected' : ''; ?>>10</option>
+                                    <option value="25" <?php echo $itemsPerPage == 25 ? 'selected' : ''; ?>>25</option>
+                                    <option value="50" <?php echo $itemsPerPage == 50 ? 'selected' : ''; ?>>50</option>
+                                    <option value="100" <?php echo $itemsPerPage == 100 ? 'selected' : ''; ?>>100
                                     </option>
                                 </select>
                                 <span class="ms-2">รายการต่อหน้า</span>
@@ -1037,7 +1031,7 @@ WHERE
                     <!-- ข้อความแสดงรายการอยู่ด้านขวา -->
                     <div class="col-md-6 text-end">
                         <div class="pagination-info">
-                            แสดงรายการที่                                                                    <?php echo($currentPage - 1) * $itemsPerPage + 1; ?> -
+                            แสดงรายการที่ <?php echo($currentPage - 1) * $itemsPerPage + 1; ?> -
                             <?php echo min($currentPage * $itemsPerPage, $totalRows); ?>
                             จากทั้งหมด<?php echo $totalRows; ?> รายการ
                         </div>
@@ -1126,6 +1120,7 @@ WHERE
                 codeSearch: codeSearch,
                 nameSearch: nameSearch,
                 leaveSearch: leaveSearch,
+                userCode: '<?php echo $userCode; ?>',
                 depart: '<?php echo $depart; ?>',
                 subDepart: '<?php echo $subDepart; ?>',
                 subDepart2: '<?php echo $subDepart2; ?>',
@@ -1947,7 +1942,6 @@ WHERE
                 ); // เพิ่ม delay เล็กน้อยเพื่อให้ modal หลักปิดสนิท
             });
 
-            // เพิ่ม Event สำหรับปุ่มสอบถามเพิ่มเติม
             $('.modal-footer .btn-inquiry').off('click').on('click', function() {
                 // ซ่อน modal หลัก
                 $('#leaveModal').modal('hide');

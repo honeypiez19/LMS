@@ -470,7 +470,7 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 27
-        echo '<td>' . $row['l_remark2'] . '</td>';
+        echo '<td>' . $row['l_remark'] . '</td>';
 
         // 28
         echo '<td hidden>' . $row['l_workplace'] . '</td>';

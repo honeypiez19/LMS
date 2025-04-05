@@ -16,6 +16,7 @@ $leaveSearch   = isset($_GET['leaveSearch']) ? $_GET['leaveSearch'] : '';
 $workplace     = isset($_GET['workplace']) ? $_GET['workplace'] : '';
 
 // รับค่าแผนกและหน่วยงาน
+$userCode     = isset($_GET['userCode']) ? $_GET['userCode'] : '';
 $depart     = isset($_GET['depart']) ? $_GET['depart'] : '';
 $subDepart  = isset($_GET['subDepart']) ? $_GET['subDepart'] : '';
 $subDepart2 = isset($_GET['subDepart2']) ? $_GET['subDepart2'] : '';
@@ -37,9 +38,9 @@ WHERE
     AND li.l_approve_status2 IN (4,6)
     AND li.l_approve_status3 <> 6
     AND li.l_leave_id NOT IN (6, 7)
+    AND li.l_usercode <> :userCode
     AND (
-        YEAR(li.l_create_datetime) = :selectedYear
-        OR YEAR(li.l_leave_end_date) = :selectedYear
+        YEAR(li.l_leave_end_date) = :selectedYear
     )";
 
 // เพิ่มเงื่อนไขสำหรับการกรองตามสถานะการอนุมัติ
@@ -50,8 +51,7 @@ if ($status !== 'all') {
 // เพิ่มเงื่อนไขสำหรับเดือน
 if ($selectedMonth != "All") {
     $sql .= " AND (
-        MONTH(li.l_create_datetime) = :selectedMonth
-        OR MONTH(li.l_leave_end_date) = :selectedMonth
+         MONTH(li.l_leave_end_date) = :selectedMonth
     )";
 }
 
@@ -95,6 +95,7 @@ $count_stmt = $conn->prepare($count_sql);
 // Bind parameters สำหรับ count_stmt
 $count_stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $count_stmt->bindParam(':workplace', $workplace);
+$count_stmt->bindParam(':userCode', $userCode);
 
 if ($status !== 'all') {
     $count_stmt->bindParam(':status', $status);
@@ -128,6 +129,7 @@ $stmt = $conn->prepare($sql);
 // Bind parameters
 $stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
 $stmt->bindParam(':workplace', $workplace);
+$stmt->bindParam(':userCode', $userCode);
 
 $stmt->bindParam(':limit', $per_page, PDO::PARAM_INT);
 $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -224,17 +226,17 @@ foreach ($statuses as $stat) {
                    AND li.l_approve_status2 IN (4,6)
                    AND li.l_approve_status3 <> 6
                    AND li.l_leave_id NOT IN (6, 7)
+                    AND li.l_usercode <> :userCode
+
                    AND (
-                       YEAR(li.l_create_datetime) = :selectedYear
-                       OR YEAR(li.l_leave_end_date) = :selectedYear
+                       YEAR(li.l_leave_end_date) = :selectedYear
                    )
                    AND li.l_workplace = :workplace";
 
     // เพิ่มเงื่อนไขสำหรับเดือนที่เลือก
     if ($selectedMonth != "All") {
         $status_sql .= " AND (
-            MONTH(li.l_create_datetime) = :selectedMonth
-            OR MONTH(li.l_leave_end_date) = :selectedMonth
+            MONTH(li.l_leave_end_date) = :selectedMonth
         )";
     }
 
@@ -268,6 +270,7 @@ foreach ($statuses as $stat) {
     // Bind parameters
     $status_stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
     $status_stmt->bindParam(':workplace', $workplace);
+    $status_stmt->bindParam(':userCode', $userCode);
 
     if ($selectedMonth != "All") {
         $status_stmt->bindParam(':selectedMonth', $selectedMonth);

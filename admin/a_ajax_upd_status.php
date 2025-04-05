@@ -55,6 +55,8 @@ if (! empty($createDate)) {
     }
 }
 
+error_log("วันที่หลังแปลงรูปแบบ: $createDate -> $formattedCreateDate");
+
 $firmDate = date("Y-m-d H:i:s");
 $pass     = '1';
 $passNo   = '2';

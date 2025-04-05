@@ -1086,7 +1086,6 @@ AND (
                                             ระยะเวลาการลา :</label>
                                         <span id="urgentLeaveDuration" class="form-label text-primary"></span>
                                     </div>
-
                                 </div>
                                 <div class="mt-2 row">
                                     <div class="col-6">
@@ -1397,25 +1396,9 @@ AND (
                                     // 8
                                     echo '<td>';
                                     if ($row['l_leave_id'] == 1) {
-                                        // เช็คว่ามีการลาฉุกเฉินหรือไม่
-                                        if (! empty($row['l_remark']) && $row['l_remark'] === 'ลาฉุกเฉิน') {
-                                            echo '<span class="text-primary">ลากิจได้รับค่าจ้างฉุกเฉิน</span><br>';
-                                        } else {
-                                            echo '<span class="text-primary">ลากิจได้รับค่าจ้าง</span><br>';
-                                        }
-
-                                        echo 'เหตุผล : ' . $row['l_leave_reason'];
+                                        echo '<span class="text-primary">' . 'ลากิจได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
                                     } elseif ($row['l_leave_id'] == 2) {
-                                        // เช็คว่ามีการลาฉุกเฉินหรือไม่
-                                        if (! empty($row['l_remark']) && $row['l_remark'] === 'ลาฉุกเฉิน') {
-                                            echo '<span class="text-primary">ลากิจไม่ได้รับค่าจ้างฉุกเฉิน</span><br>';
-                                        } else {
-                                            echo '<span class="text-primary">ลากิจไม่ได้รับค่าจ้าง</span><br>';
-                                        }
-
-                                        echo 'เหตุผล : ' . $row['l_leave_reason'];
-
-                                        // echo '<span class="text-primary">' . 'ลากิจไม่ได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
+                                        echo '<span class="text-primary">' . 'ลากิจไม่ได้รับค่าจ้าง' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
                                     } elseif ($row['l_leave_id'] == 3) {
                                         echo '<span class="text-primary">' . 'ลาป่วย' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
                                     } elseif ($row['l_leave_id'] == 4) {
@@ -2213,15 +2196,20 @@ AND (
                                 <div class="row">
                                     <div class="col-12">
                                         <label for="leaveType" class="form-label">ประเภทการลา</label>
+                                        <span class="badge rounded-pill text-bg-info" hidden>เหลือ
+                                            <span id="remaining-days">0 </span> วัน
+                                            <span id="remaining-hours">0 </span> ชั่วโมง
+                                            <span id="remaining-minutes">0 </span> นาที
+                                        </span>
                                         <span style="color: red;">*</span>
                                         <select class="form-select editLeaveType" required>
-                                            <option selected>เลือกประเภทการลา</option>
+                                            <!-- <option selected>เลือกประเภทการลา</option>
                                             <option value="1">ลากิจได้รับค่าจ้าง</option>
                                             <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
                                             <option value="3">ลาป่วย</option>
                                             <option value="4">ลาป่วยจากงาน</option>
                                             <option value="5">ลาพักร้อน</option>
-                                            <option value="8">อื่น ๆ</option>
+                                            <option value="8">อื่น ๆ</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -2237,7 +2225,8 @@ AND (
                                     <div class="col-6">
                                         <label for="editLeaveStartDate" class="form-label">วันที่เริ่มต้น</label>
                                         <span style="color: red;">*</span>
-                                        <input type="text" class="form-control" id="editLeaveStartDate" required>
+                                        <input type="text" class="form-control" id="editLeaveStartDate" required
+                                            onchange="calculateLeaveDuration()">
                                     </div>
                                     <div class=" col-6">
                                         <label for="editLeaveStartTime" class="form-label">เวลาที่เริ่มต้น</label>
@@ -2245,7 +2234,7 @@ AND (
                                                 value="" style="border: none; width: 70px;  color: red;">เวลาเดิม)
                                         </span> -->
                                         <select class="form-select" id="editLeaveStartTime" name="editLeaveStartTime"
-                                            required>
+                                            required onchange="calculateLeaveDuration()">
 
                                         </select>
                                     </div>
@@ -2254,7 +2243,8 @@ AND (
                                     <div class="col-6">
                                         <label for="editleaveEndDate" class="form-label">วันที่สิ้นสุด</label>
                                         <span style="color: red;">*</span>
-                                        <input type="text" class="form-control" id="editLeaveEndDate" required>
+                                        <input type="text" class="form-control" id="editLeaveEndDate" required
+                                            onchange="calculateLeaveDuration()">
                                     </div>
                                     <div class="col-6">
                                         <label for="editleaveEndTime" class="form-label">เวลาที่สิ้นสุด</label>
@@ -2262,9 +2252,16 @@ AND (
                                                 value="" style="border: none; width: 70px; color: red;">เวลาเดิม)
                                         </span> -->
                                         <select class="form-select" id="editLeaveEndTime" name="editLeaveEndTime"
-                                            required>
+                                            required onchange="calculateLeaveDuration()">
 
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3 row">
+                                    <div class="col-6">
+                                        <label for="editLeaveDuration" class="form-label text-primary">**
+                                            ระยะเวลาการลา :</label>
+                                        <span id="editLeaveDuration" class="form-label text-primary"></span>
                                     </div>
                                 </div>
                                 <div class="mt-3 row">
@@ -3548,6 +3545,35 @@ ${fileInfo}
                 });
             });
 
+            function updateLeaveTypeOptions(isUrgent) {
+                // ตัวเลือกสำหรับลาปกติ
+                const normalLeaveOptions = `
+        <option selected>เลือกประเภทการลา</option>
+        <option value="1">ลากิจได้รับค่าจ้าง</option>
+        <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
+        <option value="3">ลาป่วย</option>
+        <option value="4">ลาป่วยจากงาน</option>
+        <option value="5">ลาพักร้อน</option>
+        <option value="8">อื่น ๆ</option>
+    `;
+
+                // ตัวเลือกสำหรับลาฉุกเฉิน
+                const urgentLeaveOptions = `
+        <option selected>เลือกประเภทการลา</option>
+        <option value="1">ลากิจได้รับค่าจ้าง</option>
+        <option value="2">ลากิจไม่ได้รับค่าจ้าง</option>
+        <option value="5">ลาพักร้อนฉุกเฉิน</option>
+    `;
+
+                // เลือกตัวเลือกที่เหมาะสมตามเงื่อนไข
+                const options = isUrgent ? urgentLeaveOptions : normalLeaveOptions;
+
+                // แทนที่ตัวเลือกในรายการ dropdown
+                $('.editLeaveType').html(options);
+
+                // แสดง log เพื่อตรวจสอบ
+                console.log("ปรับปรุงตัวเลือกการลาเป็น:", isUrgent ? "ลาฉุกเฉิน" : "ลาปกติ");
+            }
             $('.edit-btn').click(function() {
                 var createDatetime = $(this).data('createdatetime');
                 var userCode = $(this).data('usercode');
@@ -3599,6 +3625,19 @@ ${fileInfo}
                 $('#editLeaveStartTime').html(timeOptions);
                 $('#editLeaveEndTime').html(timeOptions);
 
+                // ฟังก์ชันสำหรับแปลงวันที่จากรูปแบบ YYYY-MM-DD เป็น DD-MM-YYYY (สำหรับแสดงผล)
+                function formatDateForDisplay(dateStr) {
+                    if (dateStr && typeof dateStr === 'string') {
+                        // ตรวจสอบว่าเป็นรูปแบบ YYYY-MM-DD หรือไม่
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                            const parts = dateStr.split('-');
+                            return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงเป็น DD-MM-YYYY
+                        }
+                    }
+                    return dateStr; // คืนค่าเดิมถ้าไม่ใช่รูปแบบที่คาดหวัง
+                }
+
+                // แก้ไขส่วนที่กำหนดค่าวันที่ในฟอร์ม (ในส่วน Ajax success)
                 $.ajax({
                     url: 'u_ajax_get_leave.php',
                     type: 'POST',
@@ -3611,65 +3650,85 @@ ${fileInfo}
                         if (response.error) {
                             alert(response.error);
                         } else {
+                            // ตรวจสอบว่าเป็นการลาฉุกเฉินหรือไม่
+                            const isUrgentLeave = response.l_remark && response.l_remark
+                                .includes('ลาฉุกเฉิน');
+
+                            // อัปเดตตัวเลือกประเภทการลาตามเงื่อนไข
+                            updateLeaveTypeOptions(isUrgentLeave);
+
                             // ใส่ข้อมูลในฟอร์ม Modal
                             $('.editLeaveType').val(response.l_leave_id);
                             $('#editLeaveReason').val(response.l_leave_reason);
-                            $('#editLeaveStartDate').val(response.l_leave_start_date);
-                            $('#editLeaveEndDate').val(response.l_leave_end_date);
+
+                            // แปลงรูปแบบวันที่ก่อนแสดงผล (ถ้ามีฟังก์ชันนี้)
+                            const startDateFormatted = formatDateForDisplay ?
+                                formatDateForDisplay(response.l_leave_start_date) : response
+                                .l_leave_start_date;
+                            const endDateFormatted = formatDateForDisplay ?
+                                formatDateForDisplay(response.l_leave_end_date) : response
+                                .l_leave_end_date;
+
+                            // แสดงวันที่ในรูปแบบที่เหมาะสม
+                            $('#editLeaveStartDate').val(startDateFormatted);
+                            $('#editLeaveEndDate').val(endDateFormatted);
                             $('#editTelPhone').val(response.l_phone);
 
-                            // กำหนดค่า select สำหรับเวลาเริ่มต้น - ให้ความสำคัญกับ l_time_remark เป็นอันดับแรก
+                            // แสดงหรือซ่อน badge ข้อมูลวันลาคงเหลือ
+                            // if (isUrgentLeave) {
+                            //     $('.badge.rounded-pill.text-bg-info').removeAttr('hidden');
+                            // } else {
+                            //     $('.badge.rounded-pill.text-bg-info').removeAttr('hidden');
+                            // }
+
+                            // ส่วนโค้ดที่เหลือยังคงเหมือนเดิม...
+                            // กำหนดค่า select สำหรับเวลาเริ่มต้น
                             var startTimeValue = "08:00"; // ค่าเริ่มต้น
 
                             if (response.l_time_remark && response.l_time_remark.trim() !==
                                 "") {
-                                // ใช้ค่า l_time_remark เป็นหลัก ถ้ามี
                                 startTimeValue = response.l_time_remark.substring(0, 5);
-                            } else {
-                                // ถ้าไม่มี l_time_remark ให้แปลงจาก l_leave_start_time
+                            } else if (response.l_leave_start_time) {
+                                // กำหนดเวลาตามเงื่อนไขที่มีอยู่เดิม
                                 if (response.l_leave_start_time === "12:00:00") {
                                     startTimeValue = "11:45";
                                 } else if (response.l_leave_start_time === "13:00:00") {
                                     startTimeValue = "12:45";
                                 } else if (response.l_leave_start_time === "17:00:00") {
                                     startTimeValue = "16:40";
-                                } else if (response.l_leave_start_time) {
+                                } else {
                                     startTimeValue = response.l_leave_start_time.substring(
                                         0, 5);
                                 }
                             }
 
-                            // เลือก option ที่มีค่าตรงกับ startTimeValue
+                            // เลือกเวลาเริ่มต้น
                             $('#editLeaveStartTime').val(startTimeValue);
-                            $('#editLeaveStartTime2').val(
-                                startTimeValue); // แสดงในช่องเวลาเดิม
 
-                            // กำหนดค่า select สำหรับเวลาสิ้นสุด - ให้ความสำคัญกับ l_time_remark2 เป็นอันดับแรก
+                            // กำหนดค่าเวลาสิ้นสุด (โค้ดเดิม)
                             var endTimeValue = "17:00"; // ค่าเริ่มต้น
 
                             if (response.l_time_remark2 && response.l_time_remark2
                                 .trim() !== "") {
-                                // ใช้ค่า l_time_remark2 เป็นหลัก ถ้ามี
                                 endTimeValue = response.l_time_remark2.substring(0, 5);
-                            } else {
-                                // ถ้าไม่มี l_time_remark2 ให้แปลงจาก l_leave_end_time
+                            } else if (response.l_leave_end_time) {
+                                // กำหนดเวลาตามเงื่อนไขที่มีอยู่เดิม
                                 if (response.l_leave_end_time === "12:00:00") {
                                     endTimeValue = "11:45";
                                 } else if (response.l_leave_end_time === "13:00:00") {
                                     endTimeValue = "12:45";
                                 } else if (response.l_leave_end_time === "17:00:00") {
                                     endTimeValue = "16:40";
-                                } else if (response.l_leave_end_time) {
+                                } else {
                                     endTimeValue = response.l_leave_end_time.substring(0,
                                         5);
                                 }
                             }
 
-                            // เลือก option ที่มีค่าตรงกับ endTimeValue
+                            // เลือกเวลาสิ้นสุด
                             $('#editLeaveEndTime').val(endTimeValue);
-                            $('#editLeaveEndTime2').val(endTimeValue); // แสดงในช่องเวลาเดิม
 
-                            // จัดการไฟล์เดิม
+                            // จัดการไฟล์เดิม (โค้ดเดิม)
                             var existingFile = response.l_file;
                             if (existingFile && existingFile.trim() !== "") {
                                 var fileUrl = '../upload/' + existingFile;
@@ -3679,8 +3738,9 @@ ${fileInfo}
                             } else {
                                 $('#imagePreview').hide();
                             }
-                            calculateLeaveDuration();
 
+                            // คำนวณระยะเวลาการลา
+                            setTimeout(calculateLeaveDuration, 100);
                         }
                     },
                     error: function(xhr, status, error) {
@@ -3732,13 +3792,36 @@ ${fileInfo}
                 }
             }
 
+            $('#editLeaveModal').on('shown.bs.modal', function() {
+                // เมื่อ modal แสดงแล้ว ให้คำนวณระยะเวลาการลา
+                setTimeout(calculateLeaveDuration, 500);
+            });
+
+            $('#editLeaveStartDate').on('change', function() {
+                let startDateValue = $(this).val();
+                // ตรวจสอบว่ามีการเลือกวันที่เริ่มต้นหรือไม่
+                if (startDateValue) {
+                    console.log('วันที่เริ่มต้นเปลี่ยนเป็น:', startDateValue);
+                    // ตั้งค่าวันที่สิ้นสุดให้เป็นวันเดียวกับวันที่เริ่มต้น
+                    $('#editLeaveEndDate').val(startDateValue);
+                    // คำนวณระยะเวลาการลาใหม่
+                    calculateLeaveDuration();
+                }
+            });
+
+            $('.editLeaveType').change(function() {
+                calculateLeaveDuration();
+            });
+
+
+            // Update form validation before submit
             $('#editLeaveForm').on('submit', function(e) {
                 e.preventDefault();
+                console.log("Edit form submitted, validating");
 
-                var formData = new FormData();
+                // Additional validation before submitting
                 var startDate = new Date($('#editLeaveStartDate').val());
                 var endDate = new Date($('#editLeaveEndDate').val());
-                var files = $('#editFile')[0].files;
 
                 if (endDate < startDate) {
                     Swal.fire({
@@ -3750,13 +3833,28 @@ ${fileInfo}
                     return false;
                 }
 
+                // Check if button is disabled (which means validation failed)
+                if ($('#btnSubmitForm3').prop('disabled')) {
+                    Swal.fire({
+                        title: 'ไม่สามารถลาได้',
+                        text: 'จำนวนวันลาเกินกว่าจำนวนวันลาคงเหลือที่ใช้ได้',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                    });
+                    return false;
+                }
+
+                // Continue with existing form submission...
+                var formData = new FormData();
+                var files = $('#editFile')[0].files;
+
                 if (files.length > 0) {
                     for (let i = 0; i < Math.min(files.length, 3); i++) {
                         formData.append('file' + (i + 1), files[i]);
                     }
                 }
 
-                // เพิ่มค่าฟอร์มอื่นๆ
+                // Add other form values
                 formData.append('userCode', '<?php echo $userCode; ?>');
                 formData.append('userName', '<?php echo $userName ?>');
                 formData.append('name', '<?php echo $name ?>');
@@ -3777,14 +3875,16 @@ ${fileInfo}
                 formData.append('editLeaveEndTime', $('#editLeaveEndTime').val());
                 formData.append('editTelPhone', $('#editTelPhone').val());
 
-                // ส่งข้อมูลผ่าน AJAX
+                console.log("Form validation passed, submitting data");
+
+                // Send via AJAX
                 $.ajax({
                     url: 'u_upd_leave.php',
                     type: 'POST',
                     data: formData,
                     contentType: false,
                     processData: false,
-                    dataType: 'json', // กำหนดชัดเจนว่าต้องการรับ JSON กลับมา
+                    dataType: 'json',
                     success: function(response) {
                         console.log('Response received:', response);
 
@@ -3800,8 +3900,7 @@ ${fileInfo}
                         } else {
                             Swal.fire({
                                 title: 'เกิดข้อผิดพลาด',
-                                text: response.message ||
-                                    'ไม่สามารถแก้ไขข้อมูลได้',
+                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
                                 icon: 'error',
                                 confirmButtonText: 'ตกลง',
                             });
@@ -3824,64 +3923,48 @@ ${fileInfo}
                     }
                 });
             });
-
-
-            // ฟังก์ชันสำหรับส่งข้อมูลแก้ไขใบลา
-            function submitEditLeave(formData) {
-                $.ajax({
-                    url: 'u_upd_leave.php',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            Swal.fire({
-                                title: 'สำเร็จ!',
-                                text: 'แก้ไขข้อมูลเรียบร้อยแล้ว',
-                                icon: 'success',
-                                confirmButtonText: 'ตกลง',
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'เกิดข้อผิดพลาด',
-                                text: response.message || 'ไม่สามารถแก้ไขข้อมูลได้',
-                                icon: 'error',
-                                confirmButtonText: 'ตกลง',
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire({
-                            title: 'เกิดข้อผิดพลาด',
-                            text: 'ไม่สามารถแก้ไขข้อมูลได้ - ' + error,
-                            icon: 'error',
-                            confirmButtonText: 'ตกลง',
-                        });
-                    }
-                });
-            }
         });
 
-        // ฟังก์ชันสำหรับจัดรูปแบบวันที่
-        function formatDate(date) {
-            const parts = date.split('-');
-            return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงเป็น yyyy-mm-dd
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+
+            // ถ้าเป็นรูปแบบ DD-MM-YYYY ให้แปลงเป็น YYYY-MM-DD
+            if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+                const parts = dateStr.split('-');
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // แปลงจาก DD-MM-YYYY เป็น YYYY-MM-DD
+            }
+
+            // ถ้าเป็นรูปแบบ YYYY-MM-DD คืนค่าเดิม
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                return dateStr;
+            }
+
+            // ถ้าไม่ตรงกับรูปแบบใดเลย แสดงข้อความเตือนและคืนค่า string เปล่า
+            console.error("รูปแบบวันที่ไม่ถูกต้อง:", dateStr);
+            return "";
         }
 
         function calculateLeaveDuration() {
-            console.log("เริ่มคำนวณระยะเวลาการลา...");
+            // Check which form is active (regular, urgent, or edit)
+            const isUrgent = document.getElementById('urgentLeaveModal') && document.getElementById('urgentLeaveModal')
+                .classList.contains('show');
+            const isEdit = document.getElementById('editLeaveModal') && document.getElementById('editLeaveModal')
+                .classList.contains('show');
 
-            // ตรวจสอบว่ากำลังใช้ฟอร์มไหน (ปกติ หรือ ฉุกเฉิน)
-            const isUrgent = document.getElementById('urgentLeaveModal').classList.contains('show');
-            // console.log("ฟอร์มฉุกเฉิน:", isUrgent);
-
-            // เลือกข้อมูลจากฟอร์มที่กำลังใช้งาน
+            // Select data from the active form
             let startDate, startTime, endDate, endTime, targetElement, submitButton, currentLeaveType;
-            if (isUrgent) {
+
+            if (isEdit) {
+                startDate = document.getElementById('editLeaveStartDate').value;
+                startTime = document.getElementById('editLeaveStartTime').value;
+                endDate = document.getElementById('editLeaveEndDate').value;
+                endTime = document.getElementById('editLeaveEndTime').value;
+                targetElement = document.getElementById(
+                    'editLeaveDuration');
+                submitButton = document.getElementById('btnSubmitForm3');
+                currentLeaveType = $('.editLeaveType').val();
+            } else if (isUrgent) {
+                // Handle Urgent Leave Form (existing code)
                 startDate = document.getElementById('urgentStartDate').value;
                 startTime = document.getElementById('urgentStartTime').value;
                 endDate = document.getElementById('urgentEndDate').value;
@@ -3890,6 +3973,7 @@ ${fileInfo}
                 submitButton = document.getElementById('btnSubmitForm2');
                 currentLeaveType = document.getElementById('urgentLeaveType').value;
             } else {
+                // Handle Regular Leave Form (existing code)
                 startDate = document.getElementById('startDate').value;
                 startTime = document.getElementById('startTime').value;
                 endDate = document.getElementById('endDate').value;
@@ -3899,27 +3983,18 @@ ${fileInfo}
                 currentLeaveType = document.getElementById('leaveType').value;
             }
 
-            // console.log(`วันที่เริ่มต้น: ${startDate}, เวลาเริ่มต้น: ${startTime}`);
-            // console.log(`วันที่สิ้นสุด: ${endDate}, เวลาสิ้นสุด: ${endTime}`);
-
             if (!startDate || !startTime || !endDate || !endTime) {
                 // console.log("ข้อมูลวันที่หรือเวลาไม่ครบ กำหนดค่าเริ่มต้นเป็น 1 วัน");
                 targetElement.textContent = "1 วัน 0 ชั่วโมง 0 นาที"; // กำหนดค่าเริ่มต้นเป็น 1 วัน
                 return;
             }
 
-            // แปลงวันที่และเวลาเป็น Date object
+            // Format dates
             const formattedStartDate = formatDate(startDate);
             const formattedEndDate = formatDate(endDate);
 
-            // console.log(`วันที่เริ่มต้นหลังแปลง: ${formattedStartDate}`);
-            // console.log(`วันที่สิ้นสุดหลังแปลง: ${formattedEndDate}`);
-
             let startDateTime = new Date(`${formattedStartDate}T${startTime}:00`);
             let endDateTime = new Date(`${formattedEndDate}T${endTime}:00`);
-
-            // console.log(`วันเวลาเริ่มต้น: ${startDateTime}`);
-            // console.log(`วันเวลาสิ้นสุด: ${endDateTime}`);
 
             const startMinutes = startDateTime.getMinutes();
             if (startMinutes > 0 && startMinutes <= 15) {
@@ -3947,10 +4022,6 @@ ${fileInfo}
                 endDateTime.setHours(endDateTime.getHours() + 1);
             }
 
-            // console.log(`วันเวลาเริ่มต้นหลังปัด: ${startDateTime}`);
-            // console.log(`วันเวลาสิ้นสุดหลังปัด: ${endDateTime}`);
-
-            // ดึงวันหยุดจากฐานข้อมูล
             let holidays = [];
             $.ajax({
                 url: 'u_ajax_get_holiday.php',
@@ -4071,48 +4142,48 @@ ${fileInfo}
             // แสดงผลลัพธ์ทันทีสำหรับทั้งฟอร์มปกติและฉุกเฉิน
             targetElement.textContent = `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
 
-            // ตรวจสอบวันลาคงเหลือสำหรับทั้งฟอร์มปกติและฉุกเฉิน
-            var userCode = '<?php echo $userCode; ?>'; // ค่าจาก PHP
-            var leaveType = document.getElementById('leaveType').value;
-            var urgentLeaveType = document.getElementById('urgentLeaveType').value;
-            var selectedDate = isUrgent ? document.getElementById('urgentStartDate').value : document
-                .getElementById('startDate').value;
+            // Check remaining leave days for validation
+            var userCode = '<?php echo $userCode; ?>'; // Value from PHP
+            var selectedDate = isEdit ? document.getElementById('editLeaveStartDate').value :
+                (isUrgent ? document.getElementById('urgentStartDate').value :
+                    document.getElementById('startDate').value);
 
-            // เปิดปุ่มบันทึกเมื่อมีการเลือกวันที่เริ่มต้นและวันที่สิ้นสุด ไม่ว่าจะเลือกประเภทการลาหรือไม่
-            if (startDate && startTime && endDate && endTime) {
+            // Enable submit button if dates and times are selected
+            if (startDate && startTime && endDate && endTime && submitButton) {
                 submitButton.disabled = false;
             }
 
-            if (selectedDate) {
-                var parts = selectedDate.split('-'); // แยกวันที่จากรูปแบบ DD-MM-YYYY
+            if (selectedDate && currentLeaveType && currentLeaveType != 'เลือกประเภทการลา') {
+                var parts = selectedDate.split('-'); // Split date from DD-MM-YYYY format
                 if (parts.length === 3) {
-                    var selectedDay = parseInt(parts[0]); // ดึงวันที่
-                    var selectedMonth = parseInt(parts[1]); // ดึงเดือน
-                    var selectedYear = parseInt(parts[2]); // ดึงปี
-                } else {
-                    console.error("Invalid date format: " + selectedDate);
-                    return; // ป้องกันไม่ให้ทำงานต่อหากข้อมูลวันที่ไม่ถูกต้อง
-                }
+                    var selectedDay = parseInt(parts[0]); // Get day
+                    var selectedMonth = parseInt(parts[1]); // Get month
+                    var selectedYear = parseInt(parts[2]); // Get year
 
-                // ตรวจสอบประเภทการลาตามฟอร์มที่กำลังใช้งาน
-                // ถ้ามีการเลือกประเภทการลาแล้ว จึงตรวจสอบวันลาคงเหลือ
-                if (currentLeaveType && currentLeaveType != 'เลือกประเภทการลา') {
-                    // ส่งประเภทการลาตามฟอร์มที่กำลังใช้
-                    const requestLeaveType = isUrgent ? urgentLeaveType : leaveType;
+                    // Determine which leave type to send based on active form
+                    const requestLeaveType = isEdit ? $('.editLeaveType').val() :
+                        (isUrgent ? document.getElementById('urgentLeaveType').value :
+                            document.getElementById('leaveType').value);
+
+                    // Update remaining days display in edit form
+                    if (isEdit) {
+                        // Reset remaining days display first
+                        $('#remaining-days').text('0');
+                        $('#remaining-hours').text('0');
+                        $('#remaining-minutes').text('0');
+                    }
 
                     $.ajax({
                         url: 'u_ajax_get_leave_balance.php',
                         type: 'POST',
                         data: {
-                            leaveType: requestLeaveType, // ใช้ประเภทการลาตามฟอร์มที่กำลังใช้
+                            leaveType: requestLeaveType,
                             userCode: userCode,
-                            selectedYear: selectedYear,
-                            urgentLeaveType: urgentLeaveType // ส่งไปด้วยเผื่อฝั่ง PHP ต้องการใช้
+                            selectedYear: selectedYear
                         },
                         success: function(response) {
-                            // ตรวจสอบว่า response มีข้อมูลครบหรือไม่
                             try {
-                                // แปลง response เป็น JSON ถ้ายังไม่ได้แปลง
+                                // Parse response if it's a string
                                 if (typeof response === 'string') {
                                     response = JSON.parse(response);
                                 }
@@ -4125,13 +4196,18 @@ ${fileInfo}
                                     const remainingHours = response.remaining_hours;
                                     const remainingMinutes = response.remaining_minutes;
 
-                                    // 1 วัน = 8 ชั่วโมง = 480 นาที
-                                    const leaveTotalMinutes = (leaveDays * 8 * 60) + (
-                                            leaveHours * 60) +
+                                    // Update remaining days display in edit form
+                                    if (isEdit) {
+                                        $('#remaining-days').text(remainingDays);
+                                        $('#remaining-hours').text(remainingHours);
+                                        $('#remaining-minutes').text(remainingMinutes);
+                                    }
+
+                                    // 1 day = 8 hours = 480 minutes
+                                    const leaveTotalMinutes = (leaveDays * 8 * 60) + (leaveHours * 60) +
                                         leaveMinutes;
                                     const remainingTotalMinutes = (remainingDays * 8 * 60) + (
-                                        remainingHours *
-                                        60) + remainingMinutes;
+                                        remainingHours * 60) + remainingMinutes;
 
                                     if (leaveTotalMinutes > remainingTotalMinutes) {
                                         Swal.fire({
@@ -4141,28 +4217,32 @@ ${fileInfo}
                                                 'ลาน้อยกว่าหรือเท่ากับ ' +
                                                 remainingDays + ' วัน ' +
                                                 remainingHours + ' ชั่วโมง ' +
-                                                remainingMinutes +
-                                                ' นาที',
+                                                remainingMinutes + ' นาที',
                                             confirmButtonText: 'ตกลง'
                                         });
-                                        targetElement.textContent =
-                                            `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
-                                        submitButton.disabled = true; // ปิดปุ่มบันทึก
+                                        if (targetElement) {
+                                            targetElement.textContent =
+                                                `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+                                        }
+                                        if (submitButton) {
+                                            submitButton.disabled = true; // Disable submit button
+                                        }
                                     } else {
-                                        targetElement.textContent =
-                                            `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
-                                        submitButton.disabled = false; // เปิดปุ่มบันทึก
+                                        if (targetElement) {
+                                            targetElement.textContent =
+                                                `${leaveDays} วัน ${leaveHours} ชั่วโมง ${leaveMinutes} นาที`;
+                                        }
+                                        if (submitButton) {
+                                            submitButton.disabled = false; // Enable submit button
+                                        }
                                     }
                                 } else {
-                                    console.error('ข้อมูลวันลาคงเหลือไม่สมบูรณ์', response);
+                                    console.error('Incomplete remaining leave days data', response);
                                     alert('ข้อมูลวันลาคงเหลือไม่สมบูรณ์');
-                                    return false;
                                 }
                             } catch (e) {
-                                console.error('เกิดข้อผิดพลาดในการแปลงข้อมูล response:', e,
-                                    response);
+                                console.error('Error parsing response:', e, response);
                                 alert('เกิดข้อผิดพลาดในการประมวลผลข้อมูลวันลาคงเหลือ');
-                                return false;
                             }
                         },
                         error: function(xhr, status, error) {
@@ -4170,6 +4250,8 @@ ${fileInfo}
                             alert('เกิดข้อผิดพลาดในการดึงข้อมูลวันลาคงเหลือ');
                         }
                     });
+                } else {
+                    console.error("Invalid date format: " + selectedDate);
                 }
             }
         }

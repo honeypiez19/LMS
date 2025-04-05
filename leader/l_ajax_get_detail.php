@@ -1,16 +1,16 @@
 <?php
 include '../connect.php';
 if (isset($_POST['leaveType'])) {
-    $leaveType    = $_POST['leaveType'];
-    $userCode     = $_POST['userCode'];
+    $leaveType = $_POST['leaveType'];
+    $userCode = $_POST['userCode'];
     $selectedYear = $_POST['selectedYear'];
-    $depart       = $_POST['depart'];
+    $depart = $_POST['depart'];
 
     // $depart = $_POST['depart'];
 
-                                                       // คำนวณวันที่เริ่มต้นและสิ้นสุดตามปีที่เลือก
+    // คำนวณวันที่เริ่มต้นและสิ้นสุดตามปีที่เลือก
     $startDate = date(($selectedYear - 1) . "-12-01"); // วันที่เริ่มต้น 1 ธันวาคมของปีที่เลือก
-    $endDate   = date(($selectedYear) . "-11-30");     // วันที่สิ้นสุด 30 พฤศจิกายนของปีถัดไป
+    $endDate = date(($selectedYear) . "-11-30"); // วันที่สิ้นสุด 30 พฤศจิกายนของปีถัดไป
 
     if ($leaveType == 1) {
         $conType = "ลากิจได้รับค่าจ้าง";
@@ -33,10 +33,10 @@ if (isset($_POST['leaveType'])) {
     }
 
     // ทำความสะอาดข้อมูลก่อนนำไปใช้ใน SQL
-    $userCodeQuoted  = $conn->quote($userCode);
-    $conTypeQuoted   = $conn->quote($conType);
+    $userCodeQuoted = $conn->quote($userCode);
+    $conTypeQuoted = $conn->quote($conType);
     $startDateQuoted = $conn->quote($startDate);
-    $endDateQuoted   = $conn->quote($endDate);
+    $endDateQuoted = $conn->quote($endDate);
 
     // ดึงข้อมูลการลาจากฐานข้อมูล
     $sql = "SELECT * FROM leave_list
@@ -45,7 +45,7 @@ if (isset($_POST['leaveType'])) {
             AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
             AND l_approve_status2 IN (4,5)
             ORDER BY l_leave_start_date DESC";
-    $result    = $conn->query($sql);
+    $result = $conn->query($sql);
     $totalRows = $result->rowCount();
     $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
     if ($totalRows > 0) {
